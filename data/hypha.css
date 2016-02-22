@@ -1,0 +1,351 @@
+body {
+  font-family: sans-serif;
+}
+
+h1 {
+  font-size: 1.5em;
+}
+
+html body {
+	font-family: "Trebuchet MS", Tahoma, sans-serif;
+	font-size: 11pt;
+	letter-spacing: 0.07em;
+	text-align:justify;
+	color:#222;
+	line-height: 1.35;
+}
+
+label {
+	white-space:nowrap;
+}
+
+img {
+	border:0px;
+}
+.click {
+	cursor:pointer;
+}
+.option {
+	color:#888;
+}
+.section {
+	border:1px solid #888;
+	background-color:#eee;
+}
+.button {
+	color:#840;
+}
+.right {
+	float:right;
+}
+.divider {
+clear:left; height:10px; margin-top:10px; margin-bottom:10px; background-color:#d2691e;
+}
+
+
+body {
+	margin: 8px;
+}
+#commandForm {
+	width: 1000px;
+}
+#navContainer {
+	width:700px;
+	padding: 14px 0 0 0;
+}
+#menu {
+	margin: 0 0 5px 0;
+	float:left;
+}
+#trail {
+	clear:left;
+	float:left;
+	text-align:left;
+}
+#login {
+	float: right;
+	text-align:right;
+	margin: 0 0 0 0;
+	padding: 0 0 0 10px;
+	display: none;
+}
+#hyphaCommands {
+	float: right;
+	text-align:right;
+
+	padding: 0 0 0 10px;
+	margin: 0 0 5px 0;
+}
+#pageCommands {
+
+	text-align:right;
+	margin: 13px 100px 0 0;
+	padding: 0 0 0 0px;
+}
+#log {
+	margin: 0 0 0 0;
+	float: left;
+}
+#log div {
+	clear:left;
+	padding: 5px 9px 5px 9px;
+}
+#page {
+	width: 800px;
+	clear: left;
+	float: left;
+}
+.edit-button {
+	margin: 0 0 0 10px;
+}
+#main {
+	width: 700px;
+	min-height: 1px;
+	float: left;
+	clear: both;
+}
+
+#pagename {
+	clear:left;
+
+	float: left;
+}
+
+#langList {
+	float: left;
+	clear: right;
+    margin: 0 0 0 10px;
+    padding: 0 0 0 10px;
+}
+
+#bottomContainer {
+	float: left;
+	clear: both;
+	width: 700px;
+}
+
+#versionList  {
+	clear: both;
+	float: right;
+	margin: 0 0 0 0;
+}
+
+#footer  {
+	clear: both;
+	float: right;
+	margin: 0.5em 0 0 0;
+	text-align: right;
+}
+
+#popup {
+	position:absolute;
+	padding:5px;
+}
+
+.editor {
+	width:800px;
+	height:400px;
+	padding-top:5px;
+	clear:left;
+}
+
+.clear {
+	clear: both;
+}
+
+
+#header {
+	background-color:#840;
+}
+#header {
+	padding:10px;
+	text-align:center;
+	font-weight:bold;
+	letter-spacing:0.2em;
+	font-size:24pt;
+	width: 680px;
+	color:#f80;
+
+
+}
+
+#menu a, #login a, #hyphaCommands a {
+	color: #840;
+	text-decoration: none;
+	font-weight: bold;
+}
+#menu a.currentpagelink, #hyphaCommands a.currentpagelink {
+	color: #000;
+}
+#menu p {
+	margin: 0;
+}
+
+#trail {
+	font-size:8pt;
+}
+
+#login {
+	font-size:8pt;
+}
+
+#hyphaCommands {
+	font-size:8pt;
+}
+
+#loggedIn {
+	font-style:italic;
+	color:#999;
+}
+
+#log {
+	font-size:10pt;
+	letter-spacing:0.1em;
+	}
+	#log .error {
+		color:#b00;
+	}
+
+	#log .success {
+		color:#0b0;
+	}
+
+
+h1 {
+
+}
+h2 {
+	font-size: 24pt;
+	margin: 0 0 0 0;
+	font-weight:bold;
+	color:#840;
+}
+
+h3 {
+	font-size:15pt;
+	font-weight:bold;
+	margin: 0.2em 0 0 0;
+	color:#840;
+}
+
+h4 {
+	font-weight:bold;
+	margin: 12px 0 0 0;
+	color:#840;
+	font-size: 12pt;
+}
+h5 {
+	font-size: 11pt;
+	margin: 12px 0 0 0;
+}
+h6 {
+	margin: 12px 0 0 0;
+}
+
+td,th {
+	letter-spacing: 0em; text-align:justify;
+	vertical-align:top;
+	padding:5px;
+	color:#000;
+}
+p {
+	margin: 1em 0 1em 0;
+}
+a {
+	font-weight:bold;
+	text-decoration:none;
+	color:#840;
+}
+a.otherlanguagelink {
+	font-weight:bold;
+	text-decoration:none;
+	color:#840;
+	border-bottom: 1px dotted;
+}
+a.nopagelink {
+	text-decoration: none;
+	border-bottom: 1px dotted;
+}
+a:hover {
+	text-decoration:underline;
+}
+
+iframe
+{
+	border: #c0c0c0 solid 1px;
+	}
+	iframe.registratie, iframe.gastenboek
+	{
+		border: none;
+	}
+
+code
+{
+	color: #825500;
+}
+
+#main img {
+	margin: 1.1em 0 0.7em;
+}
+
+#versionList {
+	font-size:8pt;
+}
+
+#main .group {
+		margin: 10px 0 10px 0;
+		clear: both;
+	}
+	#main img.left {
+		float:left;
+		margin: 0 13px 10px 0;
+	}
+	#main img.right {
+		float:right;
+		margin: 0 0 10px 13px;
+	}
+	#main img.center {
+		float:none;
+		margin: 0 0 10px 0;
+	}
+
+#main h2, #main h3, #main h4, #main h5, #main h6 {
+	clear: both;
+}
+
+#main .group h2, #main .group h3, #main .group h4, #main .group h5, #main .group h6 {
+	clear: none;
+}
+
+.writely-comment {
+    border: 1px dashed #C0C0C0;
+    font-size: 9pt;
+    line-height: 1.4;
+    padding: 1px;
+    background-color: #D7FFD7;
+}
+
+
+#langList {
+	border-left: 1px solid #222;
+	font-size:8pt;
+}
+#langList .disabled {
+	color: #8f8f8f;
+}
+#langList .selected {
+	font-weight:bold;
+}
+
+
+#footer {
+	font-size:8pt;
+
+	clear: both;
+	float: right;
+	margin: 15px 0 0 0;
+	text-align: right;
+    border-top: 3px solid #840;
+    padding: 5px 0 0 0;
+    width: 100%;
+}

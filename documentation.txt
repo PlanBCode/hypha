@@ -1,0 +1,145 @@
+Section: 1. Introduction
+In this chapter the basic design principles used in hypha are laid out.
+
+Group: Design principles
+A description of hypha's main features. Hypha is intended to facilitate collaboration in small (distributed) project groups that want to share information within the group and publish (part of) it on a project website. It was designed with the following principles in mind
+
+User friendly:
+A project website should be simple to use for all group members. Hypha doesn't use wiki markup codes, but a familiar WYSIWYG editor. No myriad of options, bells and whistles, but simply the basic features.
+
+Groupwork:
+Any group member can edit any page. Hypha notifies group members of contributions to the project, and makes it very easy and intuitive to respond. Only a few advanced functions which have the power to mess up the whole system (like direct editing of low level page HTML/CSS) are shielded off by an admin level.
+
+Revisions:
+Hypha stores all versions of a page, shows differences between any two revisions and makes it easy to revert to an old version.
+
+Multilingual:
+Many groups work and communicate over borders and language barriers. Hypha makes it possible to manage any content in multiple translations by default.
+
+Lightweight:
+Hypha is written in php and javascript, and doesn't require a mySQL database. Content is stored in plain xml files. Total download size is kept under 100Kb. System requiments are limited to basic apache and php services.
+
+Portable:
+Hypha can be easily be moved from one place to another. All file references are relative. As long as the basic requirements are met (apache, php) a hypha folder can simply be copied in order to function on any server or local machine.
+
+Simple installation:
+Uploading one fully self contained file is the goal.
+
+Open source:
+All code is available under a <Simple Public License at http://opensource.org/licenses/Simple-2.0> at <http://git.giplt.nl>
+
+No content license:
+Your data is not owned by some big company but by you (or by your webhosting provider, depending on your contract with them)
+
+Privacy:
+Hypha doesn't log browsing behaviour. It shares information (contact info  of project members, system messages on updated pages etc) only within the group of registered project members.
+
+Plugins:
+By default hypha contains a basic implementation for making plain webpages. It can however be extended with modules for other uses: mailinglist, forum, blog etc.
+
+Group: Users vs administrators
+Why some things aren't user friendly at all in hypha. While the purpose is to make hypha as simple and intuitive to use as possible, some things are inevitably a little harder, like setting file permissions on the server, uploading the script through ftp or changing the general page layout in HTML/CSS. We chose not to make these things WYSIWYG as well, but rather to make a distinction between ordinary users and group members who do system administration or site layout. One reason is that these things are harder not only in principle (i.e. you need to have your mind set for using the computer as a design tool, which has nothing to do with sharing data about some project) but implementing them in a user friendly way would make the whole system much more bulky. Another reason is that most groups will have someone capable of doing the few more low-level things needed to get hypha up and running. Or else they will know someone willing to help.
+
+Group: File structure
+Overview of hypha's files and folders
+
+*./*
+
+.htaccess - rules for apache which take care of basic security and url query format
+index.php - main script
+hypha.php - installer and maintenance script
+--------------------------------- - |
+
+*./system/core*
+
+* - contains core functions, grouped by functionality
+--------------------------------- - |
+
+*./system/datatypes*
+
+system/datatypes/text.php - class for managing hypertext
+system/datatypes/settings.php - class for managing user settings and hypha system administration
+--------------------------------- - |
+
+*./system/languages*
+
+system/languages/en.php - english strings for the user interface
+--------------------------------- - |
+
+*./system/wymeditor*
+
+* - wysiwyg editor
+--------------------------------- - |
+
+*./data/*
+
+hypha.html - basic page layout, can be edited in hypha settings menu
+hypha.css - markup file, can be edited in hypha settings menu
+hypha.xml - core database, contains userlist, page index et cetera
+--------------------------------- - |
+
+*./data/images*
+
+* - in this folder all images are stored with a unique ID (php uniqid) as filename. This ID is used in /data/hypha.xml to keep track of the files.
+--------------------------------- - |
+
+*./data/pages*
+
+* - in this folder all pages are stored with a unique ID (php uniqid) as filename. This ID is used in /data/hypha.xml to keep track of the files.
+--------------------------------- - |
+
+*./doc*/
+
+doc/index.html - contains the code documentation as created with NaturalDocs, see <Coding>.
+--------------------------------- - |
+
+Group: Page structure
+A hypha website can be styled as one whishes, but al information will end up in a div element with a certain id. The structure and lay out these elements can be changed in the settings page, or by editing the files data/hypha.html and data/hypha.css directly.
+* *header* - generic markup element which can be edited on the settings page
+* *footer* - generic markup element which can be edited on the settings page
+* *pagename* - contains the title of the selected page
+* *main* - contains the content of the selected page
+* *menu* - main navigation menu, can be edited on the settings page
+* *hyphaCommands* - contains a few system-wide commands like 'create new page', 'go to settings page', 'show page index', etc
+* *pageCommands* - additional commands that are specific for the selected page content, like 'translate page', 'edit' etc
+* *login* - this element contains all HTML needed for user login/logout interaction and showing current logon status
+* *langList* - a list of available translations of the selected page
+* *versionList* - a dropdown list of past versions of the selected page
+* *trail* - an additional navigation aid
+
+Group: Coding
+Some information one naming conventions and coding techniques
+
+Naming convention:
+Long variable names are denoted in camelCaseStyle, although this has not (yet) been implemented consequently throughout all code. Variables that are used only in a local code context are prepended by an underscore, to distinguish them from global or regional variables you wouldn't like to accidentally overwrite, e.g. $_tmp.
+
+One file contains all:
+In order to maintain some overview within the hypha file structure, all code for a certain functionality is kept within one file, e.g. a class declaration will be in the same file as the implementation of its methods. Also helper functions specific for that class will reside in the same file.
+
+Documentation:
+Documentation is done with a light weight tool called NaturalDocs. More information on its syntax and how to install can be found <here at http://www.naturalsdocs.org>.
+
+Coding comments are added throughout the code. The documentation is compiled from these comments by invoking the following command from hypha's root directory
+
+> naturaldocs -i . -o FramedHTML ./doc -p ./doc
+
+The updated documentation can then be found in ./doc/index.html
+
+Output buffer:
+Sometimes a lot of HTML has to be inserted as a php string. In most sytax highlighting editors these strings get the same colour. For the convenience of readability during coding the following trick is deployed at various places, making use of php's output buffer:
+
+> <?php
+> 	...
+> 	ob_start();
+> ?>
+> 	<div class="css">this is <b>HTML</b> markup</div>
+> <?
+> 	$htmlString = ob_get_clean();
+> 	...
+> ?>
+
+Relative links:
+All links within the cms (to both code/scripts and data) are kept as relative paths. Only just before sending sending page or an email a base url is added to turn them into permalinks. In this step another security measure is taken by obfuscating email addresses, safeguarding them against spambots.
+
+Subsites:
+Subsites are not implemented on purpose. A major advantage of such a feature would be more flexibility in handling a growing community by allowing small subgroups to get started without having to deal with the inner workings of a bigger coordinating project. It would however also introduce layers of complexity in the url structure (www.dom.ain/subsite/en/home) and in administration structures (who gets rights to access what?). Also it would in a sense defeat the wiki character of the whole thing. The assumption is that if a subproject grows really big it will probably also grow a desire for a distinct domain name of its own. In the future introduction of namespaces might serve as a good compromise. For the time being the rule remains: Keep It Simple Stupid.
