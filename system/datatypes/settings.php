@@ -74,10 +74,10 @@
 		<th><?=__('email')?>:</th>
 		<td><input name="settingsEmail" id="settingsEmail" type="text" size="20" value="<?=$account->getAttribute('email')?>" /></td>
 		<th><?=__('interface-language')?>:</th>
-		<td><select name="settingsUiLang" id="settingsUiLang"><? foreach($uiLangList as $lang) echo '<option value="'.$lang.'"'.($account->getAttribute('language')==$lang?' selected':'').'>'.$isoLangList[$lang].'</option>'; ?></select></td>
+		<td><select name="settingsUiLang" id="settingsUiLang"><?php foreach($uiLangList as $lang) echo '<option value="'.$lang.'"'.($account->getAttribute('language')==$lang?' selected':'').'>'.$isoLangList[$lang].'</option>'; ?></select></td>
 	</tr>
 </table>
-<?
+<?php
 				$this->html->writeToElement('main', ob_get_clean());
 			}
 		}
@@ -98,7 +98,7 @@
 		<td><textarea name="inviteWelcome" cols="72" rows="4"><?=__('invite-message')?> `<?=hypha_getTitle()?>`</textarea></td>
 	</tr>
 </table>
-<?
+<?php
 			$this->html->writeToElement('main', ob_get_clean());
 		}
 
@@ -131,7 +131,7 @@
 		<td><textarea name="quitGoodbye" cols="36" rows="4"><?=__('goodbye-message')?></textarea></td>
 	</tr>
 </table>
-<?
+<?php
 			$this->html->writeToElement('main', ob_get_clean());
 		}
 
@@ -172,10 +172,10 @@
 		<th><?=__('email')?>:</th>
 		<td><input name="settingsEmail" id="settingsEmail" type="text" size="20" value="<?=$user->getAttribute('email')?>" /></td>
 		<th><?=__('interface-language')?>:</th>
-		<td><select name="settingsUiLang" id="settingsUiLang"><? foreach($uiLangList as $lang) echo '<option value="'.$lang.'"'.($user->getAttribute('language')==$lang?' selected':'').'>'.$isoLangList[$lang].'</option>'; ?></select></td>
+		<td><select name="settingsUiLang" id="settingsUiLang"><?php foreach($uiLangList as $lang) echo '<option value="'.$lang.'"'.($user->getAttribute('language')==$lang?' selected':'').'>'.$isoLangList[$lang].'</option>'; ?></select></td>
 	</tr>
 </table>
-<?
+<?php
 				$this->html->writeToElement('main', ob_get_clean());
 				return;
 			}
@@ -233,7 +233,7 @@
 		<td><input name="settingsIntervalDays" id="settingsIntervalDays" type="text" size="3" value="<?=$days?>" /><?=__('D')?> <input name="settingsIntervalHours" id="settingsIntervalHours" type="text" size="2" value="<?=$hours?>" /><?=__('H')?> <input name="settingsIntervalMinutes" id="settingsIntervalMinutes" type="text" size="2" value="<?=$minutes?>" /><?=__('m')?></td>
 	</tr>
 </table>
-<?
+<?php
 			$this->html->writeToElement('main', ob_get_clean());
 			}
 		}
@@ -260,7 +260,7 @@
 		<td colspan="2"><textarea name="editHtml" id="editHtml" cols="100" rows="24" wrap="off"><?=htmlspecialchars(hypha_getHtml())?></textarea></td>
 	</tr>
 </table>
-<?
+<?php
 				$this->html->writeToElement('main', ob_get_clean());
 			}
 		}
@@ -282,7 +282,7 @@
 				ob_start();
 ?>
 <textarea class="section" name="editCss" id="editCss" cols="100%" rows="18" wrap="off"><?=file_get_contents('data/hypha.css')?></textarea>
-<?
+<?php
 				$this->html->writeToElement('main', ob_get_clean());
 			}
 		}
@@ -320,7 +320,7 @@
 		<td><editor name="siteFooter"><?=hypha_getFooter();?></editor></td>
 	</tr>
 </table>
-<?
+<?php
 				$this->html->writeToElement('main', ob_get_clean());
 			}
 		}
@@ -344,7 +344,7 @@
 		<td colspan="2"><editor name="siteMenu"><?=hypha_getMenu();?></editor></td>
 	</tr>
 </table>
-<?
+<?php
 			$this->html->writeToElement('main', ob_get_clean());
 		}
 
@@ -402,7 +402,7 @@
 		<th><?=__('email')?></th>
 		<td><input type="button" class="button" value="<?=__('invite')?>" onclick="hypha('settings/invite', '', '');" /></td>
 	</tr>
-<?
+<?php
 			$numAdmins = 0;
 			foreach(hypha_getUserList() as $user) {
 				if ($user->getAttribute('rights') == 'invite') $userList['zzza'] = $user;
@@ -443,7 +443,7 @@
 			}
 ?>
 </table>
-<?
+<?php
 			$this->html->writeToElement('main', ob_get_clean());
 		}
 

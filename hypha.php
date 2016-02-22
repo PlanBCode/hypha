@@ -144,7 +144,7 @@
 		</div>
 	</body>
 </html>
-<?
+<?php
 	exit;
 
 	/*
@@ -266,7 +266,7 @@
 			</div>
 			<table class="section">
 				<tr><th style="text-align:left">file</th><th colspan="2">action</th></tr>
-<?
+<?php
 		foreach ($serverIndex as $file => $info) {
 			echo '<tr><td style="white-space:nowrap;">'.$file.'</td>';
 			if (array_key_exists($file, $localIndex)) {
@@ -418,7 +418,7 @@
 				<tr><td colspan="3" style="text-align:right;"><input type="submit" name="command" value="install" /></td></tr>
 			</table>
 		</div>
-<?
+<?php
 			return ob_get_clean();
 		}
 	}
@@ -439,7 +439,7 @@
 				<tr><th style="text-align:right; white-space:nowrap;">password:</th><td><input name="password" type="password" /></td></tr>
 				<tr><td colspan="2" style="text-align:right;"><input type="submit" name="command" value="login" /></td></tr>
 			</table>
-<?
+<?php
 		return ob_get_clean();
 	}
 
@@ -467,7 +467,7 @@
 				<tr><th style="text-align:right; white-space:nowrap;">superuser password:</th><td><input name="password" type="password" /></td></tr>
 				<tr name="datatype">
 					<th style="text-align:right; white-space:nowrap;">modules to include:</th><td>
-<?
+<?php
 		foreach ($localIndex as $file => $timestamp) {
 			if (substr($file, 0, 17) == 'system/datatypes/') {
 				$name = substr($file, 17, -4);
@@ -478,7 +478,7 @@
 				</td></tr>
 				<tr name="language">
 					<th style="text-align:right; white-space:nowrap;">languages to include:</th><td>
-<?
+<?php
 		foreach ($localIndex as $file => $timestamp) {
 			if (substr($file, 0, 17) == 'system/languages/') {
 				$name = substr($file, 17, -4);
@@ -489,7 +489,7 @@
 				</td></tr>
 				<tr><td colspan="2" style="text-align:right;"><input type="submit" id="gobutton" name="command" value="build"></td></tr>
 			</table>
-<?
+<?php
 		return ob_get_clean();
 	}
 

@@ -79,10 +79,10 @@
 			ob_start();?>
 <div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
 <b><?=__('title')?></b> <input type="text" name="textPagename" value="<?=showPagename($this->pagename)?>" onblur="validatePagename(this);" onkeyup="validatePagename(this);" />
-<input type="checkbox" name="textPrivate"<?if ($this->privateFlag=='on') echo ' checked="checked"' ?> /><?=__('private-page')?>
+<input type="checkbox" name="textPrivate"<?php if ($this->privateFlag=='on') echo ' checked="checked"' ?> /><?=__('private-page')?>
 </div>
 <editor name="textContent"><?=getWikiContent($this->xml->documentElement, $this->language, '')?></editor>
-<?			$this->html->writeToElement('main', ob_get_clean());
+<?php			$this->html->writeToElement('main', ob_get_clean());
 
 			// show 'cancel' button
 			$_action = makeAction($this->language.'/'.$this->pagename, '', '');
@@ -104,12 +104,12 @@
 
 			ob_start();?>
 <div class="section" style="padding:5px; margin-bottom:5px;">
-<input type="hidden" name="textPrivate" value="<?echo $this->privateFlag=='on' ? 'on' : 'off'?>" />
+<input type="hidden" name="textPrivate" value="<?php echo $this->privateFlag=='on' ? 'on' : 'off'?>" />
 <b><?=__('language')?></b> <select name="textLanguage"><?=languageOptionList(null, $this->language)?></select>
 &nbsp;<b><?=__('title')?></b> <input type="text" name="textPagename" value="<?=showPagename($this->pagename)?>" onblur="validatePagename(this);" onkeyup="validatePagename(this);" />
 </div>
 <editor name="textContent"><?=getWikiContent($this->xml->documentElement, $this->language, '')?></editor>
-<?			$this->html->writeToElement('main', ob_get_clean());
+<?php			$this->html->writeToElement('main', ob_get_clean());
 
 			// show 'cancel' button
 			$_action = makeAction($this->language.'/'.$this->pagename, '', '');

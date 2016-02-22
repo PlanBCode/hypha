@@ -138,7 +138,7 @@
 		document.getElementById('popup').innerHTML = '<?=__('name-or-email')?>: <input name="searchLogin" id="searchLogin" type="text" size="10" /><input type="submit" name="submit" value="<?=__('submit')?>" /><input type="button" name="cancel" value="<?=__('cancel')?>" onclick="showLogin();" />';
 		document.getElementById('searchLogin').focus();
 	}
-<?
+<?php
 		$html->writeScript(ob_get_clean());
 	}
 

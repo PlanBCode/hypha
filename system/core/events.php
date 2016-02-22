@@ -46,7 +46,7 @@
 		<input id="argument" name="argument" type="hidden">
 		<?=getInnerHtml($body)?>
 	</form>
-<?
+<?php
 		setInnerHtml($body, ob_get_clean());
 
 		// add a javascript function to process client commands and ajax calls
@@ -130,7 +130,7 @@
 		}
 	}
 </script>
-<?
+<?php
 		$html->writeScript(ob_get_clean());
 	}
 
@@ -344,7 +344,7 @@
 	}
 	setTimeout(notifyTimer, 1000);
 </script>
-<?
+<?php
 		$html->writeScript(ob_get_clean());
 	}
 

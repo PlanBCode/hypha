@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once('events.php');
 
 	/*
@@ -52,7 +52,7 @@
 	}
 	function newPage() {
 		html = '<table class="section"><tr><th colspan="2"><?=__('create-new-page')?></td><tr>';
-		html+= '<tr><th>type</th><td><select id="newPageType" name="newPageType">' + '<? foreach($types as $type) echo '<option value="'.$type.'"'.($type=='textPage' ? 'selected="selected"' : '').'>'.$type.'</option>'; ?>' + '</select></td></tr>';
+		html+= '<tr><th>type</th><td><select id="newPageType" name="newPageType">' + '<?php foreach($types as $type) echo '<option value="'.$type.'"'.($type=='textPage' ? 'selected="selected"' : '').'>'.$type.'</option>'; ?>' + '</select></td></tr>';
 		html+= '<tr><th>name</th><td><input type="text" id="newPagename" value="<?=hypha_getPage($query[0], $query[1]) ? '' : $query[1]?>" onblur="validatePagename(this);" onkeyup="validatePagename(this); document.getElementById(\'newPageSubmit\').disabled = this.value ? false : true;"/></td></tr>';
 		html+= '<tr><td></td><td><input type="checkbox" id="newPagePrivate" name="newPagePrivate"/> <?=__('private-page')?></td></tr>';
 		html+= '<tr><td></td><td><input type="button" class="button" value="<?=__('cancel')?>" onclick="document.getElementById(\'popup\').style.visibility=\'hidden\';" />';
@@ -64,7 +64,7 @@
 		document.getElementById('newPagename').focus();
 	}
 </script>
-<?
+<?php
 		$html->writeScript(ob_get_clean());
 	}
 

@@ -278,7 +278,7 @@
 	}
 
 	</script>
-<?
+<?php
 			// add hypha tweaks to WYMeditor to the custom javascript section in the HTML head section
 			$html->writeScript(ob_get_clean());
 

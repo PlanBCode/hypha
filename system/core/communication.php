@@ -1,4 +1,4 @@
-<?
+<?php
 	include_once('base.php');
 	include_once('users.php');
 //	include_once('events.php');
@@ -61,7 +61,7 @@
 		elem.innerHTML = elem.innerHTML.replace(/([\'|\"]mailto:([A-Za-z0-9\._%\+-@]+?)[\'|\"])/g, function(str, href, email) {return 'mailto:'+email.split('').reverse().join('')});
 	}
 	</script>
-<?
+<?php
 		$html->writeScript(ob_get_clean());
 
 		// invoke the unobfuscateEmail routine only after the document is fully loaded. To avoid jQuery onload when it's not strictly needed we deploy a <script> element at the end of the HTML document
