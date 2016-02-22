@@ -49,108 +49,6 @@
 		Fourthly, the script can be used to build a new hypha.php containing the core scripts together with a number of additional classes for a list of chosen datatypes. This hypha.php script is offered for download and can be used again as an installer script for a new hypha install.
 	*/
 
-	session_start();
-
-	$DEBUG = true;
-	error_reporting($DEBUG ? E_ALL ^ E_NOTICE : NULL);
-	$errorMessage = '';
-
-	// sanity check
-	if (strnatcmp(phpversion(),'5.4') < 0) die('Error: you are running php version '.substr(phpversion(),0,strpos(phpversion(), '-')).'; Hypha works only with php version 5.4 and higher');
-	if (function_exists('apache_get_modules')) {
-		if (!in_array('mod_rewrite', apache_get_modules())) die ('Error: Apache should have mod_rewrite enabled');
-	} else {
-		$errorMessage .= "Automatic URL rewriting is only supported on Apache, some manual webserver configuration might be needed<br/>";
-	}
-
-	// check for possible code injection in data coming from the client side through $_POST or $_GET variables
-	foreach ($_POST as $name => $value) if (preg_match('/.*\<\?.*\?\>.*/', $value)) { $_POST[$name] = ""; echo 'Error: php code found in POST variable'; }
-	foreach ($_GET as $name => $value) if (preg_match('/.*\<\?.*\?\>.*/', $value)) { $_GET[$name] = ""; echo 'Error: php code found in GET variable'; }
-
-	$hyphaServer = 'http://www.hypha.net/hypha.php';
-
-	// push (encoded) file if we get a file request
-	$file = isset($_GET['file']) ? $_GET['file'] : false;
-	if ($file) {
-		if ($file=='index') echo serialize(index());
-		else if (isAllowedFile($file)) if (file_exists($file)) echo base64_encode(gzencode(file_get_contents($file), 9));
-		exit;
-	}
-
-	// handle login/logout requests
-	$cmd = isset($_POST['command']) ? $_POST['command'] : false;
-	if ($cmd == 'login' || $cmd == 'continue') {
-		if ($_POST['username'] === $username && $_POST['password'] === $password) $_SESSION['hyphaSetupLoggedIn'] = true;
-		else $errorMessage.= 'Sorry, wrong user id / password<br/>';
-	}
-	if ($cmd == 'back') {
-		unset($_SESSION['hyphaSetupLoggedIn']);
-		header('Location: settings');
-	}
-	if ($cmd == 'build') buildzip();
-
-	$login = (isset($_SESSION['hyphaSetupLoggedIn']) && ($_SESSION['hyphaSetupLoggedIn'] == true)) ? true : false;
-
-	// if hypha.xml is absent present superuser login and present hypha installer
-	// else if maintenance request present superuser login and present hypha system tools
-	// else present hypha builder
-	if (!file_exists('data/hypha.xml')) $html = $login ? install($hyphaServer) : login();
-	else if (key($_GET)=='maintenance') $html = $login ? tools($hyphaServer) : login();
-	else $html = build();
-
-	// output html
-?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-		<title id="hypha setup"></title>
-		<style type="text/css">
-			html body {
-				font-family: sans-serif;
-				font-size: 11pt;
-				letter-spacing: 0.07em;
-				text-align: justify;
-				color: #222;
-				line-height: 1.35;
-			}
-			tr {
-				vertical-align: top;
-			}
-			td {
-				padding: 5px 5px 20px 5px;
-			}
-			.section {
-				border:1px solid #000;
-				background-color:#eee;
-			}
-			.help {
-				font-size: 10pt;
-			}
-		</style>
-		<script id="script" type="text/javascript">
-			function hypha(cmd, arg) {
-				document.getElementById('command').value = cmd;
-				document.getElementById('argument').value = arg;
-				document.forms['hypha'].submit();
-			}
-		</script>
-	</head>
-
-	<body>
-		<div>
-			<div><strong><font color="#990000"><?=$errorMessage?></font></strong></div>
-			<form id="hypha" method="post" accept-charset="utf-8">
-				<input id="command" name="command" type="hidden" />
-				<input id="argument" name="argument" type="hidden" />
-<?=$html?>
-			</form>
-		</div>
-	</body>
-</html>
-<?php
-	exit;
-
 	/*
 		Function: isAllowedFile
 		check if file may be shared (don't send site contents, user data or configuration settings)
@@ -621,4 +519,103 @@
 		}
 		if ($zip) return gzdecode(base64_decode($zip));
 	}
+
+	session_start();
+
+	$DEBUG = true;
+	error_reporting($DEBUG ? E_ALL ^ E_NOTICE : NULL);
+	$errorMessage = '';
+
+	// sanity check
+	if (strnatcmp(phpversion(),'5.4') < 0) die('Error: you are running php version '.substr(phpversion(),0,strpos(phpversion(), '-')).'; Hypha works only with php version 5.4 and higher');
+	if (function_exists('apache_get_modules')) {
+		if (!in_array('mod_rewrite', apache_get_modules())) die ('Error: Apache should have mod_rewrite enabled');
+	} else {
+		$errorMessage .= "Automatic URL rewriting is only supported on Apache, some manual webserver configuration might be needed<br/>";
+	}
+
+	// check for possible code injection in data coming from the client side through $_POST or $_GET variables
+	foreach ($_POST as $name => $value) if (preg_match('/.*\<\?.*\?\>.*/', $value)) { $_POST[$name] = ""; echo 'Error: php code found in POST variable'; }
+	foreach ($_GET as $name => $value) if (preg_match('/.*\<\?.*\?\>.*/', $value)) { $_GET[$name] = ""; echo 'Error: php code found in GET variable'; }
+
+	$hyphaServer = 'http://www.hypha.net/hypha.php';
+
+	// push (encoded) file if we get a file request
+	$file = isset($_GET['file']) ? $_GET['file'] : false;
+	if ($file) {
+		if ($file=='index') echo serialize(index());
+		else if (isAllowedFile($file)) if (file_exists($file)) echo base64_encode(gzencode(file_get_contents($file), 9));
+		exit;
+	}
+
+	// handle login/logout requests
+	$cmd = isset($_POST['command']) ? $_POST['command'] : false;
+	if ($cmd == 'login' || $cmd == 'continue') {
+		if ($_POST['username'] === $username && $_POST['password'] === $password) $_SESSION['hyphaSetupLoggedIn'] = true;
+		else $errorMessage.= 'Sorry, wrong user id / password<br/>';
+	}
+	if ($cmd == 'back') {
+		unset($_SESSION['hyphaSetupLoggedIn']);
+		header('Location: settings');
+	}
+	if ($cmd == 'build') buildzip();
+
+	$login = (isset($_SESSION['hyphaSetupLoggedIn']) && ($_SESSION['hyphaSetupLoggedIn'] == true)) ? true : false;
+
+	// if hypha.xml is absent present superuser login and present hypha installer
+	// else if maintenance request present superuser login and present hypha system tools
+	// else present hypha builder
+	if (!file_exists('data/hypha.xml')) $html = $login ? install($hyphaServer) : login();
+	else if (key($_GET)=='maintenance') $html = $login ? tools($hyphaServer) : login();
+	else $html = build();
+
+	// output html
 ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title id="hypha setup"></title>
+		<style type="text/css">
+			html body {
+				font-family: sans-serif;
+				font-size: 11pt;
+				letter-spacing: 0.07em;
+				text-align: justify;
+				color: #222;
+				line-height: 1.35;
+			}
+			tr {
+				vertical-align: top;
+			}
+			td {
+				padding: 5px 5px 20px 5px;
+			}
+			.section {
+				border:1px solid #000;
+				background-color:#eee;
+			}
+			.help {
+				font-size: 10pt;
+			}
+		</style>
+		<script id="script" type="text/javascript">
+			function hypha(cmd, arg) {
+				document.getElementById('command').value = cmd;
+				document.getElementById('argument').value = arg;
+				document.forms['hypha'].submit();
+			}
+		</script>
+	</head>
+
+	<body>
+		<div>
+			<div><strong><font color="#990000"><?=$errorMessage?></font></strong></div>
+			<form id="hypha" method="post" accept-charset="utf-8">
+				<input id="command" name="command" type="hidden" />
+				<input id="argument" name="argument" type="hidden" />
+<?=$html?>
+			</form>
+		</div>
+	</body>
+</html>
