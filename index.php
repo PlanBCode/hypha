@@ -43,12 +43,6 @@
 	$hyphaQuery = substr($_SERVER["REQUEST_URI"], strlen($_path));
 //	$hyphaQuery = urldecode(substr($_SERVER["REQUEST_URI"], strlen($_path)));
 
-	if ((strpos($hyphaQuery,'system')===0 && strpos($hyphaQuery,'system/datatypes')!==0) || $hyphaQuery=='data/hypha.css') {
-		$_fileInfo = apache_lookup_uri($hyphaQuery);
-		header('content-type: '.$_fileInfo->content_type);
-		readfile($hyphaQuery);
-		exit;
-	}
 
 	/*
 		Group: Stage 3 - Build hypha script
@@ -69,6 +63,12 @@
 	$_handle = opendir("system/languages/");
 	while ($_file = readdir($_handle)) if (!in_array($_file, array(".", ".."))) $uiLangList[] = basename($_file, '.php');
 	closedir($_handle);
+
+	// Shortcut for direct file requests
+	if ((strpos($hyphaQuery,'system')===0 && strpos($hyphaQuery,'system/datatypes')!==0) || $hyphaQuery=='data/hypha.css') {
+		serveFile($hyphaQuery);
+		exit;
+	}
 
 	/*
 		Group: Stage 4 - Load website data
