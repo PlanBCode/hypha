@@ -53,15 +53,15 @@
 	*/
 
 	$_handle = opendir("system/core/");
-	while ($_file = readdir($_handle)) if (!in_array($_file, array(".", ".."))) require_once("system/core/".$_file);
+	while ($_file = readdir($_handle)) if (substr($_file, -4) == '.php') require_once("system/core/".$_file);
 	closedir($_handle);
 
 	$_handle = opendir("system/datatypes/");
-	while ($_file = readdir($_handle)) if (!in_array($_file, array(".", ".."))) include_once("system/datatypes/".$_file);
+	while ($_file = readdir($_handle)) if (substr($_file, -4) == '.php') include_once("system/datatypes/".$_file);
 	closedir($_handle);
 
 	$_handle = opendir("system/languages/");
-	while ($_file = readdir($_handle)) if (!in_array($_file, array(".", ".."))) $uiLangList[] = basename($_file, '.php');
+	while ($_file = readdir($_handle)) if (substr($_file, -4) == '.php') $uiLangList[] = basename($_file, '.php');
 	closedir($_handle);
 
 	// Shortcut for direct file requests
