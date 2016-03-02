@@ -175,6 +175,9 @@
 					default: return '6';
 				}
 			}
+
+			// Sort the head tag children, keeping the order of nodes with the same rank
+			// unchanged (this is important for script tags).
 			$nodes = $this->getElementsByTagName('head')->Item(0)->childNodes;
 			for($i=0;$i<$nodes->length-1;$i++)
 				for ($j=$i+1;$j<$nodes->length;$j++)
