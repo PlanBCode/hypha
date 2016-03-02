@@ -65,10 +65,8 @@
 	closedir($_handle);
 
 	// Shortcut for direct file requests
-	if ((strpos($hyphaQuery,'system')===0 && strpos($hyphaQuery,'system/datatypes')!==0) || $hyphaQuery=='data/hypha.css') {
+	if ((strpos($hyphaQuery,'system')===0 && strpos($hyphaQuery,'system/datatypes')!==0) || $hyphaQuery=='data/hypha.css')
 		serveFile($hyphaQuery);
-		exit;
-	}
 
 	/*
 		Group: Stage 4 - Load website data

@@ -340,10 +340,24 @@
 		$filename -
 	*/
 	function serveFile($filename) {
-		$fileInfo = apache_lookup_uri($filename);
 		ob_end_clean();
-		header('Content-type: '.$fileInfo->content_type);
+		header('Content-Type: ' . getMimeType($filename));
 		readfile($filename);
 		exit;
+	}
+
+	/*
+		Function: getMimetype
+		Returns the mimetype for the given path.
+	*/
+	function getMimeType($path) {
+		// This uses finfo for most files, but that looks at the
+		// content, not the extension, so it won't get the type
+		// right for js and css files.
+		switch(pathinfo($path, PATHINFO_EXTENSION)) {
+			case 'css': return 'text/css';
+			case 'js': return 'application/javascript';
+			default: return finfo_file(finfo_open(FILEINFO_MIME_TYPE), $path);
+		}
 	}
 ?>
