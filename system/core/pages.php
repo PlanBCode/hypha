@@ -200,6 +200,7 @@
 					}
 				}
 				else {
+					http_response_code(404);
 					notify('error', __('no-page'));
 					if(isUser()) $hyphaHtml->writeToElement('main', '<span class="right""><input type="button" class="button" value="'.__('create').'" onclick="newPage();"></span>');
 					$hyphaPage = false;
