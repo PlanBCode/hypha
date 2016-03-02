@@ -67,7 +67,13 @@
 		$html->writeToElement('main', '<script>unobfuscateEmail(document.body);</script>');
 
 		// add CSS fallback in case javascript is not available
-		$html->writeStyle('.obfuscate {'.PHP_EOL.'unicode-bidi: bidi-override;'.PHP_EOL.'direction: rtl;'.PHP_EOL.'}'.PHP_EOL);
+		$css = <<<'END'
+.obfuscate {
+	unicode-bidi: bidi-override;
+	direction: rtl;
+}
+END;
+		$html->writeStyle($css);
 	}
 
 	/*
