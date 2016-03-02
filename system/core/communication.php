@@ -19,9 +19,9 @@
 	*/
 	function sendMail($to, $from, $subject, $message) {
 		global $DEBUG;
-		$headers = 'MIME-Version: 1.0'.PHP_EOL;
-		$headers .= 'Content-type: text/html; charset=utf-8'.PHP_EOL;
-		$headers .= 'From: '.$from.PHP_EOL;
+		$headers = "MIME-Version: 1.0\r\n";
+		$headers .= "Content-type: text/html; charset=utf-8\r\n";
+		$headers .= "From: $from\r\n";
 		foreach(explode(',', $to) as $email) {
 			if (!$DEBUG && !filter_var($email, FILTER_VALIDATE_EMAIL)) $error[]= $email;
 			elseif (!mail($email, $subject, '<html><body>'.$message.'</body></html>', $headers.'To: '.$email)) $error[]= $email;
