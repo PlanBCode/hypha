@@ -42,6 +42,7 @@
 
 	include_once ('database.php');
 	include_once ('language.php');
+	include_once ('crypto.php');
 
 	if (!is_file('data/hypha.xml')) die('serious error: missing system file hypha.xml');
 	$hyphaXml = new Xml('project', Xml::multiLingualOff, Xml::versionsOff);
@@ -370,7 +371,7 @@
 		elseif (($username == 'hypha') || (strpos($username, 'newUser_')!==false)) return __('cant-use-that-name');
 		else {
 			if ($username) $user->setAttribute('username', $username);
-			if ($password) $user->setAttribute('password', md5($password));
+			if ($password) $user->setAttribute('password', hashPassword($password));
 			if ($fullname) $user->setAttribute('fullname', $fullname);
 			if ($email) $user->setAttribute('email', $email);
 			if ($language) $user->setAttribute('language', $language);

@@ -212,6 +212,9 @@
 				chmod($file, 0664);
 			}
 
+			// Needed for password hashing
+			require_once('system/core/crypto.php');
+
 			// create data folders
 			mkdir('data/pages', 0755);
 			mkdir('data/images', 0755);
@@ -264,7 +267,7 @@
 			$user = $xml->createElement('user', '');
 			$user->setAttribute('id', uniqid());
 			$user->setAttribute('username', $_POST['setupUsername']);
-			$user->setAttribute('password', md5($_POST['setupPassword']));
+			$user->setAttribute('password', hashPassword($_POST['setupPassword']));
 			$user->setAttribute('fullname', $_POST['setupFullname']);
 			$user->setAttribute('email', $_POST['setupEmail']);
 			$user->setAttribute('rights', 'admin');

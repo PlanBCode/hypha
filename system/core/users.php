@@ -34,7 +34,7 @@
 	registerCommandCallback('login', 'login');
 	function login() {
 		$user = hypha_getUserByName($_POST['loginUsername']);
-		if ($user && $user->getAttribute('rights') != 'exmember' && $user->getAttribute('password') === md5($_POST['loginPassword'])) {
+		if ($user && $user->getAttribute('rights') != 'exmember' && verifyPassword($_POST['loginPassword'], $user->getAttribute('password'))) {
 			$_SESSION['hyphaLogin'] = $user->getAttribute('id');
 			return 'reload';
 		}
