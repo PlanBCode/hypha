@@ -337,10 +337,19 @@
 		Sends a file directly to the client.
 
 		Parameters:
-		$filename -
+		$filename - The filename to serve
+		$root - The directory the filename should be in, after
+			resolving any .. and symbolic links. Can be
+			empty to omit checking.
 	*/
-	function serveFile($filename) {
+	function serveFile($filename, $root) {
 		ob_end_clean();
+		$real = realpath($filename);
+		$root = realpath($root);
+		if ($real === false || $root && !startsWith($real, $root . '/')) {
+			http_response_code(404);
+			die("Invalid filename: $filename");
+		}
 		header('Content-Type: ' . getMimeType($filename));
 		readfile($filename);
 		exit;

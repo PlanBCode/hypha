@@ -91,10 +91,10 @@
 		$hyphaLanguage = $_SESSION['hyphaLanguage'];
 		switch ($args[0]) {
 			case 'files':
-				serveFile('data/files/'.$args[1]);
+				serveFile('data/files/' . $args[1], 'data/files');
 				exit;
 			case 'images':
-				serveFile('data/images/'.$args[1]);
+				serveFile('data/images/' . $args[1], 'data/images');
 				exit;
 			case 'index':
 				$hyphaHtml->writeToElement('langList', '<div style="color:#888;">'.__('index').'</div>');
