@@ -534,10 +534,6 @@
 		$errorMessage .= "Automatic URL rewriting is only supported on Apache, some manual webserver configuration might be needed<br/>";
 	}
 
-	// check for possible code injection in data coming from the client side through $_POST or $_GET variables
-	foreach ($_POST as $name => $value) if (preg_match('/.*\<\?.*\?\>.*/', $value)) { $_POST[$name] = ""; echo 'Error: php code found in POST variable'; }
-	foreach ($_GET as $name => $value) if (preg_match('/.*\<\?.*\?\>.*/', $value)) { $_GET[$name] = ""; echo 'Error: php code found in GET variable'; }
-
 	$hyphaServer = 'http://www.hypha.net/hypha.php';
 
 	// push (encoded) file if we get a file request

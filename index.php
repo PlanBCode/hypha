@@ -28,10 +28,6 @@
 	if (strnatcmp(phpversion(),'5.4') < 0) die('Error: you are running php version '.substr(phpversion(),0,strpos(phpversion(), '-')).'; Hypha works only with php version 5.4 and higher');
 	if (function_exists('apache_get_modules') && !in_array('mod_rewrite', apache_get_modules())) die ('Error: Apache should have mod_rewrite enabled');
 
-	// FIXME: scan for javascript as well?
-	foreach ($_POST as $_v) if (preg_match('/.*\<\?.*\?\>.*/', $_v)) exit('Error: php code found in POST variable');
-	foreach ($_GET as $_v) if (preg_match('/.*\<\?.*\?\>.*/', $_v)) exit('Error: php code found in GET variable');
-
 	/*
 		Group: Stage 2 - Get query and handle direct file requests
 		Here we extract our page query from the php $_SERVER data. Page requests should be formatted in a directory like structure, e.g. http://www.dom.ain/en/home/edit, the first level usually being a language id, the second level begin a page id, and the third level being an optional view.
