@@ -347,6 +347,14 @@
 	}
 
 	/*
+		Function: startsWith
+		Returns whether $string starts with $prefix
+	*/
+	function startsWith($string, $prefix) {
+		return substr($string, 0, strlen($prefix)) == $prefix;
+	}
+
+	/*
 		Function: getMimetype
 		Returns the mimetype for the given path.
 	*/
