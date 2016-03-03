@@ -34,17 +34,17 @@
 
 		function show() {
 			// throw error if private page is requested without client logged in
-			if (!isset($_SESSION['hyphaLogin']) && $this->privateFlag) return notify('error', __('login-to-view'));
+			if (!isUser() && $this->privateFlag) return notify('error', __('login-to-view'));
 
 			// setup page name and language list for the selected page
 			$this->html->writeToElement('pagename', showPagename($this->pagename).' '.asterisk($this->privateFlag));
 			$this->html->writeToElement('langList', hypha_indexLanguages($this->pageListNode, $this->language));
 
 			// show content, and only allow access to previous revisions for logged in clients
-			$this->html->writeToElement('main', getWikiContent($this->xml->documentElement, $this->language, isset($_SESSION['hyphaLogin']) ? $_POST['version'] : ''));
+			$this->html->writeToElement('main', getWikiContent($this->xml->documentElement, $this->language, isUser() ? $_POST['version'] : ''));
 
 			// setup addition widgets when client is logged in
-			if (isset($_SESSION['hyphaLogin'])) {
+			if (isUser()) {
 				// show a drop down list of revisions
 				$this->html->writeToElement('versionList', versionSelector($this));
 
@@ -69,7 +69,7 @@
 
 		function edit() {
 			// throw error if edit is requested without client logged in
-			if (!isset($_SESSION['hyphaLogin'])) return notify('error', __('login-to-edit'));
+			if (!isUser()) return notify('error', __('login-to-edit'));
 
 			// setup page name and language list
 			$this->html->writeToElement('pagename', __('editPage').' `'.showPagename($this->pagename).'`'.asterisk($this->privateFlag));
@@ -97,7 +97,7 @@
 
 		function translate() {
 			// throw error if translation is requested without client logged in
-			if (!isset($_SESSION['hyphaLogin'])) return notify('error', __('login-to-edit'));
+			if (!isUser()) return notify('error', __('login-to-edit'));
 
 			$this->html->writeToElement('pagename', __('translate-page').' `'.showPagename($this->pagename).'`'.asterisk($this->privateFlag));
 			$this->html->writeToElement('langList', $this->language);
