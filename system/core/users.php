@@ -78,7 +78,8 @@
 		returns true if user is logged in.
 	*/
 	function isUser() {
-		return isset($_SESSION['hyphaLogin']) ? true : false;
+		global $hyphaUser;
+		return !!$hyphaUser;
 	}
 
 	/*
@@ -86,9 +87,8 @@
 		returns true if user has admin rights.
 	*/
 	function isAdmin() {
-		if (!isUser()) return false;
-		if (hypha_getUserById($_SESSION['hyphaLogin'])->getAttribute('rights') !== 'admin') return false;
-		return true;
+		global $hyphaUser;
+		return $hyphaUser->getAttribute('rights') === 'admin';
 	}
 
 	/*
