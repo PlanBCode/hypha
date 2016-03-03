@@ -165,10 +165,8 @@
 	*/
 	function processCommand($id, $arg) {
 		global $hyphaEventList;
-		if (count($hyphaEventList) && array_key_exists($id, $hyphaEventList)) {
-			if(is_array($hyphaEventList[$id])) return $hyphaEventList[$id][0]->{$hyphaEventList[$id][1]}($arg);
-			else return $hyphaEventList[$id]($arg);
-		}
+		if (count($hyphaEventList) && array_key_exists($id, $hyphaEventList))
+			return call_user_func($hyphaEventList[$id], $arg);
 	}
 
 	function makeAction($langPageView, $command, $argument) {
