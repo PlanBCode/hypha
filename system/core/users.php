@@ -35,6 +35,8 @@
 	function login() {
 		$user = hypha_getUserByName($_POST['loginUsername']);
 		if ($user && $user->getAttribute('rights') != 'exmember' && verifyPassword($_POST['loginPassword'], $user->getAttribute('password'))) {
+			// Use a brand new session id for extra security
+			session_regenerate_id();
 			$_SESSION['hyphaLogin'] = $user->getAttribute('id');
 			return 'reload';
 		}
