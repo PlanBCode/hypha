@@ -20,7 +20,14 @@
 		- *code scan* Client data sent through $_GET or $_POST variables are scanned for malicious code injection before continuing to the main script.
 		- *email obfuscation* Email addresses are obfuscated to prevent spambots from harvesting published email addresses. This function is actually registered later on once all core scripts are loaded. See below...
 	*/
+
+	// Load the session and close it immediately (there does not
+	// seem to be any way to do this without also writing out the
+	// session file with PHP < 5.6). This prevents the session file
+	// from staying locked throughout the entire request and
+	// prevents serving multiple requests within the same session.
 	session_start();
+	session_write_close();
 
 	$DEBUG = false;
 	error_reporting($DEBUG ? E_ALL ^ E_NOTICE : NULL);

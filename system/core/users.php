@@ -35,13 +35,17 @@
 	function login() {
 		$user = hypha_getUserByName($_POST['loginUsername']);
 		if ($user && $user->getAttribute('rights') != 'exmember' && verifyPassword($_POST['loginPassword'], $user->getAttribute('password'))) {
+			session_start();
 			// Use a brand new session id for extra security
 			session_regenerate_id();
 			$_SESSION['hyphaLogin'] = $user->getAttribute('id');
+			session_write_close();
 			return 'reload';
 		}
 		else {
+			session_start();
 			unset($_SESSION['hyphaLogin']);
+			session_write_close();
 			notify('error', __('login-failed').'. <a href="javascript:reregister();">'.__('reregister').'</a>');
 		}
 	}
@@ -69,7 +73,9 @@
 			if ($page) $hyphaQuery = $language.'/'.$page->getAttribute('name');
 			else $hyphaQuery = hypha_getDefaultLanguage().'/'.hypha_getDefaultPage();
 		}
+		session_start();
 		unset($_SESSION['hyphaLogin']);
+		session_write_close();
 		return 'reload';
 	}
 

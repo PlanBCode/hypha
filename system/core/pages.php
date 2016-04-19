@@ -86,9 +86,17 @@
 		global $isoLangList, $hyphaHtml, $hyphaPageTypes, $hyphaPage, $hyphaLanguage, $hyphaUrl;
 
 		// set wiki language. we want to store this in a session variable, so we don't loose language when an image or the settingspage are requested
-		if (array_key_exists($args[0], $isoLangList)) $_SESSION['hyphaLanguage'] = $args[0];
-		elseif (!isset($_SESSION['hyphaLanguage'])) $_SESSION['hyphaLanguage'] = hypha_getDefaultLanguage();
-		$hyphaLanguage = $_SESSION['hyphaLanguage'];
+		if (array_key_exists($args[0], $isoLangList))
+			$hyphaLanguage = $args[0];
+		else
+			$hyphaLanguage = hypha_getDefaultLanguage();
+
+		if (!isset($_SESSION['hyphaLanguage']) || $hyphaLanguage != $_SESSION['hyphaLanguage']) {
+			session_start();
+			$_SESSION['hyphaLanguage'] = $hyphaLanguage;
+			session_write_close();
+		}
+
 		switch ($args[0]) {
 			case 'files':
 				serveFile('data/files/' . $args[1], 'data/files');
