@@ -348,8 +348,9 @@
 			$newUser->setAttribute('id', uniqid());
 			$hyphaXml->getElementsByTagName('userList')->Item(0)->appendChild($newUser);
 			return hypha_setUser($newUser, $username, $password, $fullname, $email, $language, $rights);
+		} else {
+			return __('user-exists');
 		}
-		else return __('user-exists');
 	}
 
 	/*
@@ -367,9 +368,13 @@
 	*/
 	function hypha_setUser($user, $username, $password, $fullname, $email, $language, $rights) {
 		global $hyphaXml;
-		if ($username && hypha_getUserByName($username) && hypha_getUserByName($username)!=$user && !isAdmin()) return __('user-exists');
-		elseif (($username == 'hypha') || (strpos($username, 'newUser_')!==false)) return __('cant-use-that-name');
-		else {
+		if ($username && hypha_getUserByName($username)
+		    && hypha_getUserByName($username) != $user && !isAdmin()) {
+			return __('user-exists');
+		} else if (($username == 'hypha')
+		           || (strpos($username, 'newUser_') !== false)) {
+			return __('cant-use-that-name');
+		} else {
 			if ($username) $user->setAttribute('username', $username);
 			if ($password) $user->setAttribute('password', hashPassword($password));
 			if ($fullname) $user->setAttribute('fullname', $fullname);

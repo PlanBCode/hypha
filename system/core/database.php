@@ -175,7 +175,8 @@
 		$author - author id
 	*/
 	function storeWikiContent($node, $language, $content, $author) {
-		if (getWikiContent($node, $language, '')===$content) return null;
+		if (getWikiContent($node, $language, '') === $content)
+			return null;
 		$langNode = getLangNode($node, $language);
 		if ($node->getAttribute('versions')=='on') {
 			$currentVersionNode = getCurrentVersionNode($langNode);
@@ -183,14 +184,16 @@
 			if ($currentVersionNode) setInnerHtml($currentVersionNode, diff($content, getWikiContent($node, $language, '')));
 			// append new content to version list
 			$timeStamp = time();
-			if ($currentVersionNode && $currentVersionNode->getAttribute('xml:id') == 't'.$timeStamp) $timeStamp++;
+			if ($currentVersionNode && $currentVersionNode->getAttribute('xml:id') == 't'.$timeStamp)
+				$timeStamp++;
 			$newNode = $node->ownerDocument->createElement('version', '');
 			$newNode->setAttribute('xml:id', 't'.$timeStamp);
 			$newNode->setAttribute('author', $author);
 			setInnerHtml($newNode, $content);
 			$langNode->appendChild($newNode);
+		} else {
+			setInnerHtml($langNode, $content);
 		}
-		else setInnerHtml($langNode, $content);
 		$node->ownerDocument->saveToFile();
 	}
 
