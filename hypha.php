@@ -228,6 +228,7 @@
 			$hypha->setAttribute('type', 'textpage');
 			$hypha->setAttribute('multiLingual', 'on');
 			$hypha->setAttribute('versions', 'on');
+			$hypha->setAttribute('schemaVersion', 1);
 			$language = $xml->createElement('language', '');
 			$language->setAttribute('xml:id', $_POST['setupDefaultLanguage']);
 			$version = $xml->createElement('version', '<p>welcome to your brand new hypha website.</p>');
@@ -249,6 +250,7 @@
 			$hypha->setAttribute('defaultPage', $_POST['setupDefaultPage']);
 			$hypha->setAttribute('email', $_POST['setupEmail']);
 			$hypha->setAttribute('digestInterval', '21600');
+			$hypha->setAttribute('schemaVersion', 1);
 			$hypha->appendChild($xml->createElement('title', $_POST['setupTitle']));
 			$header = $xml->createElement('header', $_POST['setupTitle']);
 			$hypha->appendChild($header);

@@ -47,6 +47,7 @@
 			$rootElement->setAttribute('type', $type);
 			$rootElement->setAttribute('multiLingual', $multiLingual ? 'on' : 'off');
 			$rootElement->setAttribute('versions', $versions ? 'on' : 'off');
+			$rootElement->setAttribute('schemaVersion', 1);
 			$this->appendChild($rootElement);
 		}
 		/*
