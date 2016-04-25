@@ -37,14 +37,14 @@
 			creates an empty HTML file
 
 			Parameters:
-			$filename - optional parameter of HTML template filename
+			$filename - optional parameter of HTML template file (HyphaFile instance).
 		*/
-		public function __construct($filename = false) {
+		public function __construct($file = false) {
 			parent::__construct('1.0', 'UTF-8');
 			$this->preserveWhiteSpace = false;
 			$this->formatOutput = true;
-			if ($filename)
-				$contents = file_get_contents($filename);
+			if ($file)
+				$contents = $file->read();
 			else
 				$contents = '<html><head></head><body></body></html>';
 			$this->loadHTML('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">'.$contents);

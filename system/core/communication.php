@@ -91,8 +91,13 @@ END;
 			$id - id of page. If id is given, a htmlDiff is in inserted in the digest
 	*/
 	function writeToDigest($message, $type, $id = false) {
-		hypha_setDigest(hypha_getDigest().'<div'.($type=='settings' ? ' style="color:#840;"' : '').'>'.date('j-m-y, H:i ', time()).addBaseUrl($message).($id ? ' - <a href="#'.$id.'">view changes</a>' : '').'</div>'."\n");
-		if (!hypha_getLastDigestTime()) hypha_setLastDigestTime(time());
+		global $hyphaXml;
+		hypha_addDigest('<div'.($type=='settings' ? ' style="color:#840;"' : '').'>'.date('j-m-y, H:i ', time()).addBaseUrl($message).($id ? ' - <a href="#'.$id.'">view changes</a>' : '').'</div>'."\n");
+		if (!hypha_getLastDigestTime()) {
+			$hyphaXml->lockAndReload();
+			hypha_setLastDigestTime(time());
+			$hyphaXml->saveAndUnlock();
+		}
 	}
 
 	/*
@@ -105,8 +110,8 @@ END;
 			$hasDiff -
 	*/
 	function flushDigest() {
-		global $hyphaPagelist;
-		$digest = hypha_getDigest();
+		global $hyphaPagelist, $hyphaXml;
+		$digest = hypha_getAndClearDigest();
 		if ($digest) {
 			$t = time() - hypha_getLastDigestTime();
 			if ($t > 86400) $s = floor($t / 86400).' '.__('days');
@@ -114,8 +119,8 @@ END;
 			elseif ($t > 60) $s = floor($t / 60).' '.__('minutes');
 			$message = '<div style="font-family: sans; font-size: 12pt;">';
 			$message.= '<div style="font-size: 14pt;"><b>'.hypha_getTitle().'</b>: '.__('hypha-summary-of-the-last').' '.$s.'</div>';
-			$stats = hypha_getStats();
-			$message.= $stats[hypha_getLastDigestTime()+hypha_getDigestInterval()].' '.__('page-visits');
+			$message.= hypha_getStats(hypha_getLastDigestTime()+hypha_getDigestInterval());
+			$message.= ' '.__('page-visits');
 			$message.= '<hr />';
 			$message.= $digest;
 			preg_match_all('/\"\#([\w]+)\"/', $message, $pages);
@@ -127,8 +132,9 @@ END;
 				$message.= '<a name="'.$id.'"></a>';
 				$message.= addBaseUrl($page->digest($hypha_getLastDigestTime));
 			}
-			hypha_setDigest('');
+			$hyphaXml->lockAndReload();
 			hypha_setLastDigestTime(time());
+			$hyphaXml->saveAndUnlock();
 			notify('error', sendMail(getUserEmailList(), hypha_getTitle().' <'.hypha_getEmail().'>', hypha_getTitle().': '.__('hypha-summary'), $message) );
 		}
 	}

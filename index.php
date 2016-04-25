@@ -78,7 +78,7 @@
 		Website data is loaded, see chapter about <Base> functions. The HTMLDocument $hyphaHtml is loaded with the website default layout.
 	*/
 
-	$hyphaHtml = new HTMLDocument('data/hypha.html');
+	$hyphaHtml = new HTMLDocument(Hypha::$data->html);
 	$hyphaHtml->linkStyle($hyphaUrl.'data/hypha.css');
 	$hyphaHtml->setTitle(hypha_getTitle());
 	$hyphaHtml->writeToElement('header', hypha_getHeader());

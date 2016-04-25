@@ -49,6 +49,22 @@
 	$hyphaXml->loadFromFile('data/hypha.xml');
 
 	/*
+		Class: Hypha
+
+		This class contains some global values for the Hypha system. It is
+		never instantiated, it just collects static variables and methods.
+	*/
+	class Hypha {
+		public static $data;
+	}
+
+	Hypha::$data = new StdClass();
+	Hypha::$data->css = new HyphaFile('data/hypha.css');
+	Hypha::$data->html = new HyphaFile('data/hypha.html');
+	Hypha::$data->digest = new HyphaFile('data/digest');
+	Hypha::$data->stats = new HyphaFile('data/hypha.stats');
+
+	/*
 		Function: hypha_getEmail
 		returns hypha email attribute
 	*/
@@ -66,8 +82,8 @@
 	*/
 	function hypha_setEmail($string) {
 		global $hyphaXml;
+		$hyphaXml->requireLock();
 		$hyphaXml->documentElement->setAttribute('email', $string);
-		$hyphaXml->saveToFile();
 	}
 
 	/*
@@ -88,8 +104,8 @@
 	*/
 	function hypha_setDefaultLanguage($string) {
 		global $hyphaXml;
+		$hyphaXml->requireLock();
 		$hyphaXml->documentElement->setAttribute('defaultLanguage', $string);
-		$hyphaXml->saveToFile();
 	}
 
 	/*
@@ -110,8 +126,8 @@
 	*/
 	function hypha_setDefaultPage($string) {
 		global $hyphaXml;
+		$hyphaXml->requireLock();
 		$hyphaXml->documentElement->setAttribute('defaultPage', $string);
-		$hyphaXml->saveToFile();
 	}
 
 	/*
@@ -132,8 +148,8 @@
 	*/
 	function hypha_setDigestInterval($string) {
 		global $hyphaXml;
+		$hyphaXml->requireLock();
 		$hyphaXml->documentElement->setAttribute('digestInterval', $string);
-		$hyphaXml->saveToFile();
 	}
 
 	/*
@@ -154,8 +170,8 @@
 	*/
 	function hypha_setLastDigestTime($string) {
 		global $hyphaXml;
+		$hyphaXml->requireLock();
 		$hyphaXml->documentElement->setAttribute('lastDigestTime', $string);
-		$hyphaXml->saveToFile();
 	}
 
 	/*
@@ -176,8 +192,8 @@
 	*/
 	function hypha_setTitle($string) {
 		global $hyphaXml;
+		$hyphaXml->requireLock();
 		setInnerHtml($hyphaXml->getElementsByTagName('title')->Item(0), $string);
-		$hyphaXml->saveToFile();
 	}
 
 	/*
@@ -185,7 +201,7 @@
 		returns hypha base html file contents
 	*/
 	function hypha_getHtml() {
-		return file_get_contents('data/hypha.html');
+		return Hypha::$data->html->read();
 	}
 
 	/*
@@ -196,7 +212,7 @@
 		$contents - html file contents
 	*/
 	function hypha_setHtml($contents) {
-		file_put_contents('data/hypha.html', $contents);
+		Hypha::$data->html->writeWithLock($contents);
 	}
 
 	/*
@@ -204,7 +220,7 @@
 		returns hypha base css file contents
 	*/
 	function hypha_getCss() {
-		return file_get_contents('data/hypha.css');
+		return Hypha::$data->css->read();
 	}
 
 	/*
@@ -215,7 +231,7 @@
 		$contents - css file contents
 	*/
 	function hypha_setCss($contents) {
-		file_put_contents('data/hypha.css', $contents);
+		Hypha::$data->css->writeWithLock($contents);
 	}
 
 	/*
@@ -236,8 +252,8 @@
 	*/
 	function hypha_setHeader($html) {
 		global $hyphaXml;
+		$hyphaXml->requireLock();
 		setInnerHtml($hyphaXml->getElementsByTagName('header')->Item(0), $html);
-		$hyphaXml->saveToFile();
 	}
 
 	/*
@@ -258,8 +274,8 @@
 	*/
 	function hypha_setFooter($html) {
 		global $hyphaXml;
+		$hyphaXml->requireLock();
 		setInnerHtml($hyphaXml->getElementsByTagName('footer')->Item(0), $html);
-		$hyphaXml->saveToFile();
 	}
 
 	/*
@@ -280,8 +296,8 @@
 	*/
 	function hypha_setMenu($html) {
 		global $hyphaXml;
+		$hyphaXml->requireLock();
 		setInnerHtml($hyphaXml->getElementsByTagName('menu')->Item(0), $html);
-		$hyphaXml->saveToFile();
 	}
 
 	/*
@@ -343,6 +359,7 @@
 	*/
 	function hypha_addUser($username, $password, $fullname, $email, $language, $rights) {
 		global $hyphaXml;
+		$hyphaXml->requireLock();
 		if (!hypha_getUserByName($username) && !hypha_getUserByEmail($email)) {
 			$newUser = $hyphaXml->createElement('user');
 			$newUser->setAttribute('id', uniqid());
@@ -368,6 +385,7 @@
 	*/
 	function hypha_setUser($user, $username, $password, $fullname, $email, $language, $rights) {
 		global $hyphaXml;
+		$hyphaXml->requireLock();
 		if ($username && hypha_getUserByName($username)
 		    && hypha_getUserByName($username) != $user && !isAdmin()) {
 			return __('user-exists');
@@ -381,7 +399,6 @@
 			if ($email) $user->setAttribute('email', $email);
 			if ($language) $user->setAttribute('language', $language);
 			if ($rights) $user->setAttribute('rights', $rights);
-			$hyphaXml->saveToFile();
 			return false;
 		}
 	}
@@ -396,8 +413,8 @@
 	*/
 	function hypha_addUserRegistrationKey($user, $key) {
 		global $hyphaXml;
+		$hyphaXml->requireLock();
 		$user->setAttribute('key', $key);
-		$hyphaXml->saveToFile();
 	}
 
 	/*
@@ -410,8 +427,8 @@
 	*/
 	function hypha_removeUserRegistrationKey($user) {
 		global $hyphaXml;
+		$hyphaXml->requireLock();
 		$user->removeAttribute('key');
-		$hyphaXml->saveToFile();
 	}
 	/*
 		Function: hypha_getPageList
@@ -457,6 +474,7 @@
 	*/
 	function hypha_addPage($type, $language, $name, $private) {
 		global $hyphaXml;
+		$hyphaXml->requireLock();
 		if (hypha_getPage($language, $name)) return __('page-exists');
 		$id = uniqid();
 		$newPage = $hyphaXml->createElement('page');
@@ -478,6 +496,7 @@
 	*/
 	function hypha_setPage($page, $language, $name, $private) {
 		global $hyphaXml;
+		$hyphaXml->requireLock();
 
 		// look for language entry
 		// update name if not conflicting with another page or return error message.
@@ -504,7 +523,6 @@
 		}
 		if ($private!=$page->getAttribute('private')) $page->setAttribute('private', $private);
 
-		$hyphaXml->saveToFile();
 		return false;
 	}
 
@@ -542,49 +560,78 @@
 		callback routine (used in conjunction with preg_replace_callback) that looks up the page id for a given combination of language and pagename
 	*/
 	function hypha_url2id($args) {
+		global $hyphaXml;
 		$path = explode('/', $args[2]);
 		$language = $path[0];
 		$pagename = $path[1];
 		$page = hypha_getPage($language, $pagename);
 		if (!$page) {
-			$error = hypha_addPage('textpage', $language, $pagename, '');
-			if ($error) notify('error', $error);
+			$hyphaXml->lockAndReload();
+			// recheck just in case it got added in the
+			// meanwhile
 			$page = hypha_getPage($language, $pagename);
+			if (!$page) {
+				$error = hypha_addPage('textpage', $language, $pagename, '');
+				$hyphaXml->saveAndUnlock();
+				if ($error) notify('error', $error);
+				$page = hypha_getPage($language, $pagename);
+			} else {
+				$hyphaXml->unlock();
+			}
 		}
 		$hypharef = $page ? $page->getAttribute('id') : '';
 		return '<a'.$args[1].'href="hypha:'.$hypharef.'"'.$args[3].' />';
 	}
 
 	/*
-		Function: hypha_getDigest
-		returns hypha digest file contents
+		Function: hypha_getAndClearDigest
+		returns hypha digest file contents, and empties it
 	*/
-	function hypha_getDigest() {
-		return file_exists('data/hypha.digest') ? file_get_contents('data/hypha.digest') : '';
+	function hypha_getAndClearDigest() {
+		$contents = Hypha::$data->digest->lockAndRead();
+		Hypha::$data->digest->writeAndUnlock('');
+		return $contents;
 	}
 
 	/*
-		Function: hypha_setDigest
-		writes hypha digest file
+		Function: hypha_addDigest
+		Adds contents to the hypha digest file.
 	*/
-	function hypha_setDigest($contents) {
-		file_put_contents('data/hypha.digest', $contents);
+	function hypha_addDigest($contents) {
+		$old = Hypha::$data->digest->lockAndRead();
+		Hypha::$data->digest->writeAndUnlock($old . $contents);
 	}
 
 	/*
 		Function: hypha_getStats
-		returns hypha stats
+		returns hypha stats for the given timestamp
 	*/
-	function hypha_getStats() {
-		return file_exists('data/hypha.stats') ? json_decode(file_get_contents('data/hypha.stats'), true) : '';
+	function hypha_getStats($timestamp) {
+		$contents = Hypha::$data->stats->read();
+		if (!$contents)
+			return 0;
+		$stats = json_decode($contents, true);
+		if (!array_key_exists($timestamp, $stats))
+			return 0;
+		return $stats[$timestamp];
 	}
 
 	/*
-		Function: hypha_setStats
-		writes json encodes hypha stats
+		Function: hypha_incrementStats
+		Increment the page view counter for the given timestamp
 	*/
-	function hypha_setStats($stats) {
-		file_put_contents('data/hypha.stats', json_encode($stats));
+	function hypha_incrementStats($timestamp) {
+		$contents = Hypha::$data->stats->lockAndRead();
+		if (!$contents)
+			$stats = Array();
+		else
+			$stats = json_decode($contents, true);
+
+		if (!array_key_exists($timestamp, $stats))
+			$stats[$timestamp] = 0;
+
+		$stats[$timestamp]++;
+		Hypha::$data->stats->writeAndUnlock(json_encode($stats));
 	}
 
 	/*

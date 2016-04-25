@@ -123,16 +123,26 @@
 		}
 
 		function save($arg) {
-			global $hyphaUrl, $hyphaUser;
+			global $hyphaUrl, $hyphaUser, $hyphaXml;
 			$pagename = validatePagename($_POST['textPagename']);
 			$language = $_POST['textLanguage'] ? $_POST['textLanguage'] : $this->language;
 			$private = $_POST['textPrivate'];
+			$hyphaXml->lockAndReload();
+			// After reloading, our page list node might
+			// have changed, so find it in the newly loaded
+			// XML. This seems a bit dodgy, though...
+			$this->replacePageListNode(hypha_getPage($this->language, $this->pagename));
 			// check if pagename, privateFlag or language (in case of a new translation) have changed
 			if ($language!=$this->language || $pagename!=$this->pagename || $private!=$this->privateFlag) {
 				hypha_setPage($this->pageListNode, $language, $pagename, ($private=='on' ? 'on' : 'off'));
+				$hyphaXml->saveAndUnlock();
+			} else {
+				$hyphaXml->unlock();
 			}
 			// unfortunately wymeditor can't handle relative urls so we'll add the baseUrl before editing and remove it afterwards
+			$this->xml->lockAndReload();
 			storeWikiContent($this->xml->documentElement, $language, wikify($_POST['textContent']), $hyphaUser->getAttribute('username'));
+			$this->xml->saveAndUnlock();
 			unset($_POST['version']);
 			writeToDigest($hyphaUser->getAttribute('fullname').__('changed-page').'<a href="'.$this->language.'/'.$this->pagename.'">'.$this->language.'/'.$this->pagename.'</a>', 'page update', $this->pageListNode->getAttribute('id'));
 			// check for new page name
@@ -142,7 +152,9 @@
 
 		function revert($version) {
 			global $hyphaUser;
+			$this->xml->lockAndReload();
 			storeWikiContent($this->xml->documentElement, $this->language, getWikiContent($this->xml->documentElement, $this->language, $_POST['version']), $hyphaUser->getAttribute('username'));
+			$this->xml->saveAndUnlock();
 			writeToDigest($hyphaUser->getAttribute('fullname').__('reverted-page').'<a href="'.$this->language.'/'.$this->pagename.'">'.$this->language.'/'.$this->pagename.'</a>', 'page update', $this->pageListNode->getAttribute('id'));
 			unset($_POST['version']);
 		}

@@ -15,17 +15,21 @@
 		public $pageListNode, $html, $language, $pagename, $view, $privateFlag;
 		function __construct($node, $view) {
 			global $hyphaHtml;
-			global $hyphaLanguage;
 			$this->html = $hyphaHtml;
 			$this->view = $view;
-			if ($node) {
-				$this->pageListNode = $node;
-				$this->privateFlag = ($node->getAttribute('private') == 'on' ? true : false);
-				$language = hypha_pageGetLanguage($node, $hyphaLanguage);
-				$this->language = $language->getAttribute('id');
-				$this->pagename = $language->getAttribute('name');
-			}
+			if ($node)
+				$this->replacePageListNode($node);
 		}
+
+		protected function replacePageListNode($node) {
+			global $hyphaLanguage;
+			$this->pageListNode = $node;
+			$this->privateFlag = ($node->getAttribute('private') == 'on' ? true : false);
+			$language = hypha_pageGetLanguage($node, $hyphaLanguage);
+			$this->language = $language->getAttribute('id');
+			$this->pagename = $language->getAttribute('name');
+		}
+
 		abstract function build();
 	}
 
@@ -83,7 +87,7 @@
 		<buildhtml>
 	*/
 	function loadPage($args) {
-		global $isoLangList, $hyphaHtml, $hyphaPageTypes, $hyphaPage, $hyphaLanguage, $hyphaUrl;
+		global $isoLangList, $hyphaHtml, $hyphaPageTypes, $hyphaPage, $hyphaLanguage, $hyphaUrl, $hyphaXml;
 
 		// set wiki language. we want to store this in a session variable, so we don't loose language when an image or the settingspage are requested
 		if (array_key_exists($args[0], $isoLangList))
@@ -188,7 +192,9 @@
 				// when necessary, create a new page or update the data in the pageList entry
 				if(!$_node && isUser() && $_POST) {
 					if ($_POST['newPageType']) {
+						$hyphaXml->lockAndReload();
 						$error = hypha_addPage($_POST['newPageType'], $hyphaLanguage, $_name, $_POST['newPagePrivate']);
+						$hyphaXml->saveAndUnlock();
 						if ($error) notify('error', $error);
 						$_node = hypha_getPage($hyphaLanguage, $_name);
 					}
@@ -201,11 +207,8 @@
 					$hyphaPage = new $_type($_node, $_view);
 
 					// write stats
-					if (!isUser()) {
-						$stats = hypha_getStats();
-						$stats[hypha_getLastDigestTime()+hypha_getDigestInterval()]++;
-						hypha_setStats($stats);
-					}
+					if (!isUser())
+						hypha_incrementStats(hypha_getLastDigestTime()+hypha_getDigestInterval());
 				}
 				else {
 					http_response_code(404);

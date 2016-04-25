@@ -105,12 +105,16 @@
 		function invite() {
 			global $hyphaUrl;
 			global $hyphaUser;
+			global $hyphaXml;
 			if (isUser()) {
 				foreach(explode(',', $_POST['inviteEmail']) as $email) {
+					$hyphaXml->lockAndReload();
 					hypha_addUser('', '', '', $email, 'en', 'invitee');
 					$newUser = hypha_getUserByEmail($email);
 					$key = uniqid(rand(), true);
 					hypha_addUserRegistrationKey($newUser, $key);
+					hypha_addUser('', '', '', $email, 'en', 'invitee');
+					$hyphaXml->saveAndUnlock();
 					writeToDigest($hyphaUser->getAttribute('fullname').' '.__('invited').' '.$email, 'settings');
 					$mailBody = '<a href="mailto:'.$newUser->getAttribute('email').'">'.$hyphaUser->getAttribute('username').'</a>'.__('invites-to-join').'\''.hypha_getTitle().'\'. '.__('follow-link-to-register').'<br /><a href="'.$hyphaUrl.'settings/register/'.$key.'">'.$hyphaUrl.'settings/register/'.$key.'</a><hr/>'.$_POST['inviteWelcome'];
 					$result = sendMail($email, hypha_getTitle().' <'.hypha_getEmail().'>', __('invitation').'\''.hypha_getTitle().'\'', nl2br($mailBody));
@@ -183,10 +187,12 @@
 		}
 
 		function register($key) {
-			global $hyphaUrl;
+			global $hyphaUrl, $hyphaXml;
+			$hyphaXml->lockAndReload();
 			foreach(hypha_getUserList() as $user) if ($user->hasAttribute('key') && $user->getAttribute('key')==$key) {
 				if (hypha_getUserByName($_POST['settingsUsername'])) {
 					notify('error', __('error-user-exists'));
+					$hyphaXml->unlock();
 					return 'reload';
 				}
 				if (!hypha_setUser($user, $_POST['settingsUsername'], $_POST['settingsPassword1'], $_POST['settingsFullname'], $_POST['settingsEmail'], $_POST['settingsUiLang'], 'user')) {
@@ -195,9 +201,11 @@
 					writeToDigest($user->getAttribute('fullname').' '.__('has-joined'), 'settings');
 					notify('success', __('registration-successful'));
 //					header('Location: '.$hyphaUrl);
+					$hyphaXml->saveAndUnlock();
 					return 'reload';
 				}
 			}
+			$hyphaXml->unlock();
 			notify('error', __('error-registration'));
 			return false;
 		}
@@ -239,12 +247,15 @@
 		}
 
 		function saveHyphaSettings() {
+			global $hyphaXml;
 			if (isAdmin()) {
+				$hyphaXml->lockAndReload();
 				hypha_setDefaultLanguage($_POST['settingsDefaultLanguage']);
 				hypha_setDefaultPage($_POST['settingsDefaultPage']);
 				hypha_setEmail($_POST['settingsSystemEmail']);
 				$digestInterval = 86400 * $_POST['settingsIntervalDays'] + 3600 * $_POST['settingsIntervalHours'] + 60 * $_POST['settingsIntervalMinutes'];
 				hypha_setDigestInterval($digestInterval);
+				$hyphaXml->saveAndUnlock();
 			}
 		}
 
@@ -325,10 +336,13 @@
 			}
 		}
 		function saveSiteElements($argument) {
+			global $hyphaXml;
 			if (isAdmin()) {
+				$hyphaXml->lockAndReload();
 				hypha_setTitle($_POST['siteTitle']);
 				hypha_setHeader($_POST['siteHeader']);
 				hypha_setFooter($_POST['siteFooter']);
+				$hyphaXml->saveAndUnlock();
 				header('Location: '.$hyphaUrl.$hyphaQuery);
 			}
 		}
@@ -349,8 +363,11 @@
 		}
 
 		function saveMenu($argument) {
+			global $hyphaXml;
 			if (isAdmin()) {
+				$hyphaXml->reloadAndLock();
 				hypha_setMenu($_POST['siteMenu']);
+				$hyphaXml->saveAndUnlock();
 				header('Location: '.$hyphaUrl.$hyphaQuery);
 			}
 		}
@@ -448,19 +465,23 @@
 		}
 
 		function saveAccount($account) {
-			global $hyphaUser;
+			global $hyphaUser, $hyphaXml;
 			if (isAdmin() || $user->getAttribute('username') == $account) {
+				$hyphaXml->lockAndReload();
 				$error = hypha_setUser(hypha_getUserByName($account), $_POST['settingsUsername'], $_POST['settingsPassword1'], $_POST['settingsFullname'], $_POST['settingsEmail'], $_POST['settingsUiLang'], '');
+				$hyphaXml->saveAndUnlock();
 				if ($error) notify('error', __('error-save-settings').' '.$error);
 				else notify('success', __('user-settings-saved'));
 			}
 		}
 
 		function makeAdmin($userId) {
-			global $hyphaUser;
+			global $hyphaUser, $hyphaXml;
 			if (isAdmin()) {
+				$hyphaXml->lockAndReload();
 				$user = hypha_getUserById($userId);
 				hypha_setUser($user, '', '', '', '', '', 'admin');
+				$hyphaXml->saveAndUnlock();
 				writeToDigest($hyphaUser->getAttribute('fullname').__('granted-admin-rights-to').$user->getAttribute('fullname'), 'settings');
 			}
 		}
@@ -468,32 +489,41 @@
 		function unmakeAdmin($userId) {
 			global $hyphaUserList;
 			global $hyphaUser;
+			global $hyphaXml;
 			if (isAdmin()) {
+				$hyphaXml->lockAndReload();
 				foreach(hypha_getUserList() as $user) if ($user->getAttribute('rights') == 'admin') $admins++;
 				if ($admins>1) {
 					$user = hypha_getUserById($userId);
 					hypha_setUser($user, '', '', '', '', '', 'user');
+					$hyphaXml->saveAndUnlock();
 					writeToDigest($hyphaUser->getAttribute('fullname').__('took-admin-rights-from').$user->getAttribute('fullname'), 'settings');
+				} else {
+					$hyphaXml->unlock();
+					notify('error', __('error-last-admin'));
 				}
-				else notify('error', __('error-last-admin'));
 			}
 		}
 
 		function removeUser($userId) {
-			global $hyphaUser;
+			global $hyphaUser, $hyphaXml;
 			if (isAdmin()) { // only admin can remove users
+				$hyphaXml->lockAndReload();
 				$user = hypha_getUserById($userId);
 				$error = hypha_setUser($user, '', '', '', '', '', 'exmember');
+				$hyphaXml->saveAndUnlock();
 				if ($error) notify($error);
 				else if ($user->getAttribute('rights')!='invitee') writeToDigest($hyphaUser->getAttribute('fullname').' '.__('removed-from-user-list').' '.$userId, 'settings');
 			}
 		}
 
 		function reincarnateUser($userId) {
-			global $hyphaUser;
+			global $hyphaUser, $hyphaXml;
 			if (isAdmin()) { // only admin can reincarnate users
+				$hyphaXml->lockAndReload();
 				$user = hypha_getUserById($userId);
 				$error = hypha_setUser($user, '', '', '', '', '', 'user');
+				$hyphaXml->saveAndUnlock();
 				if ($error) notify($error);
 				else writeToDigest($hyphaUser->getAttribute('fullname').' '.__('reincarnated-user').' '.$userId, 'settings');
 			}
