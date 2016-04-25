@@ -30,7 +30,7 @@
 	session_write_close();
 
 	$DEBUG = false;
-	error_reporting($DEBUG ? E_ALL ^ E_NOTICE : NULL);
+	ini_set('display_errors', $DEBUG ? true : false);
 
 	if (strnatcmp(phpversion(),'5.4') < 0) die('Error: you are running php version '.substr(phpversion(),0,strpos(phpversion(), '-')).'; Hypha works only with php version 5.4 and higher');
 	if (function_exists('apache_get_modules') && !in_array('mod_rewrite', apache_get_modules())) die ('Error: Apache should have mod_rewrite enabled');
