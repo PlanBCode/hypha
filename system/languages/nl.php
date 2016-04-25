@@ -27,7 +27,7 @@
 		"invite" => "uitnodigen",
 		"remind" => "herinneren",
 		"invited" => "uitgenodigd",
-		"remove" => "vertwijderen",
+		"remove" => "verwijderen",
 		"interface-language" => "bedieningstaal",
 		"new" => "nieuw",
 		"new-page" => "nieuwe pagina",
