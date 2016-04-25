@@ -542,6 +542,7 @@
 		if (!$language) $language = $page->getElementsByTagName('language')->Item(0);
 		if (!$language) return '';
 
+		$title = $class = "";
 		if($language->getAttribute('id')!=$hyphaLanguage) {
 			$title = ' title="'.__('page-in-other-language').'"';
 			$class = ' class="otherLanguageLink"';

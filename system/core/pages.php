@@ -44,6 +44,13 @@
 	*/
 	function addNewPageRoutine($html, $query, $types) {
 		global $hyphaLanguage;
+		// If a pagename is specified that does not exist yet,
+		// prefill that page name
+		if (count($query) >= 2 && !hypha_getPage($query[0], $query[1]))
+			$pagename = $query[1];
+		else
+			$pagename = '';
+
 		ob_start();
 ?>
 <script>
@@ -57,7 +64,7 @@
 	function newPage() {
 		html = '<table class="section"><tr><th colspan="2"><?=__('create-new-page')?></td><tr>';
 		html+= '<tr><th><?=__('type')?></th><td><select id="newPageType" name="newPageType">' + '<?php foreach($types as $type) echo '<option value="'.$type.'"'.($type=='textPage' ? 'selected="selected"' : '').'>'.$type.'</option>'; ?>' + '</select></td></tr>';
-		html+= '<tr><th><?=__('name')?></th><td><input type="text" id="newPagename" value="<?=hypha_getPage($query[0], $query[1]) ? '' : $query[1]?>" onblur="validatePagename(this);" onkeyup="validatePagename(this); document.getElementById(\'newPageSubmit\').disabled = this.value ? false : true;"/></td></tr>';
+		html+= '<tr><th><?=__('name')?></th><td><input type="text" id="newPagename" value="<?=$pagename?>" onblur="validatePagename(this);" onkeyup="validatePagename(this); document.getElementById(\'newPageSubmit\').disabled = this.value ? false : true;"/></td></tr>';
 		html+= '<tr><td></td><td><input type="checkbox" id="newPagePrivate" name="newPagePrivate"/> <?=__('private-page')?></td></tr>';
 		html+= '<tr><td></td><td><input type="button" class="button" value="<?=__('cancel')?>" onclick="document.getElementById(\'popup\').style.visibility=\'hidden\';" />';
 		html+= '<input type="submit" id="newPageSubmit" class="button editButton" value="<?=__('create')?>" disabled="true" onclick="hypha(\'<?=$hyphaLanguage?>/\' + document.getElementById(\'newPagename\').value + \'/edit\', \'newPage\', document.getElementById(\'newPageType\').value + \',\' + (document.getElementById(\'newPagePrivate\').checked ? \'on\' : \'off\'));" /></td></tr></table>';
@@ -88,6 +95,11 @@
 	*/
 	function loadPage($args) {
 		global $isoLangList, $hyphaHtml, $hyphaPageTypes, $hyphaPage, $hyphaLanguage, $hyphaUrl, $hyphaXml;
+
+		// Make accessing args easier by making sure it always
+		// has sufficient elements.
+		while (count($args) < 3)
+			array_push($args, null);
 
 		// set wiki language. we want to store this in a session variable, so we don't loose language when an image or the settingspage are requested
 		if (array_key_exists($args[0], $isoLangList))
