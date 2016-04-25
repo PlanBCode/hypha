@@ -39,11 +39,15 @@
 			Parameters:
 			$filename - optional parameter of HTML template filename
 		*/
-		public function __construct() {
+		public function __construct($filename = false) {
 			parent::__construct('1.0', 'UTF-8');
 			$this->preserveWhiteSpace = false;
 			$this->formatOutput = true;
-			$this->loadHTML('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">'.(func_num_args() > 0 ? file_get_contents(func_get_arg(0)) : '<html><head></head><body></body></html>'));
+			if ($filename)
+				$contents = file_get_contents($filename);
+			else
+				$contents = '<html><head></head><body></body></html>';
+			$this->loadHTML('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">'.$contents);
 			$this->documentElement->setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
 			$metaMime = $this->createElement('meta', '');
 			$metaMime->setAttribute('http-equiv', "Content-Type");
