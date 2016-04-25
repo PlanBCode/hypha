@@ -223,54 +223,54 @@
 		}
 	}
 
-	/*
-		Section: Scheduler
-		On timed events.
-
-		The scheduler implements a poor man's timing process which doesn't depend on autonomous server sided software to run. Jobs can be scheduled and their anticipated execution time is written into a file. Every time the website is visited the script checks this file to see if any timers have expired.
-
-		This actually works pretty neat, provided... the website has enough visitors. If not, the whole thing will not be very accurate but still deliver the goods whenever someone stumbles upon the site. If that doens't happen at all, well what or whom exactly are we schedulding for...
-
-		Another caveat might be that scheduled jobs that are time consuming will bother random visitors, who get a slower response than they deserve...
-	*/
-
-	/*
-		Function: addScheduler
-		Setup a <HTMLDocument> for scheduling jobs.
-
-		Parameters:
-		$html - an instance of <HTMLDocument>
-	*/
-	registerPostProcessingFunction('addScheduler');
-	function addScheduler($html) {
-		if (file_exists('schedule')) {
-			$schedule = unserialize(file_get_contents('schedule'));
-			foreach($schedule as $id => $job) if (time() > $job['time']) {
-				$cmd = $job['cmd'];
-				$arg = $job['arg'];
-				unset($schedule[$id]);
-				file_put_contents('schedule', serialize($schedule));
-				processCommand($cmd, $arg);
-			}
-		}
-	}
-
-	/*
-		Function: scheduleJob
-		Add job to the schedule.
-
-		Parameters:
-		$id - identifier for the job.
-		$duration - timeout in seconds.
-		$command - command-id for the function to call. This function can be registered using the function <registerCommandCallback>
-		$argument - argument to pass to the callback function.
-	*/
-	function scheduleJob($id, $duration, $command, $argument) {
-		if (file_exists('schedule')) $schedule = unserialize(file_get_contents('schedule'));
-		$job = array('time'=>time()+$duration, 'cmd'=>$command, 'arg'=>$argument);
-		$schedule[$id] = $job;
-		file_put_contents('schedule', serialize($schedule));
-	}
+//	/*
+//		Section: Scheduler
+//		On timed events.
+//
+//		The scheduler implements a poor man's timing process which doesn't depend on autonomous server sided software to run. Jobs can be scheduled and their anticipated execution time is written into a file. Every time the website is visited the script checks this file to see if any timers have expired.
+//
+//		This actually works pretty neat, provided... the website has enough visitors. If not, the whole thing will not be very accurate but still deliver the goods whenever someone stumbles upon the site. If that doens't happen at all, well what or whom exactly are we schedulding for...
+//
+//		Another caveat might be that scheduled jobs that are time consuming will bother random visitors, who get a slower response than they deserve...
+//	*/
+//
+//	/*
+//		Function: addScheduler
+//		Setup a <HTMLDocument> for scheduling jobs.
+//
+//		Parameters:
+//		$html - an instance of <HTMLDocument>
+//	*/
+//	registerPostProcessingFunction('addScheduler');
+//	function addScheduler($html) {
+//		if (file_exists('schedule')) {
+//			$schedule = unserialize(file_get_contents('schedule'));
+//			foreach($schedule as $id => $job) if (time() > $job['time']) {
+//				$cmd = $job['cmd'];
+//				$arg = $job['arg'];
+//				unset($schedule[$id]);
+//				file_put_contents('schedule', serialize($schedule));
+//				processCommand($cmd, $arg);
+//			}
+//		}
+//	}
+//
+//	/*
+//		Function: scheduleJob
+//		Add job to the schedule.
+//
+//		Parameters:
+//		$id - identifier for the job.
+//		$duration - timeout in seconds.
+//		$command - command-id for the function to call. This function can be registered using the function <registerCommandCallback>
+//		$argument - argument to pass to the callback function.
+//	*/
+//	function scheduleJob($id, $duration, $command, $argument) {
+//		if (file_exists('schedule')) $schedule = unserialize(file_get_contents('schedule'));
+//		$job = array('time'=>time()+$duration, 'cmd'=>$command, 'arg'=>$argument);
+//		$schedule[$id] = $job;
+//		file_put_contents('schedule', serialize($schedule));
+//	}
 
 	/*
 		Section: Notifications
