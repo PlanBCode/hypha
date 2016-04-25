@@ -277,8 +277,7 @@
 		}
 
 		function saveMarkup($argument) {
-			$hyphaUrl;
-			$hyphaQuery;
+			global $hyphaUrl, $hyphaQuery;
 			if (isAdmin()) {
 				hypha_setHtml($_POST['editHtml']);
 				header('Location: '.$hyphaUrl.$hyphaQuery);
