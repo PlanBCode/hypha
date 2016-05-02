@@ -146,6 +146,15 @@
 		Function: registerCommandCallback
 		add function to a list of allowed callback functions: $hyphaEventList[]
 
+		The function can return:
+		 - 'reload' when the current page should be reloaded.
+		   Almost all commands should do this, to prevent the
+		   browser re-submitting the POST request on a refresh.
+		   Any messages will be automatically preserved across
+		   the reload.
+		 - null when the command was handled, but not redirect
+		   needs to happen.
+
 		Parameters:
 		$id - command id
 		$func - associated function
@@ -219,7 +228,13 @@
 		if(isset($_POST['command'])) {
 			$result = processCommand($_POST['command'], $_POST['argument']);
 			unset($_POST['command']);
-			return $result;
+
+			// Command requests a reload
+			if ($result === 'reload') {
+				$url = preserveNotifications($_SERVER['REQUEST_URI']);
+				header('Location: ' . $url);
+				exit;
+			}
 		}
 	}
 
@@ -283,12 +298,48 @@
 	*/
 
 	/*
+		Function: preserveNotifications
+
+		Store pending notifications in the session, so they can
+		be reloaded after a redirect (by storing them in a
+		session, instead of a GET parameter, they can be shown
+		only once, even when the user refreshes that page). An
+		identifier is assigned to the set of stored
+		notifications, which will be passed through a GET
+		parameter (to prevent showing the notifications in the
+		wrong browser window).
+
+		Parameters:
+		$url - The url that will be redirected to
+
+		Returns the url passed with the appropriate GET
+		parameter added (if needed, otherwise the url is
+		returned unmodified).
+	*/
+	function preserveNotifications($url) {
+		global $hyphaNotificationList;
+		if (count($hyphaNotificationList)) {
+			$id = uniqid();
+			session_start();
+			$_SESSION['notifications'][$id] = $hyphaNotificationList;
+			session_write_close();
+			if (strpos($url, '?') === false)
+				$url .= '?notify=' . rawurlencode($id);
+			else
+				$url .= '&notify=' . rawurlencode($id);
+			$hyphaNotificationList = array();
+		}
+		return $url;
+	}
+
+	/*
 		Function: addNotifier
 		Setup a <HTMLDocument> for notifications from both php or javascript processes.
 		Parameters:
 		$html - an instance of <HTMLDocument>
 	*/
 	registerPostProcessingFunction('addNotifier');
+	$GLOBALS['hyphaNotificationList'] = array();
 	function addNotifier($html) {
 		global $hyphaNotificationList;
 		// add hyphaNotify element to body
@@ -297,7 +348,29 @@
 		$msgdiv->setAttribute('id', 'hyphaNotify');
 		$msgdiv->setAttribute('style', 'visibility:'.(count($hyphaNotificationList)?'visible':'hidden').';');
 		$body->appendChild($msgdiv);
-		if (count($hyphaNotificationList)) foreach ($hyphaNotificationList as $msg) $html->writeToElement('hyphaNotify', $msg);
+
+		// Show any notifications from before a redirect. The
+		// notifications themselves are stored in the session
+		// (to prevent showing them again when the user
+		// refreshes), but an identifier is passed through a GET
+		// parameter to prevent showing a notification in the
+		// wrong browser window.
+		if (isset($_GET['notify'])) {
+			$notify = $_GET['notify'];
+			session_start();
+			if (isset($_SESSION['notifications']) && isset($_SESSION['notifications'][$notify])) {
+				$notifications = $_SESSION['notifications'][$notify];
+				$hyphaNotificationList = array_merge($notifications, $hyphaNotificationList);
+
+				unset($_SESSION['notifications'][$notify]);
+			}
+			session_write_close();
+		}
+
+		if (count($hyphaNotificationList))
+			foreach ($hyphaNotificationList as $msg)
+				$html->writeToElement('hyphaNotify', $msg);
+
 		// add a javascript function to process client commands and ajax calls
 		ob_start();
 ?>

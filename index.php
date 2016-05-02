@@ -44,6 +44,10 @@
 	$_path = substr($_SERVER["PHP_SELF"], 0, strpos($_SERVER["PHP_SELF"], 'index.php'));
 	$hyphaUrl = 'http://'.$_SERVER["SERVER_NAME"].$_path;
 	$hyphaQuery = substr($_SERVER["REQUEST_URI"], strlen($_path));
+	// Strip off any query parameters
+	$parampos = strpos($hyphaQuery, '?');
+	if ($parampos !== false)
+		$hyphaQuery = substr($hyphaQuery, 0, $parampos);
 //	$hyphaQuery = urldecode(substr($_SERVER["REQUEST_URI"], strlen($_path)));
 
 
@@ -91,10 +95,9 @@
 	*/
 
 	// load user and requested page, and execute issued commands
-	do {
-		loadUser();
-		loadPage(explode('/', $hyphaQuery));
-	} while (executePostedCommand() == 'reload');
+	loadUser();
+	loadPage(explode('/', $hyphaQuery));
+	executePostedCommand(); // Might redirect and exit
 
 	/*
 		Group: Stage 6 - Load page and process query
