@@ -92,7 +92,7 @@
 
 	// load user and requested page, and execute issued commands
 	do {
-		loadUser($_SESSION['hyphaLogin']);
+		loadUser();
 		loadPage(explode('/', $hyphaQuery));
 	} while (executePostedCommand() == 'reload');
 

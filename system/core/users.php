@@ -17,10 +17,10 @@
 		Parameters:
 		$id
 	*/
-	function loadUser($id) {
+	function loadUser() {
 		global $hyphaUser;
 
-		if ($id) $hyphaUser = hypha_getUserById($id);
+		if (isset($_SESSION['hyphaLogin'])) $hyphaUser = hypha_getUserById($_SESSION['hyphaLogin']);
 		else $hyphaUser = false;
 
 		if ($hyphaUser) loadUserInterfaceLanguage('system/languages', $hyphaUser->getAttribute('language'));
