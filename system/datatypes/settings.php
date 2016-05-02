@@ -121,6 +121,7 @@
 					notify('success', $result ? $result : $email.__('was-invited'));
 				}
 			}
+			return 'reload';
 		}
 
 		function editQuitMessage() {
@@ -148,6 +149,7 @@
 					notify('success', __('bye'));
 				}
 			}
+			return 'reload';
 		}
 
 		function editRegistration() {
@@ -199,14 +201,13 @@
 					hypha_removeUserRegistrationKey($user);
 					writeToDigest($user->getAttribute('fullname').' '.__('has-joined'), 'settings');
 					notify('success', __('registration-successful'));
-//					header('Location: '.$hyphaUrl);
 					$hyphaXml->saveAndUnlock();
 					return 'reload';
 				}
 			}
 			$hyphaXml->unlock();
 			notify('error', __('error-registration'));
-			return false;
+			return 'reload';
 		}
 
 		function editHyphaSettings() {
@@ -256,6 +257,7 @@
 				hypha_setDigestInterval($digestInterval);
 				$hyphaXml->saveAndUnlock();
 			}
+			return 'reload';
 		}
 
 		function editMarkup() {
@@ -279,8 +281,8 @@
 			global $hyphaUrl, $hyphaQuery;
 			if (isAdmin()) {
 				hypha_setHtml($_POST['editHtml']);
-				header('Location: '.$hyphaUrl.$hyphaQuery);
 			}
+			return 'reload';
 		}
 
 		function editStyles() {
@@ -301,8 +303,8 @@
 			$hyphaQuery;
 			if (isAdmin()) {
 				hypha_setCss($_POST['editCss']);
-				header('Location: '.$hyphaUrl.$hyphaQuery);
 			}
+			return 'reload';
 		}
 
 		function editSiteElements() {
@@ -341,8 +343,8 @@
 				hypha_setHeader($_POST['siteHeader']);
 				hypha_setFooter($_POST['siteFooter']);
 				$hyphaXml->saveAndUnlock();
-				header('Location: '.$hyphaUrl.$hyphaQuery);
 			}
+			return 'reload';
 		}
 
 		function editMenu() {
@@ -366,8 +368,8 @@
 				$hyphaXml->reloadAndLock();
 				hypha_setMenu($_POST['siteMenu']);
 				$hyphaXml->saveAndUnlock();
-				header('Location: '.$hyphaUrl.$hyphaQuery);
 			}
+			return 'reload';
 		}
 
 		function showSettings() {
@@ -471,6 +473,7 @@
 				if ($error) notify('error', __('error-save-settings').' '.$error);
 				else notify('success', __('user-settings-saved'));
 			}
+			return 'reload';
 		}
 
 		function makeAdmin($userId) {
@@ -482,6 +485,7 @@
 				$hyphaXml->saveAndUnlock();
 				writeToDigest($hyphaUser->getAttribute('fullname').__('granted-admin-rights-to').$user->getAttribute('fullname'), 'settings');
 			}
+			return 'reload';
 		}
 
 		function unmakeAdmin($userId) {
@@ -501,6 +505,7 @@
 					notify('error', __('error-last-admin'));
 				}
 			}
+			return 'reload';
 		}
 
 		function removeUser($userId) {
@@ -513,6 +518,7 @@
 				if ($error) notify($error);
 				else if ($user->getAttribute('rights')!='invitee') writeToDigest($hyphaUser->getAttribute('fullname').' '.__('removed-from-user-list').' '.$userId, 'settings');
 			}
+			return 'reload';
 		}
 
 		function reincarnateUser($userId) {
@@ -525,6 +531,7 @@
 				if ($error) notify($error);
 				else writeToDigest($hyphaUser->getAttribute('fullname').' '.__('reincarnated-user').' '.$userId, 'settings');
 			}
+			return 'reload';
 		}
 
 		function remindNewUser($requestId) {
@@ -535,6 +542,7 @@
 				$result = sendMail($email, hypha_getTitle().' <'.hypha_getEmail().'>', __('invitation').'\''.hypha_getTitle().'\'', nl2br($mailBody));
 				notify('success', $result ? $result : $email.__('was-invited'));
 			}
+			return 'reload';
 		}
 	}
 ?>

@@ -40,7 +40,6 @@
 			session_regenerate_id();
 			$_SESSION['hyphaLogin'] = $user->getAttribute('id');
 			session_write_close();
-			return 'reload';
 		}
 		else {
 			session_start();
@@ -48,6 +47,7 @@
 			session_write_close();
 			notify('error', __('login-failed').'. <a href="javascript:reregister();">'.__('reregister').'</a>');
 		}
+		return 'reload';
 	}
 
 	/*
