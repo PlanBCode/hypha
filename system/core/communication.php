@@ -131,7 +131,7 @@ END;
 				$type = $node->getAttribute('type');
 				$page = new $type($node, 'digest');
 				$message.= '<a name="'.$id.'"></a>';
-				$message.= addBaseUrl($page->digest($hypha_getLastDigestTime));
+				$message.= addBaseUrl($page->digest(hypha_getLastDigestTime()));
 			}
 			$hyphaXml->lockAndReload();
 			hypha_setLastDigestTime(time());

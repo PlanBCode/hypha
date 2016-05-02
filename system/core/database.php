@@ -284,9 +284,10 @@
 			foreach($node->getElementsByTagName('version') as $v) $versionList[$v->getAttribute('xml:id')] = $v;
 			if ($versionList) {
 				krsort($versionList);
-				reset($versionList);
-				while(key($versionList) && ltrim(key($versionList), 't') > $timestamp) next($versionList);
-				return $current ? key($current) : null;
+				foreach ($versionList as $id => $node) {
+					if (ltrim($id, 't') > $timestamp)
+						return $id;
+				}
 			}
 			else return null;
 //		}
