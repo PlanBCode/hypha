@@ -197,7 +197,6 @@
 				}
 				if (!hypha_setUser($user, $_POST['settingsUsername'], $_POST['settingsPassword1'], $_POST['settingsFullname'], $_POST['settingsEmail'], $_POST['settingsUiLang'], 'user')) {
 					hypha_removeUserRegistrationKey($user);
-					loadUser($user->getAttribute('id'));
 					writeToDigest($user->getAttribute('fullname').' '.__('has-joined'), 'settings');
 					notify('success', __('registration-successful'));
 //					header('Location: '.$hyphaUrl);
