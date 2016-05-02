@@ -196,6 +196,8 @@
 			// upzip and install files
 			$files = explode(',', data('index'));
 			foreach ($files as $file) {
+				if (!$file)
+					continue;
 				$path = pathinfo($file);
 				$dir = explode('/', $path['dirname']);
 				$folder = '';
@@ -494,6 +496,8 @@
 	function data($name) {
 		switch ($name) {
 			//START_OF_DATA
+			case 'index': return '';
+			case 'system/core/language.php': return "json_decode('{\"en\": \"English\"}', true);";
 			//END_OF_DATA
 		}
 		if ($zip) return gzdecode(base64_decode($zip));
