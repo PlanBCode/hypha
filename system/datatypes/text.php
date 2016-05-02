@@ -41,7 +41,7 @@
 			$this->html->writeToElement('langList', hypha_indexLanguages($this->pageListNode, $this->language));
 
 			// show content, and only allow access to previous revisions for logged in clients
-			$this->html->writeToElement('main', getWikiContent($this->xml->documentElement, $this->language, isUser() ? $_POST['version'] : ''));
+			$this->html->writeToElement('main', getWikiContent($this->xml->documentElement, $this->language, isUser() && isset($_POST['version']) ? $_POST['version'] : ''));
 
 			// setup addition widgets when client is logged in
 			if (isUser()) {
@@ -49,7 +49,7 @@
 				$this->html->writeToElement('versionList', versionSelector($this));
 
 				// if a revision is selected, show a 'revert' commmand button
-				if ($_POST['version']) {
+				if (isset($_POST['version'])) {
 					$_action = makeAction($this->language.'/'.$this->pagename, 'textRevert', '');
 					$_button = makeButton(__('revert'), $_action);
 					$this->html->writeToElement('pageCommands', $_button);
@@ -125,8 +125,8 @@
 		function save($arg) {
 			global $hyphaUrl, $hyphaUser, $hyphaXml;
 			$pagename = validatePagename($_POST['textPagename']);
-			$language = $_POST['textLanguage'] ? $_POST['textLanguage'] : $this->language;
-			$private = $_POST['textPrivate'];
+			$language = isset($_POST['textLanguage']) ? $_POST['textLanguage'] : $this->language;
+			$private = isset($_POST['textPrivate']);
 			$hyphaXml->lockAndReload();
 			// After reloading, our page list node might
 			// have changed, so find it in the newly loaded
@@ -156,12 +156,13 @@
 			storeWikiContent($this->xml->documentElement, $this->language, getWikiContent($this->xml->documentElement, $this->language, $_POST['version']), $hyphaUser->getAttribute('username'));
 			$this->xml->saveAndUnlock();
 			writeToDigest($hyphaUser->getAttribute('fullname').__('reverted-page').'<a href="'.$this->language.'/'.$this->pagename.'">'.$this->language.'/'.$this->pagename.'</a>', 'page update', $this->pageListNode->getAttribute('id'));
-			unset($_POST['version']);
+			return 'reload';
 		}
 
 		function digest($timestamp) {
 			// iterate over all available translations of the page
 			$langList = $this->xml->getElementsByTagName('language');
+			$message = '';
 			foreach($langList as $lang) if (ltrim(getCurrentVersionNode($lang)->getAttribute('xml:id'), 't') > $timestamp) {
 				$language = $lang->getAttribute('xml:id');
 				$pagename = $this->pagename;

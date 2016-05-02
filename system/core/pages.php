@@ -203,7 +203,7 @@
 
 				// when necessary, create a new page or update the data in the pageList entry
 				if(!$_node && isUser() && $_POST) {
-					if ($_POST['newPageType']) {
+					if (isset($_POST['newPageType'])) {
 						$hyphaXml->lockAndReload();
 						$error = hypha_addPage($_POST['newPageType'], $hyphaLanguage, $_name, $_POST['newPagePrivate']);
 						$hyphaXml->saveAndUnlock();
@@ -301,17 +301,18 @@
 			$_action = makeAction($page->language.'/'.$page->pagename, '', 'version');
 			$html = __('version').': '.'<select class="version" name="version" onchange="'.$_action.'">';
 
+			$history = array();
 			foreach($page->xml->getElementById($page->language)->getElementsByTagName('version') as $v) {
 				$timeStamp = $v->getAttribute('xml:id');
 				$history[$timeStamp] = date('j-m-y, H:i', ltrim($timeStamp, 't')).', '.$v->getAttribute('author');
 			}
-			if ($history) {
+			if (!empty($history)) {
 				krsort($history);
 				reset($history);
 				$current = key($history);
 				foreach($history as $id => $tag)
-					if ($id!=$current) $html.='<option value="'.$id.'"'.($id==$_POST['version'] ? ' selected="selected"' : '').'>'.$tag.'</option>';
-					else $html.='<option value=""'.(!$_POST['version'] ? ' selected="selected"' : '').'>'.$tag.'</option>';
+					if ($id!=$current) $html.='<option value="'.$id.'"'.((isset($_POST['version']) && $id == $_POST['version']) ? ' selected="selected"' : '').'>'.$tag.'</option>';
+					else $html.='<option value=""'.(!isset($_POST['version']) ? ' selected="selected"' : '').'>'.$tag.'</option>';
 			}
 			$html.= '</select>';
 		}

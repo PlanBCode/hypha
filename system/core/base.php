@@ -655,6 +655,7 @@
 			$pageLangList[$_lang->getAttribute('id')] = $_lang->getAttribute('name');
 		}
 
+		$index = '';
 		foreach($langList as $lang) {
 			if ($lang == $language) $index.= '<span class="selected">'.$lang.'</span><br/>';
 			elseif (!$page || array_key_exists($lang, $pageLangList)) {

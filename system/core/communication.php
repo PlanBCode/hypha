@@ -22,6 +22,7 @@
 		$headers = "MIME-Version: 1.0\r\n";
 		$headers .= "Content-type: text/html; charset=utf-8\r\n";
 		$headers .= "From: $from\r\n";
+		$error = array();
 		foreach(explode(',', $to) as $email) {
 			if (!$DEBUG && !filter_var($email, FILTER_VALIDATE_EMAIL)) $error[]= $email;
 			elseif (!mail($email, $subject, '<html><body>'.$message.'</body></html>', $headers.'To: '.$email)) $error[]= $email;

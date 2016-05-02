@@ -102,6 +102,7 @@
 		returns a comma separated list of all registered users, omiting invitees and exmembers
 	*/
 	function getUserEmailList() {
+		$list = '';
 		foreach(hypha_getUserList() as $user) if ($user->getAttribute('rights')=='user' || $user->getAttribute('rights')=='admin') $list.= ($list ? ',' : '').$user->getAttribute('email');
 		return $list;
 	}

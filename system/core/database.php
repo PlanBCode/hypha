@@ -354,7 +354,7 @@
 				}
 				$diff.= '@@='.$copy['offset'].','.$copy['length'];
 				for ($i=0; $i<$copy['length']; $i++) array_shift($t);
-				unset($copy);
+				$copy = array();
 			}
 			else $insert[] = array_shift($t);
 		}
