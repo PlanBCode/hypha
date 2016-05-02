@@ -152,6 +152,9 @@
 		   browser re-submitting the POST request on a refresh.
 		   Any messages will be automatically preserved across
 		   the reload.
+		 - 'redirect:' followed by an url to redirect to another
+		   url. Any messages will be automatically preserved
+		   across the reload.
 		 - null when the command was handled, but not redirect
 		   needs to happen.
 
@@ -233,6 +236,14 @@
 			if ($result === 'reload') {
 				$url = preserveNotifications($_SERVER['REQUEST_URI']);
 				header('Location: ' . $url);
+				exit;
+			}
+
+			// Command requests a redirect
+			$split = explode(':', $result, 2);
+			if (count($split) == 2 && $split[0] == 'redirect') {
+				$url = preserveNotifications($_SERVER['REQUEST_URI']);
+				header('Location: ' . $split[1]);
 				exit;
 			}
 		}

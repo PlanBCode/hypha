@@ -146,8 +146,9 @@
 			unset($_POST['version']);
 			writeToDigest($hyphaUser->getAttribute('fullname').__('changed-page').'<a href="'.$this->language.'/'.$this->pagename.'">'.$this->language.'/'.$this->pagename.'</a>', 'page update', $this->pageListNode->getAttribute('id'));
 			// check for new page name
-			if ($language!=$this->language || $pagename!=$this->pagename) header('Location: '.$hyphaUrl.$language.'/'.$pagename);
-			else return 'reload';
+			if ($language != $this->language || $pagename != $this->pagename)
+				return 'redirect:' . $hyphaUrl . $language . '/' . $pagename;
+			return 'reload';
 		}
 
 		function revert($version) {
