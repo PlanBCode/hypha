@@ -466,7 +466,7 @@
 
 		function saveAccount($account) {
 			global $hyphaUser, $hyphaXml;
-			if (isAdmin() || $user->getAttribute('username') == $account) {
+			if (isAdmin() || $hyphaUser->getAttribute('username') == $account) {
 				$hyphaXml->lockAndReload();
 				$error = hypha_setUser(hypha_getUserByName($account), $_POST['settingsUsername'], $_POST['settingsPassword1'], $_POST['settingsFullname'], $_POST['settingsEmail'], $_POST['settingsUiLang'], '');
 				$hyphaXml->saveAndUnlock();
