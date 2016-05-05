@@ -365,7 +365,7 @@
 		function saveMenu($argument) {
 			global $hyphaXml;
 			if (isAdmin()) {
-				$hyphaXml->reloadAndLock();
+				$hyphaXml->lockAndReload();
 				hypha_setMenu($_POST['siteMenu']);
 				$hyphaXml->saveAndUnlock();
 			}
