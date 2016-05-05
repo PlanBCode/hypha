@@ -89,6 +89,7 @@
 		"invalid-username" => "username may contain only characters and numbers",
 		"invalid-password" => "password check failed",
 		"error-save-settings" => "failed saving settings",
+		"csrf-error" => "There was a problem submitting a command or form, please try again",
 		"changed-header" => " edited the website's header",
 		"changed-footer" => " edited the website's footer",
 		"changed-menu" => " edited the website's main menu",

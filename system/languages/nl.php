@@ -89,6 +89,7 @@
 		"invalid-username" => "gebruikersnaam mag alleen letters en cijfers bevatten",
 		"invalid-password" => "ongelding wachtwoord",
 		"error-save-settings" => "instellingen zijn niet opgeslagen",
+		"csrf-error" => "Er is een probleem bij het verzenden van een commando of formulier, probeer het nogmaals",
 		"changed-header" => " header van de website bewerkt",
 		"changed-footer" => " footer van de website bewerkt",
 		"changed-menu" => " hoofdmenu van de website bewerkt",

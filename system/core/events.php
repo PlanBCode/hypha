@@ -44,6 +44,7 @@
 	<form name="hyphaForm" method="post" action="" accept-charset="utf-8">
 		<input id="command" name="command" type="hidden">
 		<input id="argument" name="argument" type="hidden">
+		<input id="csrfToken" name="csrfToken" type="hidden" value="<?=getCsrfToken()?>">
 		<?=getInnerHtml($body)?>
 	</form>
 <?php
@@ -230,9 +231,37 @@
 		return '<input type="button" class="button" value="'.$label.'" onclick="hypha(\''.$langPageView.'\', \''.$command.'\', \''.$argument.'\');" />';
 	}
 
+	function getCsrfToken() {
+		if (!isset($_SESSION['hyphaCsrfToken'])) {
+			session_start();
+			regenerateCsrfToken();
+			session_write_close();
+		}
+
+		return $_SESSION['hyphaCsrfToken'];
+	}
+
+	/*
+		Function: regenerateCsrfToken
+
+		Regenerate the CSRF token. Should be called when a new
+		session starts, such as during login. Should be called
+		while the session is already open (e.g. between
+		session_start() and session_write_close()).
+	*/
+	function regenerateCsrfToken() {
+		$_SESSION['hyphaCsrfToken'] = bin2hex(openssl_random_pseudo_bytes(8));
+	}
+
 	// execute posted commands
 	function executePostedCommand() {
 		if(isset($_POST['command'])) {
+			if (!isset($_POST['csrfToken']) || $_POST['csrfToken'] != getCsrfToken()) {
+				notify('error', __('csrf-error'));
+				unset($_POST['command']);
+				return;
+			}
+
 			$result = processCommand($_POST['command'], $_POST['argument']);
 			if ($result !== false) {
 				// Command was handled

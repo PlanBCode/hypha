@@ -39,6 +39,7 @@
 			// Use a brand new session id for extra security
 			session_regenerate_id();
 			$_SESSION['hyphaLogin'] = $user->getAttribute('id');
+			regenerateCsrfToken();
 			session_write_close();
 		}
 		else {
