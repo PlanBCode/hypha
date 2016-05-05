@@ -144,8 +144,14 @@
 		document.getElementById('loginUsername').focus();
 	}
 	function reregister() {
-		document.getElementById('command').value = 'reregister';
-		document.getElementById('popup').innerHTML = '<?=__('name-or-email')?>: <input name="searchLogin" id="searchLogin" type="text" size="10" /><input type="submit" name="submit" value="<?=__('submit')?>" /><input type="button" name="cancel" value="<?=__('cancel')?>" onclick="showLogin();" />';
+		html = '<table class="section">';
+		html+= '<tr><th><?=__('name-or-email')?></th><td><input name="searchLogin" id="searchLogin" type="text" size="10" /></td></tr>';
+		html+= '<tr><td></td><td><input type="submit" name="submit" value="<?=__('submit')?>" onclick="hypha(\'<?=$hyphaQuery?>\', \'reregister\', \'\');" /><input type="button" name="cancel" value="<?=__('cancel')?>" onclick="showLogin();" /></td></tr>';
+		html+= '</table>';
+		document.getElementById('popup').innerHTML = html;
+		document.getElementById('popup').style.left = document.getElementById('hyphaCommands').offsetLeft + 'px';
+		document.getElementById('popup').style.top = (document.getElementById('hyphaCommands').offsetTop + 25) + 'px';
+		document.getElementById('popup').style.visibility = 'visible';
 		document.getElementById('searchLogin').focus();
 	}
 <?php
