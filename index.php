@@ -94,9 +94,12 @@
 		Check is a user is logged in and load user data. Add login/logout functionality according to session login status.
 	*/
 
+	$request = explode('/', $hyphaQuery);
+	$request = loadLanguage($request);
+
 	// load user and requested page, and execute issued commands
 	loadUser();
-	loadPage(explode('/', $hyphaQuery));
+	loadPage($request);
 	executePostedCommand(); // Might redirect and exit
 
 	/*

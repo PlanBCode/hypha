@@ -80,38 +80,52 @@
 	}
 
 	/*
-		Function: loadPage
-		loads all html needed for page lang/pagename/view
-
-		pages are called with the following address format: 'http://www.dom.ain/languagecode/pagename/view'
-			ISO639 abbreviations are used as languagecodes, i.e. en for english, de for german et cetera
-			special pages are 'http://www.dom.ain/settings', 'http://www.dom.ain/index' and 'http://www.dom.ain/ajax'
+		Function: loadLanguage
+		Pulls the language from the url.
 
 		Parameters:
-		args - array with arguments from the page url e.g. www.dom.ain/arg0/arg1/arg2
+		args - array with arguments from the page url, below the hypha root url.
 
-		See Also:
-		<buildhtml>
+		Returns the same array, with any language removed
 	*/
-	function loadPage($args) {
-		global $isoLangList, $hyphaHtml, $hyphaPageTypes, $hyphaPage, $hyphaLanguage, $hyphaUrl, $hyphaXml;
-
-		// Make accessing args easier by making sure it always
-		// has sufficient elements.
-		while (count($args) < 3)
-			array_push($args, null);
-
+	function loadLanguage($args) {
+		global $isoLangList, $hyphaLanguage;
 		// set wiki language. we want to store this in a session variable, so we don't loose language when an image or the settingspage are requested
-		if (array_key_exists($args[0], $isoLangList))
+		if (count($args) > 0 && array_key_exists($args[0], $isoLangList)) {
 			$hyphaLanguage = $args[0];
-		else
+			array_shift($args);
+		} else {
 			$hyphaLanguage = hypha_getDefaultLanguage();
+		}
 
 		if (!isset($_SESSION['hyphaLanguage']) || $hyphaLanguage != $_SESSION['hyphaLanguage']) {
 			session_start();
 			$_SESSION['hyphaLanguage'] = $hyphaLanguage;
 			session_write_close();
 		}
+		return $args;
+	}
+
+	/*
+		Function: loadPage
+		loads all html needed for page pagename/view
+
+		Parameters:
+		args - array with arguments from the page url, below the
+		hypha root url. Any language component should already be
+		removed by loadLanguage().
+
+		See Also:
+		<buildhtml>
+	*/
+	function loadPage($args) {
+		global $hyphaHtml, $hyphaPageTypes, $hyphaPage, $hyphaLanguage, $hyphaUrl, $hyphaXml;
+
+		// Make accessing args easier by making sure it always
+		// has sufficient elements.
+		while (count($args) < 3)
+			array_push($args, null);
+
 
 		switch ($args[0]) {
 			case 'files':
@@ -198,7 +212,7 @@
 				break;
 			default:
 				// fetch the requested page
-				$_name = $args[1] ? $args[1] : hypha_getDefaultPage();
+				$_name = $args[0] ? $args[0] : hypha_getDefaultPage();
 				$_node = hypha_getPage($hyphaLanguage, $_name);
 
 				// when necessary, create a new page or update the data in the pageList entry
@@ -214,8 +228,8 @@
 
 				if ($_node) {
 					$_type = $_node->getAttribute('type');
-					$_view = $args[2];
-					if (($args[1]=='') && ($args[2]=='edit')) $_view = '';
+					$_view = $args[1];
+					if (($args[0]=='') && ($args[1]=='edit')) $_view = '';
 					$hyphaPage = new $_type($_node, $_view);
 
 					// write stats
