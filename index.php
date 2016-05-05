@@ -97,8 +97,11 @@
 	$request = explode('/', $hyphaQuery);
 	$request = loadLanguage($request);
 
-	// load user and requested page, and execute issued commands
+	// Load user and page and execute the posted command. The latter
+	// is tried twice, since some commands need to run before
+	// loading the page, and some commands need to run after.
 	loadUser();
+	executePostedCommand(); // Might redirect and exit
 	loadPage($request);
 	executePostedCommand(); // Might redirect and exit
 

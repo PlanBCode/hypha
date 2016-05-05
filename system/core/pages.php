@@ -67,7 +67,7 @@
 		html+= '<tr><th><?=__('name')?></th><td><input type="text" id="newPagename" value="<?=$pagename?>" onblur="validatePagename(this);" onkeyup="validatePagename(this); document.getElementById(\'newPageSubmit\').disabled = this.value ? false : true;"/></td></tr>';
 		html+= '<tr><td></td><td><input type="checkbox" id="newPagePrivate" name="newPagePrivate"/> <?=__('private-page')?></td></tr>';
 		html+= '<tr><td></td><td><input type="button" class="button" value="<?=__('cancel')?>" onclick="document.getElementById(\'popup\').style.visibility=\'hidden\';" />';
-		html+= '<input type="submit" id="newPageSubmit" class="button editButton" value="<?=__('create')?>" disabled="true" onclick="hypha(\'<?=$hyphaLanguage?>/\' + document.getElementById(\'newPagename\').value + \'/edit\', \'newPage\', document.getElementById(\'newPageType\').value + \',\' + (document.getElementById(\'newPagePrivate\').checked ? \'on\' : \'off\'));" /></td></tr></table>';
+		html+= '<input type="submit" id="newPageSubmit" class="button editButton" value="<?=__('create')?>" disabled="true" onclick="hypha(\'<?=$hyphaLanguage?>/\' + document.getElementById(\'newPagename\').value + \'/edit\', \'newPage\', document.getElementById(\'newPagename\').value);" /></td></tr></table>';
 		document.getElementById('popup').innerHTML = html;
 		document.getElementById('popup').style.left = document.getElementById('hyphaCommands').offsetLeft + 'px';
 		document.getElementById('popup').style.top = (document.getElementById('hyphaCommands').offsetTop + 25) + 'px';
@@ -215,17 +215,6 @@
 				$_name = $args[0] ? $args[0] : hypha_getDefaultPage();
 				$_node = hypha_getPage($hyphaLanguage, $_name);
 
-				// when necessary, create a new page or update the data in the pageList entry
-				if(!$_node && isUser() && $_POST) {
-					if (isset($_POST['newPageType'])) {
-						$hyphaXml->lockAndReload();
-						$error = hypha_addPage($_POST['newPageType'], $hyphaLanguage, $_name, $_POST['newPagePrivate']);
-						$hyphaXml->saveAndUnlock();
-						if ($error) notify('error', $error);
-						$_node = hypha_getPage($hyphaLanguage, $_name);
-					}
-				}
-
 				if ($_node) {
 					$_type = $_node->getAttribute('type');
 					$_view = $args[1];
@@ -242,6 +231,30 @@
 					if(isUser()) $hyphaHtml->writeToElement('main', '<span class="right""><input type="button" class="button" value="'.__('create').'" onclick="newPage();"></span>');
 					$hyphaPage = false;
 				}
+		}
+	}
+
+	/*
+		Function: newPage
+
+		Handles the newPage command by creating a new page and redirecting to its edit interface.
+	*/
+	registerCommandCallback('newPage', 'newPage');
+	function newPage($newName) {
+		global $hyphaXml, $hyphaUrl, $hyphaLanguage;
+
+
+		$newName = validatePagename($newName);
+		if (isUser()) {
+			$hyphaXml->lockAndReload();
+			$error = hypha_addPage($_POST['newPageType'], $hyphaLanguage, $newName, isset($_POST['newPagePrivate']));
+			$hyphaXml->saveAndUnlock();
+			if ($error) {
+				notify('error', $error);
+				return 'reload';
+			} else {
+				return 'redirect:' . $hyphaUrl . $hyphaLanguage . '/' . $newName . '/edit';
+			}
 		}
 	}
 

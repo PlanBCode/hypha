@@ -155,6 +155,9 @@
 		 - 'redirect:' followed by an url to redirect to another
 		   url. Any messages will be automatically preserved
 		   across the reload.
+		 - false when the command was not actually handled and
+		   should be retried later (after loading the requested
+		   page).
 		 - null when the command was handled, but not redirect
 		   needs to happen.
 
@@ -179,6 +182,7 @@
 		global $hyphaEventList;
 		if (count($hyphaEventList) && array_key_exists($id, $hyphaEventList))
 			return call_user_func($hyphaEventList[$id], $arg);
+		return false;
 	}
 
 	function makeAction($langPageView, $command, $argument) {
@@ -230,21 +234,24 @@
 	function executePostedCommand() {
 		if(isset($_POST['command'])) {
 			$result = processCommand($_POST['command'], $_POST['argument']);
-			unset($_POST['command']);
+			if ($result !== false) {
+				// Command was handled
+				unset($_POST['command']);
 
-			// Command requests a reload
-			if ($result === 'reload') {
-				$url = preserveNotifications($_SERVER['REQUEST_URI']);
-				header('Location: ' . $url);
-				exit;
-			}
+				// Command requests a reload
+				if ($result === 'reload') {
+					$url = preserveNotifications($_SERVER['REQUEST_URI']);
+					header('Location: ' . $url);
+					exit;
+				}
 
-			// Command requests a redirect
-			$split = explode(':', $result, 2);
-			if (count($split) == 2 && $split[0] == 'redirect') {
-				$url = preserveNotifications($_SERVER['REQUEST_URI']);
-				header('Location: ' . $split[1]);
-				exit;
+				// Command requests a redirect
+				$split = explode(':', $result, 2);
+				if (count($split) == 2 && $split[0] == 'redirect') {
+					$url = preserveNotifications($_SERVER['REQUEST_URI']);
+					header('Location: ' . $split[1]);
+					exit;
+				}
 			}
 		}
 	}
