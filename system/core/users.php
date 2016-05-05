@@ -146,7 +146,7 @@
 	function reregister() {
 		html = '<table class="section">';
 		html+= '<tr><th><?=__('name-or-email')?></th><td><input name="searchLogin" id="searchLogin" type="text" size="10" /></td></tr>';
-		html+= '<tr><td></td><td><input type="submit" name="submit" value="<?=__('submit')?>" onclick="hypha(\'<?=$hyphaQuery?>\', \'reregister\', \'\');" /><input type="button" name="cancel" value="<?=__('cancel')?>" onclick="showLogin();" /></td></tr>';
+		html+= '<tr><td></td><td><input type="submit" name="submit" value="<?=__('submit')?>" onclick="hypha(\'<?=$hyphaQuery?>\', \'reregister\', document.getElementById(\'searchLogin\').value);" /><input type="button" name="cancel" value="<?=__('cancel')?>" onclick="showLogin();" /></td></tr>';
 		html+= '</table>';
 		document.getElementById('popup').innerHTML = html;
 		document.getElementById('popup').style.left = document.getElementById('hyphaCommands').offsetLeft + 'px';
@@ -162,17 +162,21 @@
 		Function: reregister
 		search for user based on a search string and send notification by email.
 	*/
+	registerCommandCallback('reregister', 'reregister');
 	function reregister($search) {
-		global $hyphaUrl;
+		global $hyphaUrl, $hyphaXml;
+		$hyphaXml->lockAndReload();
 		foreach(hypha_getUserList() as $user) if ($user->getAttribute('username')==$search || $user->getAttribute('email')==$search) {
 			$key = uniqid(rand(), true);
-			addHyphaUserRegistrationKey($user, $key);
-			$mailBody = __('reregister-to').'\''.hypha_getTitle().'\'. '.__('follow-link-to-register').'<br /><a href="'.$hyphaUrl.'settings/register/'.$key.'">'.$hyphaUrl.'settings/register/'.$key.'</a>';
+			hypha_addUserRegistrationKey($user, $key);
+			$hyphaXml->saveAndUnlock();
+			$mailBody = __('reregister-to').'\''.hypha_getTitle().'\'. '.__('follow-link-to-register').'<br /><a href="'.$hyphaUrl.'settings/reregister/'.$key.'">'.$hyphaUrl.'settings/register/'.$key.'</a>';
 			$result = sendMail($user->getAttribute('email'), hypha_getTitle().' <'.hypha_getEmail().'>', __('reregistration').'\''.hypha_getTitle().'\'', nl2br($mailBody));
 			if ($result) notify('error', $result);
 			else notify('success',  __('reregistration-sent'));
-			return false;
+			return 'reload';
 		}
+		$hyphaXml->unlock();
 		notify('success', __('reregistration-error'));
 	}
 ?>
