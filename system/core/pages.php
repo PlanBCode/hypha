@@ -253,7 +253,7 @@
 				notify('error', $error);
 				return 'reload';
 			} else {
-				return 'redirect:' . $hyphaUrl . $hyphaLanguage . '/' . $newName . '/edit';
+				return ['redirect', $hyphaUrl . $hyphaLanguage . '/' . $newName . '/edit'];
 			}
 		}
 	}
