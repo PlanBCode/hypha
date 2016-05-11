@@ -198,7 +198,12 @@
 					$hyphaXml->unlock();
 					return 'reload';
 				}
-				if (!hypha_setUser($user, $_POST['settingsUsername'], $_POST['settingsPassword1'], $_POST['settingsFullname'], $_POST['settingsEmail'], $_POST['settingsUiLang'], 'user')) {
+
+				$rights = $user->getAttribute('rights');
+				if ($rights == 'invitee')
+					$rights = 'user';
+
+				if (!hypha_setUser($user, $_POST['settingsUsername'], $_POST['settingsPassword1'], $_POST['settingsFullname'], $_POST['settingsEmail'], $_POST['settingsUiLang'], $rights)) {
 					hypha_removeUserRegistrationKey($user);
 					writeToDigest($user->getAttribute('fullname').' '.__('has-joined'), 'settings');
 					notify('success', __('registration-successful'));
