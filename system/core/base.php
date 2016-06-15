@@ -360,7 +360,8 @@
 	function hypha_addUser($username, $password, $fullname, $email, $language, $rights) {
 		global $hyphaXml;
 		$hyphaXml->requireLock();
-		if (!hypha_getUserByName($username) && !hypha_getUserByEmail($email)) {
+		if ((!$username || !hypha_getUserByName($username))
+		    && (!$email || !hypha_getUserByEmail($email))) {
 			$newUser = $hyphaXml->createElement('user');
 			$newUser->setAttribute('id', uniqid());
 			$hyphaXml->getElementsByTagName('userList')->Item(0)->appendChild($newUser);
