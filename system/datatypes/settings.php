@@ -428,9 +428,15 @@
 <?php
 			$numAdmins = 0;
 			foreach(hypha_getUserList() as $user) {
-				if ($user->getAttribute('rights') == 'invite') $userList['zzza'] = $user;
-				elseif ($user->getAttribute('rights')=='exmember' && isAdmin()) $userList['zzzb'] = $user;
-				else $userList[$user->getAttribute('username')] = $user;
+				$prio = '0';
+				if ($user->getAttribute('rights') == 'invitee') {
+					$prio = '1';
+				} elseif ($user->getAttribute('rights')=='exmember') {
+					$prio = '2';
+					if (!isAdmin())
+						continue;
+				}
+				$userList[$prio . $user->getAttribute('username') . $user->getAttribute('email')] = $user;
 				if ($user->getAttribute('rights') == 'admin') $numAdmins++;
 			}
 			ksort($userList);
