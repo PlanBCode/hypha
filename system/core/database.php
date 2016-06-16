@@ -27,8 +27,9 @@
 		- A property 'filename' which is used as default when saving
 	*/
 	require_once 'various.php';
+	require_once dirname(__FILE__).'/../php-dom-wrapper/All.php';
 
-	class Xml extends DOMDocument {
+	class Xml extends DOMWrap\Document {
 		public $file;
 		const versionsOn = true;
 		const versionsOff = false;
