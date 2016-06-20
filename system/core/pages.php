@@ -218,7 +218,6 @@
 				if ($_node) {
 					$_type = $_node->getAttribute('type');
 					$_view = $args[1];
-					if (($args[0]=='') && ($args[1]=='edit')) $_view = '';
 					$hyphaPage = new $_type($_node, $_view);
 
 					// write stats
