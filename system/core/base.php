@@ -661,8 +661,7 @@
 			if ($lang == $language) $index.= '<span class="selected">'.$lang.'</span><br/>';
 			elseif (!$page || array_key_exists($lang, $pageLangList)) {
 				if ($page) $index.= '<a href="'.$lang.'/'.$pageLangList[$lang].'">'.$lang.'</a><br/>';
-				else $index.= '<a href="index/'.$lang.'">'.$lang.'</a><br/>';
-//				else $index.= '<a href="index/'.$lang.($view ? '/'.$view : '').'">'.$lang.'</a><br/>';
+				else $index.= '<a href="'.$lang.'/index">'.$lang.'</a><br/>';
 			}
 			else $index.= '<span class="disabled">'.$lang.'</span><br/>';
 		}

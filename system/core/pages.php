@@ -152,14 +152,13 @@
 						$hyphaHtml->writeToElement('main', hypha_indexFiles());
 						break;
 					default:
-						$language = $args[1] ? $args[1] : hypha_getDefaultLanguage();
-						$languageName = $isoLangList[$language];
+						$languageName = $isoLangList[$hyphaLanguage];
 						$languageName = substr($languageName, 0, strpos($languageName, ' ('));
 						$hyphaHtml->writeToElement('pagename', __('page-index').': '.$languageName);
-						$hyphaHtml->writeToElement('langList', hypha_indexLanguages('', $language).'<br/>');
+						$hyphaHtml->writeToElement('langList', hypha_indexLanguages('', $hyphaLanguage).'<br/>');
 						$hyphaHtml->writeToElement('langList', '<a href="index/images">'.__('images').'</a><br/>');
 						$hyphaHtml->writeToElement('langList', '<a href="index/files">'.__('files').'</a><br/>');
-						$hyphaHtml->writeToElement('main', hypha_indexPages($args[1] ? $args[1] : $hyphaLanguage));
+						$hyphaHtml->writeToElement('main', hypha_indexPages($hyphaLanguage));
 						break;
 				}
 				break;
