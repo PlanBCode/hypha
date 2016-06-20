@@ -550,7 +550,7 @@
 		}
 		elseif($page==$hyphaPage) $class = ' class="currentPageLink"';
 
-		$permission = (isUser() || $page->getAttribute('private')=='off') ? true : false;
+		$permission = (isUser() || $page->getAttribute('private') != 'on');
 		if ($permission) return '<a'.$args[1].'href="'.$language->getAttribute('id').'/'.$language->getAttribute('name').'"'.$class.$title.$args[3].'>'.($args[4]?$args[4]:showPagename($language->getAttribute('name'))).'</a>';
 //			if ($permission) return '<a'.$hypharef[1].'href="'.$language.'/'.urlencode($pagename).'"'.$class.$title.$hypharef[3].'>'.$pagename.'</a>';
 //		else return $this->linksVisible ? showPagename($pagename) : '';
