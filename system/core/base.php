@@ -703,7 +703,7 @@
 		$html = '<table><tr>';
 		for ($column=1; $column<$columns+1; $column++) {
 			$html.= '<td>';
-			while($i<$lines*$column/$columns) $html.= $htmlList[$i++];
+			while($i<$lines && $i<$lines*$column/$columns) $html.= $htmlList[$i++];
 			$html.= '</td>';
 		}
 		$html.= '</tr></table>';
