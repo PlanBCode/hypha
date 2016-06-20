@@ -450,12 +450,13 @@
 				if (isAdmin()) {
 					echo '<td>';
 					if ($user->getAttribute('rights')!='exmember') {
-						echo makeButton(__('edit'), makeAction('settings/user/'.$user->getAttribute('username'), '', ''));
+						if ($user->getAttribute('username'))
+							echo makeButton(__('edit'), makeAction('settings/user/'.$user->getAttribute('username'), '', ''));
 
 						if ($user->getAttribute('rights')=='none') echo makeButton(__('restore'), makeAction('settings', 'settingsRestore', $user->getAttribute('id')));
 						else echo makeButton(__('remove'), makeAction('settings', 'settingsRemove', $user->getAttribute('id')));
 
-						if ($user->getAttribute('rights')=='invite') echo makeButton(__('remind'), makeAction('settings', 'remind', $user->getAttribute('id')));
+						if ($user->getAttribute('rights')=='invitee') echo makeButton(__('remind'), makeAction('settings', 'settingsRemind', $user->getAttribute('id')));
 						elseif ($user->getAttribute('rights') !== 'none') {
 							if ($user->getAttribute('rights') !== 'admin') echo makeButton(__('admin'), makeAction('settings', 'settingsAdmin', $user->getAttribute('id')));
 							elseif ($numAdmins>1) echo makeButton(__('unadmin'), makeAction('settings', 'settingsUnadmin', $user->getAttribute('id')));
