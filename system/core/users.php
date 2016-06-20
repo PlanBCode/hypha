@@ -167,7 +167,7 @@
 		global $hyphaUrl, $hyphaXml;
 		$hyphaXml->lockAndReload();
 		foreach(hypha_getUserList() as $user) if ($user->getAttribute('username')==$search || $user->getAttribute('email')==$search) {
-			$key = uniqid(rand(), true);
+			$key = bin2hex(openssl_random_pseudo_bytes(8));
 			hypha_addUserRegistrationKey($user, $key);
 			$hyphaXml->saveAndUnlock();
 			$mailBody = __('reregister-to').'\''.hypha_getTitle().'\'. '.__('follow-link-to-register').'<br /><a href="'.$hyphaUrl.'settings/register/'.$key.'">'.$hyphaUrl.'settings/register/'.$key.'</a>';
