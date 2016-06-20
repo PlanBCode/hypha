@@ -87,7 +87,7 @@
 		"no-page" => "Deze pagina bestaat niet",
 		"page-in-other-language" => "Deze pagina bestaat alleen in een andere taal",
 		"invalid-username" => "gebruikersnaam mag alleen letters en cijfers bevatten",
-		"invalid-password" => "ongelding wachtwoord",
+		"invalid-password" => "ongeldig wachtwoord",
 		"error-save-settings" => "instellingen zijn niet opgeslagen",
 		"csrf-error" => "Er is een probleem bij het verzenden van een commando of formulier, probeer het nogmaals",
 		"changed-header" => " header van de website bewerkt",
