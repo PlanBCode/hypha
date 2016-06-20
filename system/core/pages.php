@@ -129,7 +129,7 @@
 		<buildhtml>
 	*/
 	function loadPage($args) {
-		global $hyphaHtml, $hyphaPageTypes, $hyphaPage, $hyphaLanguage, $hyphaUrl, $hyphaXml;
+		global $isoLangList, $hyphaHtml, $hyphaPageTypes, $hyphaPage, $hyphaLanguage, $hyphaUrl, $hyphaXml;
 
 		// Make accessing args easier by making sure it always
 		// has sufficient elements.
