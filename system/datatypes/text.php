@@ -11,8 +11,8 @@
 	class textpage extends Page {
 		public $xml;
 
-		function __construct($pageListNode, $view) {
-			parent::__construct($pageListNode, $view);
+		function __construct($pageListNode, $args) {
+			parent::__construct($pageListNode, $args);
 			$this->xml = new Xml('textpage', Xml::multiLingualOn, Xml::versionsOn);
 			$this->xml->loadFromFile('data/pages/'.$pageListNode->getAttribute('id'));
 
@@ -21,7 +21,7 @@
 		}
 
 		function build() {
-			switch ($this->view) {
+			switch ($this->getArg(0)) {
 				case 'edit':
 					$this->edit();
 					break;

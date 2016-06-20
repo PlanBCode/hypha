@@ -7,9 +7,8 @@
 	<Page>
 */
 	class settingspage extends Page {
-		function __construct($view, $username) {
-			parent::__construct('', $view);
-			$this->username = $username;
+		function __construct($args) {
+			parent::__construct('', $args);
 			registerCommandCallback('settingsInvite', Array($this, 'invite'));
 			registerCommandCallback('settingsRemind', Array($this, 'remindNewUser'));
 			registerCommandCallback('settingsRegister', Array($this, 'register'));
@@ -31,11 +30,11 @@
 //			if ($view=='register') $html->pagename =  'registration';
 //			elseif ($this->hypha->login) $html->pagename = 'settings';
 //			else return notify('error', __('login-to-view'));
-			switch ($this->view) {
-				case 'user': $this->editAccount(); break;
+			switch ($this->getArg(0)) {
+				case 'user': $this->editAccount($this->getArg(1)); break;
 				case 'invite': $this->editInvitation(); break;
 				case 'quit': $this->editQuitMessage(); break;
-				case 'register': $this->editRegistration(); break;
+				case 'register': $this->editRegistration($this->getArg(1)); break;
 				case 'hypha': $this->editHyphaSettings(); break;
 				case 'markup': $this->editMarkup(); break;
 				case 'styles': $this->editStyles(); break;
@@ -45,16 +44,16 @@
 			}
 		}
 
-		function editAccount() {
+		function editAccount($username) {
 			global $uiLangList;
 			global $isoLangList;
 			global $hyphaUser;
-			if (isAdmin() || $hyphaUser->getAttribute('username') == $this->username) {
-				$account = hypha_getUserByName($this->username);
-				$this->html->writeToElement('pagename', __('change-account').' `'.$this->username.'`');
+			if (isAdmin() || $hyphaUser->getAttribute('username') == $username) {
+				$account = hypha_getUserByName($username);
+				$this->html->writeToElement('pagename', __('change-account').' `'.$username.'`');
 				$this->html->writeToElement('pageCommands', makeButton(__('cancel'), makeAction('settings', '', '')));
-				$this->html->writeToElement('pageCommands', makeButton(__('save'), makeAction('settings', 'settingsSaveAccount', $this->username)));
-				if ($account->getAttribute('rights')=='admin') $this->html->writeToElement('pageCommands', makeButton(__('unadmin'), makeAction('settings', 'settingsUnadmin', $this->username)));
+				$this->html->writeToElement('pageCommands', makeButton(__('save'), makeAction('settings', 'settingsSaveAccount', $username)));
+				if ($account->getAttribute('rights')=='admin') $this->html->writeToElement('pageCommands', makeButton(__('unadmin'), makeAction('settings', 'settingsUnadmin', $username)));
 				ob_start();
 ?>
 <table class="section" width="100%">
@@ -152,10 +151,9 @@
 			return 'reload';
 		}
 
-		function editRegistration() {
+		function editRegistration($key) {
 			global $uiLangList;
 			global $isoLangList;
-			$key = $this->username;
 			foreach(hypha_getUserList() as $user) if ($user->hasAttribute('key') && $user->getAttribute('key')==$key) {
 				$this->html->writeToElement('pagename', __('register'));
 				$this->html->writeToElement('pageCommands', makeButton(__('submit'), makeAction('settings/register', 'settingsRegister', $key)));

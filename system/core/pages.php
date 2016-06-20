@@ -12,11 +12,11 @@
 		abstract class for handling a certain kind of data
 	*/
 	abstract class Page {
-		public $pageListNode, $html, $language, $pagename, $view, $privateFlag;
-		function __construct($node, $view) {
+		public $pageListNode, $html, $language, $pagename, $args, $privateFlag;
+		function __construct($node, $args) {
 			global $hyphaHtml;
 			$this->html = $hyphaHtml;
-			$this->view = $view;
+			$this->args = $args;
 			if ($node)
 				$this->replacePageListNode($node);
 		}
@@ -28,6 +28,16 @@
 			$language = hypha_pageGetLanguage($node, $hyphaLanguage);
 			$this->language = $language->getAttribute('id');
 			$this->pagename = $language->getAttribute('name');
+		}
+
+		/**
+		 * Return the given url argument, or null if it is not
+		 * present.
+		 */
+		protected function getArg($index) {
+			if (array_key_exists($index, $this->args))
+				return $this->args[$index];
+			return null;
 		}
 
 		abstract function build();
@@ -123,7 +133,7 @@
 
 		// Make accessing args easier by making sure it always
 		// has sufficient elements.
-		while (count($args) < 3)
+		while (count($args) < 2)
 			array_push($args, null);
 
 
@@ -164,12 +174,8 @@
 				break;
 			case 'settings':
 				if (isUser() || $args[1]=='register') {
-					$hyphaPage = new settingspage($args[1], $args[2]);
-/*					$pageType = 'settings';
-					$pageView = $args[1];
-					$userId = $args[2];
-					$hyphaPage = new settingspage($pageView, $userId);
-*/				}
+					$hyphaPage = new settingspage(array_slice($args, 1));
+				}
 				else {
 					header('Location: '.$hyphaUrl.hypha_getDefaultLanguage().'/'.hypha_getDefaultPage());
 					exit;
@@ -216,8 +222,7 @@
 
 				if ($_node) {
 					$_type = $_node->getAttribute('type');
-					$_view = $args[1];
-					$hyphaPage = new $_type($_node, $_view);
+					$hyphaPage = new $_type($_node, array_slice($args, 1));
 
 					// write stats
 					if (!isUser())
