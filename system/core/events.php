@@ -284,8 +284,8 @@
 
 		// Command requests a redirect
 		if (count($result) == 2 && $result[0] == 'redirect') {
-			$url = preserveNotifications($_SERVER['REQUEST_URI']);
-			header('Location: ' . $result[1]);
+			$url = preserveNotifications($result[1]);
+			header('Location: ' . $url);
 			exit;
 		}
 	}
