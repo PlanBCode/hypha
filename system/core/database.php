@@ -40,17 +40,22 @@
 			Constructor:
 			Initializes the object
 		*/
-		function __construct($type, $multiLingual=false, $versions=false) {
+		function __construct($type=null, $multiLingual=false, $versions=false) {
 			parent::__construct('1.0', 'UTF-8');
 			$this->preserveWhiteSpace = false;
 			$this->formatOutput = true;
-			$rootElement = $this->createElement('hypha');
-			$rootElement->setAttribute('type', $type);
-			$rootElement->setAttribute('multiLingual', $multiLingual ? 'on' : 'off');
-			$rootElement->setAttribute('versions', $versions ? 'on' : 'off');
-			$rootElement->setAttribute('schemaVersion', 1);
-			$this->appendChild($rootElement);
+			// When no type is passed, just create an empty
+			// document
+			if ($type !== null) {
+				$rootElement = $this->createElement('hypha');
+				$rootElement->setAttribute('type', $type);
+				$rootElement->setAttribute('multiLingual', $multiLingual ? 'on' : 'off');
+				$rootElement->setAttribute('versions', $versions ? 'on' : 'off');
+				$rootElement->setAttribute('schemaVersion', 1);
+				$this->appendChild($rootElement);
+			}
 		}
+
 		/*
 			Function: loadFromFile
 			Fills the object with content from a file and
