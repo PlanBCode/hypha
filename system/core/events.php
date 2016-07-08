@@ -266,21 +266,27 @@
 			if ($result !== false) {
 				// Command was handled
 				unset($_POST['command']);
-
-				// Command requests a reload
-				if ($result === 'reload') {
-					$url = preserveNotifications($_SERVER['REQUEST_URI']);
-					header('Location: ' . $url);
-					exit;
-				}
-
-				// Command requests a redirect
-				if (count($result) == 2 && $result[0] == 'redirect') {
-					$url = preserveNotifications($_SERVER['REQUEST_URI']);
-					header('Location: ' . $result[1]);
-					exit;
-				}
+				processCommandResult($result);
 			}
+		}
+	}
+
+	function processCommandResult($result) {
+		if (!$result)
+			return;
+
+		// Command requests a reload
+		if ($result === 'reload') {
+			$url = preserveNotifications($_SERVER['REQUEST_URI']);
+			header('Location: ' . $url);
+			exit;
+		}
+
+		// Command requests a redirect
+		if (count($result) == 2 && $result[0] == 'redirect') {
+			$url = preserveNotifications($_SERVER['REQUEST_URI']);
+			header('Location: ' . $result[1]);
+			exit;
 		}
 	}
 
