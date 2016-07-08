@@ -13,15 +13,16 @@
 
 		Parameters:
 		$to - recipient(s). More than one recipient can be sent the same message by submitting a comma separated address list
-		$from - sender
 		$subject -
 		$message - the message may or may not contain HTML tags
 	*/
-	function sendMail($to, $from, $subject, $message) {
+	function sendMail($to, $subject, $message) {
 		global $DEBUG;
+		$fromname = addSlashes(hypha_getTitle());
+		$frommail = hypha_getEmail();
 		$headers = "MIME-Version: 1.0\r\n";
 		$headers .= "Content-type: text/html; charset=utf-8\r\n";
-		$headers .= "From: $from\r\n";
+		$headers .= "From: \"$fromname\" <$frommail>\r\n";
 		$error = array();
 		foreach(explode(',', $to) as $email) {
 			if (!$DEBUG && !filter_var($email, FILTER_VALIDATE_EMAIL)) $error[]= $email;
@@ -136,7 +137,7 @@ END;
 			$hyphaXml->lockAndReload();
 			hypha_setLastDigestTime(time());
 			$hyphaXml->saveAndUnlock();
-			notify('error', sendMail(getUserEmailList(), hypha_getTitle().' <'.hypha_getEmail().'>', hypha_getTitle().': '.__('hypha-summary'), $message) );
+			notify('error', sendMail(getUserEmailList(), hypha_getTitle().': '.__('hypha-summary'), $message) );
 		}
 	}
 

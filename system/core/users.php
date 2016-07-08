@@ -171,7 +171,7 @@
 			hypha_addUserRegistrationKey($user, $key);
 			$hyphaXml->saveAndUnlock();
 			$mailBody = __('reregister-to').'\''.hypha_getTitle().'\'. '.__('follow-link-to-register').'<br /><a href="'.$hyphaUrl.'settings/register/'.$key.'">'.$hyphaUrl.'settings/register/'.$key.'</a>';
-			$result = sendMail($user->getAttribute('email'), hypha_getTitle().' <'.hypha_getEmail().'>', __('reregistration').'\''.hypha_getTitle().'\'', nl2br($mailBody));
+			$result = sendMail($user->getAttribute('email'), __('reregistration').'\''.hypha_getTitle().'\'', nl2br($mailBody));
 			if ($result) notify('error', $result);
 			else notify('success',  __('reregistration-sent'));
 			return 'reload';

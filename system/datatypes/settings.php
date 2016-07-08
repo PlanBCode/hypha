@@ -116,7 +116,7 @@
 					$hyphaXml->saveAndUnlock();
 					writeToDigest($hyphaUser->getAttribute('fullname').' '.__('invited').' '.$email, 'settings');
 					$mailBody = '<a href="mailto:'.$newUser->getAttribute('email').'">'.$hyphaUser->getAttribute('username').'</a>'.__('invites-to-join').'\''.hypha_getTitle().'\'. '.__('follow-link-to-register').'<br /><a href="'.$hyphaUrl.'settings/register/'.$key.'">'.$hyphaUrl.'settings/register/'.$key.'</a><hr/>'.$_POST['inviteWelcome'];
-					$result = sendMail($email, hypha_getTitle().' <'.hypha_getEmail().'>', __('invitation').'\''.hypha_getTitle().'\'', nl2br($mailBody));
+					$result = sendMail($email, __('invitation').'\''.hypha_getTitle().'\'', nl2br($mailBody));
 					notify('success', $result ? $result : $email.__('was-invited'));
 				}
 			}
@@ -142,7 +142,7 @@
 		function quit($message) {
 			global $hyphaUser;
 			if (isUser()) {
-				notify('error', sendMail(getUserEmailList(), hypha_getTitle().' <'.hypha_getEmail().'>', $hyphaUser->getAttribute('fullname').__('has-left-project').'`'.hypha_getTitle().'`', nl2br($message)) );
+				notify('error', sendMail(getUserEmailList(), $hyphaUser->getAttribute('fullname').__('has-left-project').'`'.hypha_getTitle().'`', nl2br($message)) );
 				if (dropUser($hyphaUser->getAttribute('id'))) {
 					logout();
 					notify('success', __('bye'));
@@ -550,7 +550,7 @@
 			if (isAdmin()) {
 				$email = hypha_getUserById($requestId)->getAttribute('email');
 				$mailBody = __('remind-to-join').'\''.hypha_getTitle().'\'. '.__('follow-link-to-register').'<br /><a href="'.$hyphaUrl.'settings/register/'.$requestId.'">'.$hyphaUrl.'settings/register/'.$requestId.'</a>';
-				$result = sendMail($email, hypha_getTitle().' <'.hypha_getEmail().'>', __('invitation').'\''.hypha_getTitle().'\'', nl2br($mailBody));
+				$result = sendMail($email, __('invitation').'\''.hypha_getTitle().'\'', nl2br($mailBody));
 				notify('success', $result ? $result : $email.__('was-invited'));
 			}
 			return 'reload';
