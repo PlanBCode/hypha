@@ -54,6 +54,7 @@
 				$rootElement->setAttribute('schemaVersion', 1);
 				$this->appendChild($rootElement);
 			}
+			$this->registerNodeClass('DOMElement', 'HyphaDomElement');
 		}
 
 		/*
@@ -133,6 +134,63 @@
 		function requireLock() {
 			if (!$this->file->isLocked())
 				throw new LogicException('File ' . $this->filename . ' should be locked');
+		}
+	}
+
+	/*
+		Class: HyphaDomElement
+
+		Extension of the DOMWrap\Element class (which again
+		extends the PHP DOMElement class). This adds a few extra helper methods.
+	*/
+	class HyphaDomElement extends DOMWrap\Element {
+
+		/*
+		        Function: generateId
+
+			Generate a new id for this element, that is guaranteed to be
+			unique within the xml:id attributes in this
+			document.
+		*/
+		function generateId() {
+			do {
+				$id = 'id' . uniqid();
+			} while ($this->document()->getElementById($id));
+			$this->setAttribute('xml:id', $id);
+		}
+
+		/*
+		        Function: getOrCreate
+
+			Gets the child with the the given tag name
+			(non-recursively).  If it does not exist, a new
+			node is created and returned.
+
+			If multiple nodes with the given tag name exist,
+			the first one is returned.
+		 */
+		function getOrCreate($tag) {
+			$result = $this->get($tag);
+
+			if (!$result) {
+				$result = $this->document()->createElement($tag);
+				$this->append($result);
+			}
+			return $result;
+		}
+
+		/*
+		        Function: get
+
+			Gets the child with the the given tag name
+			(non-recursively). If it does not exist, null is
+			returned.
+
+			If multiple nodes with the given tag name exist,
+			the first one is returned.
+		 */
+		function get($tag) {
+			return $this->find($tag, 'child::')->first();
 		}
 	}
 
