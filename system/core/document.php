@@ -201,4 +201,189 @@
 			return $html;
 		}
 	}
+
+	/*
+		Class: HTMLForm
+
+		Wrapper around a DomElement that contains form fields,
+		to allow manipulating the form more easily.
+	*/
+	class HTMLForm {
+		/** The DOM form being wrapped */
+		public $elem;
+		/** The data associated with this form */
+		public $data;
+		/** Any collected errors from validation */
+		public $errors;
+		/** The fields found in this form. Maps field name to its DOM element. */
+		public $fields;
+		/** The labels for each field. Maps field name to the label. */
+		public $labels;
+
+
+		/*
+			Function: __construct
+			Wraps an existing form
+
+			Parameters:
+			$form - A DOMWrap\Element that contains the form
+			        fields.
+		*/
+		function __construct($form, $data = array()) {
+			$this->elem = $form;
+			$this->data = $data;
+			$this->errors = array();
+			$this->fields = array();
+			$this->labels = array();
+
+			// Look through the DOM to find form fields and
+			// their labels
+			foreach($form->find('input, select, textarea, label') as $elem) {
+				if ($elem->tagName == 'label') {
+					$name = $elem->getAttr('for');
+					if ($name)
+						$this->labels[$name] = $elem->text();
+				} else {
+					$name = $elem->getAttr('name');
+					if ($name)
+						$this->fields[$name] = $elem;
+				}
+			}
+		}
+
+		/*
+			Function: setData
+
+			Set the data to be used by validation and
+			updateDom().
+		*/
+		function setData($data) {
+			$this->data = $data;
+		}
+
+		/*
+			Function: updateDom
+
+			Updates the form fields with the data set in
+			$this->data (leaving the value unchanged if a
+			field is not present in $this->data).
+
+			Additionally, add any errors found during
+			validation to an ul.form-errors list (creating
+			it if needed).
+		 */
+		function updateDom() {
+			// Put new values in the form
+			foreach($this->fields as $name => $elem) {
+				$value = $this->dataFor($name);
+				if ($value !== null)
+					$this->updateFormField($elem, $value);
+			}
+
+			// Show any errors
+			if ($this->errors) {
+				$list = $this->elem->find('ul.form-errors')->first();
+				if (!$list) {
+					$list = $this->elem->ownerDocument->createElement('ul')->addClass('form-errors');
+					$this->elem->prepend($list);
+				}
+
+				foreach ($this->errors as $name => $error) {
+					$item = $list->document()->createElement('li');
+					$item->setText($this->labelFor($name) . ': ' . $error);
+					$list->append($item);
+				}
+			}
+		}
+
+		/*
+			Function updateFormField
+
+			Update the value of the given DOM node that contains a
+			single HTML form field with the value given.
+		*/
+		function updateFormField($field, $value) {
+			if ($field->tagName == 'input' && $field->getAttr('type') == 'checkbox') {
+				if ($value)
+					$field->setAttr('checked', 'checked');
+				else
+					$field->removeAttr('checked');
+			} else if ($field->tagName == 'input') {
+				$field->setAttr('value', $value);
+			} else if ($field->tagName == 'select') {
+				foreach($field->find('option') as $option) {
+					if ($option->getAttr('value') == $value)
+						$option->setAttr('selected', 'selected');
+					else
+						$option->removeAttr('selected');
+				}
+			} else if ($field->tagName == 'textarea') {
+				$field->setText($value);
+			}
+		}
+
+		function labelFor($name) {
+			if (array_key_exists($name, $this->labels))
+				return $this->labels[$name];
+			return $name;
+		}
+
+		function dataFor($name, $default = null) {
+			if (is_array($this->data)) {
+				if (array_key_exists($name, $this->data))
+					return $this->data[$name];
+			} else if ($this->data instanceof DOMElement)  {
+				// Look for an attribute
+				if ($this->data->hasAttribute($name))
+					return $this->data->getAttribute($name);
+
+				// Look for a descendent node with the
+				// given name
+				$result = $this->data->find($name)->first();
+				// TODO: Use text or html?
+				if ($result)
+					return $result->text();
+			}
+			return $default;
+		}
+
+		function validateRequiredField($name) {
+			if (!array_key_exists($name, $this->fields)) {
+				$this->errors[$name] = __('field-not-found');
+				return false;
+			}
+			$value = $this->dataFor($name);
+			if (!$value) {
+				$this->errors[$name] = __('required-field-missing');
+				return false;
+			}
+			return true;
+		}
+
+		function validateEmailField($name) {
+			$value = $this->dataFor($name);
+			if (!$value)
+				return true;
+
+			if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
+				$this->errors[$name] = __('invalid-email');
+				return false;
+			}
+			return true;
+		}
+
+		function validateMoneyField($name) {
+			$value = $this->dataFor($name);
+			if (!$value)
+				return true;
+
+			//TODO: Allow , as separator and/or limit to 2
+			//decimal places? Limit to positive numbers.
+			if (!filter_var($value, FILTER_VALIDATE_FLOAT)) {
+				$this->errors[$name] = __('invalid-money-amount');
+				return false;
+			}
+			return true;
+		}
+	}
 ?>

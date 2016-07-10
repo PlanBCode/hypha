@@ -163,5 +163,7 @@
 		"who" => "who",
 		"what" => "what",
 		"edit-day" => "edit day",
+		"invalid-money-amount" => "Not a valid amount of money",
+		"required-field-missing" => "Required field missing",
 	);
 ?>
