@@ -165,5 +165,30 @@
 		"edit-day" => "edit day",
 		"invalid-money-amount" => "Not a valid amount of money",
 		"required-field-missing" => "Required field missing",
+
+		/* digest */
+		"festival-edited-contribution" => " edited contribution: ",
+		"festival-added-contribution" => " added contribution: ",
+		"festival-signed-up-for" => " signed up for ",
+		"festival-failed-to-pay-for" => " failed to pay for ",
+		"festival-payed-for" => " payed for ",
+
+		/* notify & messages */
+		"festival-succesful-signup-for" => "You succesfully signed up for ",
+		"festival-successful-payment" => "Your payment was succesful.",
+		"festival-contribution-added" => "Your contribution was added to the lineup.",
+		"festival-contribution-modified" => "Your contribution was modified.",
+		"festival-complete-by-paying" => "To finalize your registration, complete the payment using the button below.",
+		"festival-signup-for" => "Signup for ",
+		"festival-pay-for" => "Pay for ",
+		"festival-lineup-for" => "Lineup for ",
+		"festival-contribute-to" => "Contribute to ",
+		"festival-invalid-or-no-key" => "Invalid or no key given",
+
+		/* buttons & links */
+		"festival-modify" => "Modify",
+		"festival-contribute" => "Contribute",
+		"festival-edit-contribution" => "Edit contribution",
+		"festival-restart-payment" => "Restart payment procedure",
 	);
 ?>
