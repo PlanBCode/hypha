@@ -165,6 +165,10 @@
 		"edit-day" => "edit day",
 		"invalid-money-amount" => "Not a valid amount of money",
 		"required-field-missing" => "Required field missing",
+		"failed-to-process-image" => "Failed to process image",
+		"image-type-must-be-one-of" => "Image type must be one of: ",
+		"error-uploading-file" => "Error uploading file: ",
+		"file-too-big-must-be-less-than" => "File is too big, it must be less than ",
 
 		/* digest */
 		"festival-edited-contribution" => " edited contribution: ",
