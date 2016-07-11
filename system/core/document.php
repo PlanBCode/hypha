@@ -219,7 +219,8 @@
 		public $fields;
 		/** The labels for each field. Maps field name to the label. */
 		public $labels;
-
+		/** The preview images in the form. Maps field name to the img element. */
+		public $image_previews;
 
 		/*
 			Function: __construct
@@ -235,14 +236,19 @@
 			$this->errors = array();
 			$this->fields = array();
 			$this->labels = array();
+			$this->image_previews = array();
 
 			// Look through the DOM to find form fields and
 			// their labels
-			foreach($form->find('input, select, textarea, label') as $elem) {
+			foreach($form->find('input, select, textarea, label, img') as $elem) {
 				if ($elem->tagName == 'label') {
 					$name = $elem->getAttr('for');
 					if ($name)
 						$this->labels[$name] = $elem->text();
+				} else if ($elem->tagName == 'img') {
+					$name = $elem->getAttr('data-preview-for');
+					if ($name)
+						$this->image_previews[$name] = $elem;
 				} else {
 					$name = $elem->getAttr('name');
 					if ($name)
@@ -278,6 +284,10 @@
 				$value = $this->dataFor($name);
 				if ($value !== null)
 					$this->updateFormField($elem, $value);
+			}
+
+			foreach($this->image_previews as $name => $elem) {
+				$this->updateImagePreview($elem, $this->dataFor($name));
 			}
 
 			// Show any errors
@@ -319,6 +329,22 @@
 				}
 			} else if ($field->tagName == 'textarea') {
 				$field->setText($value);
+			}
+		}
+
+
+		function updateImagePreview($field, $value) {
+			if ($value) {
+				$image = new HyphaImage($value);
+
+				$width = $field->getAttribute('width');
+				$height = $field->getAttribute('height');
+				if (!$width)
+					$width = 50;
+				if (!$height)
+					$height = $width;
+
+				$field->setAttribute('src', $image->getUrl($width, $height));
 			}
 		}
 
@@ -384,6 +410,17 @@
 				return false;
 			}
 			return true;
+		}
+
+		function handleImageUpload($name, $fileinfo) {
+			if (!array_key_exists('error', $fileinfo) || $fileinfo['error'] == UPLOAD_ERR_NO_FILE)
+				return;
+
+			$result = HyphaImage::importUploadedImage($fileinfo);
+			if (is_string($result))
+				$this->errors[$name] = $result;
+			else
+				$this->data[$name] = $result->getFilename();
 		}
 	}
 ?>
