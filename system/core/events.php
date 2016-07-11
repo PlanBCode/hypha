@@ -41,7 +41,7 @@
 		$body = $html->getElementsByTagName('body')->Item(0);
 		ob_start();
 ?>
-	<form name="hyphaForm" method="post" action="" accept-charset="utf-8">
+	<form name="hyphaForm" method="post" action="" accept-charset="utf-8" enctype="multipart/form-data">
 		<input id="command" name="command" type="hidden">
 		<input id="argument" name="argument" type="hidden">
 		<input id="csrfToken" name="csrfToken" type="hidden" value="<?=getCsrfToken()?>">
