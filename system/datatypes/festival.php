@@ -273,6 +273,9 @@
 			$form->validateRequiredField('name');
 			$form->validateRequiredField('title');
 			$form->validateRequiredField('category');
+			if (array_key_exists('image_upload', $_FILES))
+				$form->handleImageUpload('image', $_FILES['image_upload']);
+
 			if ($form->errors) {
 				$this->xml->unlock();
 				// HACK: Prevent index.php from
@@ -305,6 +308,7 @@
 			$contribution->setAttribute('name', $form->dataFor('name'));
 			$contribution->setAttribute('title', $form->dataFor('title'));
 			$contribution->setAttribute('category', $form->dataFor('category'));
+			$contribution->setAttribute('image', $form->dataFor('image'));
 
 			$description = $contribution->getOrCreate('description');
 			$description->setText($form->dataFor('description', ''));
@@ -365,8 +369,13 @@
 			if ($contribution->getAttribute('name')) $html.= '<a id="'.$contribution->getAttribute('xml:id').'" style="font-size:15pt; font-weight:bold; clear:left;">'.$contribution->getAttribute('name').($contribution->hasAttribute('title') ? ' - '.$contribution->getAttribute('title') : '').'</a>';
 			$html.= '<p/>';
 			// image and description
-			$image = $contribution->getElementsByTagName('image')->Item(0);
-			if ($image && is_file('images/thumb/'.$image->getAttribute('source'))) $html.= '<a href="images/hires/'.$image->getAttribute('source').'"><img style="float:left; border:0px; margin-right:10px;" src="images/thumb/'.$image->getAttribute('source').'"/></a>';
+			$image_filename = $contribution->getAttribute('image');
+			if ($image_filename) {
+				$img_width = 150;
+				$img_height = 150;
+				$image = new HyphaImage($image_filename);
+				$html.= '<a href="'.$image->getUrl().'"><img style="float:left; border:0px; margin-right:10px;" src="'.$image->getUrl($img_width, $img_height).'"/></a>';
+			}
 			$description = $contribution->getElementsByTagName('description')->Item(0);
 			if ($description) $html.= getInnerHtml($description);
 			$html.= '<p style="clear:left;"/>';
