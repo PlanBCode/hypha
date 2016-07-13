@@ -313,19 +313,19 @@
 			single HTML form field with the value given.
 		*/
 		function updateFormField($field, $value) {
-			if ($field->tagName == 'input' && $field->getAttr('type') == 'checkbox') {
+			if ($field->tagName == 'input' && $field->getAttribute('type') == 'checkbox') {
 				if ($value)
-					$field->setAttr('checked', 'checked');
+					$field->setAttribute('checked', 'checked');
 				else
-					$field->removeAttr('checked');
+					$field->removeAttribute('checked');
 			} else if ($field->tagName == 'input') {
-				$field->setAttr('value', $value);
+				$field->setAttribute('value', $value);
 			} else if ($field->tagName == 'select') {
 				foreach($field->find('option') as $option) {
-					if ($option->getAttr('value') == $value)
-						$option->setAttr('selected', 'selected');
+					if ($option->getAttribute('value') == $value)
+						$option->setAttribute('selected', 'selected');
 					else
-						$option->removeAttr('selected');
+						$option->removeAttribute('selected');
 				}
 			} else if ($field->tagName == 'textarea') {
 				$field->setText($value);
