@@ -147,7 +147,7 @@
 
 			$table = new HTMLTable();
 			$this->html->find('#main')->appendChild($table);
-			$table->addHeaderRow()->addCells([__('name'), __('email'), __('phone'), __('price'), __('festival-participant-status')]);
+			$table->addHeaderRow()->addCells([__('name'), __('email'), __('phone'), __('attending'), __('price'), __('festival-participant-status')]);
 			foreach ($this->xml->documentElement->getOrCreate('participants')->children() as $participant) {
 				$payamount = $participant->getAttribute('payment-amount');
 				if ($payamount)
@@ -159,6 +159,7 @@
 				$row->addCell($participant->getAttribute('name'));
 				$row->addCell($participant->getAttribute('email'));
 				$row->addCell($participant->getAttribute('phone'));
+				$row->addCell($participant->getAttribute('attending'));
 				$row->addCell($payamount ? '€' . $payamount : '-');
 				$row->addCell($status);
 
@@ -333,6 +334,7 @@ EOF;
 			$participant->setAttribute('email', $form->dataFor('email'));
 			$participant->setAttribute('phone', $form->dataFor('phone'));
 			$participant->setAttribute('key', bin2hex(openssl_random_pseudo_bytes(8)));
+			$participant->setAttribute('attending', implode(',', $form->dataFor('attending')));
 			$this->xml->documentElement->getOrCreate('participants')->append($participant);
 			if ((float)$form->dataFor('amount', 0) > 0)
 				$this->setupPayment($participant, $form->dataFor('amount', 0));
