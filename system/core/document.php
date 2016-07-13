@@ -215,7 +215,7 @@
 		public $data;
 		/** Any collected errors from validation */
 		public $errors;
-		/** The fields found in this form. Maps field name to its DOM element. */
+		/** The fields found in this form. Maps field name to an array of DOM elements with that name. */
 		public $fields;
 		/** The labels for each field. Maps field name to the label. */
 		public $labels;
@@ -242,19 +242,36 @@
 			// their labels
 			foreach($form->find('input, select, textarea, label, img') as $elem) {
 				if ($elem->tagName == 'label') {
-					$name = $elem->getAttr('for');
+					$name = self::getNameAttr($elem, 'for');
 					if ($name)
 						$this->labels[$name] = $elem->text();
 				} else if ($elem->tagName == 'img') {
-					$name = $elem->getAttr('data-preview-for');
+					$name = self::getNameAttr($elem, 'data-preview-for');
 					if ($name)
 						$this->image_previews[$name] = $elem;
 				} else {
-					$name = $elem->getAttr('name');
+					$name = self::getNameAttr($elem, 'name');
 					if ($name)
-						$this->fields[$name] = $elem;
+						$this->fields[$name][] = $elem;
 				}
 			}
+		}
+
+		/*
+			Function getNameAttr
+
+			Returns the given attribute from the given form
+			element, and process it as a form field name by
+			stripping any [] suffix.
+		*/
+		static function getNameAttr($elem, $attr) {
+			$name = $elem->getAttribute($attr);
+			// If a field name ends in [], PHP will construct an array
+			// when the form is submitted, whose name does not include
+			// the brackets
+			if (substr($name, -2) == '[]')
+				$name = substr_replace($name, '', -2);
+			return $name;
 		}
 
 		/*
@@ -280,10 +297,12 @@
 		 */
 		function updateDom() {
 			// Put new values in the form
-			foreach($this->fields as $name => $elem) {
+			foreach($this->fields as $name => $elems) {
 				$value = $this->dataFor($name);
-				if ($value !== null)
-					$this->updateFormField($elem, $value);
+				if ($value !== null) {
+					foreach($elems as $elem)
+						$this->updateFormField($elem, $value);
+				}
 			}
 
 			foreach($this->image_previews as $name => $elem) {
@@ -314,6 +333,13 @@
 		*/
 		function updateFormField($field, $value) {
 			if ($field->tagName == 'input' && $field->getAttribute('type') == 'checkbox') {
+				// For multiple checkboxes that have a
+				// name ending in [], PHP will put an
+				// array in $_POST containing the value
+				// of all selected checkboxes
+				if (is_array($value) && substr($field->getAttribute('name'), -2) == '[]' && $field->hasAttribute('value'))
+					$value = in_array($field->getAttribute('value'), $value);
+
 				if ($value)
 					$field->setAttribute('checked', 'checked');
 				else
