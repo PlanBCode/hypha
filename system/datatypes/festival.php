@@ -78,9 +78,9 @@
 		 * attribute from it. If no attribute is given, the
 		 * "value" attribute is returned.
 		 */
-		function getConfig($id, $attribute = null) {
+		function getConfig($id, $attribute = 'value') {
 			$config = $this->getConfigElement($id);
-			return $config->getAttribute($attribute ?: 'value');
+			return $config->getAttribute($attribute);
 		}
 
 		/**
