@@ -156,11 +156,16 @@
 				$row->addCell($contribution->getAttribute('category'));
 				$row->addCell($contribution->getAttribute('website'));
 
+				$action = makeAction($this->language.'/'.$this->pagename.'/contribute/'.$contribution->getAttribute('xml:id'), '', '');
+				$button = makeButton(__('edit'), $action);
+				$row->addCell()->append($button);
+
+
 				$description = $contribution->getOrCreate('description')->text();
 				$imgfilename = $contribution->getAttribute('image');
 				if ($description || $imgfilename) {
 					$cell = $table->addRow()->addCell(__('description') . ': ' . $description);
-					$cell->setAttribute('colspan', 4);
+					$cell->setAttribute('colspan', 5);
 					$cell->setAttribute('style', 'padding-left: 50px;');
 					if ($imgfilename) {
 						$imgtag = $this->html->createElement('img');
@@ -173,7 +178,7 @@
 				$notes = $contribution->getOrCreate('notes')->text();
 				if ($notes) {
 					$cell = $table->addRow()->addCell(__('notes') . ': ' . $notes);
-					$cell->setAttribute('colspan', 4);
+					$cell->setAttribute('colspan', 5);
 					$cell->setAttribute('style', 'padding-left: 50px;');
 				}
 			}
@@ -401,10 +406,10 @@ EOF;
 		 * Show the contribution form.
 		 */
 		function showContribute($form = null, $editing = false) {
-			$obj = $this->checkKeyArguments(['contribution', 'participant']);
-			if (!$obj && !isUser())
+			$obj = $this->checkKeyArguments(['contribution', 'participant'], true);
+			if (!$obj)
 				return;
-			$editing = ($obj && $obj->tagName == 'contribution');
+			$editing = ($obj->tagName == 'contribution');
 
 			if (!$form) {
 				$form = new HTMLForm($this->getConfigElement('contribution-form')->cloneNode(true));
@@ -433,8 +438,8 @@ EOF;
 			global $hyphaUrl, $hyphaLanguage, $hyphaPage, $hyphaUser;
 			$this->xml->lockAndReload();
 
-			$obj = $this->checkKeyArguments(['contribution', 'participant']);
-			if (!$obj && !isUser())
+			$obj = $this->checkKeyArguments(['contribution', 'participant'], true);
+			if (!$obj)
 				return;
 			$errors = array();
 
@@ -460,22 +465,18 @@ EOF;
 			}
 
 			// get contribution element or create new contribution element
-			if ($obj && $obj->tagName == 'contribution') {
+			if ($obj->tagName == 'contribution') {
 				$contribution = $obj;
 				$editing = true;
-				$participant_id = $contribution->getAttribute('participant');
-				if ($participant_id)
-					$participant = $this->xml->getElementById($participant_id);
 			} else {
 				$contribution = $this->xml->createElement('contribution');
 				$contribution->generateId();
 				$contribution->setAttribute('key', bin2hex(openssl_random_pseudo_bytes(8)));
-				if ($obj)
+				if ($obj ->tagName == 'participant')
 					$contribution->setAttribute('participant', $obj->getAttribute('xml:id'));
 
 				$this->xml->documentElement->getOrCreate('contributions')->appendChild($contribution);
 				$editing = false;
-				$participant = $obj;
 			}
 
 			// set attributes
@@ -495,11 +496,19 @@ EOF;
 			$this->xml->saveAndUnlock();
 			$edit_url = $hyphaUrl . $hyphaLanguage . '/' . $this->pagename . '/contribute/' . $contribution->getAttribute('xml:id') . '/' . $contribution->getAttribute('key');
 
-			if (isUser())
-				$digest = htmlspecialchars(getNameForUser());
-			else
-				$digest = htmlspecialchars($participant->getAttribute('name'));
+			if (isUser()) {
+				$name = htmlspecialchars(getNameForUser());
+				$email = $hyphaUser->getAttribute('email');
+			} else if ($participant_id = $contribution->getAttribute('participant')) {
+				$participant = $this->xml->getElementById($participant_id);
+				$name = htmlspecialchars($participant->getAttribute('name'));
+				$email = $participant->getAttribute('email');
+			} else {
+				$name = __('anonymous');
+				$email = false;
+			}
 
+			$digest = $name;
 			if ($editing)
 				$digest .= __('festival-edited-contribution');
 			else
@@ -509,13 +518,10 @@ EOF;
 			$digest .= ' (<a href="' . $edit_url . '">Edit contribution</a>)';
 			writeToDigest($digest, 'festival-contribution');
 
-			if (!$editing) {
+			if (!$editing && $email) {
 				$edit_url = $hyphaUrl . $hyphaLanguage . '/' . $this->pagename . '/contribute/' . $contribution->getAttribute('xml:id') . '/' . $contribution->getAttribute('key');
 				$append = '<p><a href="'.htmlspecialchars($edit_url).'">'.__('festival-edit-contribution') . '</a></p>';
-				if (isUser())
-					$this->sendMail($hyphaUser->getAttribute('email'), 'mail-added-contribution', $append);
-				else
-					$this->sendMail($participant->getAttribute('email'), 'mail-added-contribution', $append);
+				$this->sendMail($email, 'mail-added-contribution', $append);
 			}
 
 			if ($editing)
@@ -744,15 +750,25 @@ EOF;
 		 * given in the $tags array, the element is returned.
 		 * Otherwise, a notification is added and false is
 		 * returned.
+		 *
+		 * If $allow_user is true, the element will be returned
+		 * even if the key is not present. If no id is present
+		 * either, the user object itself will be returned.
 		 */
-		function checkKeyArguments($tags) {
+		function checkKeyArguments($tags, $allow_user = false) {
+			global $hyphaUser;
 			$id = $this->getArg(1);
 			if ($id) {
 				$obj = $this->xml->getElementById($id);
 				if ($obj && in_array($obj->tagName, $tags)) {
-					if ($obj->getAttribute('key') == $this->getArg(2))
+					$key = $this->getArg(2);
+					if (!$key && $allow_user && isUser() ||
+					    $key && $obj->getAttribute('key') == $key) {
 						return $obj;
+					}
 				}
+			} else if ($allow_user && isUser()) {
+				return $hyphaUser;
 			}
 			notify('error', __('invalid-or-no-key'));
 			return false;
