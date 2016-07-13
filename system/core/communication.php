@@ -26,7 +26,7 @@
 		$error = array();
 		foreach(explode(',', $to) as $email) {
 			if (!$DEBUG && !filter_var($email, FILTER_VALIDATE_EMAIL)) $error[]= $email;
-			elseif (!mail($email, $subject, '<html><body>'.$message.'</body></html>', $headers.'To: '.$email)) $error[]= $email;
+			elseif (!mail($email, $subject, '<html><body>'.$message.'</body></html>', $headers.'To: '.$email, '-f '.$frommail)) $error[]= $email;
 		}
 		if ($error) return __('error-sending-message').' '.implode(',', $error);
 		else return '';
