@@ -191,13 +191,13 @@
 		"festival-invalid-or-no-key" => "Invalid or no key given",
 
 		/* buttons & links */
-		"festival-modify" => "Modify",
-		"festival-contribute" => "Contribute",
-		"festival-edit-contribution" => "Edit contribution",
-		"festival-restart-payment" => "Restart payment procedure",
-		"festival-signup" => "Signup",
-		"festival-contribute" => "Contribute",
-		"festival-participants" => "Participants",
-		"festival-contributions" => "Contributions",
+		"festival-modify" => "modify",
+		"festival-contribute" => "contribute",
+		"festival-edit-contribution" => "edit contribution",
+		"festival-restart-payment" => "restart payment procedure",
+		"festival-signup" => "signup",
+		"festival-contribute" => "contribute",
+		"festival-participants" => "participants",
+		"festival-contributions" => "contributions",
 	);
 ?>
