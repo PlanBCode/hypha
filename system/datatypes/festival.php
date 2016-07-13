@@ -80,6 +80,8 @@
 		 */
 		function getConfig($id, $attribute = 'value') {
 			$config = $this->getConfigElement($id);
+			if (!$config)
+				return '';
 			return $config->getAttribute($attribute);
 		}
 
