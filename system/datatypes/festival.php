@@ -31,6 +31,11 @@
 				case 'translate':
 					return $this->translate();
 			*/
+				case 'participants':
+					return $this->showParticipants();
+				case 'contributions':
+					return $this->showContributions();
+
 				case 'signup':
 					return $this->showSignup();
 				case 'pay':
@@ -64,6 +69,62 @@
 		 */
 		function getConfigElement($id) {
 			return $this->xml->getElementById($id);
+		}
+
+		/**
+		 * Show the admin display with registrations.
+		 */
+		function showParticipants() {
+			if (!isUser()) return notify('error', __('login-to-edit'));
+			$table = new HTMLTable();
+			$this->html->find('#main')->appendChild($table);
+			$table->addHeaderRow()->addCells([__('name'), __('email'), __('phone'), __('price'), __('payment-status')]);
+			foreach ($this->xml->documentElement->getOrCreate('participants')->children() as $participant) {
+				$row = $table->addRow();
+				$row->addCell($participant->getAttribute('name'));
+				$row->addCell($participant->getAttribute('email'));
+				$row->addCell($participant->getAttribute('phone'));
+				$row->addCell($participant->getAttribute('payment-amount'));
+				$row->addCell($participant->getAttribute('payment-status'));
+			}
+		}
+
+		/**
+		 * Show the admin display with contributions.
+		 */
+		function showContributions() {
+			if (!isUser()) return notify('error', __('login-to-edit'));
+			$table = new HTMLTable();
+			$this->html->find('#main')->appendChild($table);
+			$table->addHeaderRow()->addCells([__('name'), __('title'), __('category'), __('website')]);
+			foreach ($this->xml->documentElement->getOrCreate('contributions')->children() as $contribution) {
+				$row = $table->addRow();
+				$row->addCell($contribution->getAttribute('name'));
+				$row->addCell($contribution->getAttribute('title'));
+				$row->addCell($contribution->getAttribute('category'));
+				$row->addCell($contribution->getAttribute('website'));
+
+				$description = $contribution->getOrCreate('description')->text();
+				$imgfilename = $contribution->getAttribute('image');
+				if ($description || $imgfilename) {
+					$cell = $table->addRow()->addCell(__('description') . ': ' . $description);
+					$cell->setAttribute('colspan', 4);
+					$cell->setAttribute('style', 'padding-left: 50px;');
+					if ($imgfilename) {
+						$imgtag = $this->html->createElement('img');
+						$cell->insertBefore($imgtag, $cell->firstChild);
+						$image = new HyphaImage($contribution->getAttribute('image'));
+						$imgtag->setAttribute('src', $image->getUrl(50, 50));
+						$imgtag->setAttribute('style', 'float: left; margin: 5px 10px 0 0;');
+					}
+				}
+				$notes = $contribution->getOrCreate('notes')->text();
+				if ($notes) {
+					$cell = $table->addRow()->addCell(__('notes') . ': ' . $notes);
+					$cell->setAttribute('colspan', 4);
+					$cell->setAttribute('style', 'padding-left: 50px;');
+				}
+			}
 		}
 
 		/**
