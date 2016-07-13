@@ -17,15 +17,19 @@
 			$this->xml = new Xml('festival', Xml::multiLingualOn, Xml::versionsOff);
 			$this->xml->loadFromFile('data/pages/'.$pageListNode->getAttribute('id'));
 
-			registerCommandCallback('save', Array($this, 'handleSave'));
+			registerCommandCallback('save', Array($this, 'handleSaveSettings'));
 			registerCommandCallback('signup', Array($this, 'handleSignup'));
 			registerCommandCallback('contribute', Array($this, 'handleContribute'));
 			registerCommandCallback('pay', Array($this, 'handlePay'));
 		}
 
 		function build() {
-			if (isUser()) {
+			if (isUser() && !in_array($this->getArg(0), ['edit'])) {
 				$commands = $this->html->find('#pageCommands');
+
+				$action = makeAction($this->language . '/' . $this->pagename . '/edit', '', '');
+				$button = makeButton(__('settings'), $action);
+				$commands->append($button);
 
 				$action = makeAction($this->language . '/' . $this->pagename . '/signup', '', '');
 				$button = makeButton(__('festival-signup'), $action);
@@ -46,11 +50,11 @@
 
 			switch ($this->getArg(0)) {
 			/*
-				case 'edit':
-					return $this->edit();
 				case 'translate':
 					return $this->translate();
 			*/
+				case 'edit':
+					return $this->showSettings();
 				case 'participants':
 					return $this->showParticipants();
 				case 'contributions':
@@ -88,9 +92,31 @@
 		/**
 		 * Retrieve the XML element with the given id and return
 		 * it.
+		 *
+		 * If the element does not exist and a tagname is given,
+		 * it is created using the given tagname. Otherwise,
+		 * null is returned.
 		 */
-		function getConfigElement($id) {
-			return $this->xml->getElementById($id);
+		function getConfigElement($id, $tagname = null) {
+			$elem = $this->xml->getElementById($id);
+			if (!$elem && $tagname) {
+				$elem = $this->xml->createElement($tagname);
+				$elem->setAttribute('xml:id', $id);
+				$this->xml->documentElement->appendChild($elem);
+			}
+			return $elem;
+		}
+
+		/**
+		 * Set a config value in the XML. This finds a
+		 * tag with the given id, sets the given attribute from
+		 * it. If no attribute is given, the "value" attribute
+		 * is set. If the tag does not exist, it is created,
+		 * using the given tagname.
+		 */
+		function setConfig($id, $value, $tagname = 'config', $attribute = 'value') {
+			$config = $this->getConfigElement($id, $tagname);
+			return $config->setAttribute($attribute, $value);
 		}
 
 		/**
@@ -147,6 +173,63 @@
 					$cell->setAttribute('style', 'padding-left: 50px;');
 				}
 			}
+		}
+
+
+		function getSettingsForm() {
+$html = <<<'EOF'
+<table>
+	<tr><td><label for="festival-title">Festival title</label> *</td><td><input name="festival-title"/></td></tr>
+</table>
+EOF;
+			$elem = $this->html->createElement('form')->html($html);
+			return new HTMLForm($elem);
+		}
+
+		function showSettings($form = null) {
+			if (!isUser()) return notify('error', __('login-to-edit'));
+
+			if (!$form) {
+				$form = $this->getSettingsForm();
+				$form->setData([
+					'festival-title' => $this->getConfig('festival-title'),
+				]);
+			}
+
+			$form->updateDom();
+			$this->html->find('#main')->append($form->elem->children());
+
+			// show 'cancel' button
+			$action = makeAction($this->language.'/'.$this->pagename, '', '');
+			$button = makeButton(__('cancel'), $action);
+			$this->html->writeToElement('pageCommands', $button);
+
+			// show 'save' button
+			$action = makeAction($this->language.'/'.$this->pagename, 'save', '');
+			$button = makeButton(__('save'), $action);
+			$this->html->writeToElement('pageCommands', $button);
+		}
+
+		function handleSaveSettings($arg) {
+			global $hyphaUrl, $hyphaLanguage, $hyphaPage;
+
+			if (!isUser()) return notify('error', __('login-to-edit'));
+			$form = $this->getSettingsForm();
+			$form->setData($_POST);
+			$form->validateRequiredField('festival-title');
+
+			if ($form->errors) {
+				// HACK: Prevent index.php from
+				// rendering the page normally, since we
+				// already rendered it. There should be
+				// a better way to achive this.
+				$hyphaPage = false;
+				return $this->showSettings($form);
+			}
+			$this->xml->lockAndReload();
+			$this->setConfig('festival-title', $form->dataFor('festival-title'));
+			$this->xml->saveAndUnlock();
+			return 'reload';
 		}
 
 		/**
