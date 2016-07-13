@@ -423,4 +423,51 @@
 				$this->data[$name] = $result->getFilename();
 		}
 	}
+
+	class HTMLTable extends DOMWrap\Element {
+		private $currentRow;
+
+		function __construct() {
+			parent::__construct('table');
+		}
+
+		function addHeaderRow() {
+			$currentRow = new HTMLTableRow('th');
+			$this->appendChild($currentRow);
+			return $currentRow;
+		}
+
+		function addRow() {
+			$currentRow = new HTMLTableRow('td');
+			$this->appendChild($currentRow);
+			return $currentRow;
+		}
+
+		function addCell($contents = null) {
+			return $currentRow->addCell($contents);
+		}
+	}
+
+	class HTMLTableRow extends DOMWrap\Element {
+		private $celltype;
+
+		function __construct($celltype) {
+			parent::__construct('tr');
+			$this->celltype = $celltype;
+		}
+
+		function addCell($text = null) {
+			$cell = new DOMWrap\Element($this->celltype);
+			$this->appendChild($cell);
+			if ($text)
+				$cell->setText($text);
+			return $cell;
+		}
+
+		function addCells($texts) {
+			foreach ($texts as $text)
+				$this->addCell($text);
+			return $this;
+		}
+	}
 ?>
