@@ -293,9 +293,9 @@
 		 */
 		function showContribute($form = null, $editing = false) {
 			$obj = $this->checkKeyArguments(['contribution', 'participant']);
-			if (!$obj)
+			if (!$obj && !isUser())
 				return;
-			$editing = ($obj->tagName == 'contribution');
+			$editing = ($obj && $obj->tagName == 'contribution');
 
 			if (!$form) {
 				$form = new HTMLForm($this->getConfigElement('contribution-form')->cloneNode(true));
@@ -321,11 +321,11 @@
 		 * Handle the contribution form.
 		 */
 		function handleContribute() {
-			global $hyphaUrl, $hyphaLanguage, $hyphaPage;
+			global $hyphaUrl, $hyphaLanguage, $hyphaPage, $hyphaUser;
 			$this->xml->lockAndReload();
 
 			$obj = $this->checkKeyArguments(['contribution', 'participant']);
-			if (!$obj)
+			if (!$obj && !isUser())
 				return;
 			$errors = array();
 
@@ -351,14 +351,18 @@
 			}
 
 			// get contribution element or create new contribution element
-			if ($obj->tagName == 'contribution') {
+			if ($obj && $obj->tagName == 'contribution') {
 				$contribution = $obj;
 				$editing = true;
+				$participant_id = $contribution->getAttribute('participant');
+				if ($participant_id)
+					$participant = $this->xml->getElementById($participant_id);
 			} else {
 				$contribution = $this->xml->createElement('contribution');
 				$contribution->generateId();
 				$contribution->setAttribute('key', bin2hex(openssl_random_pseudo_bytes(8)));
-				$contribution->setAttribute('participant', $obj->getAttribute('xml:id'));
+				if ($obj)
+					$contribution->setAttribute('participant', $obj->getAttribute('xml:id'));
 
 				$this->xml->documentElement->getOrCreate('contributions')->appendChild($contribution);
 				$editing = false;
@@ -380,9 +384,13 @@
 			$notes->setText($form->dataFor('notes', ''));
 
 			$this->xml->saveAndUnlock();
-			$participant = $this->xml->getElementById($contribution->getAttribute('participant'));
 			$edit_url = $hyphaUrl . $hyphaLanguage . '/' . $this->pagename . '/contribute/' . $contribution->getAttribute('xml:id') . '/' . $contribution->getAttribute('key');
-			$digest = htmlspecialchars($participant->getAttribute('name'));
+
+			if (isUser())
+				$digest = htmlspecialchars(getNameForUser());
+			else
+				$digest = htmlspecialchars($participant->getAttribute('name'));
+
 			if ($editing)
 				$digest .= __('festival-edited-contribution');
 			else
@@ -395,7 +403,10 @@
 			if (!$editing) {
 				$edit_url = $hyphaUrl . $hyphaLanguage . '/' . $this->pagename . '/contribute/' . $contribution->getAttribute('xml:id') . '/' . $contribution->getAttribute('key');
 				$append = '<p><a href="'.htmlspecialchars($edit_url).'">'.__('festival-edit-contribution') . '</a></p>';
-				$this->sendMail($participant->getAttribute('email'), 'mail-added-contribution', $append);
+				if (isUser())
+					$this->sendMail($hyphaUser->getAttribute('email'), 'mail-added-contribution', $append);
+				else
+					$this->sendMail($participant->getAttribute('email'), 'mail-added-contribution', $append);
 			}
 
 			if ($editing)
