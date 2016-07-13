@@ -136,7 +136,7 @@
 				$row->addCell($participant->getAttribute('name'));
 				$row->addCell($participant->getAttribute('email'));
 				$row->addCell($participant->getAttribute('phone'));
-				$row->addCell($participant->getAttribute('payment-amount'));
+				$row->addCell('€' . $participant->getAttribute('payment-amount'));
 				$row->addCell($participant->getAttribute('payment-status'));
 			}
 		}
