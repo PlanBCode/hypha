@@ -24,6 +24,26 @@
 		}
 
 		function build() {
+			if (isUser()) {
+				$commands = $this->html->find('#pageCommands');
+
+				$action = makeAction($this->language . '/' . $this->pagename . '/signup', '', '');
+				$button = makeButton(__('festival-signup'), $action);
+				$commands->append($button);
+
+				$action = makeAction($this->language . '/' . $this->pagename . '/contribute', '', '');
+				$button = makeButton(__('festival-contribute'), $action);
+				$commands->append($button);
+
+				$action = makeAction($this->language . '/' . $this->pagename . '/participants', '', '');
+				$button = makeButton(__('festival-participants'), $action);
+				$commands->append($button);
+
+				$action = makeAction($this->language . '/' . $this->pagename . '/contributions', '', '');
+				$button = makeButton(__('festival-contributions'), $action);
+				$commands->append($button);
+			}
+
 			switch ($this->getArg(0)) {
 			/*
 				case 'edit':

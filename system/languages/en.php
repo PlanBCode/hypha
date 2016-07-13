@@ -195,5 +195,9 @@
 		"festival-contribute" => "Contribute",
 		"festival-edit-contribution" => "Edit contribution",
 		"festival-restart-payment" => "Restart payment procedure",
+		"festival-signup" => "Signup",
+		"festival-contribute" => "Contribute",
+		"festival-participants" => "Participants",
+		"festival-contributions" => "Contributions",
 	);
 ?>
