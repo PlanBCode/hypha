@@ -46,6 +46,10 @@
 				$action = makeAction($this->language . '/' . $this->pagename . '/contributions', '', '');
 				$button = makeButton(__('festival-contributions'), $action);
 				$commands->append($button);
+
+				$action = makeAction($this->language . '/' . $this->pagename . '/lineup', '', '');
+				$button = makeButton(__('festival-lineup'), $action);
+				$commands->append($button);
 			}
 
 			switch ($this->getArg(0)) {

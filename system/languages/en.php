@@ -199,5 +199,6 @@
 		"festival-contribute" => "contribute",
 		"festival-participants" => "participants",
 		"festival-contributions" => "contributions",
+		"festival-lineup" => "lineup",
 	);
 ?>
