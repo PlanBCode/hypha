@@ -169,6 +169,7 @@
 		"image-type-must-be-one-of" => "Image type must be one of: ",
 		"error-uploading-file" => "Error uploading file: ",
 		"file-too-big-must-be-less-than" => "File is too big, it must be less than ",
+		"anonymous" => "anonymous",
 
 		/* digest */
 		"festival-edited-contribution" => " edited contribution: ",

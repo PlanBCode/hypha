@@ -99,6 +99,21 @@
 	}
 
 	/*
+		Function getNameForUser
+		returns a name for the given user, or the current user
+		if no user is given. Returns the fullname if set,
+		otherwise the username if set, otherwise the email.
+	*/
+	function getNameForUser($user = false) {
+		global $hyphaUser;
+		if ($user === false)
+			$user = $hyphaUser;
+		if (!$user)
+			return __('anonymous');
+		return $user->getAttribute('fullname') ?: $user->getAttribute('username') ?: $user->getAttribute('email');
+	}
+
+	/*
 		Function: getUserEmailList
 		returns a comma separated list of all registered users, omiting invitees and exmembers
 	*/
