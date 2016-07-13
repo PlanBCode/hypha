@@ -378,7 +378,7 @@ EOF;
 				exit;
 			}
 
-			if($participant->getAttribute('payment-id') != $_GET['id']) {
+			if($participant->getAttribute('payment-id') != $_REQUEST['id']) {
 				http_response_code(403);
 				writeToDigest('Invalid payment id in payment hook: ' . $_SERVER['REQUEST_URI'] . '?' . $_SERVER['QUERY_STRING'], 'error');
 				exit;
