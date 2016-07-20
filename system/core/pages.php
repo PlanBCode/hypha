@@ -287,8 +287,8 @@
 		global $hyphaUrl;
 		$body = $html->getElementsByTagName('body')->Item(0);
 		// convert occurences of '<a href="hypha:page-id">' info '<a href="language/pagename">'
-		setInnerHtml($body, preg_replace_callback('/<a(.*?)href="hypha:(.*?)"([^>]*?)\/>/', 'hypha_id2url', getInnerHtml($body)));
-		setInnerHtml($body, preg_replace_callback('/<a(.*?)href="hypha:(.*?)"(.*?)>(.*?)<\/a>/', 'hypha_id2url', getInnerHtml($body)));
+		setInnerHtml($body, preg_replace_callback('/<a([^>]*?)href="hypha:([^"]*?)"([^>]*?)\/>/', 'hypha_id2url', getInnerHtml($body)));
+		setInnerHtml($body, preg_replace_callback('/<a([^>]*?)href="hypha:([^"]*?)"([^>]*?)>([^<]*?)<\/a>/', 'hypha_id2url', getInnerHtml($body)));
 		// convert occurences of '<a href="ref">' or '<img src="ref">' into '<a href="baseUrl/ref">' resp '<img src="baseUrl/ref">'
 		setInnerHtml($body, preg_replace('/(href|src)="([^:]*?)"/i', '$1="'.$hyphaUrl.'$2"', getInnerHtml($body)));
 	}
