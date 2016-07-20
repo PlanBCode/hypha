@@ -799,7 +799,7 @@
 			$src_w = $orig_w;
 			$src_h = $height / ($width / $src_w);
 
-			// If the resulting height is larget
+			// If the resulting height is larger
 			// than the source height, use the full
 			// height and scale the width instead.
 			if ($src_h > $orig_h) {
