@@ -808,8 +808,8 @@
 			}
 
 			$result = imagecreatetruecolor($width, $height);
-			$src_x = ($src_w - $orig_w) / 2;
-			$src_y = ($src_h - $orig_h) / 2;
+			$src_x = ($orig_w - $src_w) / 2;
+			$src_y = ($orig_h - $src_h) / 2;
 			imagecopyresampled($result, $image, 0, 0, $src_x, $src_y, $width, $height, $src_w, $src_h);
 			imagejpeg($result, $destination, 90);
 			imagedestroy($result);
