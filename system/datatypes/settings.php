@@ -545,11 +545,13 @@
 			return 'reload';
 		}
 
-		function remindNewUser($requestId) {
+		function remindNewUser($userId) {
 			global $hyphaUrl;
 			if (isAdmin()) {
-				$email = hypha_getUserById($requestId)->getAttribute('email');
-				$mailBody = __('remind-to-join').'\''.hypha_getTitle().'\'. '.__('follow-link-to-register').'<br /><a href="'.$hyphaUrl.'settings/register/'.$requestId.'">'.$hyphaUrl.'settings/register/'.$requestId.'</a>';
+				$user = hypha_getUserById($userId);
+				$email = $user->getAttribute('email');
+				$url = $hyphaUrl.'settings/register/'.$user->getAttribute('key');
+				$mailBody = __('remind-to-join').'\''.hypha_getTitle().'\'. '.__('follow-link-to-register').'<br /><a href="'.$url.'">'.$url.'</a>';
 				$result = sendMail($email, __('invitation').'\''.hypha_getTitle().'\'', nl2br($mailBody));
 				notify('success', $result ? $result : $email.__('was-invited'));
 			}
