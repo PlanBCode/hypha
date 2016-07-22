@@ -724,7 +724,7 @@ EOF;
 					$append = '<p><a href="'.htmlspecialchars($pay_url).'">'.__('festival-restart-payment') . '</a></p>';
 					$this->sendMail($participant->getAttribute('email'), 'mail-payment-failed', $append);
 				}
-				$digest = htmlspecialchars($participant->getAttribute('name') . __('festival-failed-to-pay-for') . $this->getConfig('festival-title') . ' ( ' . $payment->status . ')');
+				$digest = htmlspecialchars($participant->getAttribute('name') . __('festival-failed-to-pay-for') . $this->getConfig('festival-title') . ' (' . $payment->status . ')');
 				writeToDigest($digest, 'error');
 			}
 		}
