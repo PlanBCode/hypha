@@ -578,6 +578,9 @@ EOF;
 				$duration = $contribution->hasAttribute('duration') && $contribution->getAttribute('duration') ? $contribution->getAttribute('duration') : '';
 				$html.= '<b>'.$price.($price && $duration ? ' | ' : '').$duration.'</b><br/>';
 			}
+			$website = htmlspecialchars($contribution->getAttribute('website'));
+			if ($website)
+				$html.= "<a href=\"$website\">$website</a>";
 			// additional urls
 			foreach($contribution->getElementsByTagName('contact') as $contact) {
 				if ($contact->hasAttribute('website') && $contact->getAttribute('website')) $html.= '<a style="text-decoration: none;color:#d2691e;" href="'.$contact->getAttribute('website').'">'.$contact->getAttribute('website').'</a>';
