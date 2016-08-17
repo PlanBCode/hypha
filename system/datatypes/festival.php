@@ -601,26 +601,6 @@ EOF;
 			// Make a list of all days, and per day all
 			// locations and the begin and end time.
 			$contributions = $this->xml->documentElement->getOrCreate('contributions')->children();
-			/*
-			$days = [];
-			foreach($contributions as $contribution) {
-				$events = $contribution->getElementsByTagName('event');
-				foreach($events as $event) {
-					$day = $event->getAttribute('day');
-					$location = $event->getAttribute('location');
-					$begin = $event->getAttribute('begin');
-					$end = $event->getAttribute('end');
-					if ($day && $location && $begin && $end) {
-						$days[$day]['locations'][$location] = $location;
-						if (!array_key_exists('begin', $days[$day]) || $begin < $days[$day]['begin'])
-							$days[$day]['begin'] = $begin;
-						if (!array_key_exists('end', $days[$day]) || $end > $days[$day]['end'])
-							$days[$day]['end'] = $end;
-					}
-				}
-			}
-			*/
-
 			$days = $this->getConfigElement('days', 'config')->children();
 			$locations = $this->getConfigElement('locations', 'config')->children();
 
