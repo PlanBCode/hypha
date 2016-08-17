@@ -646,7 +646,7 @@ EOF;
 						$events = $contribution->getElementsByTagName('event');
 						foreach($events as $event) {
 							if ($event->getAttribute('day') == $day->getId() && $event->getAttribute('location') == $location->getId())
-								$locevents[] = $this->timetocols($daybegin, $event->getAttribute('begin')).'|'.$this->timetocols($daybegin, $event->getAttribute('end')).'|'.$contribution->getAttribute('artist').'|'.$contribution->getAttribute('id').'|'.$contribution->getAttribute('title');
+								$locevents[] = $this->timetocols($daybegin, $event->getAttribute('begin')).'|'.$this->timetocols($daybegin, $event->getAttribute('end')).'|'.$contribution->getAttribute('artist').'|'.$contribution->getId().'|'.$contribution->getAttribute('title');
 						}
 					}
 
@@ -686,7 +686,7 @@ EOF;
 							if ($timeslot[0] - $t) $html.= '<td class="'.($line%2 ? 'tableRowOdd' : 'tableRowEven').'" colspan="'.($timeslot[0] - $t).'"></td>';
 							//$html.= '<td id="'.$id.'" class="hover tableAct '.($line%2 ? 'tableRowOddAct' : 'tableRowEvenAct').'" colspan="'.($timeslot[1] - $timeslot[0]).'" onmouseover="showhide(\''.$id.'\',-120,0,\'act\',\''.$timeslot[3].'\');" onmouseout="showhide();">'.$timeslot[2];
 							$lineup_url = $hyphaUrl . $hyphaLanguage . '/' . $this->pagename . '/lineup';
-							$html.= '<td id="'.$id.'" class="hover tableAct '.($line%2 ? 'tableRowOddAct' : 'tableRowEvenAct').'" colspan="'.($timeslot[1] - $timeslot[0]).'"><a href="'.htmlspecialchars($lineup_url).'#'.htmlspecialchars($contribution->getAttribute('xml:id')).'">'.htmlspecialchars($timeslot[2]);
+							$html.= '<td id="'.$id.'" class="hover tableAct '.($line%2 ? 'tableRowOddAct' : 'tableRowEvenAct').'" colspan="'.($timeslot[1] - $timeslot[0]).'"><a href="'.htmlspecialchars($lineup_url).'#'.htmlspecialchars($timeslot[3]).'">'.htmlspecialchars($timeslot[2]);
 							if ($timeslot[2] && $timeslot[4]) $html.= ' - ';
 							$html.= '<i>'.$timeslot[4].'</i></a></td>';
 							$t = htmlspecialchars($timeslot[1]);
