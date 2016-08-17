@@ -349,3 +349,45 @@ code
     padding: 5px 0 0 0;
     width: 100%;
 }
+
+/* Festival */
+
+.timeGridOdd {
+	text-align:left;
+	vertical-align:top;
+}
+.timeGridOdd {
+	text-align:left;
+	vertical-align:top;
+	background-color:#ddd;
+}
+.tableRowOdd {
+	background-color:#fff;
+}
+.tableRowEven {
+	background-color:#ddd;
+}
+.tableAct {
+	text-align:center;
+}
+.tableRowOddAct {
+	background-color:#c63;
+	color:#fff;
+	font-weight:bold;
+}
+.tableRowEvenAct {
+	background-color:#36c;
+	color:#fff;
+	font-weight:bold;
+}
+.tableRowHeading {
+	text-align:left;
+	font-weight:bold;
+	padding:5px;
+}
+.tableRowHeadingOdd {
+	background-color:#ddd;
+}
+.tableRowHeadingEven {
+	background-color:#bbb;
+}

@@ -50,6 +50,10 @@
 				$action = makeAction($this->language . '/' . $this->pagename . '/lineup', '', '');
 				$button = makeButton(__('festival-lineup'), $action);
 				$commands->append($button);
+
+				$action = makeAction($this->language . '/' . $this->pagename . '/timetable', '', '');
+				$button = makeButton(__('festival-timetable'), $action);
+				$commands->append($button);
 			}
 
 			switch ($this->getArg(0)) {
@@ -587,8 +591,144 @@ EOF;
 			}
 			$html.= '</div>';
 			$html.= '<p style="clear:right;"/>';
-			
+
 			return $html;
+		}
+
+		function showTimetable() {
+			global $hyphaHtml, $hyphaLanguage, $hyphaUrl;
+
+			// Make a list of all days, and per day all
+			// locations and the begin and end time.
+			$contributions = $this->xml->documentElement->getOrCreate('contributions')->children();
+			/*
+			$days = [];
+			foreach($contributions as $contribution) {
+				$events = $contribution->getElementsByTagName('event');
+				foreach($events as $event) {
+					$day = $event->getAttribute('day');
+					$location = $event->getAttribute('location');
+					$begin = $event->getAttribute('begin');
+					$end = $event->getAttribute('end');
+					if ($day && $location && $begin && $end) {
+						$days[$day]['locations'][$location] = $location;
+						if (!array_key_exists('begin', $days[$day]) || $begin < $days[$day]['begin'])
+							$days[$day]['begin'] = $begin;
+						if (!array_key_exists('end', $days[$day]) || $end > $days[$day]['end'])
+							$days[$day]['end'] = $end;
+					}
+				}
+			}
+			*/
+
+			$days = $this->getConfigElement('days', 'config')->children();
+			$locations = $this->getConfigElement('locations', 'config')->children();
+
+			// iterate over all dates
+			$html = '';
+			$d = 0;
+			foreach($days as $day) {
+				// TODO: If begin and end not set, autodetect?
+				$daybegin = $day->getAttribute('begin');
+				$dayend = $day->getAttribute('end');
+
+				foreach($contributions as $contribution) {
+					$events = $contribution->getElementsByTagName('event');
+					foreach($events as $event) {
+						$eventday = $event->getAttribute('day');
+						$eventbegin = $event->getAttribute('begin');
+						$eventend = $event->getAttribute('end');
+						if ($eventbegin && $eventend && $eventday == $day->getId()) {
+							if (!$daybegin || $eventbegin < $daybegin)
+								$daybegin = $eventbegin;
+							if (!$dayend || $eventend > $dayend)
+								$dayend = $eventend;
+						}
+					}
+				}
+
+				// output date header
+				$html.= '<br/><br/><h1>'.$day->getAttribute('display').'</h1><br/>';
+				$html.= "<table>";
+
+				// output row of invisible images to force a more or less regular time grid
+				$html.= "<tr><td></td>";
+				for ($c = 12*substr($daybegin,0,2); $c < 12*substr($dayend,0,2); $c++) $html.= '<td style="min-width: 10px;"></td>';
+				$html.= '</tr>';
+
+				// iterate over all locations
+				$line = 0;
+				$l = 0;
+				foreach($locations as $location) {
+					// generate a list of events for the given date and location
+					$locevents = [];
+					foreach($contributions as $contribution) {
+						$events = $contribution->getElementsByTagName('event');
+						foreach($events as $event) {
+							if ($event->getAttribute('day') == $day->getId() && $event->getAttribute('location') == $location->getId())
+								$locevents[] = $this->timetocols($daybegin, $event->getAttribute('begin')).'|'.$this->timetocols($daybegin, $event->getAttribute('end')).'|'.$contribution->getAttribute('artist').'|'.$contribution->getAttribute('id').'|'.$contribution->getAttribute('title');
+						}
+					}
+
+					while(count($locevents)) {
+						sort($locevents);
+						$row=[];
+						$endOfLastTimeSlot = 0;
+						$p=0;
+						while($p<count($locevents)) {
+							$timeslot = explode('|',$locevents[$p]);
+							if ($timeslot[0]>=$endOfLastTimeSlot) {
+								$endOfLastTimeSlot = $timeslot[1];
+								$row[] = implode('|',$timeslot);
+								array_splice($locevents, $p, 1);
+							}
+							else $p++;
+						}
+						// every 6 rows output time grid
+						if ($line%6==0) {
+							$html.= '<tr><th><div style="text-align:right;">'.__('time').'</div><div style="text-align:left;">'.__('location').'</div></th>';
+							for ($c = substr($daybegin,0,2); $c < substr($dayend,0,2); $c++) {
+								$html.= '<th class="timeGridOdd" colspan="6">'.$c.'</th>';
+								$html.= '<th class="timeGridEven" colspan="6"></th>';
+							}
+							$html.= '</tr>';
+						}
+						// output events
+						$id = 'a'.$d.'_'.$l;
+						$html.= '<tr class="'.($line%2 ? 'tableRowOdd' : 'tableRowEven').'">';
+						$html.= '<td id="'.$id.'" class="hover tableRowHeading '.($line%2 ? 'tableRowHeadingOdd' : 'tableRowHeadingEven').'" >'.$location->getAttribute('display').'</td>';
+						//$html.= '<td id="'.$id.'" class="hover tableRowHeading '.($line%2 ? 'tableRowHeadingOdd' : 'tableRowHeadingEven').'" onmouseover="showhide(\''.$id.'\',100,-10,\'location\',\''.$location->getAttribute('id').'\');" onmouseout="showhide();">'.$location->getAttribute('name').'</td>';
+						$t = $daybegin;
+						$t = 0;
+						for ($r=0; $r<count($row); $r++) {
+							$timeslot = explode('|', $row[$r]);
+							$id = "a".$d.'_'.$l.'_'.$r;
+							if ($timeslot[0] - $t) $html.= '<td class="'.($line%2 ? 'tableRowOdd' : 'tableRowEven').'" colspan="'.($timeslot[0] - $t).'"></td>';
+							//$html.= '<td id="'.$id.'" class="hover tableAct '.($line%2 ? 'tableRowOddAct' : 'tableRowEvenAct').'" colspan="'.($timeslot[1] - $timeslot[0]).'" onmouseover="showhide(\''.$id.'\',-120,0,\'act\',\''.$timeslot[3].'\');" onmouseout="showhide();">'.$timeslot[2];
+							$lineup_url = $hyphaUrl . $hyphaLanguage . '/' . $this->pagename . '/lineup';
+							$html.= '<td id="'.$id.'" class="hover tableAct '.($line%2 ? 'tableRowOddAct' : 'tableRowEvenAct').'" colspan="'.($timeslot[1] - $timeslot[0]).'"><a href="'.htmlspecialchars($lineup_url).'#'.htmlspecialchars($contribution->getAttribute('xml:id')).'">'.htmlspecialchars($timeslot[2]);
+							if ($timeslot[2] && $timeslot[4]) $html.= ' - ';
+							$html.= '<i>'.$timeslot[4].'</i></a></td>';
+							$t = htmlspecialchars($timeslot[1]);
+						}
+						if ($this->timetocols($daybegin, $dayend) - $t) $html.= '<td class="'.($line%2 ? 'tableRowOdd' : 'tableRowEven').'" colspan="'.($this->timetocols($daybegin, $dayend) - $t).'"></td>';
+						$html.= '</tr>';
+						$line++;
+						$l++;
+					}
+				}
+				$html.= '</table>';
+				$d++;
+			}
+			$this->html->find('#pagename')->text(__('festival-timetable-for') . $this->getConfig('festival-title'));
+			$this->html->find('#main')->html($html);
+		}
+
+		function timetocols($t1, $t2) {
+			$c1=12*substr($t1,0,2) + substr($t1,3,2)/5;
+			$c2=12*substr($t2,0,2) + substr($t2,3,2)/5;
+			$c = $c2 - $c1;
+			return str_repeat("0", 3-strlen($c)).$c;
 		}
 
 		/**

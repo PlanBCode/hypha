@@ -187,6 +187,7 @@
 		"festival-signup-for" => "Signup for ",
 		"festival-pay-for" => "Pay for ",
 		"festival-lineup-for" => "Lineup for ",
+		"festival-timetable-for" => "Timetable for ",
 		"festival-contribute-to" => "Contribute to ",
 		"festival-invalid-or-no-key" => "Invalid or no key given",
 
@@ -200,5 +201,6 @@
 		"festival-participants" => "participants",
 		"festival-contributions" => "contributions",
 		"festival-lineup" => "lineup",
+		"festival-timetable" => "timetable",
 	);
 ?>
