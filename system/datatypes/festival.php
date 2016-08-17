@@ -576,6 +576,24 @@ EOF;
 				$html.= '<a href="'.$icon->getAttribute('website').'"><img style="border:0px;" src="images/'.$icon->getAttribute('source').'"/></a>';
 			}
 			$html.= '</div>';
+
+			$days = $this->getConfigElement('days', 'config')->children();
+			$locations = $this->getConfigElement('locations', 'config')->children();
+			foreach($days as $day) {
+				$timesHtml = '';
+				foreach($contribution->getElementsByTagName('event') as $event) {
+					if ($event->getAttribute('day') == $day->getId()) {
+						if ($event->getAttribute('begin')) {
+							$timesHtml .= '&#160;&#160;&#160;'.$event->getAttribute('begin').'-'.$event->getAttribute('end');
+							foreach($locations as $location) if ($location->getId() == $event->getAttribute('location')) {
+								$timesHtml.= ', '.$location->getAttribute('display');
+							}
+							$timesHtml.='<br/>';
+						}
+					}
+				}
+				if ($timesHtml) $html.= '<b>'.$day->getAttribute('display').'</b><br/>'.$timesHtml;
+			}
 			// price and duration
 			if ($contribution->hasAttribute('price') || $contribution->hasAttribute('duration')) {
 				$price = $contribution->hasAttribute('price') && $contribution->getAttribute('price') ? __('price').': '.$contribution->getAttribute('price') : '';
