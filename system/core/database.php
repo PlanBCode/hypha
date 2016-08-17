@@ -160,6 +160,15 @@
 		}
 
 		/*
+			Function: getId
+
+			Returns the xml:id property of this element.
+		*/
+		function getId() {
+			return $this->getAttribute('xml:id');
+		}
+
+		/*
 		        Function: getOrCreate
 
 			Gets the child with the the given tag name
