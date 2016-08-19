@@ -127,24 +127,56 @@
 			return $config->setAttribute($attribute, $value);
 		}
 
+		function array_set_if_unset(&$array, $key, $default) {
+			if (!array_key_exists($key, $array))
+				$array[$key] = $default;
+		}
+
 		/**
 		 * Show the admin display with registrations.
 		 */
 		function showParticipants() {
 			if (!isUser()) return notify('error', __('login-to-edit'));
+
+			$paystats = [];
+			$totalcount = 0;
+
 			$table = new HTMLTable();
 			$this->html->find('#main')->appendChild($table);
 			$table->addHeaderRow()->addCells([__('name'), __('email'), __('phone'), __('price'), __('payment-status')]);
 			foreach ($this->xml->documentElement->getOrCreate('participants')->children() as $participant) {
 				$payamount = $participant->getAttribute('payment-amount');
+				$paystatus = $participant->getAttribute('payment-status');
+				if (!$payamount)
+					$paystatus = 'free';
 
 				$row = $table->addRow();
 				$row->addCell($participant->getAttribute('name'));
 				$row->addCell($participant->getAttribute('email'));
 				$row->addCell($participant->getAttribute('phone'));
 				$row->addCell($payamount ? '€' . $payamount : '-');
-				$row->addCell($participant->getAttribute('payment-status'));
+				$row->addCell($paystatus);
+
+				$totalcount += 1;
+				$this->array_set_if_unset($paystats, $paystatus, ['paysum' => 0, 'count' => 0]);
+				$paystats[$paystatus]['count'] += 1;
+				if ($payamount) {
+					$paystats[$paystatus]['paysum'] += $payamount;
+				}
 			}
+
+			$table = new HTMLTable();
+			$this->html->find('#main')->appendChild($table);
+			$table->addHeaderRow()->addCells(['', __('count'), __('amount')]);
+			foreach ($paystats as $category => $values) {
+				$row = $table->addRow();
+				$row->addCell($category);
+				$row->addCell($values['count']);
+				$row->addCell('€' . $values['paysum']);
+			}
+			$row = $table->addRow();
+			$row->addCell(__('total'));
+			$row->addCell($totalcount);
 		}
 
 		/**
