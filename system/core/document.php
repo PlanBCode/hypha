@@ -486,7 +486,7 @@
 			$cell = new DOMWrap\Element($this->celltype);
 			$this->appendChild($cell);
 			if ($text)
-				$cell->setText($text);
+				$cell->setText((string)$text);
 			return $cell;
 		}
 
