@@ -136,11 +136,13 @@
 			$this->html->find('#main')->appendChild($table);
 			$table->addHeaderRow()->addCells([__('name'), __('email'), __('phone'), __('price'), __('payment-status')]);
 			foreach ($this->xml->documentElement->getOrCreate('participants')->children() as $participant) {
+				$payamount = $participant->getAttribute('payment-amount');
+
 				$row = $table->addRow();
 				$row->addCell($participant->getAttribute('name'));
 				$row->addCell($participant->getAttribute('email'));
 				$row->addCell($participant->getAttribute('phone'));
-				$row->addCell('€' . $participant->getAttribute('payment-amount'));
+				$row->addCell($payamount ? '€' . $payamount : '-');
 				$row->addCell($participant->getAttribute('payment-status'));
 			}
 		}
