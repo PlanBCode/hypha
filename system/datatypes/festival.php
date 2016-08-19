@@ -143,6 +143,7 @@
 			if (!isUser()) return notify('error', __('login-to-edit'));
 
 			$stats = [];
+			$daystats = [];
 			$totalcount = 0;
 
 			$table = new HTMLTable();
@@ -154,12 +155,13 @@
 					$status = $participant->getAttribute('payment-status');
 				else
 					$status = $participant->getAttribute('email-confirmed') ? 'confirmed' : 'unconfirmed';
+				$attending = $participant->getAttribute('attending');
 
 				$row = $table->addRow();
 				$row->addCell($participant->getAttribute('name'));
 				$row->addCell($participant->getAttribute('email'));
 				$row->addCell($participant->getAttribute('phone'));
-				$row->addCell($participant->getAttribute('attending'));
+				$row->addCell($attending);
 				$row->addCell($payamount ? '€' . $payamount : '-');
 				$row->addCell($status);
 
@@ -168,6 +170,13 @@
 				$stats[$status]['count'] += 1;
 				if ($payamount) {
 					$stats[$status]['paysum'] += $payamount;
+				}
+
+				if ($attending) {
+					foreach(split(',', $attending) as $day) {
+						$this->array_set_if_unset($daystats, $day, ['count' => 0]);
+						$daystats[$day]['count'] += 1;
+					}
 				}
 			}
 
@@ -179,6 +188,11 @@
 				$row->addCell($category);
 				$row->addCell($values['count']);
 				$row->addCell('€' . $values['paysum']);
+			}
+			foreach ($daystats as $category => $values) {
+				$row = $table->addRow();
+				$row->addCell($category);
+				$row->addCell($values['count']);
 			}
 			$row = $table->addRow();
 			$row->addCell(__('total'));
