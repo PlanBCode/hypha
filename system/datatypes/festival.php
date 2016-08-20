@@ -681,7 +681,7 @@ EOF;
 
 				// output date header
 				$html.= '<br/><br/><h1>'.$day->getAttribute('display').'</h1><br/>';
-				$html.= "<table>";
+				$html.= "<table class=\"festivalTimetable\">";
 
 				// output row of invisible images to force a more or less regular time grid
 				$html.= "<tr><td></td>";

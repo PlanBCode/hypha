@@ -352,42 +352,42 @@ code
 
 /* Festival */
 
-.timeGridOdd {
+.festivalTimetable .timeGridOdd {
 	text-align:left;
 	vertical-align:top;
 }
-.timeGridOdd {
+.festivalTimetable .timeGridOdd {
 	text-align:left;
 	vertical-align:top;
 	background-color:#ddd;
 }
-.tableRowOdd {
+.festivalTimetable .tableRowOdd {
 	background-color:#fff;
 }
-.tableRowEven {
+.festivalTimetable .tableRowEven {
 	background-color:#ddd;
 }
-.tableAct {
+.festivalTimetable .tableAct {
 	text-align:center;
 }
-.tableRowOddAct {
+.festivalTimetable .tableRowOddAct {
 	background-color:#c63;
 	color:#fff;
 	font-weight:bold;
 }
-.tableRowEvenAct {
+.festivalTimetable .tableRowEvenAct {
 	background-color:#36c;
 	color:#fff;
 	font-weight:bold;
 }
-.tableRowHeading {
+.festivalTimetable .tableRowHeading {
 	text-align:left;
 	font-weight:bold;
 	padding:5px;
 }
-.tableRowHeadingOdd {
+.festivalTimetable .tableRowHeadingOdd {
 	background-color:#ddd;
 }
-.tableRowHeadingEven {
+.festivalTimetable .tableRowHeadingEven {
 	background-color:#bbb;
 }
