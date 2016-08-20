@@ -602,7 +602,7 @@ EOF;
 				$html.= '<a href="'.$image->getUrl().'"><img style="float:left; border:0px; margin-right:10px;" src="'.$image->getUrl($img_width, $img_height).'"/></a>';
 			}
 			$description = $contribution->getElementsByTagName('description')->Item(0);
-			if ($description) $html.= getInnerHtml($description);
+			if ($description) $html.= htmlspecialchars($description->text());
 			$html.= '<p style="clear:left;"/>';
 			// icons
 			$html.= '<div style="float:right; padding-top:5px; padding-left:5px;">';
