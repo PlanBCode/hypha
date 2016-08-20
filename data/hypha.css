@@ -352,6 +352,9 @@ code
 
 /* Festival */
 
+.festivalTimetable, .festivalTimetable a {
+	color: white;
+}
 .festivalTimetable .timeGridOdd {
 	text-align:left;
 	vertical-align:top;
