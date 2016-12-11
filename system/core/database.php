@@ -732,7 +732,7 @@
 		 * If an error occurs a translated error message is
 		 * returned.
 		 */
-		static function importUploadedImage($fileinfo, $max_size = 4 * 1024 * 1024) {
+		static function importUploadedImage($fileinfo, $max_size = 4194304 /* 4M */ ) {
 			if ($fileinfo['size'] > $max_size) return __('file-too-big-must-be-less-than') . $max_size . 'bytes';
 			if ($fileinfo['error'] == UPLOAD_ERR_INI_SIZE) return __('file-too-big-must-be-less-than') . ini_get('upload_max_filesize');
 			if ($fileinfo['error']) return __('error-uploading-file') . $fileinfo["error"];
