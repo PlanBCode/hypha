@@ -12,7 +12,10 @@
 	*/
 	$jquerySource = 'http://code.jquery.com/jquery-1.7.1.min.js';
 	$jqueryuiSource = 'https://code.jquery.com/ui/1.11.4/jquery-ui.min.js';
-	$wymeditorSource = $hyphaUrl.'system/wymeditor/jquery.wymeditor.min.js';
+	$wymeditorSources = [
+		$hyphaUrl.'system/wymeditor/jquery.wymeditor.min.js',
+		$hyphaUrl.'system/wymeditor/plugins/embed/jquery.wymeditor.embed.js',
+	];
 
 	/*
 		Function: loadEditor
@@ -26,14 +29,15 @@
 	function loadEditor($html) {
 		global $jquerySource;
 		global $jqueryuiSource;
-		global $wymeditorSource;
+		global $wymeditorSources;
 		global $hyphaUrl;
 		global $hyphaLanguage;
 
 		// only add the editor code when the document contains an <editor> element
 		if ($html->getElementsByTagName('editor')->length) {
 			$html->linkScript($jquerySource);
-			$html->linkScript($wymeditorSource);
+			foreach ($wymeditorSources as $src)
+				$html->linkScript($src);
 			$html->linkStyle($hyphaUrl.'system/wymeditor/skins/default/skin.css');
 
 			/*
@@ -70,7 +74,9 @@
 				+ "<title>" + WYMeditor.DIALOG_TITLE + "</title>\n"
 				+ "<script type='text/javascript' src='<?=$jquerySource?>'><\/script>\n"
 				+ "<script type='text/javascript' src='<?=$jqueryuiSource?>'><\/script>\n"
-				+ "<script type='text/javascript' src='<?=$wymeditorSource?>'><\/script>\n"
+<?php foreach ($wymeditorSources as $src) { ?>
+				+ "<script type='text/javascript' src='<?=$src?>'><\/script>\n"
+<?php } ?>
 				+ "<script type='text/javascript'>\n"
 				+ "function uploadResponse(response) {\n"
 				+ "	if (response.charAt(0) == '~') alert(response.substring(1));\n"
