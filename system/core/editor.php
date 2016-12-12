@@ -53,7 +53,7 @@
 				Property: iframeBasePath
 				Basic WYMeditor markup to start from
 			*/
-			iframeBasePath: "../wymeditor/iframe/pretty/",
+			iframeBasePath: "<?=$hyphaUrl?>system/wymeditor/iframe/pretty/",
 			/*
 				Property: boxHtml
 				Customizes the XHTML structure of WYMeditor.
