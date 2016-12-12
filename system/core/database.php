@@ -533,6 +533,8 @@
 			if ($this->fd)
 				throw new LogicException('Cannot lock file ' . $this->filename . ', already locked');
 			$this->fd = fopen($this->filename, 'c+');
+			if ($this->fd === false)
+				throw new RuntimeException('Cannot lock file ' . $this->filename . ', open failed: ' . error_get_last()['message']);
 			flock($this->fd, LOCK_EX);
 		}
 
@@ -558,6 +560,8 @@
 				$fd = $this->fd;
 			} else {
 				$fd = fopen($this->filename, 'r');
+				if ($fd === false)
+					throw new RuntimeException('Cannot lock file ' . $this->filename . ', open failed: ' . error_get_last()['message']);
 				flock($fd, LOCK_SH);
 			}
 
@@ -617,7 +621,8 @@
 			reading the contents within the lock as well).
 		*/
 		function writeWithLock($content) {
-			file_put_contents($this->filename, $content, LOCK_EX);
+			if (file_put_contents($this->filename, $content, LOCK_EX) === false)
+				throw new RuntimeException('Cannot write to file ' . $this->filename . ': ' . error_get_last()['message']);
 		}
 
 		/*
