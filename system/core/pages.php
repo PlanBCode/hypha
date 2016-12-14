@@ -145,29 +145,20 @@
 				serveFile('data/images/' . $args[1], 'data/images');
 				exit;
 			case 'index':
-				$hyphaHtml->writeToElement('langList', '<div style="color:#888;">'.__('index').'</div>');
+				$hyphaHtml->writeToElement('langList', hypha_indexLanguages('', ''));
 				switch($args[1]) {
 					case 'images':
 						$hyphaHtml->writeToElement('pagename', __('image-index'));
-						$hyphaHtml->writeToElement('langList', hypha_indexLanguages('', '').'<br/>');
-						$hyphaHtml->writeToElement('langList', '<b>'.__('images').'</b><br/>');
-						$hyphaHtml->writeToElement('langList', '<a href="index/files">'.__('files').'</a><br/>');
 						$hyphaHtml->writeToElement('main', hypha_indexImages());
 						break;
 					case 'files':
 						$hyphaHtml->writeToElement('pagename', __('file-index'));
-						$hyphaHtml->writeToElement('langList', hypha_indexLanguages('', '').'<br/>');
-						$hyphaHtml->writeToElement('langList', '<a href="index/images">'.__('images').'</a><br/>');
-						$hyphaHtml->writeToElement('langList', '<b>'.__('files').'</b><br/>');
 						$hyphaHtml->writeToElement('main', hypha_indexFiles());
 						break;
 					default:
 						$languageName = $isoLangList[$hyphaLanguage];
 						$languageName = substr($languageName, 0, strpos($languageName, ' ('));
 						$hyphaHtml->writeToElement('pagename', __('page-index').': '.$languageName);
-						$hyphaHtml->writeToElement('langList', hypha_indexLanguages('', $hyphaLanguage).'<br/>');
-						$hyphaHtml->writeToElement('langList', '<a href="index/images">'.__('images').'</a><br/>');
-						$hyphaHtml->writeToElement('langList', '<a href="index/files">'.__('files').'</a><br/>');
 						$hyphaHtml->writeToElement('main', hypha_indexPages($hyphaLanguage));
 						break;
 				}
