@@ -258,7 +258,7 @@ EOF;
 		}
 
 		function handleSaveSettings($arg) {
-			global $hyphaUrl, $hyphaLanguage, $hyphaPage;
+			global $hyphaPage;
 
 			if (!isUser()) return notify('error', __('login-to-edit'));
 			$form = $this->getSettingsForm();
