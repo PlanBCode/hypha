@@ -41,7 +41,7 @@
 			Parameters:
 			$filename - optional parameter of HTML template file (HyphaFile instance).
 		*/
-		public function __construct($file = false) {
+		public function __construct($file = false, $base_url = false) {
 			parent::__construct('1.0', 'UTF-8');
 			$this->preserveWhiteSpace = false;
 			$this->formatOutput = true;
@@ -59,6 +59,12 @@
 			$metaViewport->setAttribute('name', "viewport");
 			$metaViewport->setAttribute('content', "width=device-width, initial-scale=1");
 			$this->getElementsByTagName('head')->Item(0)->appendChild($metaViewport);
+
+			if ($base_url) {
+				$base = $this->createElement('base', '');
+				$base->setAttribute('href', $base_url);
+				$this->find('head')->prepend($base);
+			}
 		}
 
 		/*
@@ -177,6 +183,7 @@
 			// format <head> element into convenient order, could be removed to gain speed
 			function ranking($node) {
 				switch($node->tagName) {
+					case 'base': return '-1';
 					case 'meta': return '0'.$node->getAttribute('name');
 					case 'title': return '1';
 					case 'link': return '2'.$node->getAttribute('rel');
