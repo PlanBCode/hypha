@@ -700,8 +700,7 @@
 		 * passed, the original filename is returned.
 		 */
 		function getUrl($width = 0, $height = 0) {
-			global $hyphaUrl;
-			return $hyphaUrl . self::ROOT_URL . $this->getFilename($width, $height);
+			return self::ROOT_URL . $this->getFilename($width, $height);
 		}
 
 		/**

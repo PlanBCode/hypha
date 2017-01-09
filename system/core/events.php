@@ -35,7 +35,6 @@
 	*/
 	registerPostProcessingFunction('addEventHandler');
 	function addEventHandler($html) {
-		global $hyphaUrl;
 
 		// place all body content in a form
 		$body = $html->getElementsByTagName('body')->Item(0);
@@ -58,7 +57,6 @@
 		Variable: baseUrl
 		Javascript variable containing the base url from the document location object.
 	*/
-	var baseUrl = '<?=$hyphaUrl?>';
 	var postProcessingList = new Array();
 
 	/*
@@ -71,7 +69,7 @@
 		arg - argument to pass to the cmd function
 	*/
 	function hypha(url, cmd, arg) {
-		url = baseUrl + url.replace(/\s\//g, '/').replace(/\s$/g, '').replace(/\s/g, '_');
+		url = url.replace(/\s\//g, '/').replace(/\s$/g, '').replace(/\s/g, '_');
 		document.getElementById('command').value = cmd;
 		document.getElementById('argument').value = arg;
 		document.forms['hyphaForm'].action = url;
@@ -119,14 +117,14 @@
 				if (form.elements[i].tagName=='textarea') params+= encodeURIComponent(form.elements[i].innerHTML);
 				else params+= encodeURIComponent(form.elements[i].value);
 			}
-			request.open('POST', baseUrl+url, true);
+			request.open('POST', url, true);
 			request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 			request.setRequestHeader("Content-length", params.length);
 			request.setRequestHeader("Connection", "close");
 			request.send(params);
 		}
 		else {
-			request.open('GET', baseUrl+url, true);
+			request.open('GET', url, true);
 			request.send(null);
 		}
 	}

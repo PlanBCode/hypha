@@ -83,7 +83,7 @@
 	*/
 
 	$hyphaHtml = new HTMLDocument(Hypha::$data->html, $hyphaUrl);
-	$hyphaHtml->linkStyle($hyphaUrl.'data/hypha.css');
+	$hyphaHtml->linkStyle('data/hypha.css');
 	$hyphaHtml->setTitle(hypha_getTitle());
 	$hyphaHtml->writeToElement('header', hypha_getHeader());
 	$hyphaHtml->writeToElement('footer', hypha_getFooter());
