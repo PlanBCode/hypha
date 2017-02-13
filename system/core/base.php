@@ -562,11 +562,15 @@
 		callback routine (used in conjunction with preg_replace_callback) that looks up the page id for a given combination of language and pagename
 	*/
 	function hypha_url2id($args) {
-		global $hyphaXml;
+		global $hyphaXml, $isoLangList;
 		$path = explode('/', $args[2]);
 		$language = $path[0];
 		$pagename = $path[1];
 		$page = hypha_getPage($language, $pagename);
+		// Prevent mangling urls to other files, such as images or downloads
+		if (!array_key_exists($language, $isoLangList))
+			return $args[0];
+
 		if (!$page) {
 			$hyphaXml->lockAndReload();
 			// recheck just in case it got added in the
