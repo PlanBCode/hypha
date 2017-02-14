@@ -364,8 +364,10 @@ EOF;
 
 			$this->xml->lockAndReload();
 			$participant = $this->checkKeyArguments(['participant']);
-			if (!$participant)
+			if (!$participant) {
+				$this->xml->unlock();
 				return;
+			}
 
 			// Check the status of the payment
 			$this->checkPayment($participant);
