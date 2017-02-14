@@ -177,6 +177,7 @@
 		"festival-signed-up-for" => " signed up for ",
 		"festival-failed-to-pay-for" => " failed to pay for ",
 		"festival-payed-for" => " payed for ",
+		"festival-confirmed-for" => " confirmed e-mail for ",
 
 		/* notify & messages */
 		"festival-succesful-signup-for" => "You succesfully signed up for ",
@@ -184,12 +185,16 @@
 		"festival-contribution-added" => "Your contribution was added to the lineup.",
 		"festival-contribution-modified" => "Your contribution was modified.",
 		"festival-complete-by-paying" => "To finalize your registration, complete the payment using the button below.",
+		"festival-complete-by-confirming" => "To finalize your registration, confirm it using the link sent to you by e-mail.",
 		"festival-signup-for" => "Signup for ",
 		"festival-pay-for" => "Pay for ",
+		"festival-confirmation-needed" => "Confirmation needed",
 		"festival-lineup-for" => "Lineup for ",
 		"festival-timetable-for" => "Timetable for ",
 		"festival-contribute-to" => "Contribute to ",
 		"festival-invalid-or-no-key" => "Invalid or no key given",
+		"festival-email-confirmed-succesfully" => "Email address confirmed succesfully.",
+		"festival-email-already-confirmed" => "Email address was already confirmed.",
 
 		/* buttons & links */
 		"festival-modify" => "modify",
@@ -202,5 +207,8 @@
 		"festival-contributions" => "contributions",
 		"festival-lineup" => "lineup",
 		"festival-timetable" => "timetable",
+
+		/* Other */
+		"festival-participant-status" => "status",
 	);
 ?>
