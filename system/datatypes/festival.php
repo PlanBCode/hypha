@@ -70,6 +70,10 @@
 
 				case 'signup':
 					return $this->showSignup();
+				case 'confirm':
+					return $this->showConfirm();
+				case 'confirmation-needed':
+					return $this->showConfirmationNeeded();
 				case 'pay':
 					return $this->showPay();
 				case 'paymenthook':
@@ -138,37 +142,38 @@
 		function showParticipants() {
 			if (!isUser()) return notify('error', __('login-to-edit'));
 
-			$paystats = [];
+			$stats = [];
 			$totalcount = 0;
 
 			$table = new HTMLTable();
 			$this->html->find('#main')->appendChild($table);
-			$table->addHeaderRow()->addCells([__('name'), __('email'), __('phone'), __('price'), __('payment-status')]);
+			$table->addHeaderRow()->addCells([__('name'), __('email'), __('phone'), __('price'), __('festival-participant-status')]);
 			foreach ($this->xml->documentElement->getOrCreate('participants')->children() as $participant) {
 				$payamount = $participant->getAttribute('payment-amount');
-				$paystatus = $participant->getAttribute('payment-status');
-				if (!$payamount)
-					$paystatus = 'free';
+				if ($payamount)
+					$status = $participant->getAttribute('payment-status');
+				else
+					$status = $participant->getAttribute('email-confirmed') ? 'confirmed' : 'unconfirmed';
 
 				$row = $table->addRow();
 				$row->addCell($participant->getAttribute('name'));
 				$row->addCell($participant->getAttribute('email'));
 				$row->addCell($participant->getAttribute('phone'));
 				$row->addCell($payamount ? '€' . $payamount : '-');
-				$row->addCell($paystatus);
+				$row->addCell($status);
 
 				$totalcount += 1;
-				$this->array_set_if_unset($paystats, $paystatus, ['paysum' => 0, 'count' => 0]);
-				$paystats[$paystatus]['count'] += 1;
+				$this->array_set_if_unset($stats, $status, ['paysum' => 0, 'count' => 0]);
+				$stats[$status]['count'] += 1;
 				if ($payamount) {
-					$paystats[$paystatus]['paysum'] += $payamount;
+					$stats[$status]['paysum'] += $payamount;
 				}
 			}
 
 			$table = new HTMLTable();
 			$this->html->find('#main')->appendChild($table);
 			$table->addHeaderRow()->addCells(['', __('count'), __('amount')]);
-			foreach ($paystats as $category => $values) {
+			foreach ($stats as $category => $values) {
 				$row = $table->addRow();
 				$row->addCell($category);
 				$row->addCell($values['count']);
@@ -342,15 +347,64 @@ EOF;
 			if ((float)$form->dataFor('amount', 0) > 0) {
 				$next_url = $hyphaUrl . $hyphaLanguage . '/' . $this->pagename . '/pay/' . $participant->getAttribute('xml:id') . '/' . $participant->getAttribute('key');
 			} else {
+				$next_url = $hyphaUrl . $hyphaLanguage . '/' . $this->pagename . '/confirmation-needed';
+
 				// Send email
-				$contribute_url = $hyphaUrl . $hyphaLanguage . '/' . $this->pagename . '/contribute/' . $participant->getAttribute('xml:id') . '/' . $participant->getAttribute('key');
+				$confirm_url = $hyphaUrl . $hyphaLanguage . '/' . $this->pagename . '/confirm/' . $participant->getAttribute('xml:id') . '/' . $participant->getAttribute('key');
+				$append = '<p><a href="'.htmlspecialchars($confirm_url).'">'.__('festival-confirm-email') . '</a></p>';
+				$this->sendMail($participant->getAttribute('email'), 'mail-confirm-email', $append);
+			}
+			return ['redirect', $next_url];
+		}
+
+		/**
+		 * For unpaid registrations, show a message that
+		 * confirmation is needed.
+		 */
+		function showConfirmationNeeded() {
+			$this->html->find('#pagename')->text(__('festival-confirmation-needed'));
+			$main = $this->html->find('#main');
+			$message = __('festival-complete-by-confirming');
+			$main->append($message);
+		}
+
+		/**
+		 * For unpaid registrations, this link needs to be
+		 * clicked to confirm the registration.
+		 */
+		function showConfirm() {
+			global $hyphaUrl, $hyphaLanguage;
+
+			$this->xml->lockAndReload();
+			$participant = $this->checkKeyArguments(['participant']);
+			if (!$participant) {
+				$this->xml->unlock();
+				return;
+			}
+			$contribute_url = $hyphaUrl . $hyphaLanguage . '/' . $this->pagename . '/contribute/' . $participant->getAttribute('xml:id') . '/' . $participant->getAttribute('key');
+
+			if ($participant->getAttribute('email-confirmed')) {
+				$this->xml->unlock();
+				notify('success', __('festival-email-already-confirmed'));
+			} else {
+				notify('success', __('festival-email-confirmed-succesfully'));
+
+				// Mark e-mail as confirmed
+				$participant->setAttribute('email-confirmed', '1');
+				$this->xml->saveAndUnlock();
+
+				// Note in digest
+				$digest = htmlspecialchars($participant->getAttribute('name') . __('festival-confirmed-for') . $this->getConfig('festival-title'));
+				$digest .= ' (<a href="' . $contribute_url . '">Add contribution</a>)';
+				writeToDigest($digest, 'festival-confirmation');
+
+				// Send e-mail
 				$append = '<p><a href="'.htmlspecialchars($contribute_url).'">'.__('festival-contribute') . '</a></p>';
 				$this->sendMail($participant->getAttribute('email'), 'mail-signed-up-free', $append);
-
-				$next_url = $hyphaUrl . $hyphaLanguage . '/' . $this->pagename . '/contribute/' . $participant->getAttribute('xml:id') . '/' . $participant->getAttribute('key');
 			}
 
-			return ['redirect', $next_url];
+			// Redirect to contribution page
+			return ['redirect', $contribute_url];
 		}
 
 		/**
@@ -364,8 +418,10 @@ EOF;
 
 			$this->xml->lockAndReload();
 			$participant = $this->checkKeyArguments(['participant']);
-			if (!$participant)
+			if (!$participant) {
+				$this->xml->unlock();
 				return;
+			}
 
 			// Check the status of the payment
 			$this->checkPayment($participant);
