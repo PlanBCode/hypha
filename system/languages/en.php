@@ -197,7 +197,6 @@
 		"festival-edit-contribution" => "edit contribution",
 		"festival-restart-payment" => "restart payment procedure",
 		"festival-signup" => "signup",
-		"festival-contribute" => "contribute",
 		"festival-participants" => "participants",
 		"festival-contributions" => "contributions",
 		"festival-lineup" => "lineup",
