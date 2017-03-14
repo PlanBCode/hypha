@@ -126,7 +126,8 @@
 			global $hyphaUrl, $hyphaUser, $hyphaXml;
 			$pagename = validatePagename($_POST['textPagename']);
 			$language = isset($_POST['textLanguage']) ? $_POST['textLanguage'] : $this->language;
-			$private = isset($_POST['textPrivate']);
+			$private = isset($_POST['textPrivate']) ? $_POST['textPrivate'] : 'on';
+
 			$hyphaXml->lockAndReload();
 			// After reloading, our page list node might
 			// have changed, so find it in the newly loaded
