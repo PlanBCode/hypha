@@ -361,7 +361,7 @@
 			if ($versionList) {
 				krsort($versionList);
 				foreach ($versionList as $id => $node) {
-					if (ltrim($id, 't') > $timestamp)
+					if (ltrim($id, 't') < $timestamp)
 						return $id;
 				}
 			}
