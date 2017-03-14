@@ -55,6 +55,10 @@
 			$metaMime->setAttribute('http-equiv', "Content-Type");
 			$metaMime->setAttribute('content', "text/html; charset=utf-8");
 			$this->getElementsByTagName('head')->Item(0)->appendChild($metaMime);
+			$metaViewport = $this->createElement('meta', '');
+			$metaViewport->setAttribute('name', "viewport");
+			$metaViewport->setAttribute('content', "width=device-width, initial-scale=1");
+			$this->getElementsByTagName('head')->Item(0)->appendChild($metaViewport);
 		}
 
 		/*
