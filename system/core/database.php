@@ -266,8 +266,8 @@
 				krsort($versionList);
 				$content = getInnerHtml(reset($versionList));
 				if ($version) {
-					if ($version<0) for ($i=$version;$i<0;$i++) $content = patch($content, getInnerHtml(next($versionList)));
-					else while(key($versionList)>$version) $content = patch($content, getInnerHtml(next($versionList)));
+					if ($version<0) for ($i=$version;$i<0;$i++) $content = patch($content, next($versionList)->text());
+					else while(key($versionList)>$version) $content = patch($content, next($versionList)->text());
 				}
 				return $content;
 			}
@@ -308,7 +308,10 @@
 		if ($node->getAttribute('versions')=='on') {
 			$currentVersionNode = getCurrentVersionNode($langNode);
 			// update current version into patch
-			if ($currentVersionNode) setInnerHtml($currentVersionNode, diff($content, getWikiContent($node, $language, '')));
+			if ($currentVersionNode) {
+				$diff = diff($content, getWikiContent($node, $language, ''));
+				$currentVersionNode->text($diff);
+			}
 			// append new content to version list
 			$timeStamp = time();
 			if ($currentVersionNode && $currentVersionNode->getAttribute('xml:id') == 't'.$timeStamp)
