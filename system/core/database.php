@@ -307,11 +307,6 @@
 		$langNode = getLangNode($node, $language);
 		if ($node->getAttribute('versions')=='on') {
 			$currentVersionNode = getCurrentVersionNode($langNode);
-			// update current version into patch
-			if ($currentVersionNode) {
-				$diff = diff($content, getWikiContent($node, $language, ''));
-				$currentVersionNode->text($diff);
-			}
 			// append new content to version list
 			$timeStamp = time();
 			if ($currentVersionNode && $currentVersionNode->getAttribute('xml:id') == 't'.$timeStamp)
@@ -321,6 +316,12 @@
 			$newNode->setAttribute('author', $author);
 			setInnerHtml($newNode, $content);
 			$langNode->appendChild($newNode);
+
+			// update current version into patch
+			if ($currentVersionNode) {
+				$diff = diff(getInnerHtml($newNode), getInnerHtml($currentVersionNode));
+				$currentVersionNode->text($diff);
+			}
 		} else {
 			setInnerHtml($langNode, $content);
 		}
