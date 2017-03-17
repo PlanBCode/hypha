@@ -344,8 +344,8 @@
 			if (isAdmin()) {
 				$hyphaXml->lockAndReload();
 				hypha_setTitle($_POST['siteTitle']);
-				hypha_setHeader($_POST['siteHeader']);
-				hypha_setFooter($_POST['siteFooter']);
+				hypha_setHeader(wikify($_POST['siteHeader']));
+				hypha_setFooter(wikify($_POST['siteFooter']));
 				$hyphaXml->saveAndUnlock();
 			}
 			return 'reload';
