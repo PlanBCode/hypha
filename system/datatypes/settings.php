@@ -370,7 +370,7 @@
 			global $hyphaXml;
 			if (isAdmin()) {
 				$hyphaXml->lockAndReload();
-				hypha_setMenu($_POST['siteMenu']);
+				hypha_setMenu(wikify($_POST['siteMenu']));
 				$hyphaXml->saveAndUnlock();
 			}
 			return 'reload';
