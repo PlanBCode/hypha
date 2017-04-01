@@ -79,7 +79,7 @@
 			ob_start();?>
 <div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
 <b><?=__('title')?></b> <input type="text" name="textPagename" value="<?=showPagename($this->pagename)?>" onblur="validatePagename(this);" onkeyup="validatePagename(this);" />
-<input type="checkbox" name="textPrivate"<?php if ($this->privateFlag=='on') echo ' checked="checked"' ?> /><?=__('private-page')?>
+<input type="checkbox" name="textPrivate"<?php if ($this->privateFlag) echo ' checked="checked"' ?> /><?=__('private-page')?>
 </div>
 <editor name="textContent"><?=getWikiContent($this->xml->documentElement, $this->language, '')?></editor>
 <?php			$this->html->writeToElement('main', ob_get_clean());
@@ -104,7 +104,9 @@
 
 			ob_start();?>
 <div class="section" style="padding:5px; margin-bottom:5px;">
-<input type="hidden" name="textPrivate" value="<?php echo $this->privateFlag=='on' ? 'on' : 'off'?>" />
+<?php if($this->privateFlag) { ?>
+<input type="hidden" name="textPrivate" value="on" />
+<? } ?>
 <b><?=__('language')?></b> <select name="textLanguage"><?=languageOptionList(null, $this->language)?></select>
 &nbsp;<b><?=__('title')?></b> <input type="text" name="textPagename" value="<?=showPagename($this->pagename)?>" onblur="validatePagename(this);" onkeyup="validatePagename(this);" />
 </div>
@@ -126,7 +128,7 @@
 			global $hyphaUrl, $hyphaUser, $hyphaXml;
 			$pagename = validatePagename($_POST['textPagename']);
 			$language = isset($_POST['textLanguage']) ? $_POST['textLanguage'] : $this->language;
-			$private = isset($_POST['textPrivate']) && $_POST['textPrivate']=='on' ? true : false;
+			$private = isset($_POST['textPrivate']);
 
 			$hyphaXml->lockAndReload();
 			// After reloading, our page list node might
