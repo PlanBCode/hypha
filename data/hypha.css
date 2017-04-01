@@ -1,5 +1,5 @@
 body {
-  font-family: sans-serif;
+	font-family:sans-serif;
 }
 
 h1 {
@@ -7,7 +7,7 @@ h1 {
 }
 
 html body {
-	font-family: "Trebuchet MS", Tahoma, sans-serif;
+	font-family:sans-serif;
 	font-size: 11pt;
 	letter-spacing: 0.07em;
 	text-align:justify;
@@ -33,13 +33,13 @@ img {
 	background-color:#eee;
 }
 .button {
-	color:#840;
+	color:#bf6f0f;
 }
 .right {
 	float:right;
 }
 .divider {
-clear:left; height:10px; margin-top:10px; margin-bottom:10px; background-color:#d2691e;
+	clear:left; height:10px; margin-top:10px; margin-bottom:10px; background-color:#d2691e;
 }
 
 
@@ -50,7 +50,7 @@ body {
 	width: 1000px;
 }
 #navContainer {
-	width:700px;
+	width:800px;
 	padding: 14px 0 0 0;
 }
 #menu {
@@ -72,12 +72,10 @@ body {
 #hyphaCommands {
 	float: right;
 	text-align:right;
-
 	padding: 0 0 0 10px;
 	margin: 0 0 5px 0;
 }
 #pageCommands {
-
 	text-align:right;
 	margin: 13px 100px 0 0;
 	padding: 0 0 0 0px;
@@ -91,7 +89,7 @@ body {
 	padding: 5px 9px 5px 9px;
 }
 #page {
-	width: 800px;
+	width: 900px;
 	clear: left;
 	float: left;
 }
@@ -99,7 +97,7 @@ body {
 	margin: 0 0 0 10px;
 }
 #main {
-	width: 700px;
+	width: 800px;
 	min-height: 1px;
 	float: left;
 	clear: both;
@@ -107,21 +105,21 @@ body {
 
 #pagename {
 	clear:left;
-
-	float: left;
+	float:left;
+	width:800px;
 }
 
 #langList {
 	float: left;
 	clear: right;
-    margin: 0 0 0 10px;
-    padding: 0 0 0 10px;
+	margin: 0 0 0 10px;
+	padding: 0 0 0 10px;
 }
 
 #bottomContainer {
 	float: left;
 	clear: both;
-	width: 700px;
+	width: 800px;
 }
 
 #versionList  {
@@ -144,7 +142,7 @@ body {
 
 .editor {
 	width:800px;
-	height:400px;
+	height:600px;
 	padding-top:5px;
 	clear:left;
 }
@@ -155,9 +153,7 @@ body {
 
 
 #header {
-	background-color:#840;
-}
-#header {
+	background-color:#fff;
 	padding:10px;
 	text-align:center;
 	font-weight:bold;
@@ -165,12 +161,14 @@ body {
 	font-size:24pt;
 	width: 680px;
 	color:#f80;
+}
 
-
+#header p {
+	margin: 0 0 0 0;
 }
 
 #menu a, #login a, #hyphaCommands a {
-	color: #840;
+	color: #bf6f0f;
 	text-decoration: none;
 	font-weight: bold;
 }
@@ -218,20 +216,20 @@ h2 {
 	font-size: 24pt;
 	margin: 0 0 0 0;
 	font-weight:bold;
-	color:#840;
+	color:#bf6f0f;
 }
 
 h3 {
 	font-size:15pt;
 	font-weight:bold;
 	margin: 0.2em 0 0 0;
-	color:#840;
+	color:#bf6f0f;
 }
 
 h4 {
 	font-weight:bold;
 	margin: 12px 0 0 0;
-	color:#840;
+	color:#bf6f0f;
 	font-size: 12pt;
 }
 h5 {
@@ -249,17 +247,17 @@ td,th {
 	color:#000;
 }
 p {
-	margin: 1em 0 1em 0;
+	margin: 0.5em 0 1em 0;
 }
 a {
 	font-weight:bold;
 	text-decoration:none;
-	color:#840;
+	color:#bf6f0f;
 }
 a.otherlanguagelink {
 	font-weight:bold;
 	text-decoration:none;
-	color:#840;
+	color:#bf6f0f;
 	border-bottom: 1px dotted;
 }
 a.nopagelink {
@@ -270,14 +268,12 @@ a:hover {
 	text-decoration:underline;
 }
 
-iframe
-{
+iframe {
 	border: #c0c0c0 solid 1px;
-	}
-	iframe.registratie, iframe.gastenboek
-	{
-		border: none;
-	}
+}
+iframe.registratie, iframe.gastenboek {
+	border: none;
+}
 
 code
 {
@@ -325,7 +321,6 @@ code
     background-color: #D7FFD7;
 }
 
-
 #langList {
 	border-left: 1px solid #222;
 	font-size:8pt;
@@ -336,7 +331,9 @@ code
 #langList .selected {
 	font-weight:bold;
 }
-
+.language {
+	display:block;
+}
 
 #footer {
 	font-size:8pt;
@@ -345,12 +342,10 @@ code
 	float: right;
 	margin: 15px 0 0 0;
 	text-align: right;
-    border-top: 3px solid #840;
-    padding: 5px 0 0 0;
-    width: 100%;
+	border-top: 3px solid #840;
+	padding: 5px 0 0 0;
+	width: 100%;
 }
-
-/* Festival */
 
 .festivalTimetable, .festivalTimetable a {
 	color: white;
@@ -393,4 +388,57 @@ code
 }
 .festivalTimetable .tableRowHeadingEven {
 	background-color:#bbb;
+}
+
+@media (min-width: 960px) {
+}
+
+@media (max-width: 959px) {
+	#commandForm {
+		width: 100%;
+	}
+	#navContainer {
+		width:100%;
+	}
+	#page {
+		width: 100%;
+	}
+	#pagename {
+		width:auto;
+	}
+	#main {
+		width: 100%;
+	}
+	#header {
+		width: 100%;
+		padding: 0px;
+	}
+	#pageCommands {
+		clear:right;
+		float:right;
+		margin: 13px 0 0 0;
+	}
+	#footer {
+		width: 100%;
+	}
+	#bottomContainer {
+		width: 100%;
+	}
+	.editor {
+		width:100%;
+	}
+	img {
+		max-width:100%;
+	}
+	#langList {
+		float:right;
+		border:none;
+	}
+	.prefix {
+		display:none;
+	}
+	.language {
+		display:inline-block;
+		margin-right:5px;
+	}
 }
