@@ -49,7 +49,7 @@
 				$this->html->writeToElement('versionList', versionSelector($this));
 
 				// if a revision is selected, show a 'revert' commmand button
-				if (isset($_POST['version'])) {
+				if (isset($_POST['version']) && $_POST['version']!='') {
 					$_action = makeAction($this->language.'/'.$this->pagename, 'textRevert', '');
 					$_button = makeButton(__('revert'), $_action);
 					$this->html->writeToElement('pageCommands', $_button);
@@ -126,7 +126,7 @@
 			global $hyphaUrl, $hyphaUser, $hyphaXml;
 			$pagename = validatePagename($_POST['textPagename']);
 			$language = isset($_POST['textLanguage']) ? $_POST['textLanguage'] : $this->language;
-			$private = isset($_POST['textPrivate']) ? $_POST['textPrivate'] : 'on';
+			$private = isset($_POST['textPrivate']) && $_POST['textPrivate']=='on' ? true : false;
 
 			$hyphaXml->lockAndReload();
 			// After reloading, our page list node might
@@ -135,7 +135,7 @@
 			$this->replacePageListNode(hypha_getPage($this->language, $this->pagename));
 			// check if pagename, privateFlag or language (in case of a new translation) have changed
 			if ($language!=$this->language || $pagename!=$this->pagename || $private!=$this->privateFlag) {
-				hypha_setPage($this->pageListNode, $language, $pagename, ($private=='on' ? 'on' : 'off'));
+				hypha_setPage($this->pageListNode, $language, $pagename, $private);
 				$hyphaXml->saveAndUnlock();
 			} else {
 				$hyphaXml->unlock();
