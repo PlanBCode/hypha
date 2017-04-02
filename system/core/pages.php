@@ -316,7 +316,8 @@
 
 		// Use the page name (in the appropriate language) as
 		// the link text
-		$node->text(showPagename($language->getAttribute('name')));
+		if ($node->text() == '')
+			$node->text(showPagename($language->getAttribute('name')));
 
 		// Check permissions, replace by a span with just the
 		// pagename if the link would lead to an inaccessible
@@ -330,7 +331,8 @@
 
 		// Add appropriate class and/or title attributes
 		if ($language->getAttribute('id') != $hyphaLanguage) {
-			$node->setAttribute('title', __('page-in-other-language'));
+			if (!$node->getAttribute('title'))
+				$node->setAttribute('title', __('page-in-other-language'));
 			$node->addClass('otherLanguageLink');
 		} else if ($language->getAttribute('name') == $hyphaPage->pagename) {
 			$node->addClass('currentPageLink');
@@ -409,11 +411,16 @@
 		$node->removeClass('currentPageLink');
 		if ($node->getAttribute('class') == '')
 			$node->removeAttribute('class');
-		$node->removeAttribute('title');
+		if ($node->getAttribute('title') == __('page-in-other-language'))
+			$node->removeAttribute('title');
 
 		$uri = $page ? 'hypha:' . $page->getAttribute('id') : '';
 		$node->setAttribute('href', $uri);
-		$node->text('');
+
+		// Clear out the page name in the link text, but keep
+		// any custom link name
+		if ($node->text == showPagename($language->getAttribute('name')))
+			$node->text('');
 	}
 
 	/*

@@ -181,11 +181,14 @@
 
 		// if existing link is edited retrieve link parameters
 		if (selObj) {
-			if (selObj.attr('href').indexOf('<?=$hyphaUrl?>')==0) {
+			var href = selObj.attr('href').replace('<?=$hyphaUrl?>', '');
+			var match = /^<?=$hyphaLanguage?>\/([^\/]*)$/.exec(href);
+			if (match !== null) {
 				wdw.$('#selectLinkSourceLocal').attr('checked', 'checked');
 				jQuery(body).filter('.wym_dialog_link').find('.wymLinkUrl').css("display", "none");
 				jQuery(body).filter('.wym_dialog_link').find('.wymLinkLocal').css("display", "block");
-				wdw.$('#localLinkName').val(selObj.html());
+				pagename = match[1];
+				wdw.$('#localLinkName').val(pagename);
 			}
 			else {
 				wdw.$('#selectLinkSourceUrl').attr('checked', 'checked');
