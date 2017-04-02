@@ -144,7 +144,7 @@
 			}
 			// unfortunately wymeditor can't handle relative urls so we'll add the baseUrl before editing and remove it afterwards
 			$this->xml->lockAndReload();
-			storeWikiContent($this->xml->documentElement, $language, wikify($_POST['textContent']), $hyphaUser->getAttribute('username'));
+			storeWikiContent($this->xml->documentElement, $language, wikify_html($_POST['textContent']), $hyphaUser->getAttribute('username'));
 			$this->xml->saveAndUnlock();
 			unset($_POST['version']);
 			writeToDigest($hyphaUser->getAttribute('fullname').__('changed-page').'<a href="'.$this->language.'/'.$this->pagename.'">'.$this->language.'/'.$this->pagename.'</a>', 'page update', $this->pageListNode->getAttribute('id'));

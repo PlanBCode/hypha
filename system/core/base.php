@@ -528,65 +528,40 @@
 	}
 
 	/*
-		Function: hypha_id2url
-		callback routine (used in conjunction with preg_replace_callback) that returns a language/pagename url for a given page id
+		Function: hypha_make_absolute
+		If the url is relative, make it absolute by prefixing $hyphaUrl.
 	*/
-	function hypha_id2url($args) {
-		global $hyphaLanguage;
-		global $hyphaPage;
-
-		if ($args[2]) $page = hypha_getPageById($args[2]);
-		if (!$page) return '';
-
-		$language = hypha_pageGetLanguage($page, $hyphaLanguage);
-		if (!$language) $language = hypha_pageGetLanguage($page, hypha_getDefaultLanguage());
-		if (!$language) $language = $page->getElementsByTagName('language')->Item(0);
-		if (!$language) return '';
-
-		$title = $class = "";
-		if($language->getAttribute('id')!=$hyphaLanguage) {
-			$title = ' title="'.__('page-in-other-language').'"';
-			$class = ' class="otherLanguageLink"';
-		}
-		elseif($page==$hyphaPage) $class = ' class="currentPageLink"';
-
-		$permission = (isUser() || $page->getAttribute('private') != 'on');
-		if ($permission) return '<a'.$args[1].'href="'.$language->getAttribute('id').'/'.$language->getAttribute('name').'"'.$class.$title.$args[3].'>'.($args[4]?$args[4]:showPagename($language->getAttribute('name'))).'</a>';
-//			if ($permission) return '<a'.$hypharef[1].'href="'.$language.'/'.urlencode($pagename).'"'.$class.$title.$hypharef[3].'>'.$pagename.'</a>';
-//		else return $this->linksVisible ? showPagename($pagename) : '';
-		else return showPagename($language->getAttribute('name'));
+	function hypha_make_absolute($url) {
+		global $hyphaUrl;
+		// This regex is based on RFC3986 that defines URI
+		// formats. It matches all urls that are already
+		// absolute by matching:
+		//  - Uris starting with a scheme (e.g. "http:")
+		//  - Uris starting with a / (which refer to the server
+		//    root, not hypha root.
+		// This incorrectly identifies paths that have a scheme
+		// but are still relative (e.g. http:foo/bar,
+		// path-rootless in the RFC) as absolute, but those are
+		// not really used in practice anyway.
+		// TODO: Absolute paths without a hostname should get
+		// the hostname from $hyphaUrl prepended, to make these
+		// urls work in non-HTTP contexts (e.g. e-mail).
+		if (preg_match("#^([a-zA-Z][a-zA-Z0-9+.-]*:|/)#", $url))
+			return $url;
+		return $hyphaUrl . $url;
 	}
 
 	/*
-		Function: hypha_url2id
-		callback routine (used in conjunction with preg_replace_callback) that looks up the page id for a given combination of language and pagename
+		Function: hypha_make_relative
+		If the url is an url within this hypha installation,
+		make it a relative to $hyphaUrl.
 	*/
-	function hypha_url2id($args) {
-		global $hyphaXml, $isoLangList;
-		$path = explode('/', $args[2]);
-		$language = $path[0];
-		$pagename = $path[1];
-		$page = hypha_getPage($language, $pagename);
-		// Prevent mangling urls to other files, such as images or downloads
-		if (!array_key_exists($language, $isoLangList))
-			return $args[0];
-
-		if (!$page) {
-			$hyphaXml->lockAndReload();
-			// recheck just in case it got added in the
-			// meanwhile
-			$page = hypha_getPage($language, $pagename);
-			if (!$page) {
-				$error = hypha_addPage('textpage', $language, $pagename, '');
-				$hyphaXml->saveAndUnlock();
-				if ($error) notify('error', $error);
-				$page = hypha_getPage($language, $pagename);
-			} else {
-				$hyphaXml->unlock();
-			}
-		}
-		$hypharef = $page ? $page->getAttribute('id') : '';
-		return '<a'.$args[1].'href="hypha:'.$hypharef.'"'.$args[3].' />';
+	function hypha_make_relative($url) {
+		global $hyphaUrl;
+		$len = strlen($hyphaUrl);
+		if (substr($url, 0, $len) == $hyphaUrl)
+			$url = substr($url, $len);
+		return $url;
 	}
 
 	/*

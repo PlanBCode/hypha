@@ -344,8 +344,8 @@
 			if (isAdmin()) {
 				$hyphaXml->lockAndReload();
 				hypha_setTitle($_POST['siteTitle']);
-				hypha_setHeader(wikify($_POST['siteHeader']));
-				hypha_setFooter(wikify($_POST['siteFooter']));
+				hypha_setHeader(wikify_html($_POST['siteHeader']));
+				hypha_setFooter(wikify_html($_POST['siteFooter']));
 				$hyphaXml->saveAndUnlock();
 			}
 			return 'reload';
@@ -370,7 +370,7 @@
 			global $hyphaXml;
 			if (isAdmin()) {
 				$hyphaXml->lockAndReload();
-				hypha_setMenu(wikify($_POST['siteMenu']));
+				hypha_setMenu(wikify_html($_POST['siteMenu']));
 				$hyphaXml->saveAndUnlock();
 			}
 			return 'reload';

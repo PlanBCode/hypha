@@ -277,34 +277,143 @@
 	}
 
 	/*
-		Function: dewikify
-		convert links to local pages (by hypha page ids) to permalinks
+		Function: wikify
+		Convert links containing page ids back to working links,
+		adding some extra attributes to the HTML node.
 
 		Parameters:
-		html - DOM Document to operate on
+		doc - A DomWrap\Document to process
 	*/
-	function dewikify($html) {
-		$body = $html->getElementsByTagName('body')->Item(0);
-		// convert occurences of '<a href="hypha:page-id">' info '<a href="language/pagename">'
-		setInnerHtml($body, preg_replace_callback('/<a([^>]*?)href="hypha:([^"]*?)"([^>]*?)\/>/', 'hypha_id2url', getInnerHtml($body)));
-		setInnerHtml($body, preg_replace_callback('/<a([^>]*?)href="hypha:([^"]*?)"([^>]*?)>([^<]*?)<\/a>/', 'hypha_id2url', getInnerHtml($body)));
+	function dewikify($doc) {
+		foreach ($doc->findXPath("//a[@href]") as $node) {
+			dewikify_link($node);
+		}
+	}
+
+	function dewikify_link($node) {
+		global $hyphaXml, $isoLangList;
+		global $hyphaLanguage;
+		global $hyphaPage;
+
+		$uri = $node->getAttribute('href');
+
+		$parts = explode(':', $uri, 2);
+		if (count($parts) != 2 || $parts[0] != 'hypha')
+			return;
+
+		$page = hypha_getPageById($parts[1]);
+		if (!$page)
+			return;
+
+		// Find out what language to use (current language,
+		// default language, or any language offered by the
+		// page).
+		$language = hypha_pageGetLanguage($page, $hyphaLanguage);
+		if (!$language) $language = hypha_pageGetLanguage($page, hypha_getDefaultLanguage());
+		if (!$language) $language = $page->getElementsByTagName('language')->Item(0);
+		if (!$language)
+			return;
+
+		// Use the page name (in the appropriate language) as
+		// the link text
+		$node->text(showPagename($language->getAttribute('name')));
+
+		// Check permissions, replace by a span with just the
+		// pagename if the link would lead to an inaccessible
+		// page
+		if(!isUser() && $page->getAttribute('private') == 'on') {
+			$span = $page->createElement('span');
+			$span->text($node->text());
+			$node->replaceWith($span);
+			return;
+		}
+
+		// Add appropriate class and/or title attributes
+		if ($language->getAttribute('id') != $hyphaLanguage) {
+			$node->setAttribute('title', __('page-in-other-language'));
+			$node->addClass('otherLanguageLink');
+		} else if ($page == $hyphaPage) {
+			$node->addClass('currentPageLink');
+		}
+
+		// Generate and set the url
+		$url = $language->getAttribute('id').'/'.urlencode($language->getAttribute('name'));
+		$node->setAttribute('href', $url);
+	}
+
+	/* Like wikify, but accepts a HTML string instead of a document */
+	function wikify_html($html) {
+		$doc = new DomWrap\Document();
+		$doc->html($html);
+		wikify($doc);
+
+		return $doc->documentElement->html();
 	}
 
 	/*
 		Function: wikify
-		convert local relative links to hypha page ids
+		Convert urls in page links into hypha page ids, and make
+		all other urls relative.
 
 		Parameters:
-		html - string
+		doc - A DomWrap\Document to process
 	*/
-	function wikify($html) {
-		global $hyphaUrl;
-		// convert occurences of '<a href="baseUrl/ref">' or '<img src="baseUrl/ref">' into '<a href="ref">' resp '<img src="ref">'
-		// remove basepath from local urls (make path relative)
-		$html = preg_replace('#(href|src)="'.$hyphaUrl.'([^:"]*)("|(?:(?:%20|\s|\+)[^"]*"))#', '$1="$2$3', $html);
-		// replace (relative) urls with page ids
-		$html = preg_replace_callback('/<a(.*?)href="([^:]*?)"(.*?)>(.*?)<\/a>/', 'hypha_url2id', $html);
-		return $html;
+	function wikify($doc) {
+		foreach ($doc->findXPath("//*[@href] | //*[@src]") as $node) {
+			// Make all urls relative
+			foreach (['href', 'src'] as $attr) {
+				if ($node->hasAttribute($attr))
+					$node->setAttribute($attr, hypha_make_relative($node->getAttribute($attr)));
+			}
+			// Additionally wikify links (to pages)
+			if ($node->tagName == 'a')
+				wikify_link($node);
+		}
+
+		return $doc->documentElement->html();
+	}
+
+	function wikify_link($node) {
+		global $hyphaXml, $isoLangList;
+
+		$path = explode('/', $node->getAttribute('href'), 2);
+		if (count($path) < 2)
+			return;
+
+		$language = $path[0];
+		$pagename = $path[1];
+
+		// Prevent mangling urls to other files, such as images or downloads
+		if (!array_key_exists($language, $isoLangList))
+			return;
+
+		$page = hypha_getPage($language, $pagename);
+
+		if (!$page) {
+			$hyphaXml->lockAndReload();
+			// recheck just in case it got added in the
+			// meanwhile
+			$page = hypha_getPage($language, $pagename);
+			if (!$page) {
+				$error = hypha_addPage('textpage', $language, $pagename, '');
+				$hyphaXml->saveAndUnlock();
+				if ($error) notify('error', $error);
+				$page = hypha_getPage($language, $pagename);
+			} else {
+				$hyphaXml->unlock();
+			}
+		}
+
+		// Clean up the node from stuff dewikify may have added.
+		$node->removeClass('otherLanguageLink');
+		$node->removeClass('currentPageLink');
+		if ($node->getAttribute('class') == '')
+			$node->removeAttribute('class');
+		$node->removeAttribute('title');
+
+		$uri = $page ? 'hypha:' . $page->getAttribute('id') : '';
+		$node->setAttribute('href', $uri);
+		$node->text('');
 	}
 
 	/*
