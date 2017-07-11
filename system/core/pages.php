@@ -419,7 +419,8 @@
 
 		// Clear out the page name in the link text, but keep
 		// any custom link name
-		if ($node->text == showPagename($language->getAttribute('name')))
+		$lang = hypha_pageGetLanguage($page, $language);
+		if ($node->text() == showPagename($lang->getAttribute('name')))
 			$node->text('');
 	}
 
