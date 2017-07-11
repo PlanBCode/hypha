@@ -1,5 +1,5 @@
 body {
-	font-family:sans-serif;
+	font-family: Griffos;
 }
 
 h1 {
@@ -7,8 +7,8 @@ h1 {
 }
 
 html body {
-	font-family:sans-serif;
-	font-size: 11pt;
+	font-family: Griffos;
+	font-size: 12pt;
 	letter-spacing: 0.07em;
 	text-align:justify;
 	color:#222;
@@ -39,7 +39,7 @@ img {
 	float:right;
 }
 .divider {
-	clear:left; height:10px; margin-top:10px; margin-bottom:10px; background-color:#d2691e;
+	clear:left; height:10px; margin-top:10px; margin-bottom:10px; background-color:#620;
 }
 
 
@@ -156,11 +156,9 @@ body {
 	background-color:#fff;
 	padding:10px;
 	text-align:center;
-	font-weight:bold;
-	letter-spacing:0.2em;
-	font-size:24pt;
+	font-family: OldNewspaper;
 	width: 680px;
-	color:#f80;
+	color:#620;
 }
 
 #header p {
@@ -168,7 +166,7 @@ body {
 }
 
 #menu a, #login a, #hyphaCommands a {
-	color: #bf6f0f;
+	color: #620;
 	text-decoration: none;
 	font-weight: bold;
 }
@@ -216,20 +214,20 @@ h2 {
 	font-size: 24pt;
 	margin: 0 0 0 0;
 	font-weight:bold;
-	color:#bf6f0f;
+	color:#222;
 }
 
 h3 {
 	font-size:15pt;
 	font-weight:bold;
-	margin: 0.2em 0 0 0;
-	color:#bf6f0f;
+	margin: 12px 0 0 0;
+	color:#222;
 }
 
 h4 {
 	font-weight:bold;
 	margin: 12px 0 0 0;
-	color:#bf6f0f;
+	color:#222;
 	font-size: 12pt;
 }
 h5 {
@@ -247,12 +245,12 @@ td,th {
 	color:#000;
 }
 p {
-	margin: 0.5em 0 1em 0;
+	margin: 0.2em 0 1em 0;
 }
 a {
 	font-weight:bold;
 	text-decoration:none;
-	color:#bf6f0f;
+	color:#620;
 }
 a.otherlanguagelink {
 	font-weight:bold;
@@ -342,7 +340,7 @@ code
 	float: right;
 	margin: 15px 0 0 0;
 	text-align: right;
-	border-top: 3px solid #840;
+	border-top: 3px solid #620;
 	padding: 5px 0 0 0;
 	width: 100%;
 }
@@ -441,4 +439,13 @@ code
 		display:inline-block;
 		margin-right:5px;
 	}
+}
+
+@font-face {
+	font-family: OldNewspaper;
+	src: url('../files/OldNewspaperTypes.ttf');
+}
+@font-face {
+	font-family: Griffos;
+	src: url('../files/GriffosFont.ttf');
 }
