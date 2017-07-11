@@ -369,8 +369,9 @@
 		function saveMenu($argument) {
 			global $hyphaXml;
 			if (isAdmin()) {
+				$html = wikify_html($_POST['siteMenu']);
 				$hyphaXml->lockAndReload();
-				hypha_setMenu(wikify_html($_POST['siteMenu']));
+				hypha_setMenu($html);
 				$hyphaXml->saveAndUnlock();
 			}
 			return 'reload';
