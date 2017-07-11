@@ -297,7 +297,8 @@
 
 		$uri = $node->getAttribute('href');
 
-		$parts = explode(':', $uri, 2);
+		$path = explode('/', $uri, 2);
+		$parts = explode(':', $path[0], 2);
 		if (count($parts) != 2 || $parts[0] != 'hypha')
 			return;
 
@@ -340,6 +341,8 @@
 
 		// Generate and set the url
 		$url = $language->getAttribute('id').'/'.urlencode($language->getAttribute('name'));
+		if (count($path) > 1)
+			$url .= '/' . $path[1];
 		$node->setAttribute('href', $url);
 	}
 
@@ -378,7 +381,7 @@
 	function wikify_link($node) {
 		global $hyphaXml, $isoLangList;
 
-		$path = explode('/', $node->getAttribute('href'), 2);
+		$path = explode('/', $node->getAttribute('href'), 3);
 		if (count($path) < 2)
 			return;
 
@@ -419,6 +422,8 @@
 			$node->removeAttribute('title');
 
 		$uri = 'hypha:' . $page->getAttribute('id');
+		if (count($path) > 2)
+			$uri .= '/' . $path[2];
 		$node->setAttribute('href', $uri);
 
 		// Clear out the page name in the link text, but keep
