@@ -406,6 +406,10 @@
 			}
 		}
 
+		// If creating the page failed, leave the link unchanged
+		if (!$page)
+			return;
+
 		// Clean up the node from stuff dewikify may have added.
 		$node->removeClass('otherLanguageLink');
 		$node->removeClass('currentPageLink');
@@ -414,7 +418,7 @@
 		if ($node->getAttribute('title') == __('page-in-other-language'))
 			$node->removeAttribute('title');
 
-		$uri = $page ? 'hypha:' . $page->getAttribute('id') : '';
+		$uri = 'hypha:' . $page->getAttribute('id');
 		$node->setAttribute('href', $uri);
 
 		// Clear out the page name in the link text, but keep
