@@ -647,6 +647,11 @@ EOF;
 		function showLineup() {
 			global $hyphaHtml;
 			$html = '';
+			$html .= '<b>Is this the final lineup?</b>';
+			$html .= '<p>No, new contributions can be added up to or even during the event. Have something to contribute? Sign up and you can directly add something to this lineup.</p>';
+			$html .= '<b>When will these things take place?</b?</br>';
+			$html .= '<p>All hackathons will take place during the week (monday to friday). Some workshops and other items will also happen during the week, which is noted in the description. All other things will take place on saturday or sunday. The final schedule for the weekend will be published shortly before the event, since the lineup is still open for new contributions.</p>';
+
 			$contributions = $this->xml->documentElement->getOrCreate('contributions')->children();
 			foreach($contributions as $contribution) {
 				$html.= $this->buildContribution($contribution);
