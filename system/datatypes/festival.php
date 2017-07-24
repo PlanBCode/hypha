@@ -647,7 +647,10 @@ EOF;
 		function buildContribution($contribution) {
 			$html = '<div class="infoact">';
 			// artist and title
-			if ($contribution->getAttribute('name')) $html.= '<a id="'.$contribution->getAttribute('xml:id').'" style="font-size:15pt; font-weight:bold; clear:left;">'.$contribution->getAttribute('name').($contribution->hasAttribute('title') ? ' - '.$contribution->getAttribute('title') : '').'</a>';
+			$id = $contribution->getAttribute('xml:id');
+			$url = $hyphaUrl . $hyphaLanguage . '/' . $this->pagename . '/lineup#' . $id;
+			if ($contribution->getAttribute('name'))
+				$html.= '<a id="'.$id.'" href="'.$url.'" style="font-size:15pt; font-weight:bold; clear:left;">'.$contribution->getAttribute('name').($contribution->hasAttribute('title') ? ' - '.$contribution->getAttribute('title') : '').'</a>';
 			$html.= '<p/>';
 			// image and description
 			$image_filename = $contribution->getAttribute('image');
