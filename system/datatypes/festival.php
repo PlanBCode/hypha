@@ -649,8 +649,17 @@ EOF;
 			// artist and title
 			$id = $contribution->getAttribute('xml:id');
 			$url = $hyphaUrl . $hyphaLanguage . '/' . $this->pagename . '/lineup#' . $id;
+			$title = '';
+			if ($contribution->getAttribute('category'))
+				$title .= $contribution->getAttribute('category') . ': ';
 			if ($contribution->getAttribute('name'))
-				$html.= '<a id="'.$id.'" href="'.$url.'" style="font-size:15pt; font-weight:bold; clear:left;">'.$contribution->getAttribute('name').($contribution->hasAttribute('title') ? ' - '.$contribution->getAttribute('title') : '').'</a>';
+				$title .= $contribution->getAttribute('name');
+			if ($contribution->getAttribute('name') && $contribution->getAttribute('title'))
+				$title .= ' - ';
+			if ($contribution->getAttribute('title'))
+				$title .= $contribution->getAttribute('title');
+
+			$html.= '<a id="'.$id.'" href="'.$url.'" style="font-size:15pt; font-weight:bold; clear:left;">'.$title.'</a>';
 			$html.= '<p/>';
 			// image and description
 			$image_filename = $contribution->getAttribute('image');
