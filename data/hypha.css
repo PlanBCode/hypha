@@ -286,6 +286,11 @@ code
 	margin: 1.1em 0 0.7em;
 }
 
+/* Festival lineup */
+#main .infoact img {
+	margin: 0 0 0.7em;
+}
+
 #versionList {
 	font-size:8pt;
 }
