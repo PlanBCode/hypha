@@ -348,7 +348,7 @@ EOF;
 			$participant->setAttribute('email', $form->dataFor('email'));
 			$participant->setAttribute('phone', $form->dataFor('phone'));
 			$participant->setAttribute('key', bin2hex(openssl_random_pseudo_bytes(8)));
-			$participant->setAttribute('attending', implode(',', $form->dataFor('attending')));
+			$participant->setAttribute('attending', implode(',', $form->dataFor('attending', [])));
 			$this->xml->documentElement->getOrCreate('participants')->append($participant);
 			if ((float)$form->dataFor('amount', 0) > 0)
 				$this->setupPayment($participant, $form->dataFor('amount', 0));
