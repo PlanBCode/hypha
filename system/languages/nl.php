@@ -202,4 +202,3 @@
 		"festival-lineup" => "lineup",
 		"festival-timetable" => "blokkenschema",
 	);
-?>

@@ -65,4 +65,3 @@ require_once("CssSelector/Parser/Reader.php");
 require_once("CssSelector/Parser/Tokenizer/TokenizerEscaping.php");
 require_once("CssSelector/Parser/Tokenizer/TokenizerPatterns.php");
 require_once("CssSelector/Parser/Tokenizer/Tokenizer.php");
-?>

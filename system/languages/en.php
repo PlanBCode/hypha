@@ -210,4 +210,3 @@
 		/* Other */
 		"festival-participant-status" => "status",
 	);
-?>

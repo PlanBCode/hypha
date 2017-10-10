@@ -463,4 +463,3 @@
 		else $html = __('no-versions');
 		return $html;
 	}
-?>

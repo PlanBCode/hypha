@@ -110,4 +110,3 @@
 	function makeLink($label, $action) {
 		return '<a href="javascript:'.$action.'">'.$label.'</a>';
 	}
-?>
