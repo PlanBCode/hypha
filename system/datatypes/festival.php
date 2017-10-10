@@ -231,7 +231,7 @@
 		function getSettingsForm() {
 $html = <<<'EOF'
 <table>
-	<tr><td><label for="festival-title">Festival title</label> *</td><td><input name="festival-title"/></td></tr>
+	<tr><td><label for="festival-title">Festival title</label> *</td><td><input id="festival-title" name="festival-title"/></td></tr>
 </table>
 EOF;
 			$elem = $this->html->createElement('form')->html($html);
