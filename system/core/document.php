@@ -220,7 +220,11 @@
 		to allow manipulating the form more easily.
 	*/
 	class HTMLForm {
-		/** The DOM form being wrapped */
+		/**
+		 * The DOM form being wrapped
+		 *
+		 * @var \DOMWrap\Element
+		 */
 		public $elem;
 		/** The data associated with this form */
 		public $data;
@@ -249,9 +253,27 @@
 			$this->labels = array();
 			$this->image_previews = array();
 
-			// Look through the DOM to find form fields and
-			// their labels
-			foreach($form->find('input, select, textarea, label, img') as $elem) {
+			$this->scanForm($form);
+		}
+
+		/*
+			Function: getFormField
+
+			Form fields to look through
+		 */
+		function getFormFieldTypes() {
+			return ['input', 'select', 'textarea', 'label', 'img'];
+		}
+
+		/*
+			Function: scanForm
+
+			Look through the DOM to find form fields and
+			their labels
+		 */
+		function scanForm($form)
+		{
+			foreach($form->find(implode(', ', $this->getFormFieldTypes())) as $elem) {
 				if ($elem->tagName == 'label') {
 					$name = self::getNameAttr($elem, 'for');
 					if ($name)
@@ -343,7 +365,8 @@
 			single HTML form field with the value given.
 		*/
 		function updateFormField($field, $value) {
-			if ($field->tagName == 'input' && $field->getAttribute('type') == 'checkbox') {
+			$fieldType = $this->getFieldType($field);
+			if ($fieldType == 'checkbox') {
 				// For multiple checkboxes that have a
 				// name ending in [], PHP will put an
 				// array in $_POST containing the value
@@ -355,20 +378,34 @@
 					$field->setAttribute('checked', 'checked');
 				else
 					$field->removeAttribute('checked');
-			} else if ($field->tagName == 'input') {
+			} else if ($fieldType == 'input') {
 				$field->setAttribute('value', $value);
-			} else if ($field->tagName == 'select') {
+			} else if ($fieldType == 'select') {
 				foreach($field->find('option') as $option) {
 					if ($option->getAttribute('value') == $value)
 						$option->setAttribute('selected', 'selected');
 					else
 						$option->removeAttribute('selected');
 				}
-			} else if ($field->tagName == 'textarea') {
+			} else if ($fieldType == 'textarea') {
 				$field->setText($value);
 			}
 		}
 
+		function getFieldType($field)
+		{
+			switch ($field->tagName) {
+				case 'input':
+					return $field->getAttribute('type') == 'checkbox' ? 'checkbox' : 'input';
+				case 'select':
+				case 'textarea':
+				case 'img':
+				case 'label':
+					return $field->tagName;
+			}
+
+			return null;
+		}
 
 		function updateImagePreview($field, $value) {
 			if ($value) {
