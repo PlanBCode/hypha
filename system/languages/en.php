@@ -170,8 +170,22 @@
 		"error-uploading-file" => "Error uploading file: ",
 		"file-too-big-must-be-less-than" => "File is too big, it must be less than ",
 		"anonymous" => "anonymous",
+		"back" => "back",
+		"read" => "read",
+		"total" => "total",
+		"description" => "description",
+		"subject" => "subject",
+		"subscribe" => "subscribe",
+		"status" => "status",
+		"send" => "send",
+		"addresses" => "addresses",
+		"not-found" => "not found",
+		"invalid-code" => "invalid code",
+		"unable-to-edit" => "unable to edit",
+		"missing-arguments" => "missing arguments",
+		"archive" => "archive",
 
-		/* digest */
+		// festival - digest
 		"festival-edited-contribution" => " edited contribution: ",
 		"festival-added-contribution" => " added contribution: ",
 		"festival-signed-up-for" => " signed up for ",
@@ -179,7 +193,7 @@
 		"festival-payed-for" => " payed for ",
 		"festival-confirmed-for" => " confirmed e-mail for ",
 
-		/* notify & messages */
+		// festival - notify & messages
 		"festival-successful-signup-for" => "You successfully signed up for ",
 		"festival-successful-payment" => "Your payment was successful.",
 		"festival-contribution-added" => "Your contribution was added to the lineup.",
@@ -196,7 +210,7 @@
 		"festival-email-confirmed-successfully" => "Email address confirmed successfully.",
 		"festival-email-already-confirmed" => "Email address was already confirmed.",
 
-		/* buttons & links */
+		// festival - buttons & links
 		"festival-modify" => "modify",
 		"festival-contribute" => "contribute",
 		"festival-edit-contribution" => "edit contribution",
@@ -207,6 +221,39 @@
 		"festival-lineup" => "lineup",
 		"festival-timetable" => "timetable",
 
-		/* Other */
+		// festival - other
 		"festival-participant-status" => "status",
+
+		// mailing list
+		"ml-view-addresses" => "view addresses",
+		"ml-date-format" => "d/m/Y",
+		"ml-received-by" => "received by",
+
+		// mailing list - response
+		"ml-no-sender" => "no sender, please edit the mailing list",
+		"ml-mail-has-invalid-status" => "de mail heeft een onjuiste status",
+		"ml-invalid-command" => "invalid command",
+		"ml-inconsistent-parameters" => "the given parameters are inconsistent",
+		"ml-successfully-subscribed" => "successfully subscribed",
+		"ml-successfully-unsubscribed" => "successfully unsubscribed",
+		"ml-successfully-created" => "successfully created",
+		"ml-successfully-updated" => "successfully updated",
+		"ml-successfully-sent" => "successfully sent",
+
+		// mailing list - mail
+		"ml-please-confirm-email" => "please confirm the email",
+		"ml-unsubscribe" => "unsubscribe",
+		"ml-if-unreadable-use-link" => "if the mail is unreadable, please use the link",
+
+		// mailing list - status
+		"ml-mailing-status-draft" => "draft",
+		"ml-mailing-status-sending" => "sending",
+		"ml-mailing-status-sent" => "sent",
+		"ml-address-status-pending" => "pending",
+		"ml-address-status-confirmed" => "confirmed",
+		"ml-address-status-unsubscribed" => "unsubscribed",
+
+		// mailing
+		"mailing-sender-email" => "email",
+		"mailing-sender-name" => "name",
 	);
