@@ -7,29 +7,66 @@
 		Contains functions for sending email to one, a few or a lot of recipients, as well as the digest system to keep the group of collaborators up to date.
 	*/
 
-	/*
-		Function: sendMail
-		Sends email to one or more recipients
-
-		Parameters:
-		$to - recipient(s). More than one recipient can be sent the same message by submitting a comma separated address list
-		$subject -
-		$message - the message may or may not contain HTML tags
-	*/
-	function sendMail($to, $subject, $message) {
+	/**
+	 * Sends email to one or more recipients
+	 *
+	 * @param string $receivers , comma separated email addresses.
+	 * @param string $subject
+	 * @param string $message
+	 * @param string|null $senderEmail
+	 * @param string|null $senderName
+	 * @param string|null $style
+	 *
+	 * @return string
+	 */
+	function sendMail($receivers, $subject, $message, $senderEmail = null, $senderName = null, $style = null) {
 		global $DEBUG;
-		$fromname = addSlashes(hypha_getTitle());
-		$frommail = hypha_getEmail();
-		$headers = "MIME-Version: 1.0\r\n";
-		$headers .= "Content-type: text/html; charset=utf-8\r\n";
-		$headers .= "From: \"$fromname\" <$frommail>\r\n";
-		$error = array();
-		foreach(explode(',', $to) as $email) {
-			if (!$DEBUG && !filter_var($email, FILTER_VALIDATE_EMAIL)) $error[]= $email;
-			elseif (!mail($email, $subject, '<html><body>'.$message.'</body></html>', $headers.'To: '.$email, '-f '.$frommail)) $error[]= $email;
+		if (null == $senderEmail) {
+			$senderEmail = hypha_getEmail();
 		}
-		if ($error) return __('error-sending-message').' '.implode(',', $error);
-		else return '';
+		if (null == $senderName) {
+			$senderName = addSlashes(hypha_getTitle());
+		}
+		$headers = 'MIME-Version: 1.0' . "\r\n";
+		$headers .= 'Content-type: text/html; charset=utf-8' . "\r\n";
+		$headers .= 'From: ' . $senderName . ' <' . $senderEmail . '>' . "\r\n";
+		$headers .= 'Reply-To: ' . $senderEmail . "\r\n";
+		$headers .= 'X-Mailer: PHP/' . phpversion() . "\r\n";
+
+		$messageHtml = '<!DOCTYPE HTML>' . "\r\n";
+		$messageHtml .= '<html>' . "\r\n";
+		$messageHtml .= '	<head>' . "\r\n";
+		$messageHtml .= '		<meta http-equiv=Content-Type content="text/html; charset=utf-8"/>' . "\r\n";
+		$messageHtml .= '		<title>' . $subject . '</title>' . "\r\n";
+		if (null !== $style) {
+			$messageHtml .= '		<style>' . "\r\n";
+			$messageHtml .= '			' . $style . "\r\n";
+			$messageHtml .= '		</style>' . "\r\n";
+		}
+		$messageHtml .= '	</head>' . "\r\n";
+		$messageHtml .= '	<body>' . "\r\n";
+		$messageHtml .= $message;
+		$messageHtml .= '	</body>' . "\r\n";
+		$messageHtml .= '</html>' . "\r\n";
+
+		$error = array();
+		foreach (explode(',', $receivers) as $receiver) {
+			$validEmail = filter_var($receiver, FILTER_VALIDATE_EMAIL);
+			if (!$DEBUG && !$validEmail) {
+				$error[] = $receiver;
+				continue;
+			}
+			$success = mail($receiver, $subject, $messageHtml, $headers . 'To: ' . $receiver, '-f ' . $senderEmail);
+			if (!$success) {
+				$error[] = $receiver;
+			}
+		}
+
+		if ($error) {
+			return __('error-sending-message') . ' ' . implode(',', $error);
+		}
+
+		return '';
 	}
 
 	/*
