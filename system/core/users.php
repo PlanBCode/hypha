@@ -194,4 +194,3 @@
 		$hyphaXml->unlock();
 		notify('success', __('reregistration-error'));
 	}
-?>

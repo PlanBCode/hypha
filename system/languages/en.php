@@ -180,8 +180,8 @@
 		"festival-confirmed-for" => " confirmed e-mail for ",
 
 		/* notify & messages */
-		"festival-succesful-signup-for" => "You succesfully signed up for ",
-		"festival-successful-payment" => "Your payment was succesful.",
+		"festival-successful-signup-for" => "You successfully signed up for ",
+		"festival-successful-payment" => "Your payment was successful.",
 		"festival-contribution-added" => "Your contribution was added to the lineup.",
 		"festival-contribution-modified" => "Your contribution was modified.",
 		"festival-complete-by-paying" => "To finalize your registration, complete the payment using the button below.",
@@ -193,7 +193,7 @@
 		"festival-timetable-for" => "Timetable for ",
 		"festival-contribute-to" => "Contribute to ",
 		"festival-invalid-or-no-key" => "Invalid or no key given",
-		"festival-email-confirmed-succesfully" => "Email address confirmed succesfully.",
+		"festival-email-confirmed-successfully" => "Email address confirmed successfully.",
 		"festival-email-already-confirmed" => "Email address was already confirmed.",
 
 		/* buttons & links */
@@ -210,4 +210,3 @@
 		/* Other */
 		"festival-participant-status" => "status",
 	);
-?>

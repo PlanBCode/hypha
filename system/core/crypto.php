@@ -34,4 +34,3 @@
 		notify('error', 'Cannot verify your password, PHP 5.5 required');
 		return false;
 	}
-?>

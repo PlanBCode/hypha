@@ -253,4 +253,3 @@ END;
 		$ret.= substr($s, $subPos).$endWrap;
 		return $ret;
 	}
-?>

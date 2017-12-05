@@ -828,5 +828,3 @@
 			imagedestroy($image);
 		}
 	}
-
-?>

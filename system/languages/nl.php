@@ -179,7 +179,7 @@
 		"festival-payed-for" => " heeft betaald voor ",
 
 		/* notify & messages */
-		"festival-succesful-signup-for" => "Je bent ingeschreven voor ",
+		"festival-successful-signup-for" => "Je bent ingeschreven voor ",
 		"festival-successful-payment" => "Je betaling is gelukt.",
 		"festival-contribution-added" => "Je bijdrage is toegevoegd aan de lineup.",
 		"festival-contribution-modified" => "Je bijdrage is aangepast.",
@@ -202,4 +202,3 @@
 		"festival-lineup" => "lineup",
 		"festival-timetable" => "blokkenschema",
 	);
-?>
