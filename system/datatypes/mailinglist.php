@@ -653,7 +653,6 @@ EOF;
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
 				<strong><label for="$messageFieldName"> $message </label></strong><editor id="$messageFieldName" name="$messageFieldName"></editor>
 			</div>
-			<editor id="$messageFieldName" name="$messageFieldName"></editor>
 EOF;
 		/** @var HyphaDomElement $form */
 		$form = $this->html->createElement('form');
