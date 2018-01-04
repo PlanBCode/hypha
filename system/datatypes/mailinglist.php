@@ -196,36 +196,35 @@ class mailinglist extends Page {
 		} else {
 			$mailings = $this->getDoc()->findXPath('//mailing[@status="' . self::MAILING_STATUS_SENT . '"]');
 		}
-		if (!empty($mailings->toArray())) {
-			/** @var HyphaDomElement $main */
-			$main = $this->findBySelector('#main');
-			$main->append('<div><h3>' . __('archive') . '</h3></div>');
-			$table = new HTMLTable();
-			$main->appendChild($table);
-			$header = $table->addHeaderRow();
-			$table->addClass('section');
+
+		/** @var HyphaDomElement $main */
+		$main = $this->findBySelector('#main');
+		$main->append('<div><h3>' . __('archive') . '</h3></div>');
+		$table = new HTMLTable();
+		$main->appendChild($table);
+		$header = $table->addHeaderRow();
+		$table->addClass('section');
+		$header->addCell();
+		$header->addCell(__('subject'));
+		$header->addCell(__('status'));
+		if (isUser()) {
 			$header->addCell();
-			$header->addCell(__('subject'));
-			$header->addCell(__('status'));
-			if (isUser()) {
-				$header->addCell();
+		}
+		$header->addCell()->setHtml(isUser() ? $this->makeActionButton('add', 'create') : '');
+		$header->addCell();
+		foreach ($mailings as $mailing) {
+			$status = $mailing->getAttribute('status');
+			$row = $table->addRow();
+			$row->addCell()->setHtml('<span style="color:#b90;">∗</span>');
+			$row->addCell($mailing->getAttribute('subject'));
+			$row->addCell(__('ml-mailing-status-' . $status));
+			$date = $mailing->getAttribute('date');
+			$row->addCell($date ? (new \DateTime($date))->format(__('ml-date-format')) : '');
+			$buttons = $this->makeActionButton(__('read'), $mailing->getId());
+			if (self::MAILING_STATUS_DRAFT == $status) {
+				$buttons .= $this->makeActionButton(__('edit'), $mailing->getId() . '/edit');
 			}
-			$header->addCell()->setHtml(isUser() ? $this->makeActionButton('add', 'create') : '');
-			$header->addCell();
-			foreach ($mailings as $mailing) {
-				$status = $mailing->getAttribute('status');
-				$row = $table->addRow();
-				$row->addCell()->setHtml('<span style="color:#b90;">∗</span>');
-				$row->addCell($mailing->getAttribute('subject'));
-				$row->addCell(__('ml-mailing-status-' . $status));
-				$date = $mailing->getAttribute('date');
-				$row->addCell($date ? (new \DateTime($date))->format(__('ml-date-format')) : '');
-				$buttons = $this->makeActionButton(__('read'), $mailing->getId());
-				if (self::MAILING_STATUS_DRAFT == $status) {
-					$buttons .= $this->makeActionButton(__('edit'), $mailing->getId() . '/edit');
-				}
-				$row->addCell()->setHtml($buttons);
-			}
+			$row->addCell()->setHtml($buttons);
 		}
 	}
 
