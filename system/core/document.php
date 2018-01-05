@@ -181,8 +181,9 @@
 			foreach($postProcessingList as $func) $func($this);
 
 			// format <head> element into convenient order, could be removed to gain speed
-			function ranking($node) {
-				switch($node->tagName) {
+			$ranking = function ($node) {
+				$tagName = isset($node->tagName) ? $node->tagName : '';
+				switch($tagName) {
 					case 'base': return '-1';
 					case 'meta': return '0'.$node->getAttribute('name');
 					case 'title': return '1';
@@ -191,17 +192,19 @@
 					case 'script': return $node->hasAttribute('src') ? '4' : '5';
 					default: return '6';
 				}
-			}
+			};
 
 			// Sort the head tag children, keeping the order of nodes with the same rank
 			// unchanged (this is important for script tags).
 			$nodes = $this->getElementsByTagName('head')->Item(0)->childNodes;
-			for($i=0;$i<$nodes->length-1;$i++)
-				for ($j=$i+1;$j<$nodes->length;$j++)
-					if(ranking($nodes->Item($j-1)) > ranking($nodes->Item($j))) {
+			for ($i=0;$i<$nodes->length-1;$i++) {
+				for ($j = $i + 1; $j < $nodes->length; $j++) {
+					if ($ranking($nodes->Item($j - 1)) > $ranking($nodes->Item($j))) {
 						$swapnode = $this->getElementsByTagName('head')->Item(0)->removeChild($nodes->Item($j));
-						$this->getElementsByTagName('head')->Item(0)->insertBefore($swapnode, $nodes->Item($j-1));
+						$this->getElementsByTagName('head')->Item(0)->insertBefore($swapnode, $nodes->Item($j - 1));
 					}
+				}
+			}
 
 			// convert to string
 			$html = $this->saveHTML();
