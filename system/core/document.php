@@ -502,6 +502,7 @@
 	}
 
 	class HTMLTable extends DOMWrap\Element {
+		/** @var HTMLTableRow */
 		private $currentRow;
 
 		function __construct() {
@@ -509,19 +510,19 @@
 		}
 
 		function addHeaderRow() {
-			$currentRow = new HTMLTableRow('th');
-			$this->appendChild($currentRow);
-			return $currentRow;
+			$this->currentRow = new HTMLTableRow('th');
+			$this->appendChild($this->currentRow);
+			return $this->currentRow;
 		}
 
 		function addRow() {
-			$currentRow = new HTMLTableRow('td');
-			$this->appendChild($currentRow);
-			return $currentRow;
+			$this->currentRow = new HTMLTableRow('td');
+			$this->appendChild($this->currentRow);
+			return $this->currentRow;
 		}
 
 		function addCell($contents = null) {
-			return $currentRow->addCell($contents);
+			return $this->currentRow->addCell($contents);
 		}
 	}
 
