@@ -219,7 +219,13 @@ class mailinglist extends Page {
 			$row->addCell($mailing->getAttribute('subject'));
 			$row->addCell(__('ml-mailing-status-' . $status));
 			$date = $mailing->getAttribute('date');
-			$row->addCell($date ? (new \DateTime($date))->format(__('ml-date-format')) : '');
+			if ($date) {
+				$date = new \DateTime($date);
+				$date = $date->format(__('ml-date-format'));
+			} else {
+				$date = '';
+			}
+			$row->addCell($date);
 			$buttons = $this->makeActionButton(__('read'), $mailing->getId());
 			if (self::MAILING_STATUS_DRAFT == $status) {
 				$buttons .= $this->makeActionButton(__('edit'), $mailing->getId() . '/edit');
@@ -538,7 +544,8 @@ class mailinglist extends Page {
 		$main = $this->findBySelector('#main');
 		$main->append('<div><h2>' . $mailing->getAttribute('subject') . '</h2></div>');
 		if ($date) {
-			$main->append('<div>' . __('date') . ': ' . (new \DateTime($date))->format(__('ml-date-format')) . '</h2></div>');
+			$date = new \DateTime($date);
+			$main->append('<div>' . __('date') . ': ' . $date->format(__('ml-date-format')) . '</h2></div>');
 		}
 		if (isUser()) {
 			$receivers = $mailing->getAttribute('receivers');
