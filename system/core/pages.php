@@ -335,7 +335,7 @@
 			if (!$node->getAttribute('title'))
 				$node->setAttribute('title', __('page-in-other-language'));
 			$node->addClass('otherLanguageLink');
-		} else if ($language->getAttribute('name') == $hyphaPage->pagename) {
+		} else if ($hyphaPage && $language->getAttribute('name') == $hyphaPage->pagename) {
 			$node->addClass('currentPageLink');
 		}
 
