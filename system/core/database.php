@@ -482,7 +482,7 @@
 		}
 		$real = realpath($filename);
 		$root = realpath($root);
-		if ($real === false || $root && !startsWith($real, $root . '/')) {
+		if ($real === false || $root && !startsWith($real, $root . DIRECTORY_SEPARATOR)) {
 			http_response_code(404);
 			die("Invalid filename: $filename");
 		}
