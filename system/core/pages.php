@@ -94,26 +94,21 @@
 		Pulls the language from the url.
 
 		Parameters:
-		args - array with arguments from the page url, below the hypha root url.
-
-		Returns the same array, with any language removed
+		HyphaRequest $hyphaRequest
 	*/
-	function loadLanguage($args) {
-		global $isoLangList, $hyphaLanguage;
+	function loadLanguage(HyphaRequest $hyphaRequest) {
+		global $hyphaLanguage;
+
+		$language = $hyphaRequest->getLanguage();
+
 		// set wiki language. we want to store this in a session variable, so we don't loose language when an image or the settingspage are requested
-		if (count($args) > 0 && array_key_exists($args[0], $isoLangList)) {
-			$hyphaLanguage = $args[0];
-			array_shift($args);
-		} else {
-			$hyphaLanguage = hypha_getDefaultLanguage();
-		}
+		$hyphaLanguage = $language !== null ? $language : hypha_getDefaultLanguage();
 
 		if (!isset($_SESSION['hyphaLanguage']) || $hyphaLanguage != $_SESSION['hyphaLanguage']) {
 			session_start();
 			$_SESSION['hyphaLanguage'] = $hyphaLanguage;
 			session_write_close();
 		}
-		return $args;
 	}
 
 	/*
@@ -121,32 +116,56 @@
 		loads all html needed for page pagename/view
 
 		Parameters:
-		args - array with arguments from the page url, below the
-		hypha root url. Any language component should already be
-		removed by loadLanguage().
+		HyphaRequest $hyphaRequest
 
 		See Also:
 		<buildhtml>
 	*/
-	function loadPage($args) {
-		global $isoLangList, $hyphaHtml, $hyphaPageTypes, $hyphaPage, $hyphaLanguage, $hyphaUrl, $hyphaXml;
+	function loadPage(HyphaRequest $hyphaRequest) {
+		global $isoLangList, $hyphaHtml, $hyphaPage, $hyphaLanguage, $hyphaUrl;
+
+		$args = $hyphaRequest->getArgs();
+
+		if (!$hyphaRequest->isSystemPage()) {
+			// fetch the requested page
+			$_name = $hyphaRequest->getPageName();
+			if ($_name === null) {
+				$_name = hypha_getDefaultPage();
+			}
+			$_node = hypha_getPage($hyphaLanguage, $_name);
+
+			if ($_node) {
+				$_type = $_node->getAttribute('type');
+				$hyphaPage = new $_type($_node, $args);
+
+				// write stats
+				if (!isUser())
+					hypha_incrementStats(hypha_getLastDigestTime() + hypha_getDigestInterval());
+			} else {
+				http_response_code(404);
+				notify('error', __('no-page'));
+				if (isUser()) $hyphaHtml->writeToElement('main', '<span class="right""><input type="button" class="button" value="' . __('create') . '" onclick="newPage();"></span>');
+				$hyphaPage = false;
+			}
+
+			return;
+		}
 
 		// Make accessing args easier by making sure it always
 		// has sufficient elements.
-		while (count($args) < 2)
+		while (count($args) < 1)
 			array_push($args, null);
 
-
-		switch ($args[0]) {
-			case 'files':
-				serveFile('data/files/' . $args[1], 'data/files');
+		switch ($hyphaRequest->getSystemPage()) {
+			case HyphaRequest::HYPHA_SYSTEM_PAGE_FILES:
+				serveFile('data/files/' . $args[0], 'data/files');
 				exit;
-			case 'images':
-				serveFile('data/images/' . $args[1], 'data/images');
+			case HyphaRequest::HYPHA_SYSTEM_PAGE_IMAGES:
+				serveFile('data/images/' . $args[0], 'data/images');
 				exit;
-			case 'index':
+			case HyphaRequest::HYPHA_SYSTEM_PAGE_INDEX:
 				$hyphaHtml->writeToElement('langList', hypha_indexLanguages('', ''));
-				switch($args[1]) {
+				switch ($args[0]) {
 					case 'images':
 						$hyphaHtml->writeToElement('pagename', __('image-index'));
 						$hyphaHtml->writeToElement('main', hypha_indexImages());
@@ -163,17 +182,17 @@
 						break;
 				}
 				break;
-			case 'settings':
-				if (isUser() || $args[1]=='register') {
-					$hyphaPage = new settingspage(array_slice($args, 1));
+			case HyphaRequest::HYPHA_SYSTEM_PAGE_SETTINGS:
+				if (isUser() || $args[0]=='register') {
+					$hyphaPage = new settingspage($args);
 				}
 				else {
 					header('Location: '.$hyphaUrl.hypha_getDefaultLanguage().'/'.hypha_getDefaultPage());
 					exit;
 				}
 				break;
-			case 'upload':
-				if ($args[1]=='image') {
+			case HyphaRequest::HYPHA_SYSTEM_PAGE_UPLOAD:
+				if ($args[0]=='image') {
 					if(!$_FILES['wymFile']) $response = __('too-big-file').ini_get('upload_max_filesize');
 					else {
 						$ext = strtolower(substr(strrchr($_FILES['wymFile']['name'], '.'), 1));
@@ -188,12 +207,12 @@
 					echo '<script language="javascript" type="text/javascript">window.top.window.uploadResponse(\''.$response.'\');</script>';
 				}
 				exit;
-			case 'chooser':
+			case HyphaRequest::HYPHA_SYSTEM_PAGE_CHOOSER:
 				$query = $_GET['term'];
 				$pageList = array();
 				foreach(hypha_getPageList() as $page) {
 					foreach($page->getElementsByTagName('language') as $language) {
-						if ($language->getAttribute('id')==$args[1]) {
+						if ($language->getAttribute('id')==$args[0]) {
 							if (isUser() || ($page->getAttribute('private')!='on')) if(strpos(strtolower($language->getAttribute('name')), strtolower($query))!==false) $pageList[] = showPagename($language->getAttribute('name'));
 						}
 					}
@@ -205,26 +224,6 @@
 				$html.= ']';
 				echo $html;
 				exit;
-				break;
-			default:
-				// fetch the requested page
-				$_name = $args[0] ? $args[0] : hypha_getDefaultPage();
-				$_node = hypha_getPage($hyphaLanguage, $_name);
-
-				if ($_node) {
-					$_type = $_node->getAttribute('type');
-					$hyphaPage = new $_type($_node, array_slice($args, 1));
-
-					// write stats
-					if (!isUser())
-						hypha_incrementStats(hypha_getLastDigestTime()+hypha_getDigestInterval());
-				}
-				else {
-					http_response_code(404);
-					notify('error', __('no-page'));
-					if(isUser()) $hyphaHtml->writeToElement('main', '<span class="right""><input type="button" class="button" value="'.__('create').'" onclick="newPage();"></span>');
-					$hyphaPage = false;
-				}
 		}
 	}
 
