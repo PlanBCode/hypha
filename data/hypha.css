@@ -110,10 +110,10 @@ body {
 	margin: 8px;
 }
 #commandForm {
-	width: 1000px;
+	//width: 1000px;
 }
 #navContainer {
-	width:800px;
+	//width:800px;
 	padding: 14px 0 0 0;
 }
 #menu {
@@ -152,7 +152,7 @@ body {
 	padding: 5px 9px 5px 9px;
 }
 #page {
-	width: 900px;
+	//width: 900px;
 	clear: left;
 	float: left;
 }
@@ -160,7 +160,7 @@ body {
 	margin: 0 0 0 10px;
 }
 #main {
-	width: 800px;
+	//width: 800px;
 	min-height: 1px;
 	float: left;
 	clear: both;
@@ -169,7 +169,7 @@ body {
 #pagename {
 	clear:left;
 	float:left;
-	width:800px;
+	//width:800px;
 }
 
 #langList {
@@ -182,7 +182,7 @@ body {
 #bottomContainer {
 	float: left;
 	clear: both;
-	width: 800px;
+	//width: 800px;
 }
 
 #versionList  {
@@ -204,7 +204,7 @@ body {
 }
 
 .editor {
-	width:800px;
+	//width:800px;
 	height:600px;
 	padding-top:5px;
 	clear:left;
@@ -222,7 +222,7 @@ body {
 	font-weight:bold;
 	letter-spacing:0.2em;
 	font-size:24pt;
-	width: 680px;
+	//width: 680px;
 	color:#f80;
 }
 
