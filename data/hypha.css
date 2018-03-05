@@ -149,8 +149,10 @@ img {
 }
 #page {
 	//width: 900px;
-	clear: left;
-	float: left;
+	//clear: left;
+	//float: left;
+  display:block;
+  width:100%;
 }
 .edit-button {
 	margin: 0 0 0 10px;
@@ -163,8 +165,8 @@ img {
 }
 
 #pagename {
-	clear:left;
-	float:left;
+	//clear:left;
+	//float:left;
 	//width:800px;
 }
 
@@ -176,9 +178,10 @@ img {
 }
 
 #bottomContainer {
-	float: left;
-	clear: both;
+	//float: left;
+	//clear: both;
 	//width: 800px;
+  width:100%;
 }
 
 #versionList  {
