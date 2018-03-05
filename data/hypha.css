@@ -65,21 +65,17 @@ textarea,input[type=text]{-webkit-appearance:none;width:13em;outline:0}
 /* End MinCSS */
 
 
-body {
-	font-family:sans-serif;
-}
-
 h1 {
-  font-size: 1.5em;
+  //font-size: 1.5em;
 }
 
 html body {
-	font-family:sans-serif;
-	font-size: 11pt;
-	letter-spacing: 0.07em;
-	text-align:justify;
+	//font-family:sans-serif;
+	//font-size: 11pt;
+	//letter-spacing: 0.07em;
+	//text-align:justify;
 	color:#222;
-	line-height: 1.35;
+	line-height: 1.25;
 }
 
 label {
