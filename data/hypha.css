@@ -110,7 +110,7 @@ img {
 }
 #navContainer {
 	//width:800px;
-	padding: 14px 0 0 0;
+	padding: 4px 0 0 0;
 }
 #menu {
 	margin: 0 0 5px 0;
@@ -150,7 +150,7 @@ img {
 }
 #page {
 	//width: 900px;
-	//clear: left;
+	clear: both;
 	//float: left;
   //display:block;
   //width:100%;
@@ -163,6 +163,20 @@ img {
 	min-height: 1px;
 	//float: left;
 	clear: both;
+}
+
+#menu{
+  
+}
+
+#menu a{
+  padding:5px;
+  background:lightgrey;
+}
+
+#menu a:hover{
+  background:#884400;
+  color:white;
 }
 
 #pagename {
@@ -226,14 +240,14 @@ img {
 
 
 #header {
-	background-color:#fff;
+	background-color:#f80;
 	padding:10px;
 	text-align:center;
 	font-weight:bold;
-	letter-spacing:0.2em;
+	//letter-spacing:0.2em;
 	font-size:24pt;
 	//width: 680px;
-	color:#f80;
+	color:#fff;
 }
 
 #header p {
@@ -281,28 +295,29 @@ img {
 		color:#0b0;
 	}
 
-
-h1 {
-
+h1, h2, h3, h4{
+  color:#bf6f0f;
 }
+
+h1{
+  font-size:2em;
+}
+  
 h2 {
 	font-size: 24pt;
-	margin: 0 0 0 0;
+	margin: 0;
 	font-weight:bold;
-	color:#bf6f0f;
 }
 
 h3 {
 	font-size:15pt;
 	font-weight:bold;
 	margin: 0.2em 0 0 0;
-	color:#bf6f0f;
 }
 
 h4 {
 	font-weight:bold;
 	margin: 12px 0 0 0;
-	color:#bf6f0f;
 	font-size: 12pt;
 }
 h5 {
@@ -473,14 +488,19 @@ code
 	#main {
 		width: 100%;
 	}
+  
+  h1{
+    font-size:1.5em;
+  }
 	#header {
 		width: 100%;
 		padding: 0px;
+    font-size:16px;
 	}
 	#pageCommands {
-		clear:right;
-		float:right;
-		margin: 13px 0 0 0;
+		//clear:right;
+		//float:right;
+		//margin: 13px 0 0 0;
 	}
 	#footer {
 		width: 100%;
@@ -495,8 +515,8 @@ code
 		max-width:100%;
 	}
 	#langList {
-		float:right;
-		border:none;
+		//float:right;
+		//border:none;
 	}
 	.prefix {
 		display:none;
