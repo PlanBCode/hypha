@@ -1,0 +1,38 @@
+table {
+  text-align: left;
+  width:100%;
+  }
+  
+tr{
+  
+}
+
+td,
+th {
+  padding: $picnic-separation / 2 1em $picnic-separation / 2 $picnic-separation;
+  }
+
+th {
+  text-align: left;
+  }
+
+.success th {
+  background-color: $picnic-success;
+  }
+
+.warning th {
+  background-color: $picnic-warning;
+  }
+
+.error th {
+  background-color: $picnic-error;
+  }
+
+.dull th {
+  background-color: $picnic-dull;
+  }
+
+// Zebra stripes
+tr:nth-child(even) {
+  background: rgba(0, 0, 0, .05);
+  }

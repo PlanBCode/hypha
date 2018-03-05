@@ -1,7 +1,8 @@
-@import url("css/normalize.css");
-@import url("css/picnic.css");
-@import url("css/fontello.css");
-@import url("css/festival.css");
+@import url("normalize.css");
+@import url("picnic.css");
+@import url("fontello.css");
+@import url("animation.css");
+@import url("festival.css");
 /* CSS - Cascading Style Sheet */
 /* Palette color codes */
 /* Palette URL: http://paletton.com/#uid=33h0u0kllllaFw0g0qFqFg0w0aF */
@@ -27,7 +28,6 @@
   --color-secondary-2-4: #540002;
   --textfont: sans-serif;
   --textcolor: #222;
-  --bordercolor: #aaa;
   --headingsfont: sans-serif;
   --headingscolor: var(--color-primary-2);
   --linkcolor: var(--color-secondary-1-0);
@@ -66,51 +66,49 @@ a.nopagelink {
   text-decoration: none;
   border-bottom: 1px dotted; }
 
-.navContainer {
+#navContainer {
   padding: 0; }
-  .navContainer nav {
+  #navContainer nav {
     padding: 0; }
-    .navContainer nav.main {
+    #navContainer nav #main-menu {
       padding-left: 10px;
       padding-top: 8px;
       padding-bottom: 8px;
       background-color: var(--menubackground); }
-      .navContainer nav.main a {
-        color: white;
-        margin-right: 10px;
-        text-decoration: none; }
-        .navContainer nav.main a:hover {
+      #navContainer nav #main-menu a {
+        color: white; }
+        #navContainer nav #main-menu a:hover {
           background: var(--color-secondary-1-4); }
-        .navContainer nav.main a.active {
+        #navContainer nav #main-menu a.active {
           background: var(--color-secondary-1-2); }
-      .navContainer nav.main .menu-item {
+      #navContainer nav #main-menu .menu-item {
         padding: 10px; }
-    .navContainer nav #hyphaCommands {
+    #navContainer nav #hyphaCommands {
       background: #eee;
       font-size: 80%;
       padding: 5px 0;
       text-align: right;
       width: 100%; }
-      .navContainer nav #hyphaCommands a {
+      #navContainer nav #hyphaCommands a {
         margin-right: 5px; }
-      .navContainer nav #hyphaCommands .menu-item {
+      #navContainer nav #hyphaCommands .menu-item {
         padding-right: 10px; }
 
-.headerContainer {
-  background-color: var(--headercolor); }
-  .headerContainer.flex {
+#headerContainer {
+  background-color: var(--headercolor);
+  padding: 15px;
+  margin-top: 70px; }
+  #headerContainer.flex {
     justify-content: flex-start; }
-    .headerContainer.flex div {
+    #headerContainer.flex div {
       align-self: center;
       padding-bottom: 0;
       flex: 0 1 auto; }
-  .headerContainer p {
+  #headerContainer .site-title {
     font-weight: bold;
     font-size: 24pt;
-    color: #fff;
-    margin: 0;
-    padding: 15px; }
-  .headerContainer .logo {
+    color: #fff; }
+  #headerContainer .logo {
     padding-left: 0; }
 
 #login {
@@ -150,11 +148,10 @@ a.nopagelink {
   margin-right: auto; }
 
 .pageContainer {
+  padding-left: 15px;
+  padding-right: 15px;
   background: white;
   clear: both; }
-
-#page {
-  padding: 15px; }
 
 #breadcrumb {
   font-size: 80%; }
@@ -197,12 +194,11 @@ a.nopagelink {
 #popup {
   position: absolute;
   top: 50px;
+  padding: 5px;
   background: lightyellow;
   left: 10%;
   margin-right: auto;
   border: 1px solid darkgrey; }
-  #popup table {
-    margin: 5px; }
 
 label {
   white-space: nowrap; }
@@ -373,30 +369,3 @@ input {
     content: "\f2d3"; }
   .memberlist button.delete span {
     display: none; }
-
-.method,
-.sources,
-.review-comments-wrapper {
-  border-top: 1px solid var(--bordercolor); }
-
-.new-comment label {
-  display: block; }
-
-.review-comment-wrapper {
-  background: lightyellow;
-  border-bottom: 3px solid var(--bordercolor);
-  padding-left: 15px;
-  padding-right: 15px;
-  margin-bottom: 30px; }
-  .review-comment-wrapper ul {
-    padding: 0; }
-  .review-comment-wrapper li {
-    list-style: none;
-    padding-top: 10px;
-    padding-bottom: 10px;
-    padding-left: 30px;
-    border-bottom: 1px solid var(--bordercolor); }
-    .review-comment-wrapper li.first-comment {
-      padding-left: 0; }
-    .review-comment-wrapper li p {
-      margin: 0; }

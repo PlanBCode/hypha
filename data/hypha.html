@@ -3,24 +3,32 @@
     <title></title>
   </head>
   <body>
-    <div id="header" />
-    <div id="navContainer">
-      <div id="menu" />
-      <div id="hyphaCommands" />
+    <div id="header" class="container headerContainer"/>
+    <div id="navContainer" class= "container navContainer">
+      <nav class="nav main">
+        <div id="menu" class="nav-left"/>
+      </nav>
+      <nav class="tabs user">
+        <div id="hyphaCommands" class="nav-right" />
+      </nav>
       <div id="login" />
       <div id="trail" />
       <div id="log" />
     </div>
-    <div id="page">
-      <h2 id="pagename"></h2>
-      <div id="pageCommands" />
-      <div id="main" />
-      <div id="langList"/>
-      <div id="bottomContainer">
+    <div class="container pageContainer">      
+      <div id="page">
+        <div id="pageCommands" />
+        <div id="langList"/>
+        <div class="pageTitle">
+          <h1 id="pagename"></h1>
+        </div>
+        <div id="main" />        
+        <div id="popup"/>
         <div id="versionList"/>
-        <div id="footer"/>
       </div>
-      <div id="popup"/>
+    </div>
+    <div class="container footerContainer">    
+      <div id="footer"/>
     </div>
   </body>
 </html>

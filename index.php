@@ -133,10 +133,10 @@
 		$_cmds[] = makeLink(__('settings'), makeAction('settings', '', ''));
 		$_cmds[] = makeLink(__('logout'), makeAction($hyphaQuery, 'logout', ''));
 	}
-	$hyphaHtml->writeToElement('hyphaCommands', implode(' - ', $_cmds));
-	if ($hyphaUser) $hyphaHtml->writeToElement('hyphaCommands', '<br/><span id="loggedIn">'.__('logged-in-as').' `'.$hyphaUser->getAttribute('username').'`'.asterisk(isAdmin()).'</span>');
+	$hyphaHtml->writeToElement('hyphaCommands', implode('', $_cmds));
+	if ($hyphaUser) $hyphaHtml->writeToElement('hyphaCommands', '<br/><div id="loggedIn">'.__('logged-in-as').' `'.$hyphaUser->getAttribute('username').'`'.asterisk(isAdmin()).'</div>');
 
-	// obfuscate email addresses to strangers. It's ok to send readible addresses to logged in members. This also prevents conflicts in the editor.
+	// obfuscate email addresses to strangers. It's ok to send readable addresses to logged in members. This also prevents conflicts in the editor.
 //	if (!$hyphaUser) registerPostProcessingFunction('obfuscateEmail');
 
 	// poor man's cron job
