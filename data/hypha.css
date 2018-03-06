@@ -49,6 +49,21 @@ a {
 	color:var(--linkcolor);
 }
 
+a.otherlanguagelink {
+	font-weight:bold;
+	text-decoration:none;
+	color:#bf6f0f;
+	border-bottom: 1px dotted;
+}
+a.nopagelink {
+	text-decoration: none;
+	border-bottom: 1px dotted;
+}
+a:hover {
+	//text-decoration:underline;
+}
+
+
 #header {
 	background-color:var(--primarycolor3);
 	padding:10px;
@@ -75,11 +90,37 @@ a {
   color:white;
 }
 
+.nav.main a:hover{
+  background:var(--secondcolor5);
+}
+
+.nav a:hover{
+  text-decoration:none;
+  color:white;
+}
+
+.currentPageLink{
+  background:var(--secondcolor5);
+}
+
+nav.tabs a{
+  margin-left:5px;
+  margin-right:5px;
+  color:#555;
+  padding: 5px;
+}
+
+nav.tabs a:hover{
+  background:#aaa;
+  color:white;
+}
+
 #hyphaCommands{
   background:#eee;
   font-size:80%;
-  padding:0 5px;
-}
+  padding-left:5px;
+  padding-right:5px;
+  }
 
 #login {
 	float: right;
@@ -104,9 +145,8 @@ a {
 
 #loggedIn {
 	color:#555;
-  font-weight:bold;
-  margin-top:15px;
   margin-left:10px;
+  padding:5px;
 }
 
 #langList {
@@ -273,21 +313,6 @@ td,th {
 	vertical-align:top;
 	padding:5px;
 	color:#222;
-}
-
-
-a.otherlanguagelink {
-	font-weight:bold;
-	text-decoration:none;
-	color:#bf6f0f;
-	border-bottom: 1px dotted;
-}
-a.nopagelink {
-	text-decoration: none;
-	border-bottom: 1px dotted;
-}
-a:hover {
-	text-decoration:underline;
 }
 
 iframe {
