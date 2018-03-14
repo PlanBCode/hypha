@@ -36,7 +36,7 @@
 body {
 	font-family:var(--textfont);
 	color:var(--textcolor);
-	line-height: 1.25;
+	line-height: 1.4;
   background:#ddd;
 }
 
