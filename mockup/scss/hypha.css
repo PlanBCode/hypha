@@ -1,5 +1,7 @@
-@import url("//unpkg.com/normalize.css@8.0.0/normalize.css");
-@import url("//unpkg.com/chota@latest");
+@import url("normalize.css");
+@import url("chota.css");
+@import url("festival.css");
+
 
 /* CSS - Cascading Style Sheet */
 /* Palette color codes */
@@ -328,6 +330,14 @@ code {
 	display:block;
 }
 
+fieldset{
+  margin-bottom:15px;
+}
+
+input{
+  margin-bottom:15px;
+}
+
 @media (min-width: 960px) {
 }
 
@@ -379,46 +389,40 @@ code {
 	resize: vertical;
 }
 
-/* Festival */
-.festivalTimetable, .festivalTimetable a {
-	color: white;
+.buttongroup{
+  margin-top:10px;
+  margin-bottom:10px;
 }
-.festivalTimetable .timeGridOdd {
-	text-align:left;
-	vertical-align:top;
+.right{
+  text-align:right;
 }
-.festivalTimetable .timeGridOdd {
-	text-align:left;
-	vertical-align:top;
-	background-color:#ddd;
+
+.flex-container-row{
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-around;
 }
-.festivalTimetable .tableRowOdd {
-	background-color:#fff;
+
+.flex-container-column{
+  display: flex;
+  width:100%;
+  flex-flow: column wrap;
+  justify-content: space-around;
 }
-.festivalTimetable .tableRowEven {
-	background-color:#ddd;
+
+.flex-item{
+  width:25%;
 }
-.festivalTimetable .tableAct {
-	text-align:center;
-}
-.festivalTimetable .tableRowOddAct {
-	background-color:#c63;
-	color:#fff;
-	font-weight:bold;
-}
-.festivalTimetable .tableRowEvenAct {
-	background-color:#36c;
-	color:#fff;
-	font-weight:bold;
-}
-.festivalTimetable .tableRowHeading {
-	text-align:left;
-	font-weight:bold;
-	padding:5px;
-}
-.festivalTimetable .tableRowHeadingOdd {
-	background-color:#ddd;
-}
-.festivalTimetable .tableRowHeadingEven {
-	background-color:#bbb;
+
+fieldset h2 {
+    text-transform: none;
+    font-size: 1.2em;
+    letter-spacing: 0;
+    font-weight:bold;
+    padding:5px;
+    color:white;
+    width:100%;
+    background:var(--color-primary-0);
+    margin-top:15px;
+    display:block;
 }
