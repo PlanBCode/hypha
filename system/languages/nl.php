@@ -260,4 +260,68 @@
 		// mailing
 		"mailing-sender-email" => "e-mail",
 		"mailing-sender-name" => "naam",
+
+		// peer_reviewed_article
+		"datatype.name.peer_reviewed_article" => "artikel met review",
+
+		// peer_reviewed_article - action
+		"art-login-preform-action" => "je moet ingelogd zijn om deze actie te kunnen uitvoeren",
+		"art-insufficient-rights-to-set-as-closed" => "je hebt niet genoeg rechten om dit te sluiten",
+		"art-unsupported-status-change" => "deze status verandering wordt niet ondersteund",
+		"art-no-approves-yet" => "er zijn nog geen goedkeuringen ontvangen",
+		"art-successfully-updated" => "succesvol bijgewerkt",
+		"art-status-changed-in-between" => "de status is tussentijds aangepast",
+
+		// peer_reviewed_article - mail
+		"art-a-new-article-has-been-submitted-for-review" => "Een nieuw artikel kan beoordeeld worden",
+		"art-the-status-of-an-article-has-been-updated" => "De status van een artikel is geüpdate",
+		"art-a-blocking-comment-has-been-submitted" => "Een blokkerende opmerking is toegevoegd",
+		"art-a-blocking-comment-has-been-resolved" => "Een blokkerende opmerking is opgelost",
+		"art-please-confirm" => "Graag een bevestiging",
+		"art-please-confirm-you-just-added-a-comment" => "Bevestigingt u aub dat u zojuist een opmerking heeft toegevoegd",
+		"art-confirm" => "bevestiging",
+
+		// peer_reviewed_article - status
+		"art-status-draft" => "schets",
+		"art-status-review" => "in beoordeling",
+		"art-status-approved" => "goedgekeurd",
+		"art-status-published" => "gepubliceerd",
+		"art-status-retracted" => "teruggetrokken",
+
+		// peer_reviewed_article - comment
+		"art-blocking" => "blokkerend",
+		"art-review-comments" => "beoordelingsopmerkingen",
+		"art-no-comments-yet" => "nog geen opmerkingen",
+		"art-add-review-comment" => "voeg beoordelingsopmerking toe",
+		"art-add-comment" => "voeg opmerking toe",
+		"art-comment" => "opmerking",
+		"art-comments" => "opmerkingen",
+
+		// peer_reviewed_article - edit
+		"art-cancel" => "afbreken",
+		"art-save" => "opslaan",
+
+		// peer_reviewed_article
+		"art-by" => "door",
+		"art-at" => "om",
+		"art-method" => "bijsluiter",
+		"art-sources" => "bronnen",
+		"art-is-resolved" => "is opgelost",
+		"art-is-blocking" => "is blokkerend",
+		"art-set-as-resolved" => "zet op opgelost",
+		"art-set-as-closed" => "zet op gesloten",
+		"art-approves" => "goedkeuringen",
+		"art-approve" => "geef goedkeuring",
+		"art-publish" => "publiceer",
+		"art-title" => "titel",
+		"art-name" => "naam",
+		"art-email" => "e-mail",
+		"art-author" => "auteur",
+		"art-excerpt" => "uittreksel",
+		"art-article" => "artikel",
+		"art-missing-arguments" => "missende argumenten",
+		"art-invalid-code" => "ongeldige code",
+
+		"art-start-review" => "start beoordeling",
+
 	);
