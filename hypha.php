@@ -67,6 +67,7 @@
 		if ($dir == 'system/core') return true;
 		if ($dir == 'system/datatypes') return true;
 		if ($dir == 'system/languages') return true;
+		if ($dir == 'system/php-dom-wrapper') return true;
 		return false;
 	}
 
