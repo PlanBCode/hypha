@@ -1,41 +1,19 @@
-Hypha is intended to facilitate collaboration in small (distributed)
-project groups that want to share information within the group and
-publish (part of) it on a project website. It was designed with the
-following principles in mind:
+Hypha is a lightweight CMS for small to medium sized communities and project teams, offering the possibility to create a basic website that is easy to set up and maintain.
+It is open source and doesn't rely on third party code, making it a safe tool that can be self hosted. Hypha is written in php.
 
- * **user friendly**: A project website should be simple to use for all
-   group members. Hypha doesn't use wiki markup codes, but a familiar
-   WYSIWYG editor. No myriad of options, bells and whistles, but simply
-   the basic features.
- * **groupwork**: Any group member can edit any page. Hypha notifies
-   group members of contributions to the project, and makes it very easy
-   and intuitive to respond. Only a few advanced functions which have
-   the power to mess up the whole system (like direct editing of low
-   level page HTML/CSS) are shielded off by an admin level.
- * **revisions**: Hypha stores all versions of a page, shows differences
-   between any two revisions and makes it easy to revert to an old
-   version.
- * **multilingual**: Many groups work and communicate over borders and
-   language barriers. Hypha makes it possible to manage any content in
-   multiple translations by default.
- * **extensions**: Hypha contains a basic implementation for making
-   plain webpages. It can however be extended with modules for other
-   uses: mailinglist, forum etc.
- * **lightweight**: Hypha is written in php and javascript, and doesn't
-   require a mySQL database. Content is stored in plain XML files. Total
-   download size is kept under 100Kb.
- * **simple installation**: Uploading one fully self contained file is
-   the goal.
- * **open source**: All code will be freely available
- * **no content license:** Your data is not owned by some big company
-   but by you (or by your webhosting provider, depending on your
-   contract with them)
- * **privacy:** Hypha doesn't log browsing behaviour. It shares
-   information (contact info  of project members, system messages on
-   updated pages etc) only within the group of registered project
-   members.
- * **portable**: All links to internal pages and files are stored with
-   relative paths.  Hypha can be copied to a different folder or system
-   without breaking.
- * **safe email**: An email obfucation algorithm is used to prevent
-   robots from scraping addresses for spammers.
+The saying goes: "If you can't open it you don't own it." We'd like to add however: "It's no good if you have to use a screwdriver to simply turn it on."
+
+Hypha's core philosophy is about empowering communities by offering its members intuitive tools rather than learning curves, all while sticking to the ethical standards embedded in open source software. For this reason Hypha is not 'packed with features' but in stead focuses on features that will cater to the basic needs of a community and can be understood by average users of the web. In this philosophy every button that is used by 10% of a community but scares off 90% is a bug, rather than a feature.
+
+**Homepage**<br/>
+The hypha homepage can be found at <a href="http://hypha.net">hypha.net</a>.
+
+**Basic install**<br/>
+The easiest way to install hypha is probably to follow the instructions on <a href="http://hypha.net/hypha.php">hypha.net/hypha.php</a>.
+This script packages a fully self contained copy of hypha in a single monolithic php file. If you drop this file on a server and call it from a browser it will extract all necessary files and configure your site according to a few settings to have to enter. The script guides you through the installation process step by step.
+
+**Advanced install though git**<br/>
+1. Pull in a git clone, either by downloading a <a href="https://github.com/PlanBCode/hypha/archive/master.zip">zip file</a> and extracting it in your webfolder of choice, or by issuing a <pre>git clone https://github.com/PlanBCode/hypha.git .</pre> from the commandline in that folder.
+2. Open the file 'hypha.php' in a text editor and enter a superuser name and password.
+3. Set write permissions to the folder 'data/'.
+4. Navigate to your webfolder in a browser and follow instructions from there.
