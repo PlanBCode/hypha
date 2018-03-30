@@ -1,5 +1,5 @@
 @import url("normalize.css");
-@import url("chota.css");
+@import url("picnic.css");
 @import url("fontello.css");
 @import url("animation.css");
 @import url("festival.css");
@@ -33,7 +33,8 @@
   --linkcolor: var(--color-secondary-1-0);
   --linkhovercolor: var(--color-secondary-1-3);
   --headercolor: var(--color-primary-0);
-  --menubackground: var(--color-secondary-1-2); }
+  --menubackground: var(--color-secondary-1-2);
+  --formheaderback: var(--color-primary-0); }
 
 /* Variables end */
 body {
@@ -65,52 +66,48 @@ a.nopagelink {
   text-decoration: none;
   border-bottom: 1px dotted; }
 
-#header {
-  background-color: var(--headercolor);
-  padding: 10px;
-  text-align: center;
-  font-weight: bold;
-  font-size: 24pt;
-  color: #fff;
-  margin-top: 15px; }
-
-#header p {
-  margin: 0 0 0 0; }
-
 #navContainer {
   padding: 0; }
+  #navContainer nav {
+    padding: 0; }
+    #navContainer nav #main-menu {
+      padding-left: 10px;
+      padding-top: 8px;
+      padding-bottom: 8px;
+      background-color: var(--menubackground); }
+      #navContainer nav #main-menu a {
+        color: white; }
+        #navContainer nav #main-menu a:hover {
+          background: var(--color-secondary-1-4); }
+        #navContainer nav #main-menu a.active {
+          background: var(--color-secondary-1-2); }
+      #navContainer nav #main-menu .menu-item {
+        padding: 10px; }
+    #navContainer nav #hyphaCommands {
+      background: #eee;
+      font-size: 80%;
+      padding: 5px 0;
+      text-align: right;
+      width: 100%; }
+      #navContainer nav #hyphaCommands .menu-item {
+        padding-right: 10px; }
 
-#menu {
-  background: var(--menubackground); }
-
-.nav.main a {
-  color: white; }
-
-.nav.main a:hover {
-  background: var(--color-secondary-1-4); }
-
-.nav a:hover {
-  text-decoration: none;
-  color: white; }
-
-.currentPageLink {
-  background: var(--color-secondary-1-2); }
-
-nav.tabs a {
-  margin-left: 5px;
-  margin-right: 5px;
-  color: #555;
-  padding: 5px; }
-
-nav.tabs a:hover {
-  background: #aaa;
-  color: white; }
-
-#hyphaCommands {
-  background: #eee;
-  font-size: 80%;
-  padding-left: 5px;
-  padding-right: 5px; }
+#headerContainer {
+  background-color: var(--headercolor);
+  padding: 15px;
+  margin-top: 70px; }
+  #headerContainer.flex {
+    justify-content: flex-start; }
+    #headerContainer.flex div {
+      align-self: center;
+      padding-bottom: 0;
+      flex: 0 1 auto; }
+  #headerContainer .site-title {
+    font-weight: bold;
+    font-size: 24pt;
+    color: #fff; }
+  #headerContainer .logo {
+    padding-left: 0; }
 
 #login {
   float: right;
@@ -119,11 +116,12 @@ nav.tabs a:hover {
   padding: 0 0 0 10px;
   display: none; }
 
+.pageTopContainer {
+  justify-content: space-between; }
+
 #pageCommands {
-  display: inline-block;
-  float: right;
   font-size: 80%;
-  margin-top: 15px; }
+  margin-top: 10px; }
 
 #loggedIn {
   color: #555;
@@ -131,12 +129,8 @@ nav.tabs a:hover {
   padding: 5px; }
 
 #langList {
-  clear: right;
-  margin: 0 0 0 10px;
-  padding: 0 0 0 10px;
-  display: inline-block;
-  float: right;
-  border-left: 1px solid #222;
+  padding-right: 10px;
+  text-align: right;
   font-size: 8pt; }
 
 #langList .disabled {
@@ -145,16 +139,25 @@ nav.tabs a:hover {
 #langList .selected {
   font-weight: bold; }
 
-#page {
-  padding-top: 15px; }
+.container {
+  max-width: 1120px;
+  margin-left: auto;
+  margin-right: auto; }
+
+.pageContainer {
+  padding-left: 15px;
+  padding-right: 15px;
+  background: white;
+  clear: both; }
 
 #main {
   min-height: 1px;
   clear: both;
   padding-bottom: 1em; }
 
-.pageContainer {
-  background: white; }
+.card header {
+  color: white;
+  background: var(--formheaderback); }
 
 .footerContainer {
   padding-bottom: 2em;
@@ -275,9 +278,6 @@ code {
 .language {
   display: block; }
 
-fieldset {
-  margin-bottom: 15px; }
-
 input {
   margin-bottom: 15px; }
 
@@ -322,29 +322,14 @@ input {
 
 .flex-container-row {
   display: flex;
-  flex-flow: row wrap;
+  flex-flow: row wrap; }
+
+.space-around {
   justify-content: space-around; }
 
 .flex-container-column {
   display: flex;
-  flex-flow: column wrap;
-  height: 20em; }
-
-.flex-item {
-  width: 25%;
-  height: 25px; }
-
-fieldset h2 {
-  text-transform: none;
-  font-size: 1.2em;
-  letter-spacing: 0;
-  font-weight: bold;
-  padding: 5px;
-  color: white;
-  width: 100%;
-  background: var(--color-primary-0);
-  margin-top: 15px;
-  display: block; }
+  flex-flow: column wrap; }
 
 #settingsIntervalDays,
 #settingsIntervalHours,

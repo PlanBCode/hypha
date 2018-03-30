@@ -5,7 +5,7 @@ var sass = require('gulp-sass');
 var webserver = require('gulp-webserver');
 
 gulp.task('sass', function(){
-  return gulp.src('scss/hypha.scss')
+  return gulp.src('scss/*.scss')
     .pipe(sass()) // Using gulp-sass
     .pipe(gulp.dest('css'))
 });

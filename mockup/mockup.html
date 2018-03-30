@@ -1,550 +1,480 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"><head>
-<!-- base href="http://localhost.hypha.nl/" -->
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Meet je stad</title>
-<link href="css/hypha.css" rel="stylesheet" type="text/css">
-<script type="text/javascript" id="jsAggregator">
-	function validatePagename(obj) {
-		var pos = obj.selectionStart;
-		var val = obj.value.replace(/\s+/g, ' ').replace(/^\s|[^\d\w\s\.-]/gi, '');
-		if (val.length < pos) pos = val.length;
-		obj.value = val;
-		obj.setSelectionRange(pos, pos);
-	}
-	function newPage() {
-		html = '<table><tr><th colspan="2">maak nieuwe pagina</td><tr>';
-		html+= '<tr><th>type</th><td><select id="newPageType" name="newPageType">' + '<option value="festivalpage">festivalpage</option><option value="mailinglist">mailinglist</option><option value="textpage">textpage</option>' + '</select></td></tr>';
-		html+= '<tr><th>naam</th><td><input type="text" id="newPagename" value="" onblur="validatePagename(this);" onkeyup="validatePagename(this); document.getElementById(\'newPageSubmit\').disabled = this.value ? false : true;"/></td></tr>';
-		html+= '<tr><td></td><td><input type="checkbox" id="newPagePrivate" name="newPagePrivate"/> prive pagina</td></tr>';
-		html+= '<tr><td></td><td><input type="button" class="button" value="annuleren" onclick="document.getElementById(\'popup\').style.visibility=\'hidden\';" />';
-		html+= '<input type="submit" id="newPageSubmit" class="button editButton" value="maak" disabled="true" onclick="hypha(\'nl/\' + document.getElementById(\'newPagename\').value + \'/edit\', \'newPage\', document.getElementById(\'newPagename\').value);" /></td></tr></table>';
-		document.getElementById('popup').innerHTML = html;
-		document.getElementById('popup').style.left = document.getElementById('hyphaCommands').offsetLeft + 'px';
-		document.getElementById('popup').style.top = (document.getElementById('hyphaCommands').offsetTop + 25) + 'px';
-		document.getElementById('popup').style.visibility = 'visible';
-		document.getElementById('newPagename').focus();
-	}
+<html xmlns="http://www.w3.org/1999/xhtml">
 
-
-	
-	var postProcessingList = new Array();
-
-	
-	function hypha(url, cmd, arg) {
-		url = url.replace(/\s\//g, '/').replace(/\s$/g, '').replace(/\s/g, '_');
-		document.getElementById('command').value = cmd;
-		document.getElementById('argument').value = arg;
-		document.forms['hyphaForm'].action = url;
-		for(i=0; i<postProcessingList.length; i++) postProcessingList[i]();
-		if (cmd||arg) document.forms['hyphaForm'].submit();
-		else window.location = url;
-	}
-
-	
-	function ajax(url, resultCallback, sendPostParams) {
-		var request;  // The variable that makes Ajax possible!
-		try{
-			// Opera 8.0+, Firefox, Safari
-			request = new XMLHttpRequest();
-		} catch (e){
-			// Internet Explorer Browsers
-			try{
-				request = new ActiveXObject("Msxml2.XMLHTTP");
-			} catch (e) {
-				try{
-					request = new ActiveXObject("Microsoft.XMLHTTP");
-				} catch (e){
-					// Something went wrong
-					alert("Je browser is stuk!");
-					return false;
-				}
-			}
-		}
-		request.onreadystatechange = function() {
-			if(request.readyState == 4) resultCallback(request.responseText);
-		}
-		if (sendPostParams) {
-			var params = "";
-			var form = document.forms['hyphaForm'];
-			for (var i=0; i < form.elements.length; i++) if (form.elements[i].hasAttribute('name')) {
-				params+= (params ? "&" : "") + form.elements[i].getAttribute('name') + "=";
-				if (form.elements[i].tagName=='textarea') params+= encodeURIComponent(form.elements[i].innerHTML);
-				else params+= encodeURIComponent(form.elements[i].value);
-			}
-			request.open('POST', url, true);
-			request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-			request.setRequestHeader("Content-length", params.length);
-			request.setRequestHeader("Connection", "close");
-			request.send(params);
-		}
-		else {
-			request.open('GET', url, true);
-			request.send(null);
-		}
-	}
-
-
-	
-	function notify(type, message) {
-		document.getElementById('hyphaNotify').innerHTML = document.getElementById('hyphaNotify').innerHTML + '<div class="' + type + '" time="' + new Date().getTime() + '">' + message + '</div>';
-		notifyTimer();
-	}
-	
-	function notifyTimer() {
-		if(document.getElementById('hyphaNotify')) {
-			var now = new Date().getTime();
-			var msgbox = document.getElementById('hyphaNotify');
-			if (msgbox.children.length) {
-				var msg = msgbox.firstChild;
-				while (msg) {
-					var next = msg.nextSibling;
-					if (msg.nodeType === 1) {
-						if(!msg.hasAttribute('time')) msg.setAttribute('time', now);
-						else if (now - msg.getAttribute('time') > 5000) msg.parentNode.removeChild(msg);
-					}
-					msg = next;
-				}
-			}
-			if (msgbox.children.length) {
-				document.getElementById('hyphaNotify').style.visibility = 'visible';
-				setTimeout(notifyTimer, 100);
-			}
-			else document.getElementById('hyphaNotify').style.visibility = 'hidden';
-		}
-	}
-	setTimeout(notifyTimer, 1000);
-
-</script>
+<head>
+  <!-- base href="http://localhost.hypha.nl/" -->
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Meet je stad</title>
+  <link href="css/hypha.css" rel="stylesheet" type="text/css">
 </head>
-<body cz-shortcut-listen="true">	<form name="hyphaForm" method="post" action="" accept-charset="utf-8" enctype="multipart/form-data">
-		<input id="command" name="command" type="hidden"><input id="argument" name="argument" type="hidden"><input id="csrfToken" name="csrfToken" value="b6b5189f9efed020" type="hidden">
-		
-    <div id="header" class="container headerContainer"><p>Meet je stad</p></div>
-    <div id="navContainer" class="container navContainer">
-      <nav class="nav main"><div id="menu" class="nav-left">
-<a href="http://localhost.hypha.nl/nl/home" class="currentPageLink">home</a><a href="http://www.kleinestappen.nl/">Kleine Stappen</a><a href="https://www.toolsforresearch.com/">TFR</a>
-</div>
-      </nav><nav class="tabs user"><div id="hyphaCommands" class="nav-right">
-<a href="http://localhost.hypha.nl/index/nl">index</a><a href="javascript:newPage();">nieuwe pagina</a><a href="javascript:hypha('settings',%20'',%20'');">instellingen</a><a href="javascript:hypha('',%20'logout',%20'');">uitloggen</a><br><div id="loggedIn">ingelogd als `gastheer`<span style="color:#b90;">∗</span>
-</div>
-</div>
-      </nav><div id="login"></div>
-      <div id="trail"></div>
-      <div id="log"></div>
-    </div>
-    <div class="container pageContainer">      
-      <div id="page">
-        <div id="pageCommands">
-<input class="button" value="bewerken" onclick="hypha('nl/home/edit', '', 'version');" type="button"><input class="button" value="vertalen" onclick="hypha('nl/home/translate', '', 'version');" type="button">
-</div>
-        <div id="langList">
-<span class="prefix">talen: </span><span class="language"><a href="http://localhost.hypha.nl/aa/home">aa</a></span><span class="language selected">nl</span>
-</div>
-        <div class="pageTitle">
-          <h1 id="pagename">home in h1.pagename</h1>
-        </div>
-        <div id="main">
-<h1>Welkom! in gewone h1</h1>
-<p>Dit is een gewone paragraph</p>
-<ul>
-<li>list item 1</li>
-<li>list item 2</li>
-</ul>
-<ol>
-<li>List item</li>
-<li>list item</li>
-<li>list item</li>
-</ol>
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris sed eleifend neque, eget congue est. Nullam congue hendrerit pretium. Aenean mollis eget quam faucibus consectetur. Donec pharetra lacinia eros sed posuere. </p>
 
-<p>Sed suscipit cursus nisi, eget porttitor metus ornare non. Ut accumsan quis dolor in tempor. Etiam fringilla, magna et accumsan condimentum, nulla lacus iaculis purus, pretium euismod sapien nibh nec urna. Quisque lorem risus, fermentum vel ultrices ac, accumsan suscipit mauris. Aenean interdum sit amet sem ac molestie. Vivamus finibus turpis sit amet aliquet ullamcorper. </p>
+<body class="home page-type logged-in admin">	<!--Classes that display if this is home, page-type and if user is logged-in/not-logged-in and if user is admin -->
 
-<h2>De meetgroep in h2</h2>
-<h3>De meetgroep in h3</h3>
-<h4>De meetgroep in h4</h4>
-<h5>De meetgroep in h5</h5>
-<h6>De meetgroep in h6</h6>
-
-<form id="form1">
-<fieldset id="personal_setting">
-<h2>Persoonlijke instellingen</h2>
-<label for="input__text">Gebruikersnaam:</label>
-<input id="input__text" type="text" placeholder="Text Input">
-<label for="input__text">Volledige naam:</label>
-<input id="input__text" type="text" placeholder="Text Input">
-<label for="input__text">E-mail:</label>
-<input id="input__text" type="text" placeholder="Text Input">	
-<label for="select">Bedieningstaal:</label>
-	<select id="select">
-    <optgroup label="Option Group">
-      <option>Nederlands</option>
-      <option>Engels</option>
-      <option>Swahili</option>
-    </optgroup>
-  </select>
-  <div class="buttongroup">
-    <div class="left">
-      <input type="button" class="button secondary" value="Password aanpassen">
-    </div>
-    <div class="right"> 
-      <a href="#" class=""></a>annuleren   </a><input type="button" class="button primary" value="bewaren">
-    </div>
-  </div>
-  
-  </fieldset>
-</form>
-
-<form id="form2">
-<fieldset id="memberlist">
-<h2>Projectledenlijst</h2>
-
-<table>
-<tr>
-<th></th>
-		<th>gebruikersnaam</th>
-		<th>volledige naam</th>
-		<th>e-mail</th>
-		<td><input type="button" class="button" value="uitnodigen" onclick="hypha('settings/invite', '', '');"></td>
-	</tr>
-<tr>
-<td></td>
-<td>Daan</td>
-<td>D.B.Bezemer</td>
-<td>d.b.bezemer@kpnmail.nl</td>
-<td>
-<input type="button" class="button" value="bewerken" onclick="hypha('settings/user/Daan', '', '');"><input type="button" class="button" value="verwijderen" onclick="hypha('settings', 'settingsRemove', '5a6f03747309f');"><input type="button" class="button" value="admin" onclick="hypha('settings', 'settingsAdmin', '5a6f03747309f');">
-</td>
-</tr>
-<tr>
-<td><span style="color:#b90;">∗</span></td>
-<td>giplt</td>
-<td>Harmen G. Zijp</td>
-<td>mjs@giplt.nl</td>
-<td>
-<input type="button" class="button" value="bewerken" onclick="hypha('settings/user/giplt', '', '');"><input type="button" class="button" value="verwijderen" onclick="hypha('settings', 'settingsRemove', '5a649c55c6e28');"><input type="button" class="button" value="ontadmin" onclick="hypha('settings', 'settingsUnadmin', '5a649c55c6e28');">
-</td>
-</tr>
-<tr>
-<td></td>
-<td>plink</td>
-<td>Paul Link</td>
-<td>paul@link2.nl</td>
-<td>
-<input type="button" class="button" value="bewerken" onclick="hypha('settings/user/plink', '', '');"><input type="button" class="button" value="verwijderen" onclick="hypha('settings', 'settingsRemove', '5a649c841f093');"><input type="button" class="button" value="admin" onclick="hypha('settings', 'settingsAdmin', '5a649c841f093');">
-</td>
-</tr>
-<tr>
-<td><span style="color:#b90;">∗</span></td>
-<td>tamadmin</td>
-<td>Tammo Admin</td>
-<td>tammo.terhark@toolsforresearch.com</td>
-<td>
-<input type="button" class="button" value="bewerken" onclick="hypha('settings/user/tamadmin', '', '');"><input type="button" class="button" value="verwijderen" onclick="hypha('settings', 'settingsRemove', '5a6f8db4127f6');"><input type="button" class="button" value="ontadmin" onclick="hypha('settings', 'settingsUnadmin', '5a6f8db4127f6');">
-</td>
-</tr>
-<tr>
-<td></td>
-<td>tammo</td>
-<td>tammo</td>
-<td>tammo@kleinestappen.nl</td>
-<td>
-<input type="button" class="button" value="bewerken" onclick="hypha('settings/user/tammo', '', '');"><input type="button" class="button" value="verwijderen" onclick="hypha('settings', 'settingsRemove', '5a6f035cc6e46');"><input type="button" class="button" value="admin" onclick="hypha('settings', 'settingsAdmin', '5a6f035cc6e46');">
-</td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td></td>
-<td> tammo@terhark.nl</td>
-<td>
-<input type="button" class="button" value="verwijderen" onclick="hypha('settings', 'settingsRemove', '5a82964446112');"><input type="button" class="button" value="herinneren" onclick="hypha('settings', 'settingsRemind', '5a82964446112');">
-</td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td></td>
-<td>info@haarlemduurzaam.nl</td>
-<td>
-<input type="button" class="button" value="verwijderen" onclick="hypha('settings', 'settingsRemove', '5a829644429c4');"><input type="button" class="button" value="herinneren" onclick="hypha('settings', 'settingsRemind', '5a829644429c4');">
-</td>
-</tr>
-</table>
-</fieldset>
-</form>
-
-
-<form id="hypha" method="post" accept-charset="utf-8">
-  <fieldset>			
-    <h2>hypha superuser login</h2>
-    <div class="intro">Please log in with the superuser account. In case you forgot the password you'll have to look it up in the file 'hypha.php' on your server.</div>
-    <label for="input__text">User name:</label>
-    <input id="input__text" type="text" placeholder="Text Input">
-    <label for="input__text">Password:</label>
-    <input id="input__text" type="text" placeholder="********">
-    <div class="buttongroup">
-      <div class="right"> 
-        <input type="button" class="button primary" value="login">
+  <section id="navContainer">
+    <nav>  
+      <div id="main-menu">
+        <a href="http://localhost.hypha.nl/nl/home" class="menu-item current">home</a>
+        <a href="http://www.kleinestappen.nl/" class="menu-item">Kleine Stappen</a>
+        <a href="https://www.toolsforresearch.com/" class="menu-item">TFR</a>   
       </div>
-    </div>
-  </fieldset>
-</form>
-<form>
-  <fieldset>
-    <h2 id="pagename">verander projectinstellingen</h2>
-    <label for="select__box">standaard taal:</label>
-    <select name="settingsDefaultLanguage" id="settingsDefaultLanguage"><option value="aa">aa: ʿAfár af (Afar)</option>
-      <option value="ab">ab: аҧсуа бызшәа (Abkhaz)</option>
-      <option value="af">af: Afrikaans (Afrikaans)</option>
-      <option value="am">am: (Amhari) ܠܫܢܐ ܤܘܪܝܝܐ</option>
-      <option value="ar">ar: (Arabic) عربي</option>
-      <option value="as">as: অসমীয়া (Assamese)</option>
-      <option value="ay">ay: aymar aru (Aymara)</option>
-      <option value="az">az: Azərbaycan dili (Azerbaijani)</option>
-      <option value="ba">ba: башҡорт теле (Bashkir)</option>
-      <option value="be">be: Беларускі (Belarussian)</option>
-      <option value="bg">bg: Български (Bulgarian)</option>
-      <option value="bh">bh:  (Bihari)</option>
-      <option value="bi">bi:  (Bislama)</option>
-      <option value="bn">bn: বাংলা (Bengali; Bangla)</option>
-      <option value="bo">bo: བོད་སྐད་ (Tibetan)</option>
-      <option value="br">br: ar brezhoneg (Breton)</option>
-      <option value="ca">ca: Català (Catalan)</option>
-      <option value="co">co: corsu (Corsican)</option>
-      <option value="cs">cs: Čeština (Czech)</option>
-      <option value="cy">cy: Cymraeg (Welsh)</option>
-      <option value="da">da: Dansk (Danish)</option>
-      <option value="de">de: Deutsch (German)</option>
-      <option value="dz">dz: རྫོང་ཁ (Bhutanese)</option>
-      <option value="el">el: Ελληνικά (Greek)</option>
-      <option value="en">en: English (English)</option>
-      <option value="eo">eo: Esperanto (Esperanto)</option>
-      <option value="es">es: Español (Spanish)</option>
-      <option value="et">et: Eesti (Estonian)</option>
-      <option value="eu">eu: euskara (Basque)</option>
-      <option value="fa">fa: (Persian) پارسی</option>
-      <option value="fi">fi: Suomi (Finnish)</option>
-      <option value="fj">fj: Vakaviti (Fijian)</option>
-      <option value="fo">fo: Føroyskt (Faroese)</option>
-      <option value="fr">fr: Français (French)</option>
-      <option value="fy">fy: Frysk (Frisian)</option>
-      <option value="ga">ga: Gaeilge (Irish Gaelic)</option>
-      <option value="gd">gd: Gàidhlig (Scots Gaelic)</option>
-      <option value="gl">gl: Galego (Galician)</option>
-      <option value="gn">gn: Avañe\'ẽ (Guarani)</option>
-      <option value="gu">gu: zગુજરાતી (Gujarati)</option>
-      <option value="ha">ha: (Hausa) حَوْسَ</option>
-      <option value="he">he: (Hebrew) עברית</option>
-      <option value="hi">hi: हिंदी (Hindi)</option>
-      <option value="hr">hr: Hrvatski (Croatian)</option>
-      <option value="hu">hu: Magyar (Hungarian)</option>
-      <option value="hy">hy: Հայերէն (Armenian)</option>
-      <option value="ia">ia: Interlingua</option>
-      <option value="id">id: Bahasa Indonesia (Indonesian)</option>
-      <option value="ie">ie: Interlingue</option>
-      <option value="ik">ik: Inupiatun (Inupiak)</option>
-      <option value="is">is: Íslenska (Icelandic)</option>
-      <option value="it">it: Italiano (Italian)</option>
-      <option value="iu">iu: ᐃᓄᒃᑎᑐᑦ (Inuktitut)</option>
-      <option value="ja">ja: 日本語 (Japanese)</option>
-      <option value="jw">jw: basa Jawa (Javanese)</option>
-      <option value="ka">ka: ქართული (Georgian)</option>
-      <option value="kk">kk: Қазақ тілі / Qazaq tili (Kazakh) قازاق ٴتىلى</option>
-      <option value="kl">kl: Kalaallisut (Greenlandic)</option>
-      <option value="km">km:  (Cambodian)</option>
-      <option value="kn">kn: ಕನ್ನಡ (Kannada)</option>
-      <option value="ko">ko: 한국어 (Korean)</option>
-      <option value="ks">ks: कॉशुर (Kashmiri) كٲشُر</option>
-      <option value="ku">ku: Kurdí / к’öрди (Kurdish) کوردی</option>
-      <option value="ky">ky: (Kirghiz) قىرعىز</option>
-      <option value="la">la: Lingua Latina (Latin)</option>
-      <option value="ln">ln: lingála (Lingala)</option>
-      <option value="lo">lo: ພາສາລາວ (Laothian)</option>
-      <option value="lt">lt: Lietuviskai (Lithuanian)</option>
-      <option value="lv">lv: Latviešu (Latvian)</option>
-      <option value="mg">mg: Fiteny Malagasy (Malagasy)</option>
-      <option value="mi">mi: te Reo Māori (Maori)</option>
-      <option value="mk">mk: Македонски (Macedonian)</option>
-      <option value="ml">ml: മലയാളം (Malayalam)</option>
-      <option value="mn">mn: монгол (Mongolian)</option>
-      <option value="mo">mo: лимба молдовеняскэ (Moldavian)</option>
-      <option value="mr">mr: मराठी (Marathi)</option>
-      <option value="ms">ms: Bahasa melayu (Malay)</option>
-      <option value="mt">mt: Malti (Maltese)</option>
-      <option value="my">my: ဗမာစကား (Burmese)</option>
-      <option value="na">na: Ekakairũ Naoero (Nauru)</option>
-      <option value="ne">ne: नेपाली (Nepali)</option>
-      <option value="nl" selected>nl: Nederlands (Dutch)</option>
-      <option value="no">no: Norsk (Norwegian)</option>
-      <option value="oc">oc:  (Occitan)</option>
-      <option value="om">om: Afaan Oromo (Afan Oromo)</option>
-      <option value="or">or: ଓଡ଼ିଆ (Oriya)</option>
-      <option value="pa">pa: ਪੰਜਾਬੀ (Punjabi)</option>
-      <option value="pl">pl: Polski (Polish)</option>
-      <option value="ps">ps: (Pashto, Pushto) پښتو</option>
-      <option value="pt">pt: Português (Portuguese)</option>
-      <option value="qu">qu: Qhichwa (Quechua)</option>
-      <option value="rm">rm:  (Rhaeto-Romance)</option>
-      <option value="rn">rn: íkiRǔndi (Kirundi)</option>
-      <option value="ro">ro: Română (Romanian)</option>
-      <option value="ru">ru: Русский (Russian)</option>
-      <option value="rw">rw: Ikinyarwanda (Kinyarwanda)</option>
-      <option value="sa">sa: संस्कृतम् (Sanskrit)</option>
-      <option value="sd">sd: (Sindhi) سنڌي</option>
-      <option value="sg">sg: Yângâ tî Sängö (Sangho)</option>
-      <option value="sh">sh:  (Serbo-Croatian)</option>
-      <option value="si">si: සිංහල (Sinhalese)</option>
-      <option value="sk">sk: Slovenčina (Slovak)</option>
-      <option value="sl">sl: Slovenščina (Slovenian)</option>
-      <option value="sm">sm: Gagana Samoa (Samoan)</option>
-      <option value="sn">sn: chiShona (Shona)</option>
-      <option value="so">so: af Soomaali (Somali)</option>
-      <option value="sq">sq: Shqip (Albanian)</option>
-      <option value="sr">sr: српски (Serbian)</option>
-      <option value="ss">ss: siSwati (Siswati)</option>
-      <option value="st">st: seSotho (Sesotho)</option>
-      <option value="su">su: basa Sunda (Sundanese)</option>
-      <option value="sv">sv: Svenska (Swedish)</option>
-      <option value="sw">sw: Swahili (Swahili)</option>
-      <option value="ta">ta: தமிழ் (Tamil)</option>
-      <option value="te">te: తెలుగు (Telugu)</option>
-      <option value="tg">tg: тоҷикӣ (Tajik)</option>
-      <option value="th">th: ไทย (Thai)</option>
-      <option value="ti">ti: ትግርኛ (Tigrinya)</option>
-      <option value="tk">tk: түркmенче (Turkmen)</option>
-      <option value="tl">tl: Tagalog (Tagalog)</option>
-      <option value="tn">tn: seTswana (Setswana)</option>
-      <option value="to">to: chiTonga (Tonga)</option>
-      <option value="tr">tr: Türkçe (Turkish)</option>
-      <option value="ts">ts: xiTsonga (Tsonga)</option>
-      <option value="tt">tt: татарча / tatar tele (Tatar) تاتارچا</option>
-      <option value="tw">tw: twi (Twi)</option>
-      <option value="ug">ug: Уйғур (Uighur)ئۇيغۇر</option>
-      <option value="uk">uk: Українська (Ukrainian)</option>
-      <option value="ur">ur: (Urdu) اردو</option>
-      <option value="uz">uz: o\'zbek tili / ўзбек тили (Uzbek) أۇزبېك ﺗﻴﻠی</option>
-      <option value="vi">vi: Tiếng Việt (Vietnamese)</option>
-      <option value="vo">vo: Volapuk</option>
-      <option value="wo">wo: Wollof (Wolof)</option>
-      <option value="xh">xh: isiXhosa (Xhosa)</option>
-      <option value="yi">yi: (Yiddish) ײִדיש</option>
-      <option value="yo">yo: Yorùbá (Yoruba)</option>
-      <option value="za">za: Saw cuengh / Saɯ cueŋƅ (Zhuang)</option>
-      <option value="zh">zh: 中文 (Chinese)</option>
-      <option value="zu">zu: isiZulu (Zulu)</option></select></td>
-
-    <label for="select__box">standaard pagina:</label>
-		<input name="settingsDefaultPage" id="settingsDefaultPage" type="text" size="20" value="home" onblur="validatePagename(this);" onkeyup="validatePagename(this);"></td>
-    <label for="select__box">systeememail:</label>
-		<input name="settingsSystemEmail" id="settingsSystemEmail" type="text" size="40" value="mjs@giplt.nl"></td>
-    <label for="select__box">notificatie-interval:</label>
-		<input name="settingsIntervalDays" id="settingsIntervalDays" type="text" size="3" value="0">D <input name="settingsIntervalHours" id="settingsIntervalHours" type="text" size="2" value="6">U <input name="settingsIntervalMinutes" id="settingsIntervalMinutes" type="text" size="2" value="0">m</td>
-    <div class="buttongroup">
-      <div class="right"> 
-      <a href="#" class=""></a>annuleren   </a><input type="button" class="button primary" value="bewaren">
-      </div>
-    </div>
-	</fieldset>
-</form>
-
-<form>
-<fieldset>
-  <textarea name="editHtml" id="editHtml" cols="100" rows="24" wrap="off">&lt;html&gt;
-    &lt;head&gt;
-      &lt;title&gt;&lt;/title&gt;
-    &lt;/head&gt;
-    &lt;body&gt;
-      &lt;div id="header" /&gt;
-      &lt;div id="navContainer"&gt;
-        &lt;div id="menu" /&gt;
-        &lt;div id="hyphaCommands" /&gt;
-        &lt;div id="login" /&gt;
-        &lt;div id="trail" /&gt;
-        &lt;div id="log" /&gt;
-      &lt;/div&gt;
-      &lt;div id="page"&gt;
-        &lt;h2 id="pagename"&gt;&lt;/h2&gt;
-        &lt;div id="pageCommands" /&gt;
-        &lt;div id="main" /&gt;
-        &lt;div id="langList"/&gt;
-        &lt;div id="bottomContainer"&gt;
-          &lt;div id="versionList"/&gt;
-          &lt;div id="footer"/&gt;
-        &lt;/div&gt;
-        &lt;div id="popup"/&gt;
-      &lt;/div&gt;
-    &lt;/body&gt;
-  &lt;/html&gt;
-  </textarea>
-    <div class="buttongroup">
-      <div class="right"> 
-      <a href="#" class=""></a>annuleren   </a><input type="button" class="button primary" value="bewaren">
-      </div>
-    </div>  
-
-</fieldset> 
-</form>
-<h2 id="pagename">page-index: Nederlands</h2>
-      <div id="pageCommands"></div>
-<div id="main">
-
-  <div class="flex-container-column">
-    <div class="flex-item title">A</div>
-    <div class="flex-item"><a href="nl/Andere_titel">Andere titel</a></div>
-    <div class="flex-item title">B</div>
-    <div class="flex-item"><a href="nl/Bevindingen">Bevindingen</a></div>
-    <div class="flex-item title">D</div>
-    <div class="flex-item"><a href="nl/Daans_html">Daans html</a></div>
-    <div class="flex-item"><a href="nl/Daans_html#P001">Daans html#P001</a></div>
-    <div class="flex-item"><a href="nl/Daans_html.html#P001">Daans html.html#P001</a></div>
-    <div class="flex-item"><a href="nl/Daans_htmlP001">Daans htmlP001</a></div>
-    <div class="flex-item"><a href="nl/Daans_pagina">Daans pagina</a></div>
-    <div class="flex-item"><a href="nl/Daans_pagina#P001">Daans pagina#P001</a></div>
-    <div class="flex-item"><a href="nl/de_floragroep">de floragroep</a></div>
-    <div class="flex-item"><a href="nl/de_meetgroep">de meetgroep</a></div>
-    <div class="flex-item"><a href="nl/de_verhalengroep">de verhalengroep</a></div>
-    <div class="flex-item title">E</div>
-    <div class="flex-item"><a href="nl/Etherpad">Etherpad</a></div>
-    <div class="flex-item title">F</div>
-    <div class="flex-item"><a href="nl/Festival_1">Festival 1</a></div>
-    <div class="flex-item title">G</div>
-    <div class="flex-item"><a href="nl/Github">Github</a></div>
-    <div class="flex-item title">H</div>
-    <div class="flex-item"><a href="nl/home">home</a></div>
-    <div class="flex-item title">K</div>
-    <div class="flex-item"><a href="nl/Kan_weg_2">Kan weg 2</a></div>
-    <div class="flex-item"><a href="nl/Kan_weg_3">Kan weg 3</a></div>
-    <div class="flex-item"><a href="nl/Kanweg_1">Kanweg 1</a></div>
-    <div class="flex-item title">M</div>
-    <div class="flex-item"><a href="nl/mailinglist">mailinglist</a></div>
-    <div class="flex-item"><a href="nl/meten">meten</a></div>
-    <div class="flex-item title">T</div>
-    <div class="flex-item"><a href="nl/test">test</a></div>
-    <div class="flex-item"><a href="nl/test123">test123</a></div>
-    <div class="flex-item"><a href="nl/testmailing">testmailing</a></div>
-    <div class="flex-item title">X</div>
-    <div class="flex-item"><a href="nl/XML">XML</a></div>
-  </div>
-</div>
       
-        <div id="popup"></div>
-        <div id="versionList">versie: <select class="version" name="version" onchange="hypha('nl/home', '', 'version');"><option value="" selected="selected">15-03-18, 15:05, gastheer</option>
-<option value="t1520373874">6-03-18, 23:04, gastheer</option>
-<option value="t1520368264">6-03-18, 21:31, gastheer</option>
-<option value="t1520368255">6-03-18, 21:30, gastheer</option>
-<option value="t1520294095">6-03-18, 00:54, gastheer</option>
-<option value="t1518514771">13-02-18, 10:39, </option></select>
-</div>
+      <div id="hyphaCommands">
+        <a href="http://localhost.hypha.nl/index/nl" class="menu-item">index</a>
+        <a href="javascript:newPage();" class="menu-item">nieuwe pagina</a>
+        <a href="javascript:hypha('settings',%20'',%20'');" class="menu-item">instellingen</a>
+        <a href="javascript:hypha('',%20'logout',%20'');" class="menu-item">uitloggen</a>
+        <span class="logged-in menu-item">ingelogd als `gastheer</span>
       </div>
+    </nav>
+  </section>
+
+  <section id="headerContainer" class="container flex">
+    <div class="logo">
+      <img src="images/logo.png">
     </div>
-    <div class="container footerContainer">    
-      <div id="footer">
-<a href="http://creativecommons.org/licenses/by-sa/3.0/"><img alt="Creative Commons License" style="border-width: 0pt; float: right; margin-left: 5px;" src="hypha_files/cclogo.png"></a> This work is licensed under a <a href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>. Website powered by <a href="http://www.hypha.net/">hypha</a>.</div>
+    <div class="site-title">Meet je stad</div>
+  </section>
+  
+  <section class="pageTopContainer flex container">      
+    <div id="pageCommands">
+      <input class="button" value="bewerken" onclick="hypha('nl/home/edit', '', 'version');" type="button">
+      <input class="button" value="vertalen" onclick="hypha('nl/home/translate', '', 'version');" type="button">
     </div>
-  	</form>
-<div id="hyphaNotify" style="visibility:hidden;"></div>
+    <div id="langList">
+      <span class="prefix">talen: </span>
+      <span class="language"><a href="http://localhost.hypha.nl/aa/home">aa</a></span>
+      <span class="language selected">nl</span>
+    </div>
+  </section>
+  <section class="pageContainer container">
+    <div class="pageTitle">
+      <h1 id="pagename">Paginatitel h1.pagename (de enige h1 op de pagina)</h1>
+    </div>
+    <div id="main">
+      <h2>Welkom! in h2</h2>
+      <p>Dit is een gewone paragraph</p>
+      <ul>
+        <li>list item 1</li>
+        <li>list item 2</li>
+      </ul>
+      <ol>
+        <li>List item</li>
+        <li>list item</li>
+        <li>list item</li>
+      </ol>
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris sed eleifend neque, eget congue est. Nullam congue hendrerit pretium. Aenean mollis eget quam faucibus consectetur. Donec pharetra lacinia eros sed posuere. </p>
+
+      <p>Sed suscipit cursus nisi, eget porttitor metus ornare non. Ut accumsan quis dolor in tempor. Etiam fringilla, magna et accumsan condimentum, nulla lacus iaculis purus, pretium euismod sapien nibh nec urna. Quisque lorem risus, fermentum vel ultrices ac, accumsan suscipit mauris. Aenean interdum sit amet sem ac molestie. Vivamus finibus turpis sit amet aliquet ullamcorper. </p>
+
+      <h2>De meetgroep in h2</h2>
+      <h3>De meetgroep in h3</h3>
+      <h4>De meetgroep in h4</h4>
+      <h5>De meetgroep in h5</h5>
+      <h6>De meetgroep in h6</h6>
+
+      <form>
+        <fieldset class="card">
+          <header>Persoonlijke instellingen</header>
+          <footer>
+          <label for="input__text">Gebruikersnaam:</label>
+          <input id="input__text" type="text" placeholder="Text Input">
+          <label for="input__text">Volledige naam:</label>
+          <input id="input__text" type="text" placeholder="Text Input">
+          <label for="input__text">E-mail:</label>
+          <input id="input__text" type="text" placeholder="Text Input">	
+          <label for="select">Bedieningstaal:</label>
+          <select id="select">
+            <optgroup label="Option Group">
+              <option>Nederlands</option>
+              <option>Engels</option>
+              <option>Swahili</option>
+            </optgroup>
+          </select>
+          <div class="buttongroup">
+            <div class="left">
+              <input type="button" class="button secondary" value="Password aanpassen">
+            </div>
+            <div class="right"> 
+              <a href="#" class=""></a>annuleren   </a><input type="button" class="button primary" value="bewaren">
+            </div>
+          </div>
+          </footer>
+        
+        </fieldset>
+      </form>
+
+      <form>
+        <fieldset class="card">
+          <header>Projectledenlijst</header>
+          <footer>
+            <table>
+              <tr>
+                <th></th>
+                <th>gebruikersnaam</th>
+                <th>volledige naam</th>
+                <th>e-mail</th>
+                <th></th>
+                <th></th>
+                <th></th>
+              </tr>
+              <tr>
+                <td></td>
+                <td>Daan</td>
+                <td>D.B.Bezemer</td>
+                <td>d.b.bezemer@kpnmail.nl</td>
+                <td>
+                <input type="button" class="button success" value="bewerken" onclick="hypha('settings/user/Daan', '', '');"></td>
+                <td><input type="button" class="button error" value="verwijderen" onclick="hypha('settings', 'settingsRemove', '5a6f03747309f');"></td>
+                <td><input type="button" class="button warning" value="admin" onclick="hypha('settings', 'settingsAdmin', '5a6f03747309f');">
+                </td>
+              </tr>
+              <tr>
+                <td><span style="color:#b90;">∗</span></td>
+                <td>giplt</td>
+                <td>Harmen G. Zijp</td>
+                <td>mjs@giplt.nl</td>
+                <td>
+                <input type="button" class="button" value="bewerken" onclick="hypha('settings/user/giplt', '', '');"></td>
+                <td><input type="button" class="button" value="verwijderen" onclick="hypha('settings', 'settingsRemove', '5a649c55c6e28');"></td>
+                <td><input type="button" class="button" value="ontadmin" onclick="hypha('settings', 'settingsUnadmin', '5a649c55c6e28');">
+                </td>
+              </tr>
+              <tr>
+                <td></td>
+                <td>plink</td>
+                <td>Paul Link</td>
+                <td>paul@link2.nl</td>
+                <td>
+                <input type="button" class="button" value="bewerken" onclick="hypha('settings/user/plink', '', '');"></td>
+                <td><input type="button" class="button" value="verwijderen" onclick="hypha('settings', 'settingsRemove', '5a649c841f093');"></td>
+                <td><input type="button" class="button" value="admin" onclick="hypha('settings', 'settingsAdmin', '5a649c841f093');">
+                </td>
+              </tr>
+              <tr>
+                <td><span style="color:#b90;">∗</span></td>
+                <td>tamadmin</td>
+                <td>Tammo Admin</td>
+                <td>tammo.terhark@toolsforresearch.com</td>
+                <td>
+                <input type="button" class="button" value="bewerken" onclick="hypha('settings/user/tamadmin', '', '');"></td>
+                <td><input type="button" class="button" value="verwijderen" onclick="hypha('settings', 'settingsRemove', '5a6f8db4127f6');"></td>
+                <td><input type="button" class="button" value="ontadmin" onclick="hypha('settings', 'settingsUnadmin', '5a6f8db4127f6');">
+                </td>
+              </tr>
+              <tr>
+                <td></td>
+                <td>tammo</td>
+                <td>tammo</td>
+                <td>tammo@kleinestappen.nl</td>
+                <td>
+                <input type="button" class="button" value="bewerken" onclick="hypha('settings/user/tammo', '', '');"></td>
+                <td><input type="button" class="button" value="verwijderen" onclick="hypha('settings', 'settingsRemove', '5a6f035cc6e46');"></td>
+                <td><input type="button" class="button" value="admin" onclick="hypha('settings', 'settingsAdmin', '5a6f035cc6e46');">
+                </td>
+              </tr>
+              <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td> tammo@terhark.nl</td>
+                <td>
+                <input type="button" class="button" value="verwijderen" onclick="hypha('settings', 'settingsRemove', '5a82964446112');"></td>
+                <td><input type="button" class="button" value="herinneren" onclick="hypha('settings', 'settingsRemind', '5a82964446112');">
+                </td>
+                <td></td>
+              </tr>
+              <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>info@haarlemduurzaam.nl</td>
+                <td>
+                <input type="button" class="button" value="verwijderen" onclick="hypha('settings', 'settingsRemove', '5a829644429c4');"></td>
+                <td><input type="button" class="button" value="herinneren" onclick="hypha('settings', 'settingsRemind', '5a829644429c4');">
+                </td>
+                <td></td>
+              </tr>
+            </table>
+          </footer>
+        </fieldset>
+      </form>
 
 
-</body></html>
+      <form id="hypha" method="post" accept-charset="utf-8" class="card">			
+        <header>hypha superuser login</header>
+        <footer>
+          <div class="intro">Please log in with the superuser account. In case you forgot the password you'll have to look it up in the file 'hypha.php' on your server.</div>
+          <label for="input__text">User name:</label>
+          <input id="input__text" type="text" placeholder="Text Input">
+          <label for="input__text">Password:</label>
+          <input id="input__text" type="text" placeholder="********">
+          <div class="buttongroup">
+            <div class="right"> 
+              <input type="button" class="button primary" value="login">
+            </div>
+          </div>
+        </footer>
+      </form>
+      
+      
+      <form class="card">
+        <header id="pagename">verander projectinstellingen</header>
+        <footer>
+        <label for="select__box">standaard taal:</label>
+          <select name="settingsDefaultLanguage" id="settingsDefaultLanguage"><option value="aa">aa: ʿAfár af (Afar)</option>
+            <option value="ab">ab: аҧсуа бызшәа (Abkhaz)</option>
+            <option value="af">af: Afrikaans (Afrikaans)</option>
+            <option value="am">am: (Amhari) ܠܫܢܐ ܤܘܪܝܝܐ</option>
+            <option value="ar">ar: (Arabic) عربي</option>
+            <option value="as">as: অসমীয়া (Assamese)</option>
+            <option value="ay">ay: aymar aru (Aymara)</option>
+            <option value="az">az: Azərbaycan dili (Azerbaijani)</option>
+            <option value="ba">ba: башҡорт теле (Bashkir)</option>
+            <option value="be">be: Беларускі (Belarussian)</option>
+            <option value="bg">bg: Български (Bulgarian)</option>
+            <option value="bh">bh:  (Bihari)</option>
+            <option value="bi">bi:  (Bislama)</option>
+            <option value="bn">bn: বাংলা (Bengali; Bangla)</option>
+            <option value="bo">bo: བོད་སྐད་ (Tibetan)</option>
+            <option value="br">br: ar brezhoneg (Breton)</option>
+            <option value="ca">ca: Català (Catalan)</option>
+            <option value="co">co: corsu (Corsican)</option>
+            <option value="cs">cs: Čeština (Czech)</option>
+            <option value="cy">cy: Cymraeg (Welsh)</option>
+            <option value="da">da: Dansk (Danish)</option>
+            <option value="de">de: Deutsch (German)</option>
+            <option value="dz">dz: རྫོང་ཁ (Bhutanese)</option>
+            <option value="el">el: Ελληνικά (Greek)</option>
+            <option value="en">en: English (English)</option>
+            <option value="eo">eo: Esperanto (Esperanto)</option>
+            <option value="es">es: Español (Spanish)</option>
+            <option value="et">et: Eesti (Estonian)</option>
+            <option value="eu">eu: euskara (Basque)</option>
+            <option value="fa">fa: (Persian) پارسی</option>
+            <option value="fi">fi: Suomi (Finnish)</option>
+            <option value="fj">fj: Vakaviti (Fijian)</option>
+            <option value="fo">fo: Føroyskt (Faroese)</option>
+            <option value="fr">fr: Français (French)</option>
+            <option value="fy">fy: Frysk (Frisian)</option>
+            <option value="ga">ga: Gaeilge (Irish Gaelic)</option>
+            <option value="gd">gd: Gàidhlig (Scots Gaelic)</option>
+            <option value="gl">gl: Galego (Galician)</option>
+            <option value="gn">gn: Avañe\'ẽ (Guarani)</option>
+            <option value="gu">gu: zગુજરાતી (Gujarati)</option>
+            <option value="ha">ha: (Hausa) حَوْسَ</option>
+            <option value="he">he: (Hebrew) עברית</option>
+            <option value="hi">hi: हिंदी (Hindi)</option>
+            <option value="hr">hr: Hrvatski (Croatian)</option>
+            <option value="hu">hu: Magyar (Hungarian)</option>
+            <option value="hy">hy: Հայերէն (Armenian)</option>
+            <option value="ia">ia: Interlingua</option>
+            <option value="id">id: Bahasa Indonesia (Indonesian)</option>
+            <option value="ie">ie: Interlingue</option>
+            <option value="ik">ik: Inupiatun (Inupiak)</option>
+            <option value="is">is: Íslenska (Icelandic)</option>
+            <option value="it">it: Italiano (Italian)</option>
+            <option value="iu">iu: ᐃᓄᒃᑎᑐᑦ (Inuktitut)</option>
+            <option value="ja">ja: 日本語 (Japanese)</option>
+            <option value="jw">jw: basa Jawa (Javanese)</option>
+            <option value="ka">ka: ქართული (Georgian)</option>
+            <option value="kk">kk: Қазақ тілі / Qazaq tili (Kazakh) قازاق ٴتىلى</option>
+            <option value="kl">kl: Kalaallisut (Greenlandic)</option>
+            <option value="km">km:  (Cambodian)</option>
+            <option value="kn">kn: ಕನ್ನಡ (Kannada)</option>
+            <option value="ko">ko: 한국어 (Korean)</option>
+            <option value="ks">ks: कॉशुर (Kashmiri) كٲشُر</option>
+            <option value="ku">ku: Kurdí / к’öрди (Kurdish) کوردی</option>
+            <option value="ky">ky: (Kirghiz) قىرعىز</option>
+            <option value="la">la: Lingua Latina (Latin)</option>
+            <option value="ln">ln: lingála (Lingala)</option>
+            <option value="lo">lo: ພາສາລາວ (Laothian)</option>
+            <option value="lt">lt: Lietuviskai (Lithuanian)</option>
+            <option value="lv">lv: Latviešu (Latvian)</option>
+            <option value="mg">mg: Fiteny Malagasy (Malagasy)</option>
+            <option value="mi">mi: te Reo Māori (Maori)</option>
+            <option value="mk">mk: Македонски (Macedonian)</option>
+            <option value="ml">ml: മലയാളം (Malayalam)</option>
+            <option value="mn">mn: монгол (Mongolian)</option>
+            <option value="mo">mo: лимба молдовеняскэ (Moldavian)</option>
+            <option value="mr">mr: मराठी (Marathi)</option>
+            <option value="ms">ms: Bahasa melayu (Malay)</option>
+            <option value="mt">mt: Malti (Maltese)</option>
+            <option value="my">my: ဗမာစကား (Burmese)</option>
+            <option value="na">na: Ekakairũ Naoero (Nauru)</option>
+            <option value="ne">ne: नेपाली (Nepali)</option>
+            <option value="nl" selected>nl: Nederlands (Dutch)</option>
+            <option value="no">no: Norsk (Norwegian)</option>
+            <option value="oc">oc:  (Occitan)</option>
+            <option value="om">om: Afaan Oromo (Afan Oromo)</option>
+            <option value="or">or: ଓଡ଼ିଆ (Oriya)</option>
+            <option value="pa">pa: ਪੰਜਾਬੀ (Punjabi)</option>
+            <option value="pl">pl: Polski (Polish)</option>
+            <option value="ps">ps: (Pashto, Pushto) پښتو</option>
+            <option value="pt">pt: Português (Portuguese)</option>
+            <option value="qu">qu: Qhichwa (Quechua)</option>
+            <option value="rm">rm:  (Rhaeto-Romance)</option>
+            <option value="rn">rn: íkiRǔndi (Kirundi)</option>
+            <option value="ro">ro: Română (Romanian)</option>
+            <option value="ru">ru: Русский (Russian)</option>
+            <option value="rw">rw: Ikinyarwanda (Kinyarwanda)</option>
+            <option value="sa">sa: संस्कृतम् (Sanskrit)</option>
+            <option value="sd">sd: (Sindhi) سنڌي</option>
+            <option value="sg">sg: Yângâ tî Sängö (Sangho)</option>
+            <option value="sh">sh:  (Serbo-Croatian)</option>
+            <option value="si">si: සිංහල (Sinhalese)</option>
+            <option value="sk">sk: Slovenčina (Slovak)</option>
+            <option value="sl">sl: Slovenščina (Slovenian)</option>
+            <option value="sm">sm: Gagana Samoa (Samoan)</option>
+            <option value="sn">sn: chiShona (Shona)</option>
+            <option value="so">so: af Soomaali (Somali)</option>
+            <option value="sq">sq: Shqip (Albanian)</option>
+            <option value="sr">sr: српски (Serbian)</option>
+            <option value="ss">ss: siSwati (Siswati)</option>
+            <option value="st">st: seSotho (Sesotho)</option>
+            <option value="su">su: basa Sunda (Sundanese)</option>
+            <option value="sv">sv: Svenska (Swedish)</option>
+            <option value="sw">sw: Swahili (Swahili)</option>
+            <option value="ta">ta: தமிழ் (Tamil)</option>
+            <option value="te">te: తెలుగు (Telugu)</option>
+            <option value="tg">tg: тоҷикӣ (Tajik)</option>
+            <option value="th">th: ไทย (Thai)</option>
+            <option value="ti">ti: ትግርኛ (Tigrinya)</option>
+            <option value="tk">tk: түркmенче (Turkmen)</option>
+            <option value="tl">tl: Tagalog (Tagalog)</option>
+            <option value="tn">tn: seTswana (Setswana)</option>
+            <option value="to">to: chiTonga (Tonga)</option>
+            <option value="tr">tr: Türkçe (Turkish)</option>
+            <option value="ts">ts: xiTsonga (Tsonga)</option>
+            <option value="tt">tt: татарча / tatar tele (Tatar) تاتارچا</option>
+            <option value="tw">tw: twi (Twi)</option>
+            <option value="ug">ug: Уйғур (Uighur)ئۇيغۇر</option>
+            <option value="uk">uk: Українська (Ukrainian)</option>
+            <option value="ur">ur: (Urdu) اردو</option>
+            <option value="uz">uz: o\'zbek tili / ўзбек тили (Uzbek) أۇزبېك ﺗﻴﻠی</option>
+            <option value="vi">vi: Tiếng Việt (Vietnamese)</option>
+            <option value="vo">vo: Volapuk</option>
+            <option value="wo">wo: Wollof (Wolof)</option>
+            <option value="xh">xh: isiXhosa (Xhosa)</option>
+            <option value="yi">yi: (Yiddish) ײִדיש</option>
+            <option value="yo">yo: Yorùbá (Yoruba)</option>
+            <option value="za">za: Saw cuengh / Saɯ cueŋƅ (Zhuang)</option>
+            <option value="zh">zh: 中文 (Chinese)</option>
+            <option value="zu">zu: isiZulu (Zulu)</option></select></td>
+
+          <label for="select__box">standaard pagina:</label>
+          <input name="settingsDefaultPage" id="settingsDefaultPage" type="text" size="20" value="home" onblur="validatePagename(this);" onkeyup="validatePagename(this);"></td>
+          <label for="select__box">systeememail:</label>
+          <input name="settingsSystemEmail" id="settingsSystemEmail" type="text" size="40" value="mjs@giplt.nl"></td>
+          <label for="select__box">notificatie-interval:</label>
+          <input name="settingsIntervalDays" id="settingsIntervalDays" type="text" size="3" value="0">D <input name="settingsIntervalHours" id="settingsIntervalHours" type="text" size="2" value="6">U <input name="settingsIntervalMinutes" id="settingsIntervalMinutes" type="text" size="2" value="0">m</td>
+          <div class="buttongroup">
+            <div class="right"> 
+            <a href="#" class=""></a>annuleren   </a><input type="button" class="button primary" value="bewaren">
+            </div>
+          </div>
+          </footer>
+      </form>
+
+      <form class="card">
+      <header>Edit HTML template</header>
+      <footer>
+        <textarea name="editHtml" id="editHtml" cols="100" rows="24" wrap="off">Pas op, dit klopt helemaal niet meer....
+        &lt;html&gt;
+          &lt;head&gt;
+            &lt;title&gt;&lt;/title&gt;
+          &lt;/head&gt;
+          &lt;body&gt;
+            &lt;div id="header" /&gt;
+            &lt;div id="navContainer"&gt;
+              &lt;div id="menu" /&gt;
+              &lt;div id="hyphaCommands" /&gt;
+              &lt;div id="login" /&gt;
+              &lt;div id="trail" /&gt;
+              &lt;div id="log" /&gt;
+            &lt;/div&gt;
+            &lt;div id="page"&gt;
+              &lt;h2 id="pagename"&gt;&lt;/h2&gt;
+              &lt;div id="pageCommands" /&gt;
+              &lt;div id="main" /&gt;
+              &lt;div id="langList"/&gt;
+              &lt;div id="bottomContainer"&gt;
+                &lt;div id="versionList"/&gt;
+                &lt;div id="footer"/&gt;
+              &lt;/div&gt;
+              &lt;div id="popup"/&gt;
+            &lt;/div&gt;
+          &lt;/body&gt;
+        &lt;/html&gt;
+        </textarea>
+          <div class="buttongroup">
+            <div class="right"> 
+            <a href="#" class=""></a>annuleren   </a><input type="button" class="button primary" value="bewaren">
+            </div>
+          </div>  
+      </footer>
+      </fieldset> 
+      </form>
+
+      <hr>
+      <h1 id="pagename">page-index: Nederlands</h1>
+      <div id="main">
+
+        <div class="flex-container-column pageIndex">
+          <div class="flex-item title">A</div>
+          <div class="flex-item"><a href="nl/Andere_titel">Andere titel</a></div>
+          <div class="flex-item title">B</div>
+          <div class="flex-item"><a href="nl/Bevindingen">Bevindingen</a></div>
+          <div class="flex-item title">D</div>
+          <div class="flex-item"><a href="nl/Daans_html">Daans html</a></div>
+          <div class="flex-item"><a href="nl/Daans_html#P001">Daans html#P001</a></div>
+          <div class="flex-item"><a href="nl/Daans_html.html#P001">Daans html.html#P001</a></div>
+          <div class="flex-item"><a href="nl/Daans_htmlP001">Daans htmlP001</a></div>
+          <div class="flex-item"><a href="nl/Daans_pagina">Daans pagina</a></div>
+          <div class="flex-item"><a href="nl/Daans_pagina#P001">Daans pagina#P001</a></div>
+          <div class="flex-item"><a href="nl/de_floragroep">de floragroep</a></div>
+          <div class="flex-item"><a href="nl/de_meetgroep">de meetgroep</a></div>
+          <div class="flex-item"><a href="nl/de_verhalengroep">de verhalengroep</a></div>
+          <div class="flex-item title">E</div>
+          <div class="flex-item"><a href="nl/Etherpad">Etherpad</a></div>
+          <div class="flex-item title">F</div>
+          <div class="flex-item"><a href="nl/Festival_1">Festival 1</a></div>
+          <div class="flex-item title">G</div>
+          <div class="flex-item"><a href="nl/Github">Github</a></div>
+          <div class="flex-item title">H</div>
+          <div class="flex-item"><a href="nl/home">home</a></div>
+          <div class="flex-item title">K</div>
+          <div class="flex-item"><a href="nl/Kan_weg_2">Kan weg 2</a></div>
+          <div class="flex-item"><a href="nl/Kan_weg_3">Kan weg 3</a></div>
+          <div class="flex-item"><a href="nl/Kanweg_1">Kanweg 1</a></div>
+          <div class="flex-item title">M</div>
+          <div class="flex-item"><a href="nl/mailinglist">mailinglist</a></div>
+          <div class="flex-item"><a href="nl/meten">meten</a></div>
+          <div class="flex-item title">T</div>
+          <div class="flex-item"><a href="nl/test">test</a></div>
+          <div class="flex-item"><a href="nl/test123">test123</a></div>
+          <div class="flex-item"><a href="nl/testmailing">testmailing</a></div>
+          <div class="flex-item title">X</div>
+          <div class="flex-item"><a href="nl/XML">XML</a></div>
+        </div>
+      </div>
+            
+      <div id="versionList">
+        versie: <select class="version" name="version" onchange="hypha('nl/home', '', 'version');">
+          <option value="" selected="selected">15-03-18, 15:05, gastheer</option>
+          <option value="t1520373874">6-03-18, 23:04, gastheer</option>
+          <option value="t1520368264">6-03-18, 21:31, gastheer</option>
+          <option value="t1520368255">6-03-18, 21:30, gastheer</option>
+          <option value="t1520294095">6-03-18, 00:54, gastheer</option>
+          <option value="t1518514771">13-02-18, 10:39, </option></select>
+      </div>
+    </div> 
+  </section>
+  <section class="container footerContainer">    
+    <div id="footer">
+      <a href="http://creativecommons.org/licenses/by-sa/3.0/"><img alt="Creative Commons License" style="border-width: 0pt; float: right; margin-left: 5px;" src="hypha_files/cclogo.png"></a> This work is licensed under a <a href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>. Website powered by <a href="http://www.hypha.net/">hypha</a>.
+    </div>
+  </section>
+ 
+</body>
+</html>
