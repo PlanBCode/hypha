@@ -47,8 +47,16 @@
       <span class="language selected">nl</span>
     </div>
   </section>
-  <section class="pageContainer container">
-    <div class="pageTitle">
+  <section id="pageContainer" class="container">
+    <div id="breadcrumb">
+      <a href="/" class="history3">history 3</a>
+      <span class="breadcrumb-divider"></span>
+      <a href="/" class="history2">history 2</a>
+      <span class="breadcrumb-divider"></span>
+      <a href="/" class="history1">history 1</a>
+      <span class="breadcrumb-divider"></span>
+    </div>
+    <div id="pageTitle">
       <h1 id="pagename">Paginatitel h1.pagename (de enige h1 op de pagina)</h1>
     </div>
     <div id="main">
@@ -93,10 +101,10 @@
           </select>
           <div class="buttongroup">
             <div class="left">
-              <input type="button" class="button secondary" value="Password aanpassen">
+              <button class="secondary">Password aanpassen</button>
             </div>
             <div class="right"> 
-              <a href="#" class=""></a>annuleren   </a><input type="button" class="button primary" value="bewaren">
+              <a href="#" class=""></a>annuleren</a><input type="button" class="button primary" value="bewaren">
             </div>
           </div>
           </footer>
@@ -104,100 +112,105 @@
         </fieldset>
       </form>
 
-      <form>
-        <fieldset class="card">
-          <header>Projectledenlijst</header>
-          <footer>
-            <table>
-              <tr>
-                <th></th>
-                <th>gebruikersnaam</th>
-                <th>volledige naam</th>
-                <th>e-mail</th>
-                <th></th>
-                <th></th>
-                <th></th>
-              </tr>
-              <tr>
-                <td></td>
-                <td>Daan</td>
-                <td>D.B.Bezemer</td>
-                <td>d.b.bezemer@kpnmail.nl</td>
-                <td>
-                <input type="button" class="button success" value="bewerken" onclick="hypha('settings/user/Daan', '', '');"></td>
-                <td><input type="button" class="button error" value="verwijderen" onclick="hypha('settings', 'settingsRemove', '5a6f03747309f');"></td>
-                <td><input type="button" class="button warning" value="admin" onclick="hypha('settings', 'settingsAdmin', '5a6f03747309f');">
-                </td>
-              </tr>
-              <tr>
-                <td><span style="color:#b90;">∗</span></td>
-                <td>giplt</td>
-                <td>Harmen G. Zijp</td>
-                <td>mjs@giplt.nl</td>
-                <td>
-                <input type="button" class="button" value="bewerken" onclick="hypha('settings/user/giplt', '', '');"></td>
-                <td><input type="button" class="button" value="verwijderen" onclick="hypha('settings', 'settingsRemove', '5a649c55c6e28');"></td>
-                <td><input type="button" class="button" value="ontadmin" onclick="hypha('settings', 'settingsUnadmin', '5a649c55c6e28');">
-                </td>
-              </tr>
-              <tr>
-                <td></td>
-                <td>plink</td>
-                <td>Paul Link</td>
-                <td>paul@link2.nl</td>
-                <td>
-                <input type="button" class="button" value="bewerken" onclick="hypha('settings/user/plink', '', '');"></td>
-                <td><input type="button" class="button" value="verwijderen" onclick="hypha('settings', 'settingsRemove', '5a649c841f093');"></td>
-                <td><input type="button" class="button" value="admin" onclick="hypha('settings', 'settingsAdmin', '5a649c841f093');">
-                </td>
-              </tr>
-              <tr>
-                <td><span style="color:#b90;">∗</span></td>
-                <td>tamadmin</td>
-                <td>Tammo Admin</td>
-                <td>tammo.terhark@toolsforresearch.com</td>
-                <td>
-                <input type="button" class="button" value="bewerken" onclick="hypha('settings/user/tamadmin', '', '');"></td>
-                <td><input type="button" class="button" value="verwijderen" onclick="hypha('settings', 'settingsRemove', '5a6f8db4127f6');"></td>
-                <td><input type="button" class="button" value="ontadmin" onclick="hypha('settings', 'settingsUnadmin', '5a6f8db4127f6');">
-                </td>
-              </tr>
-              <tr>
-                <td></td>
-                <td>tammo</td>
-                <td>tammo</td>
-                <td>tammo@kleinestappen.nl</td>
-                <td>
-                <input type="button" class="button" value="bewerken" onclick="hypha('settings/user/tammo', '', '');"></td>
-                <td><input type="button" class="button" value="verwijderen" onclick="hypha('settings', 'settingsRemove', '5a6f035cc6e46');"></td>
-                <td><input type="button" class="button" value="admin" onclick="hypha('settings', 'settingsAdmin', '5a6f035cc6e46');">
-                </td>
-              </tr>
-              <tr>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td> tammo@terhark.nl</td>
-                <td>
-                <input type="button" class="button" value="verwijderen" onclick="hypha('settings', 'settingsRemove', '5a82964446112');"></td>
-                <td><input type="button" class="button" value="herinneren" onclick="hypha('settings', 'settingsRemind', '5a82964446112');">
-                </td>
-                <td></td>
-              </tr>
-              <tr>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td>info@haarlemduurzaam.nl</td>
-                <td>
-                <input type="button" class="button" value="verwijderen" onclick="hypha('settings', 'settingsRemove', '5a829644429c4');"></td>
-                <td><input type="button" class="button" value="herinneren" onclick="hypha('settings', 'settingsRemind', '5a829644429c4');">
-                </td>
-                <td></td>
-              </tr>
-            </table>
-          </footer>
-        </fieldset>
+      <form class="card memberlist">       
+        <header>Projectledenlijst</header>
+        <footer>
+          <table>
+            <tr>
+              <th></th>
+              <th>gebruikersnaam</th>
+              <th>volledige naam</th>
+              <th>e-mail</th>
+              <th></th>
+              <th></th>
+              <th></th>
+            </tr>
+            <tr>
+              <td></td>
+              <td>Daan</td>
+              <td>D.B.Bezemer</td>
+              <td>d.b.bezemer@kpnmail.nl</td>
+              <td>
+                <button class="edit" title="Edit this person's attributes" onclick="hypha('settings/user/Daan', '', '');"><span>Edit</span></button>
+              </td>
+              <td>
+                <button class="delete" title="Delete this person" value="delete" onclick="hypha('settings', 'settingsRemove', '5a6f03747309f');"><span>delete</span></button></td>
+              <td>
+                <button class="admin" value="admin" onclick="hypha('settings', 'settingsAdmin', '5a6f03747309f');"><span>admin</span></button>
+              </td>
+            </tr>
+            <tr>
+              <td><span style="color:#b90;">∗</span></td>
+              <td>giplt</td>
+              <td>Harmen G. Zijp</td>
+              <td>mjs@giplt.nl</td>
+              <td>
+                <button class="edit" title="Edit this person's attributes" onclick="hypha('settings/user/giplt', '', '');"><span>Edit</span></button>
+              </td>
+              <td>
+                <button class="delete" title="delete this person" value="delete" onclick="hypha('settings', 'settingsRemove', '5a6f03747309f');">
+              </td>
+              <td>
+                <button class="admin" value="un-admin" onclick="hypha('settings', 'settingsAdmin', '5a6f03747309f');"><span>un-admin</span></button>
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>plink</td>
+              <td>Paul Link</td>
+              <td>paul@link2.nl</td>
+              <td>
+              <button class="edit" title="Edit this person's attributes" onclick="hypha('settings/user/giplt', '', '');"><span>Edit</span></button></td>
+              <td><button class="delete" title="delete this person" value="delete" onclick="hypha('settings', 'settingsRemove', '5a6f03747309f');"></td>
+              <td><button class="admin" value="admin" onclick="hypha('settings', 'settingsAdmin', '5a6f03747309f');"><span>admin</span></button>
+              </td>
+            </tr>
+            <tr>
+              <td><span style="color:#b90;">∗</span></td>
+              <td>tamadmin</td>
+              <td>Tammo Admin</td>
+              <td>tammo.terhark@toolsforresearch.com</td>
+              <td>
+              <button class="edit" title="Edit this person's attributes" onclick="hypha('settings/user/giplt', '', '');"><span>Edit</span></button></td>
+              <td><button class="delete" title="delete this person" value="delete" onclick="hypha('settings', 'settingsRemove', '5a6f03747309f');"></td>
+              <td><button class="un-admin" value="un-admin" onclick="hypha('settings', 'settingsAdmin', '5a6f03747309f');"><span>un-admin</span></button>
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>tammo</td>
+              <td>tammo</td>
+              <td>tammo@kleinestappen.nl</td>
+              <td>
+              <button class="edit" title="Edit this person's attributes" onclick="hypha('settings/user/giplt', '', '');"><span>Edit</span></button></td>
+              <td><button class="delete" title="delete this person" value="delete" onclick="hypha('settings', 'settingsRemove', '5a6f03747309f');"></td>
+              <td><button class="admin" value="admin" onclick="hypha('settings', 'settingsAdmin', '5a6f03747309f');"><span>admin</span></button>
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td> tammo@terhark.nl</td>
+              <td></td>
+              <td><button class="delete" title="delete this person" value="delete" onclick="hypha('settings', 'settingsRemove', '5a6f03747309f');"></td>
+              <td><button class="re-invite" value="re-invite" onclick="hypha('settings', 'settingsAdmin', '5a6f03747309f');"><span>herinneren</span></button>
+              </td>
+              <td></td>
+            </tr>
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td>info@haarlemduurzaam.nl</td>
+              <td></td>
+              <td><button class="delete" title="delete this person" value="delete" onclick="hypha('settings', 'settingsRemove', '5a6f03747309f');"></td>
+              <td><input type="button" class="button" value="herinneren" onclick="hypha('settings', 'settingsRemind', '5a829644429c4');">
+              </td>
+              <td></td>
+            </tr>
+          </table>
+        </footer>        
       </form>
 
 
@@ -470,7 +483,7 @@
       </div>
     </div> 
   </section>
-  <section class="container footerContainer">    
+  <section id="footerContainer" class="container">    
     <div id="footer">
       <a href="http://creativecommons.org/licenses/by-sa/3.0/"><img alt="Creative Commons License" style="border-width: 0pt; float: right; margin-left: 5px;" src="hypha_files/cclogo.png"></a> This work is licensed under a <a href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>. Website powered by <a href="http://www.hypha.net/">hypha</a>.
     </div>

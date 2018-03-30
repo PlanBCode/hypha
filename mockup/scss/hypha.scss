@@ -193,11 +193,21 @@ a.nopagelink {
   margin-right:auto;
 }
 
-.pageContainer{
+#pageContainer{
   padding-left:15px;
   padding-right:15px;
   background:white;
   clear:both;
+}
+
+#breadcrumb{
+  font-size:80%;
+}
+
+.breadcrumb-divider:before{
+  content:">";
+  padding-left:0;
+  padding-right:0;
 }
 
 #main {
@@ -211,7 +221,7 @@ a.nopagelink {
   background:var(--formheaderback);
 }
 
-.footerContainer{
+#footerContainer{
   padding-bottom:2em;
   background:#eee;
 }
@@ -445,4 +455,36 @@ input{
 {
   width:50px;
   display:inline;
+}
+
+.memberlist{
+  button{
+    &.edit, &.delete{
+    &:before{
+      font-family: "fontello";
+    }}
+
+    
+    &.edit{
+    background:purple;  
+      &:before{
+        content:"\e805";
+        }
+        
+      span{
+      display:none;
+      }
+    }
+    
+    &.delete{
+    background:red;  
+      &:before{
+      content:"\f2d3";
+      }
+      
+      span{
+      display:none;
+      }
+    }
+  }
 }

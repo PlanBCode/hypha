@@ -144,11 +144,19 @@ a.nopagelink {
   margin-left: auto;
   margin-right: auto; }
 
-.pageContainer {
+#pageContainer {
   padding-left: 15px;
   padding-right: 15px;
   background: white;
   clear: both; }
+
+#breadcrumb {
+  font-size: 80%; }
+
+.breadcrumb-divider:before {
+  content: ">";
+  padding-left: 0;
+  padding-right: 0; }
 
 #main {
   min-height: 1px;
@@ -159,7 +167,7 @@ a.nopagelink {
   color: white;
   background: var(--formheaderback); }
 
-.footerContainer {
+#footerContainer {
   padding-bottom: 2em;
   background: #eee; }
 
@@ -336,3 +344,20 @@ input {
 #settingsIntervalMinutes {
   width: 50px;
   display: inline; }
+
+.memberlist button.edit:before, .memberlist button.delete:before {
+  font-family: "fontello"; }
+
+.memberlist button.edit {
+  background: purple; }
+  .memberlist button.edit:before {
+    content: "\e805"; }
+  .memberlist button.edit span {
+    display: none; }
+
+.memberlist button.delete {
+  background: red; }
+  .memberlist button.delete:before {
+    content: "\f2d3"; }
+  .memberlist button.delete span {
+    display: none; }
