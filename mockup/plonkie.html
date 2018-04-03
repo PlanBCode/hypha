@@ -1,0 +1,214 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- saved from url=(0036)http://test.hypha.net/en/Tammos_test -->
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!--<base href="http://test.hypha.net/">--><base href=".">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>plonkie</title>
+<link href="css/hypha.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" id="jsAggregator">
+	function validatePagename(obj) {
+		var pos = obj.selectionStart;
+		var val = obj.value.replace(/\s+/g, ' ').replace(/^\s|[^\d\w\s\.-]/gi, '');
+		if (val.length < pos) pos = val.length;
+		obj.value = val;
+		obj.setSelectionRange(pos, pos);
+	}
+	function newPage() {
+		html = '<table class="section"><tr><th colspan="2">create new page</td><tr>';
+		html+= '<tr><th>type</th><td><select id="newPageType" name="newPageType">' + '<option value="default_data_type">default_data_type</option><option value="textpage">textpage</option><option value="filepage">filepage</option><option value="festivalpage">festivalpage</option><option value="mailinglist">mailinglist</option><option value="article">article</option>' + '</select></td></tr>';
+		html+= '<tr><th>name</th><td><input type="text" id="newPagename" value="" onblur="validatePagename(this);" onkeyup="validatePagename(this); document.getElementById(\'newPageSubmit\').disabled = this.value ? false : true;"/></td></tr>';
+		html+= '<tr><td></td><td><input type="checkbox" id="newPagePrivate" name="newPagePrivate"/> private page</td></tr>';
+		html+= '<tr><td></td><td><input type="button" class="button" value="cancel" onclick="document.getElementById(\'popup\').style.visibility=\'hidden\';" />';
+		html+= '<input type="submit" id="newPageSubmit" class="button editButton" value="create" disabled="true" onclick="hypha(\'en/\' + document.getElementById(\'newPagename\').value + \'/edit\', \'newPage\', document.getElementById(\'newPagename\').value);" /></td></tr></table>';
+		document.getElementById('popup').innerHTML = html;
+		document.getElementById('popup').style.left = document.getElementById('hyphaCommands').offsetLeft + 'px';
+		document.getElementById('popup').style.top = (document.getElementById('hyphaCommands').offsetTop + 25) + 'px';
+		document.getElementById('popup').style.visibility = 'visible';
+		document.getElementById('newPagename').focus();
+	}
+
+
+	
+	var postProcessingList = new Array();
+
+	
+	function hypha(url, cmd, arg) {
+		url = url.replace(/\s\//g, '/').replace(/\s$/g, '').replace(/\s/g, '_');
+		document.getElementById('command').value = cmd;
+		document.getElementById('argument').value = arg;
+		document.forms['hyphaForm'].action = url;
+		for(i=0; i<postProcessingList.length; i++) postProcessingList[i]();
+		if (cmd||arg) document.forms['hyphaForm'].submit();
+		else window.location = url;
+	}
+
+	
+	function ajax(url, resultCallback, sendPostParams) {
+		var request;  // The variable that makes Ajax possible!
+		try{
+			// Opera 8.0+, Firefox, Safari
+			request = new XMLHttpRequest();
+		} catch (e){
+			// Internet Explorer Browsers
+			try{
+				request = new ActiveXObject("Msxml2.XMLHTTP");
+			} catch (e) {
+				try{
+					request = new ActiveXObject("Microsoft.XMLHTTP");
+				} catch (e){
+					// Something went wrong
+					alert("Your browser broke!");
+					return false;
+				}
+			}
+		}
+		request.onreadystatechange = function() {
+			if(request.readyState == 4) resultCallback(request.responseText);
+		}
+		if (sendPostParams) {
+			var params = "";
+			var form = document.forms['hyphaForm'];
+			for (var i=0; i < form.elements.length; i++) if (form.elements[i].hasAttribute('name')) {
+				params+= (params ? "&" : "") + form.elements[i].getAttribute('name') + "=";
+				if (form.elements[i].tagName=='textarea') params+= encodeURIComponent(form.elements[i].innerHTML);
+				else params+= encodeURIComponent(form.elements[i].value);
+			}
+			request.open('POST', url, true);
+			request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+			request.setRequestHeader("Content-length", params.length);
+			request.setRequestHeader("Connection", "close");
+			request.send(params);
+		}
+		else {
+			request.open('GET', url, true);
+			request.send(null);
+		}
+	}
+
+
+	
+	function notify(type, message) {
+		document.getElementById('hyphaNotify').innerHTML = document.getElementById('hyphaNotify').innerHTML + '<div class="' + type + '" time="' + new Date().getTime() + '">' + message + '</div>';
+		notifyTimer();
+	}
+	
+	function notifyTimer() {
+		if(document.getElementById('hyphaNotify')) {
+			var now = new Date().getTime();
+			var msgbox = document.getElementById('hyphaNotify');
+			if (msgbox.children.length) {
+				var msg = msgbox.firstChild;
+				while (msg) {
+					var next = msg.nextSibling;
+					if (msg.nodeType === 1) {
+						if(!msg.hasAttribute('time')) msg.setAttribute('time', now);
+						else if (now - msg.getAttribute('time') > 5000) msg.parentNode.removeChild(msg);
+					}
+					msg = next;
+				}
+			}
+			if (msgbox.children.length) {
+				document.getElementById('hyphaNotify').style.visibility = 'visible';
+				setTimeout(notifyTimer, 100);
+			}
+			else document.getElementById('hyphaNotify').style.visibility = 'hidden';
+		}
+	}
+	setTimeout(notifyTimer, 1000);
+
+</script><style>@media print {#ghostery-purple-box {display:none !important}}</style>
+<link rel="import" href="chrome-extension://kkelicaakdanhinjdeammmilcgefonfh/assets/tpl/resize-tooltip.html"></head>
+<body>	<form name="hyphaForm" method="post" action="http://test.hypha.net/" accept-charset="utf-8" enctype="multipart/form-data">
+		<input id="command" name="command" type="hidden"><input id="argument" name="argument" type="hidden"><input id="csrfToken" name="csrfToken" type="hidden" value="1d920ddf57e57490">
+		
+    <div id="header" class="container headerContainer"><p>plonkie</p></div>
+    <div id="navContainer" class="container navContainer">
+      <nav class="nav main"><div id="menu" class="nav-left">
+</div>
+      </nav><nav class="tabs user"><div id="hyphaCommands" class="nav-right">
+<a href="http://test.hypha.net/index/en">index</a><a href="javascript:newPage();">new page</a><a href="javascript:hypha(&#39;settings&#39;,%20&#39;&#39;,%20&#39;&#39;);">settings</a><a href="javascript:hypha(&#39;en/Tammos_test&#39;,%20&#39;logout&#39;,%20&#39;&#39;);">logout</a><br><div id="loggedIn">logged in as `plonkie`<span style="color:#b90;">∗</span>
+</div>
+</div>
+      </nav><div id="login"></div>
+      <div id="trail"></div>
+      <div id="log"></div>
+    </div>
+    <div class="container pageContainer">      
+      <div id="page">
+        <div id="pageCommands"><input type="button" class="button" value="edit" onclick="hypha(&#39;en/Tammos_test/edit&#39;, &#39;&#39;, &#39;&#39;);"></div>
+        <div id="langList"></div>
+        <div class="pageTitle">
+          <h1 id="pagename">Tammos test <span style="color:#b90;">∗</span>
+</h1>
+<div class="review-info">review, 1 approves, 1 unresolved blocks</div>
+        </div>
+        <div id="main" class="review">
+<div class="author">by Plon Kie</div>
+<div class="article">
+<p>Even after more than a year in power, President Donald Trump is still able to take the punditry by surprise. When he&nbsp;<a href="https://www.theguardian.com/us-news/2018/mar/22/who-is-john-bolton-trump-national-security-adviser" data-link-name="in body link" class="u-underline" style="background: transparent; touch-action: manipulation; color: rgb(224, 94, 0); cursor: pointer; border-bottom: 0.0625rem solid rgb(220, 220, 220); transition: border-color 0.15s ease-out; text-decoration-line: none !important;">appointed John Bolton</a>&nbsp;as the new national security adviser, liberal publications were quick to declare that Trump’s alleged far-right isolationist base would deem this a betrayal. After all, Bolton was one of the figureheads of George W Bush’s interventionist, nation-building administration. But the backlash, if there is any, is overstated – and it shows how little we understand Trump’s supporters.&nbsp;
+</p>
+<p>While Bolton is a clear betrayal of the so-called alt-right and isolationalist conservatives, they are a marginal part of the electorate. Similarly, the much-discussed libertarians and Bernie Bros who voted Trump to keep the “war-mongerer” Hillary Clinton away from the presidency are electorally inconsequential. The vast majority of the&nbsp;<a href="http://www.pewresearch.org/fact-tank/2016/05/11/trump-supporters-differ-from-other-gop-voters-on-foreign-policy-immigration-issues/" data-link-name="in body link" class="u-underline">Trump electorate</a>&nbsp;doesn’t care much about foreign policy, and largely supports Trump’s instinctive “America First” agenda. Just like John Bolton.</p>
+</div>
+<div class="method">
+<h2>method</h2>
+<p>More than anything, the narrative that Trump voters will feel betrayed by Bolton’s appointment show that most liberals still don’t understand the Trump phenomenon. They continue see it as the US equivalent of the rise of the far right in Europe, that is, led by an “alt-right” elite and powered by the white working class. The fact of the matter is, however, that the Trump vote was, first and foremost, a&nbsp;<a href="https://www.washingtonpost.com/news/monkey-cage/wp/2016/11/10/2016-was-an-ordinary-election-not-a-realignment/?utm_term=.0b86736b097e" data-link-name="in body link" class="u-underline" style="background: rgb(254, 249, 245); touch-action: manipulation; color: rgb(224, 94, 0); cursor: pointer; border-bottom: 0.0625rem solid rgb(220, 220, 220); transition: border-color 0.15s ease-out; font-family: &quot;Guardian Text Egyptian Web">Republican vote</a><span style="color: rgb(18, 18, 18); font-family: &quot;Guardian Text Egyptian Web">, and was much more based on cultural backlash than economic anxiety.</span></p>
+</div>
+<div class="sources">
+<h2>sources</h2>
+<p>How can I write a comment to this page?</p>
+</div>
+<div class="review-comments-wrapper">
+<h2>review comments</h2>
+<div class="review-comment-wrapper collapsed"><ul>
+<li class="first-comment">Dit is een startcoment
+<p>by <strong>Plon Kie</strong> at 3-04-18, 09:25</p>
+</li>
+<li>Dit is een comment op een comment
+<p>by <strong>Plon Kie</strong> at 3-04-18, 09:25</p>
+</li>
+<p><input type="button" class="button" value="set as closed" onclick="hypha(&#39;en/Tammos_test/discussions/id5ac32c4d61390/closed&#39;, &#39;discussion_closed&#39;, &#39;&#39;);"></p>
+<div class="new-comment">
+			<div>
+				<strong><label for="discussion_comment[id5ac32c4d61390]"> comment </label></strong><textarea name="discussion_comment[id5ac32c4d61390]" id="discussion_comment[id5ac32c4d61390]" cols="36" rows="4"></textarea>
+</div>
+<input type="button" class="button" value="add review comment" onclick="hypha(&#39;en/Tammos_test/discussions/id5ac32c4d61390/comment&#39;, &#39;comment&#39;, &#39;&#39;);">
+</div>
+</ul></div>
+<div class="review-comment-wrapper collapsed blocking"><ul>
+<li class="first-comment">Volgende discussie<p>by <strong>Plon Kie</strong> at 3-04-18, 09:33 | is blocking</p>
+</li>
+<p><input type="button" class="button" value="set as resolved" onclick="hypha(&#39;en/Tammos_test/discussions/id5ac32e4d03f1d/resolved&#39;, &#39;discussion_resolved&#39;, &#39;&#39;);"></p>
+<div class="new-comment">
+			<div>
+				<strong><label for="discussion_comment[id5ac32e4d03f1d]"> comment </label></strong><textarea name="discussion_comment[id5ac32e4d03f1d]" id="discussion_comment[id5ac32e4d03f1d]" cols="36" rows="4"></textarea>
+</div>
+<input type="button" class="button" value="add review comment" onclick="hypha(&#39;en/Tammos_test/discussions/id5ac32e4d03f1d/comment&#39;, &#39;comment&#39;, &#39;&#39;);">
+</div>
+</ul></div>
+<div class="new-comment">
+			<div>
+				<strong><label for="discussion_comment[new]"> comment </label></strong><textarea name="discussion_comment[new]" id="discussion_comment[new]" cols="36" rows="4"></textarea>
+</div>			<div>
+				<strong><label for="blocking"> blocking </label></strong><input type="checkbox" name="blocking" id="blocking">
+</div>
+<input type="button" class="button" value="add review comment" onclick="hypha(&#39;en/Tammos_test/discussion&#39;, &#39;discussion&#39;, &#39;&#39;);">
+</div>
+</div>
+<div class="approves">
+<h2>approves</h2>
+<ul><li><p>by <strong>Plon Kie</strong> at 3-04-18, 08:16</p></li></ul>
+</div>
+</div>        
+        <div id="popup"></div>
+        <div id="versionList"></div>
+      </div>
+    </div>
+    <div class="container footerContainer">    
+      <div id="footer"><p><img alt="Creative Commons License" src="./plonkie_files/88x31.png" class="cc">This work is licensed under a <a href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.<br>Website powered by <a href="http://www.hypha.net/">hypha</a>.</p></div>
+    </div>
+  	</form>
+<div id="hyphaNotify" style="visibility:hidden;"></div>
+
+
+<div id="window_resizer_tooltip_wrapper" data-pos-y="bottom" data-pos-x="right" class="visible" style="transform: scale(1) translateY(597px) translateX(778px);"></div></body></html>

@@ -1,10 +1,10 @@
 // styles.scss
 
-@import url("normalize.css");
-@import url("picnic.css");
-@import url("fontello.css");
-@import url("animation.css");
-@import url("festival.css");
+@import url("css/normalize.css");
+@import url("css/picnic.css");
+@import url("css/fontello.css");
+//@import url("animation.css");
+@import url("css/festival.css");
 
 /* CSS - Cascading Style Sheet */
 /* Palette color codes */
@@ -33,6 +33,7 @@
 
 --textfont: sans-serif;
 --textcolor: #222;
+--bordercolor: #aaa;
 --headingsfont:sans-serif;
 --headingscolor: var(--color-primary-2);
 --linkcolor: var(--color-secondary-1-0);
@@ -80,13 +81,13 @@ a.nopagelink {
 	border-bottom: 1px dotted;
 }
 
-#navContainer {
+.navContainer {
 	padding: 0;
   
   nav{
     padding:0;
     
-    #main-menu{
+    &.main{
       padding-left:10px;
       padding-top:8px;
       padding-bottom:8px;
@@ -94,6 +95,8 @@ a.nopagelink {
       
       a{
         color:white;
+        margin-right:10px;
+        text-decoration:none;
           
         &:hover{
           background:var(--color-secondary-1-4);
@@ -116,6 +119,10 @@ a.nopagelink {
       text-align:right;
       width:100%;
       
+      a{
+        margin-right: 5px;
+      }
+      
       .menu-item{
         padding-right: 10px;
       }
@@ -123,10 +130,10 @@ a.nopagelink {
   }
 }
 
-#headerContainer {
+.headerContainer {
 	background-color:var(--headercolor);
-	padding:15px;
-	margin-top:70px;
+	//padding:15px;
+	//margin-top:70px;
   
   &.flex{
     justify-content:flex-start;
@@ -139,10 +146,12 @@ a.nopagelink {
     }
   }
   
-  .site-title{
+  p{
     font-weight:bold;
     font-size:24pt;
     color:#fff;
+    margin:0;
+    padding:15px;
   }
   
   .logo{
@@ -171,6 +180,7 @@ a.nopagelink {
 	color:#555;
   margin-left:10px;
   padding:5px;
+  display: inline-block;
 }
 
 #langList {
@@ -193,11 +203,15 @@ a.nopagelink {
   margin-right:auto;
 }
 
-#pageContainer{
-  padding-left:15px;
-  padding-right:15px;
+.pageContainer{
+  //padding-left:15px;
+  //padding-right:15px;
   background:white;
   clear:both;
+}
+
+#page{
+  padding:15px;
 }
 
 #breadcrumb{
@@ -246,8 +260,18 @@ a.nopagelink {
 }
 
 #popup {
-	position:absolute;
-	padding:5px;
+  position: absolute;
+  top: 50px;
+  
+  background: lightyellow;
+  left: 10%;
+  margin-right: auto;
+  border: 1px solid darkgrey;
+  //box-shadow: 5px 5px #000 inset;
+  
+  table{
+    margin:5px;
+  }
 }
 
 label {
@@ -485,6 +509,46 @@ input{
       span{
       display:none;
       }
+    }
+  }
+}
+
+.method, 
+.sources, 
+.review-comments-wrapper{
+  border-top: 1px solid var(--bordercolor);
+}
+
+.new-comment{
+  label{
+    display:block;
+  }
+}
+
+.review-comment-wrapper{
+  background:lightyellow;
+  border-bottom: 3px solid var(--bordercolor);
+  padding-left:15px;
+  padding-right:15px;
+  margin-bottom:30px;
+
+  ul{
+    padding:0;
+  }
+  li{
+    list-style:none;
+    padding-top:10px;
+    padding-bottom:10px;
+    padding-left:30px;
+    border-bottom:1px solid var(--bordercolor);
+    
+    &.first-comment{
+      //border-top:1px solid var(--bordercolor);
+      padding-left:0;
+    }
+    
+    p{
+      margin:0;
     }
   }
 }

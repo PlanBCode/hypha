@@ -7,7 +7,7 @@ var webserver = require('gulp-webserver');
 gulp.task('sass', function(){
   return gulp.src('scss/*.scss')
     .pipe(sass()) // Using gulp-sass
-    .pipe(gulp.dest('css'))
+    .pipe(gulp.dest('../data'))
 });
 
 gulp.task('serve', ['inject'], function () {
