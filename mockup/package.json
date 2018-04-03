@@ -1,0 +1,20 @@
+{
+  "name": "mockup",
+  "version": "1.0.0",
+  "description": "Mockup for both developers as well as frontenders",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "Tammo ter Hark",
+  "license": "ISC",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-inject": "^4.3.1",
+    "gulp-sass": "^3.1.0",
+    "gulp-webserver": "^0.9.1"
+  },
+  "dependencies": {
+    "picnic": "^6.5.0"
+  }
+}
