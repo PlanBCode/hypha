@@ -348,10 +348,14 @@
 	/* Like wikify, but accepts a HTML string instead of a document */
 	function wikify_html($html) {
 		$doc = new DomWrap\Document();
-		$doc->html($html);
-		wikify($doc->documentElement);
+		// Wikify a separate element instead of the entire
+		// document, since loading html into a document adds
+		// <html><body>.
+		$elem = $doc->createElement('root');
+		$elem->html($html);
+		wikify($elem);
 
-		return $doc->documentElement->html();
+		return $elem->html();
 	}
 
 	/*
