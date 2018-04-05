@@ -373,8 +373,6 @@
 			if ($node->tagName == 'a')
 				wikify_link($node);
 		}
-
-		return $doc->documentElement->html();
 	}
 
 	function wikify_link($node) {
