@@ -281,10 +281,10 @@
 		adding some extra attributes to the HTML node.
 
 		Parameters:
-		doc - A DomWrap\Document to process
+		doc - A DomWrap\Element to process
 	*/
-	function dewikify($doc) {
-		foreach ($doc->findXPath("//a[@href]") as $node) {
+	function dewikify($element) {
+		foreach ($element->findXPath("//a[@href]") as $node) {
 			dewikify_link($node);
 		}
 	}
@@ -349,7 +349,7 @@
 	function wikify_html($html) {
 		$doc = new DomWrap\Document();
 		$doc->html($html);
-		wikify($doc);
+		wikify($doc->documentElement);
 
 		return $doc->documentElement->html();
 	}
@@ -360,10 +360,10 @@
 		all other urls relative.
 
 		Parameters:
-		doc - A DomWrap\Document to process
+		doc - A DomWrap\Element to process
 	*/
-	function wikify($doc) {
-		foreach ($doc->findXPath("//*[@href] | //*[@src]") as $node) {
+	function wikify($elem) {
+		foreach ($elem->findXPath("//*[@href] | //*[@src]") as $node) {
 			// Make all urls relative
 			foreach (['href', 'src'] as $attr) {
 				if ($node->hasAttribute($attr))
