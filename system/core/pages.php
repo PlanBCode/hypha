@@ -355,7 +355,9 @@
 		$elem->html($html);
 		wikify($elem);
 
-		return $elem->html();
+		// TODO: This should probably not use getInnerHtml,
+		// probably just return the element instead.
+		return getInnerHtml($elem);
 	}
 
 	/*
