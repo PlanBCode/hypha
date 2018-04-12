@@ -64,7 +64,9 @@
 	closedir($_handle);
 
 	$_handle = opendir("system/datatypes/");
-	while ($_file = readdir($_handle)) if (substr($_file, -4) == '.php') include_once("system/datatypes/".$_file);
+	while ($_file = readdir($_handle)) if (substr($_file, -4) == '.php') {
+		include_once("system/datatypes/".$_file);
+	}
 	closedir($_handle);
 
 	$_handle = opendir("system/languages/");
@@ -122,7 +124,11 @@
 		$_cmds[] = '<a href="javascript:login();">'.__('login').'</a>';
 	}
 	else {
-		addNewPageRoutine($hyphaHtml, explode('/', $hyphaQuery), $hyphaPageTypes);
+		$dataTypeMtx = [];
+		foreach ($hyphaPageTypes as $className) {
+			$dataTypeMtx[$className] = call_user_func($className . '::getDatatypeName');
+		}
+		addNewPageRoutine($hyphaHtml, explode('/', $hyphaQuery), $dataTypeMtx);
 		$_cmds[] = makeLink(__('new-page'), 'newPage();');
 		$_cmds[] = makeLink(__('settings'), makeAction('settings', '', ''));
 		$_cmds[] = makeLink(__('logout'), makeAction($hyphaQuery, 'logout', ''));

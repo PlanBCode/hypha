@@ -21,6 +21,10 @@
 				$this->replacePageListNode($node);
 		}
 
+		public static function getDatatypeName() {
+			return str_replace('_', ' ', get_called_class());
+		}
+
 		protected function replacePageListNode($node) {
 			global $hyphaLanguage;
 			$this->pageListNode = $node;
@@ -73,7 +77,7 @@
 	}
 	function newPage() {
 		html = '<table class="section"><tr><th colspan="2"><?=__('create-new-page')?></td><tr>';
-		html+= '<tr><th><?=__('type')?></th><td><select id="newPageType" name="newPageType">' + '<?php foreach($types as $type) echo '<option value="'.$type.'"'.($type=='textPage' ? 'selected="selected"' : '').'>'.$type.'</option>'; ?>' + '</select></td></tr>';
+		html+= '<tr><th><?=__('type')?></th><td><select id="newPageType" name="newPageType">' + '<?php foreach($types as $type => $pagename) echo '<option value="'.$type.'"'.($type=='textPage' ? 'selected="selected"' : '').'>'.$pagename.'</option>'; ?>' + '</select></td></tr>';
 		html+= '<tr><th><?=__('name')?></th><td><input type="text" id="newPagename" value="<?=$pagename?>" onblur="validatePagename(this);" onkeyup="validatePagename(this); document.getElementById(\'newPageSubmit\').disabled = this.value ? false : true;"/></td></tr>';
 		html+= '<tr><td></td><td><input type="checkbox" id="newPagePrivate" name="newPagePrivate"/> <?=__('private-page')?></td></tr>';
 		html+= '<tr><td></td><td><input type="button" class="button" value="<?=__('cancel')?>" onclick="document.getElementById(\'popup\').style.visibility=\'hidden\';" />';

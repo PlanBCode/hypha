@@ -56,6 +56,10 @@ class mailinglist extends Page {
 		$this->language = $hyphaLanguage;
 	}
 
+	public static function getDatatypeName() {
+		return __('datatype.name.mailinglist');
+	}
+
 	/**
 	 * @return HyphaDomElement|DOMElement
 	 */

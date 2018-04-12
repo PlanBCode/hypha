@@ -185,6 +185,12 @@
 		"missing-arguments" => "missing arguments",
 		"archive" => "archive",
 
+		// textpage
+		"datatype.name.textpage" => 'web page',
+
+		// festival
+		"datatype.name.festivalpage" => "festival page",
+
 		// festival - digest
 		"festival-edited-contribution" => " edited contribution: ",
 		"festival-added-contribution" => " added contribution: ",
@@ -223,6 +229,9 @@
 
 		// festival - other
 		"festival-participant-status" => "status",
+
+		// mailing list
+		"datatype.name.mailinglist" => "mailinglist",
 
 		// mailing list
 		"ml-view-addresses" => "view addresses",

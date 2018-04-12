@@ -185,6 +185,12 @@
 		"missing-arguments" => "argumenten ontbreken",
 		"archive" => "archief",
 
+		// textpage
+		"datatype.name.textpage" => "webpagina",
+
+		// festival
+		"datatype.name.festivalpage" => "festival pagina",
+
 		// festival - digest
 		"festival-edited-contribution" => " heeft festivalbijdrage aangepast: ",
 		"festival-added-contribution" => " heeft een festivalbijdrage toegevoegd: ",
@@ -218,6 +224,9 @@
 
 		// festival - other
 		"festival-participant-status" => "status",
+
+		// mailing list
+		"datatype.name.mailinglist" => "mailinglist",
 
 		// mailing list
 		"ml-view-addresses" => "bekijk adressen",

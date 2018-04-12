@@ -23,6 +23,10 @@
 			registerCommandCallback('pay', Array($this, 'handlePay'));
 		}
 
+		public static function getDatatypeName() {
+			return __('datatype.name.festivalpage');
+		}
+
 		function build() {
 			if (isUser() && !in_array($this->getArg(0), ['edit'])) {
 				$commands = $this->html->find('#pageCommands');

@@ -20,6 +20,10 @@
 			registerCommandCallback('textRevert', Array($this, 'revert'));
 		}
 
+		public static function getDatatypeName() {
+			return __('datatype.name.textpage');
+		}
+
 		function build() {
 			switch ($this->getArg(0)) {
 				case 'edit':
