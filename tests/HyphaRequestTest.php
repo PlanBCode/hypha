@@ -71,7 +71,6 @@ class HyphaRequestTest {
 				'query' => 'festival/festival',
 				'system' => false,
 				'lang' => null,
-				'type' => 'festival',
 				'name' => 'festival',
 				'args' => [],
 				'parts' => ['festival', 'festival'],
@@ -156,7 +155,7 @@ class HyphaRequestTest {
 		$resultText = ($result ? '' : '! ' . $expectedText . '(' . gettype($expected) . ') -> ') . $actualText . ($result ? '' : '(' . gettype($actual) . ')');
 		$this->results[$query][$test] = [$resultText, $actual, $expected, $result];
 
-		if ($this->testResultMaxLength['test'][$test] < strlen($test)) {
+		if (!isset($this->testResultMaxLength['test'][$test]) || $this->testResultMaxLength['test'][$test] < strlen($test)) {
 			$this->testResultMaxLength['testText'][$test]  = $test;
 			$this->testResultMaxLength['test'][$test] = strlen($test);
 		}
