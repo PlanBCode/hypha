@@ -329,7 +329,7 @@
 		$username - identifier for the user
 	*/
 	function hypha_getUserByName($username) {
-		foreach(hypha_getUserList() as $user) if ($user->getAttribute('username') == $username) return $user;
+		foreach(hypha_getUserList() as $user) if (strtolower($user->getAttribute('username')) == strtolower($username)) return $user;
 		return false;
 	}
 
