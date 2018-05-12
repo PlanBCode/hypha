@@ -49,11 +49,11 @@ class mailinglist extends Page {
 	 * @param array $args
 	 */
 	public function __construct(DOMElement $pageListNode, $args) {
-		global $hyphaLanguage;
+		global $hyphaContentLanguage;
 		parent::__construct($pageListNode, $args);
 		$this->xml = new Xml('mailinglist', Xml::multiLingualOn, Xml::versionsOff);
 		$this->xml->loadFromFile('data/pages/' . $pageListNode->getAttribute('id'));
-		$this->language = $hyphaLanguage;
+		$this->language = $hyphaContentLanguage;
 	}
 
 	public static function getDatatypeName() {

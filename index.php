@@ -101,6 +101,12 @@
 	 */
 	$hyphaLanguage = $O_O->getInterfaceLanguage();
 
+	/**
+	 * Set content language as global variable.
+	 * @deprecated Use O_O instead
+	 */
+	$hyphaContentLanguage = $O_O->getContentLanguage();
+
 	// Load page and execute the posted command. This
 	// is tried twice, since some commands need to run before
 	// loading the page, and some commands need to run after.

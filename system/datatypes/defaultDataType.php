@@ -21,11 +21,11 @@ abstract class defaultDataType extends Page {
 	 * @param array $args
 	 */
 	public function __construct(DOMElement $pageListNode, $args) {
-		global $hyphaLanguage, $hyphaUser;
+		global $hyphaUser, $hyphaContentLanguage;
 		parent::__construct($pageListNode, $args);
 		$this->xml = new Xml($this->getType(), Xml::multiLingualOff, Xml::versionsOff);
 		$this->xml->loadFromFile('data/pages/' . $pageListNode->getAttribute('id'));
-		$this->language = $hyphaLanguage;
+		$this->language = $hyphaContentLanguage;
 		$this->hyphaUser = $hyphaUser;
 	}
 
