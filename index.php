@@ -46,10 +46,7 @@
 	$hyphaQuery = substr($_SERVER["REQUEST_URI"], strlen($_path));
 	// Strip off any query parameters
 	$parampos = strpos($hyphaQuery, '?');
-	if ($parampos !== false)
-		$hyphaQuery = substr($hyphaQuery, 0, $parampos);
-//	$hyphaQuery = urldecode(substr($_SERVER["REQUEST_URI"], strlen($_path)));
-
+	if ($parampos !== false) $hyphaQuery = substr($hyphaQuery, 0, $parampos);
 
 	/*
 		Group: Stage 3 - Build hypha script
@@ -60,13 +57,11 @@
 	*/
 
 	$_handle = opendir("system/core/");
-	while ($_file = readdir($_handle)) if (substr($_file, -4) == '.php') require_once("system/core/".$_file);
+	while ($_file = readdir($_handle)) if (substr($_file, -4) == '.php') require_once("system/core/" . $_file);
 	closedir($_handle);
 
 	$_handle = opendir("system/datatypes/");
-	while ($_file = readdir($_handle)) if (substr($_file, -4) == '.php') {
-		include_once("system/datatypes/".$_file);
-	}
+	while ($_file = readdir($_handle)) if (substr($_file, -4) == '.php') include_once("system/datatypes/" . $_file);
 	closedir($_handle);
 
 	$_handle = opendir("system/languages/");
@@ -74,10 +69,8 @@
 	closedir($_handle);
 
 	// Shortcut for direct file requests
-	if ($hyphaQuery == 'data/hypha.css')
-		serveFile($hyphaQuery, false);
-	if (startsWith($hyphaQuery, 'system/wymeditor'))
-		serveFile($hyphaQuery, 'system/wymeditor');
+	if ($hyphaQuery == 'data/hypha.css') serveFile($hyphaQuery, false);
+	if (startsWith($hyphaQuery, 'system/wymeditor')) serveFile($hyphaQuery, 'system/wymeditor');
 
 	/*
 		Group: Stage 4 - Load website data
@@ -96,15 +89,23 @@
 		Check is a user is logged in and load user data. Add login/logout functionality according to session login status.
 	*/
 
-	$hyphaRequest = new HyphaRequest($hyphaQuery, $isoLangList);
-	loadLanguage($hyphaRequest);
+	// Build request
+	$O_O = new RequestContext(new HyphaRequest($hyphaQuery, $isoLangList), hypha_getDefaultLanguage());
 
-	// Load user and page and execute the posted command. The latter
+	// Set user as global variable.
+	$hyphaUser = $O_O->getUser();
+
+	/**
+	 * Set language as global variable.
+	 * @deprecated Use O_O instead
+	 */
+	$hyphaLanguage = $O_O->getInterfaceLanguage();
+
+	// Load page and execute the posted command. This
 	// is tried twice, since some commands need to run before
 	// loading the page, and some commands need to run after.
-	loadUser();
 	executePostedCommand(); // Might redirect and exit
-	loadPage($hyphaRequest);
+	loadPage($O_O);
 	executePostedCommand(); // Might redirect and exit
 
 	/*
@@ -119,7 +120,7 @@
 
 	// add hypha commands and navigation
 	$_cmds[] = '<a href="index/'.$hyphaLanguage.'">'.__('index').'</a>';
-	if (!$hyphaUser) {
+	if (!$O_O->isUser()) {
 		addLoginRoutine($hyphaHtml);
 		$_cmds[] = '<a href="javascript:login();">'.__('login').'</a>';
 	}
@@ -134,10 +135,10 @@
 		$_cmds[] = makeLink(__('logout'), makeAction($hyphaQuery, 'logout', ''));
 	}
 	$hyphaHtml->writeToElement('hyphaCommands', implode('', $_cmds));
-	if ($hyphaUser) $hyphaHtml->writeToElement('hyphaCommands', '<br/><div id="loggedIn">'.__('logged-in-as').' `'.$hyphaUser->getAttribute('username').'`'.asterisk(isAdmin()).'</div>');
+	if ($O_O->isUser()) $hyphaHtml->writeToElement('hyphaCommands', '<br/><div id="loggedIn">'.__('logged-in-as').' `'.$O_O->getUser()->getAttribute('username').'`'.asterisk(isAdmin()).'</div>');
 
 	// obfuscate email addresses to strangers. It's ok to send readable addresses to logged in members. This also prevents conflicts in the editor.
-//	if (!$hyphaUser) registerPostProcessingFunction('obfuscateEmail');
+//	if (!$O_O->isUser()) registerPostProcessingFunction('obfuscateEmail');
 
 	// poor man's cron job
 	if (time() - hypha_getLastDigestTime() >= hypha_getDigestInterval()) flushDigest();
@@ -150,4 +151,3 @@
 	header('Content-Type: text/html; charset=utf-8');
 	print $hyphaHtml->toString();
 	exit;
-?>

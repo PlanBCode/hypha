@@ -26,10 +26,11 @@
 		}
 
 		protected function replacePageListNode($node) {
-			global $hyphaLanguage;
+			global $O_O;
+			$hyphaContentLanguage = $O_O->getContentLanguage();
 			$this->pageListNode = $node;
 			$this->privateFlag = ($node->getAttribute('private') == 'on' ? true : false);
-			$language = hypha_pageGetLanguage($node, $hyphaLanguage);
+			$language = hypha_pageGetLanguage($node, $hyphaContentLanguage);
 			$this->language = $language->getAttribute('id');
 			$this->pagename = $language->getAttribute('name');
 		}
@@ -94,28 +95,6 @@
 	}
 
 	/*
-		Function: loadLanguage
-		Pulls the language from the url.
-
-		Parameters:
-		HyphaRequest $hyphaRequest
-	*/
-	function loadLanguage(HyphaRequest $hyphaRequest) {
-		global $hyphaLanguage;
-
-		$language = $hyphaRequest->getLanguage();
-
-		// set wiki language. we want to store this in a session variable, so we don't loose language when an image or the settingspage are requested
-		$hyphaLanguage = $language !== null ? $language : hypha_getDefaultLanguage();
-
-		if (!isset($_SESSION['hyphaLanguage']) || $hyphaLanguage != $_SESSION['hyphaLanguage']) {
-			session_start();
-			$_SESSION['hyphaLanguage'] = $hyphaLanguage;
-			session_write_close();
-		}
-	}
-
-	/*
 		Function: loadPage
 		loads all html needed for page pagename/view
 
@@ -125,18 +104,18 @@
 		See Also:
 		<buildhtml>
 	*/
-	function loadPage(HyphaRequest $hyphaRequest) {
-		global $isoLangList, $hyphaHtml, $hyphaPage, $hyphaLanguage, $hyphaUrl;
+	function loadPage(RequestContext $O_O) {
+		global $isoLangList, $hyphaHtml, $hyphaPage, $hyphaUrl;
 
-		$args = $hyphaRequest->getArgs();
+		$args = $O_O->getArgs();
 
-		if (!$hyphaRequest->isSystemPage()) {
+		if (!$O_O->isSystemPage()) {
 			// fetch the requested page
-			$_name = $hyphaRequest->getPageName();
+			$_name = $O_O->getPageName();
 			if ($_name === null) {
 				$_name = hypha_getDefaultPage();
 			}
-			$_node = hypha_getPage($hyphaLanguage, $_name);
+			$_node = hypha_getPage($O_O->getContentLanguage(), $_name);
 
 			if ($_node) {
 				$_type = $_node->getAttribute('type');
@@ -160,7 +139,7 @@
 		while (count($args) < 1)
 			array_push($args, null);
 
-		switch ($hyphaRequest->getSystemPage()) {
+		switch ($O_O->getSystemPage()) {
 			case HyphaRequest::HYPHA_SYSTEM_PAGE_FILES:
 				serveFile('data/files/' . $args[0], 'data/files');
 				exit;
@@ -179,10 +158,10 @@
 						$hyphaHtml->writeToElement('main', hypha_indexFiles());
 						break;
 					default:
-						$languageName = $isoLangList[$hyphaLanguage];
+						$languageName = $isoLangList[$O_O->getContentLanguage()];
 						$languageName = substr($languageName, 0, strpos($languageName, ' ('));
 						$hyphaHtml->writeToElement('pagename', __('page-index').': '.$languageName);
-						$hyphaHtml->writeToElement('main', hypha_indexPages($hyphaLanguage));
+						$hyphaHtml->writeToElement('main', hypha_indexPages($O_O->getContentLanguage()));
 						break;
 				}
 				break;

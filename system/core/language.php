@@ -1,28 +1,5 @@
 <?php
 	/*
-		Title: Language
-
-		This chapter describes the hypha user interface.
-	*/
-
-	$hyphaDictionary = array();
-
-	/*
-		Function: loadUserInterfaceLanguage
-		Selects a dictionary for the user interface.
-
-		Parameters:
-		$path - path to the folder whers the language files are found.
-		$lang - language identifier
-	*/
-	function loadUserInterfaceLanguage($path, $lang) {
-		global $hyphaDictionary;
-		$lang = file_exists($path.'/'.$lang.'.php') ? $lang : 'en';
-		include($path.'/'.$lang.'.php');
-		$hyphaDictionary = $LANG;
-	}
-
-	/*
 		Function: __
 		Returns a string from the selected dictionary.
 
@@ -30,7 +7,9 @@
 		$msgid - identifier used as a key to fetch the corresponding string from the dictionary.
 	*/
 	function __($msgid) {
-		global $hyphaDictionary;
+		global $O_O;
+
+		$hyphaDictionary = $O_O->getDictionary();
 		return array_key_exists($msgid, $hyphaDictionary) ? $hyphaDictionary[$msgid] : $msgid;
 	}
 
