@@ -71,6 +71,7 @@
 	// Shortcut for direct file requests
 	if ($hyphaQuery == 'data/hypha.css') serveFile($hyphaQuery, false);
 	if (startsWith($hyphaQuery, 'system/wymeditor')) serveFile($hyphaQuery, 'system/wymeditor');
+	if (startsWith($hyphaQuery, 'system/bowser')) serveFile($hyphaQuery, 'system/bowser');
 
 	/*
 		Group: Stage 4 - Load website data
