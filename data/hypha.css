@@ -253,6 +253,9 @@ img {
 #login {
   font-size: 8pt; }
 
+#loginForgotPassword {
+  font-size:8pt; }
+
 #log {
   font-size: 10pt;
   letter-spacing: 0.1em; }
