@@ -13,6 +13,7 @@
 		"logout" => "uitloggen",
 		"quit" => "stop",
 		"logged-in-as" => "ingelogd als",
+		"forgot-password" => "Klik hier als je je gebruikersnaam of wachtwoord bent vergeten: ",
 		"login-failed" => "inloggen mislukt. Klik hier als je je wachtwoord bent vergeten: ",
 		"reregister" => "heraanmelden",
 		"name" => "naam",

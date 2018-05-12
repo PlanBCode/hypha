@@ -13,6 +13,7 @@
 		"logout" => "logout",
 		"quit" => "unsubscribe",
 		"logged-in-as" => "logged in as",
+		"forgot-password" => "If you forgot your username or password, click here: ",
 		"login-failed" => "login failed. If you forgot your password, click here: ",
 		"reregister" => "recover account",
 		"name" => "name",
