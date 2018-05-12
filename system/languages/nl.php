@@ -276,8 +276,8 @@
 		// peer_reviewed_article - mail
 		"art-a-new-article-has-been-submitted-for-review" => "Een nieuw artikel kan beoordeeld worden",
 		"art-the-status-of-an-article-has-been-updated" => "De status van een artikel is geüpdate",
-		"art-a-blocking-comment-has-been-submitted" => "Een blokkerende opmerking is toegevoegd",
-		"art-a-blocking-comment-has-been-resolved" => "Een blokkerende opmerking is opgelost",
+		"art-a-blocking-comment-has-been-submitted" => "Een breekpunt is toegevoegd",
+		"art-a-blocking-comment-has-been-resolved" => "Een breekpunt is opgelost",
 		"art-please-confirm" => "Graag een bevestiging",
 		"art-please-confirm-you-just-added-a-comment" => "Bevestigingt u aub dat u zojuist een opmerking heeft toegevoegd",
 		"art-confirm" => "bevestiging",
@@ -290,7 +290,7 @@
 		"art-status-retracted" => "teruggetrokken",
 
 		// peer_reviewed_article - comment
-		"art-blocking" => "blokkerend",
+		"art-blocking" => "breekpunt",
 		"art-review-comments" => "beoordelingsopmerkingen",
 		"art-no-comments-yet" => "nog geen opmerkingen",
 		"art-add-review-comment" => "voeg beoordelingsopmerking toe",
@@ -308,7 +308,7 @@
 		"art-method" => "bijsluiter",
 		"art-sources" => "bronnen",
 		"art-is-resolved" => "is opgelost",
-		"art-is-blocking" => "is blokkerend",
+		"art-is-blocking" => "is een breekpunt",
 		"art-set-as-resolved" => "zet op opgelost",
 		"art-set-as-closed" => "zet op gesloten",
 		"art-approves" => "goedkeuringen",
