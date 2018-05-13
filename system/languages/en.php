@@ -330,3 +330,5 @@
 
 		"art-start-review" => "start review",
 	);
+
+	return $LANG;

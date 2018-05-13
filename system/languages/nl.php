@@ -326,3 +326,5 @@
 		"art-start-review" => "start beoordeling",
 
 	);
+
+	return $LANG;
