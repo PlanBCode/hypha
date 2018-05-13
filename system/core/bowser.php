@@ -30,8 +30,7 @@
 ?>
 	<script>
 		if (bowser.name === 'msie' && !bowser.check({msie: "9.0"})) {
-			document.addEventListener(`DOMContentLoaded`, showBrowserNotSupportedPopup);
-			function showBrowserNotSupportedPopup() {
+			document.addEventListener('DOMContentLoaded', function showBrowserNotSupportedPopup() {
 				var el = document.getElementById('popup');
 				if (el !== null) {
 					html = '<table class="section"><tr><th colspan="2"><?=__('browser')?> <?=__('not-supported')?></td><tr>';
@@ -43,7 +42,7 @@
 					el.style.top = (document.getElementById('hyphaCommands').offsetTop + 25) + 'px';
 					el.style.visibility = 'visible';
 				}
-			}
+			});
 		}
 	</script>
 <?php
