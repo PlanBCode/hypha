@@ -37,9 +37,6 @@
 		}
 
 		function show() {
-			// throw error if private page is requested without client logged in
-			if (!isUser() && $this->privateFlag) return notify('error', __('login-to-view'));
-
 			// setup page name and language list for the selected page
 			$this->html->writeToElement('pagename', showPagename($this->pagename).' '.asterisk($this->privateFlag));
 			$this->html->writeToElement('langList', hypha_indexLanguages($this->pageListNode, $this->language));
