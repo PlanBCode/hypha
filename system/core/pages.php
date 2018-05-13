@@ -196,9 +196,23 @@
 						@$size = getimagesize($_FILES['wymFile']['tmp_name']);
 						if(!$size || !in_array($ext, array('jpg','jpeg','png','gif','bmp'))) $response = __('invalid-image-file').ini_get('upload_max_filesize');
 						else {
-							$filename = uniqid().'.'.$ext;
-							if(!move_uploaded_file($_FILES['wymFile']['tmp_name'], 'data/images/'.$filename)) $response = __('server-error');
-							else $response = 'images/'.$filename;
+							$maxSize = [1120, 800];
+							$needResize = $size[0] > $maxSize[0] || $size[1] > $maxSize[1];
+							$filename = uniqid() . '.' . $ext;
+							$destinations = ['org' => 'data/images/org/' . $filename, 'img' => 'data/images/' . $filename];
+							if ($needResize && !file_exists('data/images/org/')) {
+								mkdir('data/images/org/', 0777, true);
+							}
+							if (move_uploaded_file($_FILES['wymFile']['tmp_name'], $destinations[$needResize ? 'org' : 'img'])) {
+								$response = 'images/' . $filename . '?' . 'w=' . $size[0] . '&h=' . $size[1];
+								if ($needResize) {
+									if (true !== image_resize($destinations['org'], $destinations['img'], $maxSize[0], $maxSize[1])) {
+										$response = __('server-error-resize-image');
+									}
+								}
+							} else {
+								$response = __('server-error');
+							}
 						}
 					}
 					echo '<script language="javascript" type="text/javascript">window.top.window.uploadResponse(\''.$response.'\');</script>';
@@ -462,4 +476,42 @@
 		}
 		else $html = __('no-versions');
 		return $html;
+	}
+
+	function image_resize($src, $dst, $width, $height) {
+		list($w, $h) = getimagesize($src);
+
+		$type = strtolower(substr(strrchr($src,"."),1));
+		if ($type == 'jpeg') $type = 'jpg';
+		switch ($type) {
+			case 'bmp': $img = imagecreatefromwbmp($src); break;
+			case 'gif': $img = imagecreatefromgif($src); break;
+			case 'jpg': $img = imagecreatefromjpeg($src); break;
+			case 'png': $img = imagecreatefrompng($src); break;
+			default : return "Unsupported picture type!";
+		}
+
+		// resize
+		$ratio = min($width/$w, $height/$h);
+		$width = $w * $ratio;
+		$height = $h * $ratio;
+
+		$new = imagecreatetruecolor($width, $height);
+
+		// preserve transparency
+		if ($type == 'gif' || $type == 'png') {
+			imagecolortransparent($new, imagecolorallocatealpha($new, 0, 0, 0, 127));
+			imagealphablending($new, false);
+			imagesavealpha($new, true);
+		}
+
+		imagecopyresampled($new, $img, 0, 0, 0, 0, $width, $height, $w, $h);
+
+		switch($type){
+			case 'bmp': imagewbmp($new, $dst); break;
+			case 'gif': imagegif($new, $dst); break;
+			case 'jpg': imagejpeg($new, $dst); break;
+			case 'png': imagepng($new, $dst); break;
+		}
+		return true;
 	}
