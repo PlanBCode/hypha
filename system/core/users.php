@@ -151,6 +151,7 @@
 		html+= '<tr><th>Username:</th><td><input name="loginUsername" id="loginUsername" type="text" size="10" /></td></tr>';
 		html+= '<tr><th>Password:</th><td><input name="loginPassword" type="password" size="10" /></td></tr>';
 		html+= '<tr><td></td><td><input type="submit" name="login" value="<?=__('login')?>" onclick="hypha(\'<?=$hyphaQuery?>\', \'login\', \'\');" /><input type="button" name="cancel" value="<?=__('cancel')?>" onclick="document.getElementById(\'popup\').style.visibility=\'hidden\';" /></td></tr>';
+		html+= '<tr><td id="loginForgotPassword" colspan="2"><?=__('forgot-password')?><a href="javascript:reregister();"><?=__('reregister')?></a></td></tr>';
 		html+= '</table>';
 		document.getElementById('popup').innerHTML = html;
 		document.getElementById('popup').style.left = document.getElementById('hyphaCommands').offsetLeft + 'px';
@@ -194,4 +195,3 @@
 		$hyphaXml->unlock();
 		notify('success', __('reregistration-error'));
 	}
-?>

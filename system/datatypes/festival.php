@@ -246,7 +246,7 @@
 		function getSettingsForm() {
 $html = <<<'EOF'
 <table>
-	<tr><td><label for="festival-title">Festival title</label> *</td><td><input name="festival-title"/></td></tr>
+	<tr><td><label for="festival-title">Festival title</label> *</td><td><input id="festival-title" name="festival-title"/></td></tr>
 </table>
 EOF;
 			$elem = $this->html->createElement('form')->html($html);
@@ -332,7 +332,7 @@ EOF;
 				// HACK: Prevent index.php from
 				// rendering the page normally, since we
 				// already rendered it. There should be
-				// a better way to achive this.
+				// a better way to achieve this.
 				$hyphaPage = false;
 				// Reshow the form with submitted values
 				// and errors
@@ -354,7 +354,7 @@ EOF;
 				$this->setupPayment($participant, $form->dataFor('amount', 0));
 			$this->xml->saveAndUnlock();
 
-			notify('success', __('festival-succesful-signup-for') . $this->getConfig('festival-title'));
+			notify('success', __('festival-successful-signup-for') . $this->getConfig('festival-title'));
 			$contribute_url = $hyphaUrl . $hyphaLanguage . '/' . $this->pagename . '/contribute/' . $participant->getAttribute('xml:id') . '/' . $participant->getAttribute('key');
 			$digest = htmlspecialchars($participant->getAttribute('name') . __('festival-signed-up-for') . $this->getConfig('festival-title'));
 			$digest .= ' (<a href="' . $contribute_url . '">Add contribution</a>)';
@@ -403,7 +403,7 @@ EOF;
 				$this->xml->unlock();
 				notify('success', __('festival-email-already-confirmed'));
 			} else {
-				notify('success', __('festival-email-confirmed-succesfully'));
+				notify('success', __('festival-email-confirmed-successfully'));
 
 				// Mark e-mail as confirmed
 				$participant->setAttribute('email-confirmed', '1');
@@ -663,7 +663,19 @@ EOF;
 		function buildContribution($contribution) {
 			$html = '<div class="infoact">';
 			// artist and title
-			if ($contribution->getAttribute('name')) $html.= '<a id="'.$contribution->getAttribute('xml:id').'" style="font-size:15pt; font-weight:bold; clear:left;">'.$contribution->getAttribute('name').($contribution->hasAttribute('title') ? ' - '.$contribution->getAttribute('title') : '').'</a>';
+			$id = $contribution->getAttribute('xml:id');
+			$url = $hyphaUrl . $hyphaLanguage . '/' . $this->pagename . '/lineup#' . $id;
+			$title = '';
+			if ($contribution->getAttribute('category'))
+				$title .= $contribution->getAttribute('category') . ': ';
+			if ($contribution->getAttribute('name'))
+				$title .= $contribution->getAttribute('name');
+			if ($contribution->getAttribute('name') && $contribution->getAttribute('title'))
+				$title .= ' - ';
+			if ($contribution->getAttribute('title'))
+				$title .= $contribution->getAttribute('title');
+
+			$html.= '<a id="'.$id.'" href="'.$url.'" style="font-size:15pt; font-weight:bold; clear:left;">'.$title.'</a>';
 			$html.= '<p/>';
 			// image and description
 			$image_filename = $contribution->getAttribute('image');
@@ -887,14 +899,14 @@ EOF;
 		 * Check the status of the given participants's payment,
 		 * sending out any mails or digests as needed.
 		 *
-		 * When the payment is complete (succesful or
-		 * unsuccesful), NULL is returned. If the payment is
+		 * When the payment is complete (successful or
+		 * unsuccessful), NULL is returned. If the payment is
 		 * still open, the url to redirect to is returned.
 		 *
 		 * When create_new is true, a new payment is created if
 		 * the existing one is not paid but no longer opened
 		 * (e.g. expired, failed or cancelled). In this case, a
-		 * NULL return value means the payment was succesful.
+		 * NULL return value means the payment was successful.
 		 *
 		 * Should be called with the XML lock held.
 		 */
@@ -1022,5 +1034,3 @@ EOF;
 		}
 
 	}
-?>
-

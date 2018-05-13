@@ -94,15 +94,15 @@
 		Check is a user is logged in and load user data. Add login/logout functionality according to session login status.
 	*/
 
-	$request = explode('/', $hyphaQuery);
-	$request = loadLanguage($request);
+	$hyphaRequest = new HyphaRequest($hyphaQuery, $isoLangList);
+	loadLanguage($hyphaRequest);
 
 	// Load user and page and execute the posted command. The latter
 	// is tried twice, since some commands need to run before
 	// loading the page, and some commands need to run after.
 	loadUser();
 	executePostedCommand(); // Might redirect and exit
-	loadPage($request);
+	loadPage($hyphaRequest);
 	executePostedCommand(); // Might redirect and exit
 
 	/*

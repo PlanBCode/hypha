@@ -481,4 +481,3 @@
 		global $hyphaNotificationList;
 		if ($message) $hyphaNotificationList[] = '<div class="'.$type.'">'.$message.'</div>';
 	}
-?>

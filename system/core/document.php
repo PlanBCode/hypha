@@ -181,8 +181,9 @@
 			foreach($postProcessingList as $func) $func($this);
 
 			// format <head> element into convenient order, could be removed to gain speed
-			function ranking($node) {
-				switch($node->tagName) {
+			$ranking = function ($node) {
+				$tagName = isset($node->tagName) ? $node->tagName : '';
+				switch($tagName) {
 					case 'base': return '-1';
 					case 'meta': return '0'.$node->getAttribute('name');
 					case 'title': return '1';
@@ -191,17 +192,19 @@
 					case 'script': return $node->hasAttribute('src') ? '4' : '5';
 					default: return '6';
 				}
-			}
+			};
 
 			// Sort the head tag children, keeping the order of nodes with the same rank
 			// unchanged (this is important for script tags).
 			$nodes = $this->getElementsByTagName('head')->Item(0)->childNodes;
-			for($i=0;$i<$nodes->length-1;$i++)
-				for ($j=$i+1;$j<$nodes->length;$j++)
-					if(ranking($nodes->Item($j-1)) > ranking($nodes->Item($j))) {
+			for ($i=0;$i<$nodes->length-1;$i++) {
+				for ($j = $i + 1; $j < $nodes->length; $j++) {
+					if ($ranking($nodes->Item($j - 1)) > $ranking($nodes->Item($j))) {
 						$swapnode = $this->getElementsByTagName('head')->Item(0)->removeChild($nodes->Item($j));
-						$this->getElementsByTagName('head')->Item(0)->insertBefore($swapnode, $nodes->Item($j-1));
+						$this->getElementsByTagName('head')->Item(0)->insertBefore($swapnode, $nodes->Item($j - 1));
 					}
+				}
+			}
 
 			// convert to string
 			$html = $this->saveHTML();
@@ -220,7 +223,11 @@
 		to allow manipulating the form more easily.
 	*/
 	class HTMLForm {
-		/** The DOM form being wrapped */
+		/**
+		 * The DOM form being wrapped
+		 *
+		 * @var \DOMWrap\Element
+		 */
 		public $elem;
 		/** The data associated with this form */
 		public $data;
@@ -249,9 +256,27 @@
 			$this->labels = array();
 			$this->image_previews = array();
 
-			// Look through the DOM to find form fields and
-			// their labels
-			foreach($form->find('input, select, textarea, label, img') as $elem) {
+			$this->scanForm($form);
+		}
+
+		/*
+			Function: getFormField
+
+			Form fields to look through
+		 */
+		function getFormFieldTypes() {
+			return ['input', 'select', 'textarea', 'label', 'img'];
+		}
+
+		/*
+			Function: scanForm
+
+			Look through the DOM to find form fields and
+			their labels
+		 */
+		function scanForm($form)
+		{
+			foreach($form->find(implode(', ', $this->getFormFieldTypes())) as $elem) {
 				if ($elem->tagName == 'label') {
 					$name = self::getNameAttr($elem, 'for');
 					if ($name)
@@ -343,7 +368,8 @@
 			single HTML form field with the value given.
 		*/
 		function updateFormField($field, $value) {
-			if ($field->tagName == 'input' && $field->getAttribute('type') == 'checkbox') {
+			$fieldType = $this->getFieldType($field);
+			if ($fieldType == 'checkbox') {
 				// For multiple checkboxes that have a
 				// name ending in [], PHP will put an
 				// array in $_POST containing the value
@@ -355,20 +381,34 @@
 					$field->setAttribute('checked', 'checked');
 				else
 					$field->removeAttribute('checked');
-			} else if ($field->tagName == 'input') {
+			} else if ($fieldType == 'input') {
 				$field->setAttribute('value', $value);
-			} else if ($field->tagName == 'select') {
+			} else if ($fieldType == 'select') {
 				foreach($field->find('option') as $option) {
 					if ($option->getAttribute('value') == $value)
 						$option->setAttribute('selected', 'selected');
 					else
 						$option->removeAttribute('selected');
 				}
-			} else if ($field->tagName == 'textarea') {
+			} else if ($fieldType == 'textarea') {
 				$field->setText($value);
 			}
 		}
 
+		function getFieldType($field)
+		{
+			switch ($field->tagName) {
+				case 'input':
+					return $field->getAttribute('type') == 'checkbox' ? 'checkbox' : 'input';
+				case 'select':
+				case 'textarea':
+				case 'img':
+				case 'label':
+					return $field->tagName;
+			}
+
+			return null;
+		}
 
 		function updateImagePreview($field, $value) {
 			if ($value) {
@@ -462,6 +502,7 @@
 	}
 
 	class HTMLTable extends DOMWrap\Element {
+		/** @var HTMLTableRow */
 		private $currentRow;
 
 		function __construct() {
@@ -469,19 +510,19 @@
 		}
 
 		function addHeaderRow() {
-			$currentRow = new HTMLTableRow('th');
-			$this->appendChild($currentRow);
-			return $currentRow;
+			$this->currentRow = new HTMLTableRow('th');
+			$this->appendChild($this->currentRow);
+			return $this->currentRow;
 		}
 
 		function addRow() {
-			$currentRow = new HTMLTableRow('td');
-			$this->appendChild($currentRow);
-			return $currentRow;
+			$this->currentRow = new HTMLTableRow('td');
+			$this->appendChild($this->currentRow);
+			return $this->currentRow;
 		}
 
 		function addCell($contents = null) {
-			return $currentRow->addCell($contents);
+			return $this->currentRow->addCell($contents);
 		}
 	}
 
@@ -507,4 +548,3 @@
 			return $this;
 		}
 	}
-?>

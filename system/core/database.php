@@ -477,10 +477,12 @@
 			empty to omit checking.
 	*/
 	function serveFile($filename, $root) {
-		ob_end_clean();
+		while (ob_get_level() > 0) {
+			ob_end_clean();
+		}
 		$real = realpath($filename);
 		$root = realpath($root);
-		if ($real === false || $root && !startsWith($real, $root . '/')) {
+		if ($real === false || $root && !startsWith($real, $root . DIRECTORY_SEPARATOR)) {
 			http_response_code(404);
 			die("Invalid filename: $filename");
 		}
@@ -828,5 +830,3 @@
 			imagedestroy($image);
 		}
 	}
-
-?>

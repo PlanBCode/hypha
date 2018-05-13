@@ -696,4 +696,3 @@
 	function hypha_indexFiles() {
 		return 'file index is not yet implemented';
 	}
-?>

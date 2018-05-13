@@ -13,6 +13,7 @@
 		"logout" => "uitloggen",
 		"quit" => "stop",
 		"logged-in-as" => "ingelogd als",
+		"forgot-password" => "Klik hier als je je gebruikersnaam of wachtwoord bent vergeten: ",
 		"login-failed" => "inloggen mislukt. Klik hier als je je wachtwoord bent vergeten: ",
 		"reregister" => "heraanmelden",
 		"name" => "naam",
@@ -20,8 +21,8 @@
 		"fullname" => "volledige naam",
 		"password" => "wachtwoord",
 		"confirm-password" => "bevestig wachtwoord",
-		"email" => "email",
-		"name-or-email" => "gebruikersnaam of email adres",
+		"email" => "e-mail",
+		"name-or-email" => "gebruikersnaam of e-mailadres",
 		"admin" => "admin",
 		"unadmin" => "ontadmin",
 		"invite" => "uitnodigen",
@@ -37,7 +38,7 @@
 		"create-new-page" => "maak nieuwe pagina",
 		"private-page" => "prive pagina",
 		"title" => "titel",
-		"message" => "boodschap",
+		"message" => "bericht",
 		"system-email" => "systeememail",
 		"default-page" => "standaard pagina",
 		"default-language" => "standaard taal",
@@ -78,7 +79,7 @@
 		"page-exists" => "pagina bestaat al",
 		"no-page-name" => "geen paginanaam opgegeven",
 		"page-name-conflict" => "pagina met deze naam bestaat al, oude naam wordt gehandhaafd",
-		"error-sending-message" => "het versturen van email naar de volgende adressen is mislukt:",
+		"error-sending-message" => "het versturen van e-mail naar de volgende adressen is mislukt:",
 		"error-loading-html" => "setNodeHTML: fout bij het laden van de HTML",
 		"too-big-file" => "~Error: bestand moet kleiner zijn dan ",
 		"invalid-image-file" => "~Ongeldige afbeelding, moet een geldige afbeelding zijn minder dan ",
@@ -111,8 +112,8 @@
 		"follow-link-to-register" => "om te registreren, volg onderstaande link",
 		"reregister-to" => "om te registreren, volg onderstaande link",
 		"reregistration" => "Herstel je account naar ",
-		"reregistration-sent" => "een herstelemail is verstuurd naar je emailadres",
-		"reregistration-error" => "Fout: geen gebruiker of emailadres gevonden met die naam",
+		"reregistration-sent" => "een herstelemail is verstuurd naar je e-mailadres",
+		"reregistration-error" => "Fout: geen gebruiker of e-mailadres gevonden met die naam",
 		"error-registration" => "registratie mislukt",
 		"error-user-exists" => "gebruikersnaam bestaat, kies een andere",
 		"error-last-admin" => "Kan je adminrechten niet wegnemen, je bent de laatste deelnemer met adminrechten.",
@@ -170,16 +171,30 @@
 		"error-uploading-file" => "Uploaden bestand mislukt: ",
 		"file-too-big-must-be-less-than" => "Bestand is te groot, moet kleiner zijn dan ",
 		"anonymous" => "anoniem",
+		"back" => "terug",
+		"read" => "lezen",
+		"total" => "totaal",
+		"description" => "omschrijving",
+		"subject" => "onderwerp",
+		"subscribe" => "aanmelden",
+		"status" => "status",
+		"send" => "verstuur",
+		"addresses" => "adressen",
+		"not-found" => "niet gevonden",
+		"invalid-code" => "ongeldige code",
+		"unable-to-edit" => "kan niet worden bewerkt",
+		"missing-arguments" => "argumenten ontbreken",
+		"archive" => "archief",
 
-		/* digest */
+		// festival - digest
 		"festival-edited-contribution" => " heeft festivalbijdrage aangepast: ",
 		"festival-added-contribution" => " heeft een festivalbijdrage toegevoegd: ",
 		"festival-signed-up-for" => " heeft zich ingeschreven voor ",
 		"festival-failed-to-pay-for" => " kon niet belaten voor ",
 		"festival-payed-for" => " heeft betaald voor ",
 
-		/* notify & messages */
-		"festival-succesful-signup-for" => "Je bent ingeschreven voor ",
+		// festival - notify & messages
+		"festival-successful-signup-for" => "Je bent ingeschreven voor ",
 		"festival-successful-payment" => "Je betaling is gelukt.",
 		"festival-contribution-added" => "Je bijdrage is toegevoegd aan de lineup.",
 		"festival-contribution-modified" => "Je bijdrage is aangepast.",
@@ -191,7 +206,7 @@
 		"festival-contribute-to" => "Draag bij aan ",
 		"festival-invalid-or-no-key" => "Geen of een ongeldige pagina-id",
 
-		/* buttons & links */
+		// festival - buttons & links
 		"festival-modify" => "wijzigen",
 		"festival-contribute" => "bijdragen",
 		"festival-edit-contribution" => "wijzig bijdrage",
@@ -201,5 +216,40 @@
 		"festival-contributions" => "bijdragen",
 		"festival-lineup" => "lineup",
 		"festival-timetable" => "blokkenschema",
+
+		// festival - other
+		"festival-participant-status" => "status",
+
+		// mailing list
+		"ml-view-addresses" => "bekijk adressen",
+		"ml-date-format" => "d-m-Y",
+		"ml-received-by" => "ontvangen door",
+
+		// mailing list - response
+		"ml-no-sender" => "geen afzender, pas de mailinglist aan",
+		"ml-mail-has-invalid-status" => "de mail heeft een onjuiste status",
+		"ml-invalid-command" => "de command is onjuist",
+		"ml-inconsistent-parameters" => "de parameters zijn inconsistent",
+		"ml-successfully-subscribed" => "succesvol aangemeld",
+		"ml-successfully-unsubscribed" => "succesvol afgemeld",
+		"ml-successfully-created" => "succesvol aangemaakt",
+		"ml-successfully-updated" => "succesvol bijgewerkt",
+		"ml-successfully-sent" => "succesvol verstuurd",
+
+		// mailing list - mail
+		"ml-please-confirm-email" => "bevestig de e-mail",
+		"ml-unsubscribe" => "afmelden",
+		"ml-if-unreadable-use-link" => "als het onleesbaar is, gebruik dan de link",
+
+		// mailing list - status
+		"ml-mailing-status-draft" => "in opmaak",
+		"ml-mailing-status-sending" => "aan het versturen",
+		"ml-mailing-status-sent" => "verstuurd",
+		"ml-address-status-pending" => "in behandeling",
+		"ml-address-status-confirmed" => "bevestigd",
+		"ml-address-status-unsubscribed" => "uitgeschreven",
+
+		// mailing
+		"mailing-sender-email" => "e-mail",
+		"mailing-sender-name" => "naam",
 	);
-?>
