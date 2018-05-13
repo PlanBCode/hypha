@@ -25,6 +25,19 @@
 			return str_replace('_', ' ', get_called_class());
 		}
 
+		protected function deletePage() {
+			global $hyphaXml;
+			$id = $this->pageListNode->getAttribute('id');
+			$hyphaXml->lockAndReload();
+			hypha_deletePage($id);
+			$hyphaXml->saveAndUnlock();
+
+			$file = 'data/pages/' . $id;
+			if (file_exists($file)) {
+				unlink($file);
+			}
+		}
+
 		protected function replacePageListNode($node) {
 			global $O_O;
 			$hyphaContentLanguage = $O_O->getContentLanguage();

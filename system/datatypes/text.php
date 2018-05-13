@@ -18,6 +18,7 @@
 
 			registerCommandCallback('textSave', Array($this, 'save'));
 			registerCommandCallback('textRevert', Array($this, 'revert'));
+			registerCommandCallback('textDelete', Array($this, 'delete'));
 		}
 
 		public static function getDatatypeName() {
@@ -64,6 +65,12 @@
 					$_action = makeAction($this->language.'/'.$this->pagename.'/translate', '', 'version');
 					$_button = makeButton(__('translate'), $_action);
 					$this->html->writeToElement('pageCommands', $_button);
+
+					if (isAdmin()) {
+						$_action = 'if(confirm(\'' . __('sure-to-delete') . '\'))' . makeAction($this->language . '/' . $this->pagename, 'textDelete', '');
+						$_button = makeButton(__('delete'), $_action);
+						$this->html->writeToElement('pageCommands', $_button);
+					}
 				}
 			}
 		}
@@ -94,6 +101,18 @@
 			$_action = makeAction($this->language.'/'.$this->pagename, 'textSave', '');
 			$_button = makeButton(__('save'), $_action);
 			$this->html->writeToElement('pageCommands', $_button);
+		}
+
+		function delete() {
+			// throw error if delete is requested without admin logged in
+			if (!isAdmin()) return notify('error', __('login-as-admin-to-delete'));
+
+			global $hyphaUrl;
+
+			$this->deletePage();
+
+			notify('success', ucfirst(__('page-successfully-deleted')));
+			return ['redirect', $hyphaUrl];
 		}
 
 		function translate() {

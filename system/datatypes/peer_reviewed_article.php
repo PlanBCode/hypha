@@ -59,6 +59,7 @@ class peer_reviewed_article extends defaultDataType {
 	const STATUS_RETRACTED = 'retracted';
 
 	const PATH_EDIT = 'edit';
+	const PATH_DELETE = 'delete';
 	const PATH_DISCUSSION = 'discussion';
 	const PATH_DISCUSSION_TYPE = 'discussion/{type}';
 	const PATH_COMMENT = 'comment';
@@ -73,6 +74,7 @@ class peer_reviewed_article extends defaultDataType {
 	const PATH_DISCUSSION_COMMENT_CONFIRM = 'comment/{id}/confirm?code={code}';
 
 	const FORM_CMD_EDIT = 'edit';
+	const FORM_CMD_DELETE = 'delete';
 	const FORM_CMD_DISCUSSION = 'discussion';
 	const FORM_CMD_COMMENT = 'comment';
 	const FORM_CMD_DISCUSSION_RESOLVED = 'discussion_resolved';
@@ -306,7 +308,10 @@ class peer_reviewed_article extends defaultDataType {
 	}
 
 	protected function processRequest() {
+		// By default a user can preform any action
+		$valid = isUser();
 		if (!isUser()) {
+			// Non users are limited to preform certain actions
 			$valid = null === $this->getArg(0);
 			if (self::PATH_DISCUSSION === $this->getArg(0) && self::FIELD_NAME_DISCUSSION_PUBLIC_CONTAINER === $this->getArg(1)) {
 				$valid = true;
@@ -317,11 +322,16 @@ class peer_reviewed_article extends defaultDataType {
 			if (self::PATH_COMMENT === $this->getArg(0) && self::PATH_CONFIRM === $this->getArg(2)) {
 				$valid = true;
 			}
-			if (!$valid) {
-				notify('error', __('art-login-preform-action'));
+		}
+		// Only admins can delete a page
+		if (self::PATH_DELETE === $this->getArg(0) && !isAdmin()) {
+			$valid = false;
+		}
+		if (!$valid) {
+			$msg = isUser() ? 'art-insufficient-rights-to-preform-action' : 'art-login-preform-action';
+			notify('error', __($msg));
 
-				return ['redirect', $this->constructFullPath($this->pagename)];
-			}
+			return ['redirect', $this->constructFullPath($this->pagename)];
 		}
 
 		switch ($this->getArg(0)) {
@@ -330,6 +340,8 @@ class peer_reviewed_article extends defaultDataType {
 				return $this->indexAction();
 			case self::PATH_EDIT:
 				return $this->editAction();
+			case self::PATH_DELETE:
+				return $this->deleteAction();
 			case self::PATH_APPROVE:
 				return $this->approveAction();
 			case self::PATH_DISCUSSION:
@@ -437,6 +449,10 @@ class peer_reviewed_article extends defaultDataType {
 					$path = str_replace(['{new_status}', '{current_status}'], [$newStatus, $status], self::PATH_STATUS_CHANGE);
 					$commands->append($this->makeActionButton(__($option), $path));
 				}
+			}
+			if (isAdmin()) {
+				$path = $this->language . '/' . $this->pagename . '/' . self::PATH_DELETE;
+				$commands->append(makeButton(__(self::PATH_DELETE), 'if(confirm(\'' . __('sure-to-delete') . '\'))' . makeAction($path, self::PATH_DELETE, '')));
 			}
 		}
 
@@ -674,6 +690,21 @@ class peer_reviewed_article extends defaultDataType {
 
 		$this->findBySelector('#main')->append($form->elem->children());
 		return null;
+	}
+
+	public function deleteAction() {
+		// check if form is posted and get form data
+		$formPosted = $this->isPosted(self::FORM_CMD_DELETE);
+		if (!$formPosted) {
+			return null;
+		}
+
+		global $hyphaUrl;
+
+		$this->deletePage();
+
+		notify('success', ucfirst(__('page-successfully-deleted')));
+		return ['redirect', $hyphaUrl];
 	}
 
 	public function discussionAction($type) {
