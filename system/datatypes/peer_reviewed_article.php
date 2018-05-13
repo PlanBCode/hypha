@@ -153,7 +153,7 @@ class peer_reviewed_article extends defaultDataType {
 			$subject = __('art-the-status-of-an-article-has-been-updated');
 			$message = '<p>' . $subject . '</p><a href="' . $linkToPage . '">' . $title . '</a> now has \'' . $statusArray['new'] . '\' as status';
 		}
-		$this->sendMailToUsers($subject, $message);
+		$this->sendMail(getUserEmailList(), $subject, $message);
 	}
 
 	protected function onStatusChangeToPublish(array $statusArray) {
@@ -182,7 +182,7 @@ class peer_reviewed_article extends defaultDataType {
 		$linkToPage = $this->constructFullPath($this->pagename);
 		$subject = __('art-a-blocking-comment-has-been-submitted');
 		$message = '<p>' . $subject . '</p><a href="' . $linkToPage . '">' . $title . '</a>';
-		$this->sendMailToUsers($subject, $message);
+		$this->sendMail(getUserEmailList(), $subject, $message);
 	}
 
 	protected function onDiscussionClosed(array $param) {
@@ -195,7 +195,7 @@ class peer_reviewed_article extends defaultDataType {
 		$linkToPage = $this->constructFullPath($this->pagename);
 		$subject = __('art-a-blocking-comment-has-been-resolved');
 		$message = '<p>' . $subject . '</p><a href="' . $linkToPage . '">' . $title . '</a>';
-		$this->sendMailToUsers($subject, $message);
+		$this->sendMail(getUserEmailList(), $subject, $message);
 	}
 
 	protected function onPublicComment(array $param) {
@@ -214,8 +214,7 @@ class peer_reviewed_article extends defaultDataType {
 		$subject = __('art-please-confirm');
 		$message = __('art-please-confirm-you-just-added-a-comment');
 		$message .= '<p><a href="'.$linkToConfirm.'">'.__('art-confirm').'</a></p>';
-		$style = 'body {margin-top:10px; margin-left: 10px; font-size:10pt; font-family: Sans; color:black; background-color:white;}';
-		sendMail($email, hypha_getTitle().': '.$subject, $message, hypha_getEmail(), hypha_getTitle(), $style);
+		$this->sendMail($email, $subject, $message);
 	}
 
 	protected function getTitle() {
@@ -1055,9 +1054,9 @@ EOF;
 		return $html;
 	}
 
-	private function sendMailToUsers($subject, $message) {
+	private function sendMail($receivers, $subject, $message) {
 		$style = 'body {margin-top:10px; margin-left: 10px; font-size:10pt; font-family: Sans; color:black; background-color:white;}';
-		sendMail(getUserEmailList(), hypha_getTitle().': '.$subject, $message, hypha_getEmail(), hypha_getTitle(), $style);
+		sendMail($receivers, hypha_getTitle() . ': '.$subject, $message, hypha_getEmail(), hypha_getTitle(), $style);
 	}
 
 	/**
