@@ -42,7 +42,7 @@
 			global $O_O;
 			$hyphaContentLanguage = $O_O->getContentLanguage();
 			$this->pageListNode = $node;
-			$this->privateFlag = in_array($node->getAttribute('private'), [true, '1', 'on']);
+			$this->privateFlag = in_array($node->getAttribute('private'), ['true', '1', 'on']);
 			$language = hypha_pageGetLanguage($node, $hyphaContentLanguage);
 			$this->language = $language->getAttribute('id');
 			$this->pagename = $language->getAttribute('name');
@@ -131,7 +131,7 @@
 			}
 			$_node = hypha_getPage($O_O->getContentLanguage(), $_name);
 
-			if ($_node && (!in_array($_node->getAttribute('private'), [true, '1', 'on']) || isUser())) {
+			if ($_node && (!in_array($_node->getAttribute('private'), ['true', '1', 'on']) || isUser())) {
 				$_type = $_node->getAttribute('type');
 				$hyphaPage = new $_type($_node, $args);
 

@@ -531,7 +531,7 @@
 				$page->appendChild($newLanguage);
 			}
 		}
-		$private = in_array($private, [true, '1', 'on']) ? 'on' : 'off';
+		$private = in_array($private, ['true', '1', 'on']) ? 'on' : 'off';
 		if ($private!=$page->getAttribute('private')) $page->setAttribute('private', $private);
 
 		return false;
