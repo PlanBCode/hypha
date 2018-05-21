@@ -1,4 +1,6 @@
 <?php
+    global $DEBUG;
+
 	include_once('various.php');
 	include_once('document.php');
 
@@ -451,7 +453,7 @@
 					var next = msg.nextSibling;
 					if (msg.nodeType === 1) {
 						if(!msg.hasAttribute('time')) msg.setAttribute('time', now);
-						else if (now - msg.getAttribute('time') > 5000) msg.parentNode.removeChild(msg);
+						else if (!debug && now - msg.getAttribute('time') > 10000) msg.parentNode.removeChild(msg);
 					}
 					msg = next;
 				}
