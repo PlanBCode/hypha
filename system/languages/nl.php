@@ -185,6 +185,7 @@
 		"unable-to-edit" => "kan niet worden bewerkt",
 		"missing-arguments" => "argumenten ontbreken",
 		"archive" => "archief",
+		"sure-to-delete" => "Weet je zeker dat je deze pagina wilt verwijderen",
 
 		// textpage
 		"datatype.name.textpage" => "webpagina",
