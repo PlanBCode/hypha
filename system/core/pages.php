@@ -36,6 +36,10 @@
 			if (file_exists($file)) {
 				unlink($file);
 			}
+
+			$hyphaUser = $this->getHyphaUser()->getAttribute('id');
+
+			writeToDigest($hyphaUser->getAttribute('fullname').__('deleted-page').$this->language.'/'.$this->pagename, 'page delete', $this->pageListNode->getAttribute('id'));
 		}
 
 		protected function replacePageListNode($node) {

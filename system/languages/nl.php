@@ -97,6 +97,7 @@
 		"changed-css" => " heeft de CSS layout van de website bewerkt",
 		"changed-html" => " heeft de HTML structuur van de website bewerkt",
 		"changed-page" => " heeft de volgende pagina bewerkt: ",
+		"deleted-page" => " heeft de volgende pagina verwijderd: ",
 		"translated-page" => " heeft de volgende pagina vertaald: ",
 		"reverted-page" => " heeft de volgende pagina teruggezet naar een oudere versie: ",
 		"granted-admin-rights-to" => " heeft adminrechten toegekend aan ",
