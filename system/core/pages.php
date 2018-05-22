@@ -26,7 +26,7 @@
 		}
 
 		protected function deletePage() {
-			global $hyphaXml;
+			global $hyphaXml, $hyphaUser;
 			$id = $this->pageListNode->getAttribute('id');
 			$hyphaXml->lockAndReload();
 			hypha_deletePage($id);
@@ -36,8 +36,6 @@
 			if (file_exists($file)) {
 				unlink($file);
 			}
-
-			$hyphaUser = $this->getHyphaUser()->getAttribute('id');
 
 			writeToDigest($hyphaUser->getAttribute('fullname').__('deleted-page').$this->language.'/'.$this->pagename, 'page delete', $this->pageListNode->getAttribute('id'));
 		}
