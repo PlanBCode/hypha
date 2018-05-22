@@ -125,11 +125,12 @@
 	function loadPage(RequestContext $O_O) {
 		global $isoLangList, $hyphaHtml, $hyphaPage, $hyphaUrl;
 
-		$args = $O_O->getArgs();
+		$request = $O_O->getRequest();
+		$args = $request->getArgs();
 
-		if (!$O_O->isSystemPage()) {
+		if (!$request->isSystemPage()) {
 			// fetch the requested page
-			$_name = $O_O->getPageName();
+			$_name = $request->getPageName();
 			if ($_name === null) {
 				$_name = hypha_getDefaultPage();
 			}
@@ -157,7 +158,7 @@
 		while (count($args) < 1)
 			array_push($args, null);
 
-		switch ($O_O->getSystemPage()) {
+		switch ($request->getSystemPage()) {
 			case HyphaRequest::HYPHA_SYSTEM_PAGE_FILES:
 				serveFile('data/files/' . $args[0], 'data/files');
 				exit;

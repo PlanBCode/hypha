@@ -57,46 +57,35 @@
 		}
 
 		/**
-		 * @return string
+		 * @return array
 		 */
-		protected function getDictionaryLanguage() {
-			$interfaceLanguage = $this->getInterfaceLanguage();
-
-			return file_exists('system/languages/' . $interfaceLanguage . '.php') ? $interfaceLanguage : 'en';
+		protected function getDictionaryLanguageOptions() {
+			return [
+				$this->getInterfaceLanguage(),
+				$this->getContentLanguage(),
+				$this->defaultLanguage,
+				'en',
+			];
 		}
 
 		/**
 		 * @return array
 		 */
 		public function getDictionary() {
-			return include('system/languages/' . $this->getDictionaryLanguage() . '.php');
+			foreach ($this->getDictionaryLanguageOptions() as $lang) {
+				$file = 'system/languages/' . $lang . '.php';
+				if (file_exists($file)) {
+					return include($file);
+				}
+			}
+
+			return [];
 		}
 
 		/**
-		 * @return bool
+		 * @return HyphaRequest
 		 */
-		public function isSystemPage() {
-			return $this->hyphaRequest->isSystemPage();
-		}
-
-		/**
-		 * @return string|null
-		 */
-		public function getSystemPage() {
-			return $this->hyphaRequest->getSystemPage();
-		}
-
-		/**
-		 * @return string|null
-		 */
-		public function getPageName() {
-			return $this->hyphaRequest->getPageName();
-		}
-
-		/**
-		 * @return array
-		 */
-		public function getArgs() {
-			return $this->hyphaRequest->getArgs();
+		public function getRequest() {
+			return $this->hyphaRequest;
 		}
 	}
