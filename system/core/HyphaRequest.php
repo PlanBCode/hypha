@@ -10,6 +10,9 @@
 		const HYPHA_SYSTEM_PAGE_CHOOSER = 'chooser';
 
 		/** @var string */
+		private $rootPath;
+
+		/** @var string */
 		private $requestQuery;
 
 		/** @var array */
@@ -31,11 +34,18 @@
 		private $args = [];
 
 		/**
-		 * @param $requestQuery
+		 * @param string $rootPath
 		 * @param array $isoLangList Associative array containing connecting iso639 language codes with their native name (and english translation)
 		 */
-		public function __construct($requestQuery, array $isoLangList) {
-			$this->requestQuery = $requestQuery;
+		public function __construct($rootPath, array $isoLangList) {
+			$this->rootPath = $rootPath;
+
+			$this->requestQuery = substr($_SERVER['REQUEST_URI'], strlen($this->rootPath));
+			// Strip off any query parameters
+			if (($paramPos = strpos($this->requestQuery, '?')) && $paramPos !== false){
+				$this->requestQuery = substr($this->requestQuery, 0, $paramPos);
+			}
+
 			$this->isoLangList = $isoLangList;
 			$this->processRequest();
 		}
@@ -75,6 +85,30 @@
 				HyphaRequest::HYPHA_SYSTEM_PAGE_UPLOAD,
 				HyphaRequest::HYPHA_SYSTEM_PAGE_CHOOSER,
 			];
+		}
+
+		public function getRootUrl() {
+			$scheme = $this->getScheme();
+			$https = 'https' === $scheme;
+			$host = $this->getHost();
+			$port = $this->getPort();
+
+			$hasAltPort = (!$https && $port !== 80) || ($https && $port !== 443);
+			$altPort = $hasAltPort ? ':' . $port : '';
+
+			return sprintf('%s://%s%s%s', $scheme, $host, $altPort, $this->rootPath);
+		}
+
+		public function getScheme() {
+			return $_SERVER['REQUEST_SCHEME'];
+		}
+
+		public function getHost() {
+			return $_SERVER['HTTP_HOST'];
+		}
+
+		public function getPort() {
+			return $_SERVER['SERVER_PORT'];
 		}
 
 		/**

@@ -10,12 +10,6 @@
 
 		A new <editor> element is introduced which can be used throughout the HTML document. The function loadEditor should be called just before the documente is sent to the client. It takes care of everything that needs to be done to hook this element to WYMeditor.
 	*/
-	$jquerySource = 'http://code.jquery.com/jquery-1.7.1.min.js';
-	$jqueryuiSource = 'https://code.jquery.com/ui/1.11.4/jquery-ui.min.js';
-	$wymeditorSources = [
-		$hyphaUrl.'system/wymeditor/jquery.wymeditor.min.js',
-		$hyphaUrl.'system/wymeditor/plugins/embed/jquery.wymeditor.embed.js',
-	];
 
 	/*
 		Function: loadEditor
@@ -27,11 +21,14 @@
 
 	registerPostProcessingFunction('loadEditor');
 	function loadEditor($html) {
-		global $jquerySource;
-		global $jqueryuiSource;
-		global $wymeditorSources;
 		global $hyphaUrl;
 		global $hyphaLanguage;
+		$jquerySource = 'http://code.jquery.com/jquery-1.7.1.min.js';
+		$jqueryuiSource = 'https://code.jquery.com/ui/1.11.4/jquery-ui.min.js';
+		$wymeditorSources = [
+			$hyphaUrl.'system/wymeditor/jquery.wymeditor.min.js',
+			$hyphaUrl.'system/wymeditor/plugins/embed/jquery.wymeditor.embed.js',
+		];
 
 		// only add the editor code when the document contains an <editor> element
 		if ($html->getElementsByTagName('editor')->length) {

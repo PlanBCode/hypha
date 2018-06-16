@@ -36,20 +36,7 @@
 	if (function_exists('apache_get_modules') && !in_array('mod_rewrite', apache_get_modules())) die ('Error: Apache should have mod_rewrite enabled');
 
 	/*
-		Group: Stage 2 - Get query and handle direct file requests
-		Here we extract our page query from the php $_SERVER data. Page requests should be formatted in a directory like structure, e.g. http://www.dom.ain/en/home/edit, the first level usually being a language id, the second level begin a page id, and the third level being an optional view.
-		Some requests don't need the whole script to run. Certain file requests (css, javascript) can be handled directly here.
-	*/
-
-	$_path = substr($_SERVER["PHP_SELF"], 0, strpos($_SERVER["PHP_SELF"], 'index.php'));
-	$hyphaUrl = 'http://'.$_SERVER["SERVER_NAME"].$_path;
-	$hyphaQuery = substr($_SERVER["REQUEST_URI"], strlen($_path));
-	// Strip off any query parameters
-	$parampos = strpos($hyphaQuery, '?');
-	if ($parampos !== false) $hyphaQuery = substr($hyphaQuery, 0, $parampos);
-
-	/*
-		Group: Stage 3 - Build hypha script
+		Group: Stage 2 - Build hypha script
 		Additional scripts and data are included.
 		- *core* Include core scripts
 		- *dataypes* Include modules for available datatypes: textpage, mailinglist, blog et cetera
@@ -67,6 +54,18 @@
 	$_handle = opendir("system/languages/");
 	while ($_file = readdir($_handle)) if (substr($_file, -4) == '.php') $uiLangList[] = basename($_file, '.php');
 	closedir($_handle);
+
+	/*
+		Group: Stage 3 - Get query and handle direct file requests
+		Here we extract our page query from the php $_SERVER data. Page requests should be formatted in a directory like structure, e.g. http://www.dom.ain/en/home/edit, the first level usually being a language id, the second level begin a page id, and the third level being an optional view.
+		Some requests don't need the whole script to run. Certain file requests (css, javascript) can be handled directly here.
+	*/
+
+	// Build request
+	$rootPath = dirname($_SERVER['SCRIPT_NAME']) . '/';
+	$hyphaRequest = new HyphaRequest($rootPath, $isoLangList);
+	$hyphaQuery = $hyphaRequest->getRequestQuery();
+	$hyphaUrl = $hyphaRequest->getRootUrl();
 
 	// Shortcut for direct file requests
 	if ($hyphaQuery == 'data/hypha.css') serveFile($hyphaQuery, false);
@@ -90,8 +89,8 @@
 		Check is a user is logged in and load user data. Add login/logout functionality according to session login status.
 	*/
 
-	// Build request
-	$O_O = new RequestContext(new HyphaRequest($hyphaQuery, $isoLangList), hypha_getDefaultLanguage());
+	// Build request context
+	$O_O = new RequestContext($hyphaRequest, hypha_getDefaultLanguage());
 
 	// Set user as global variable.
 	$hyphaUser = $O_O->getUser();
