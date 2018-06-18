@@ -293,16 +293,17 @@ class peer_reviewed_article extends defaultDataType {
 	}
 
 	public function beforeProcessRequest() {
+		$status = $this->getStatus();
 		$main = $this->findBySelector('#main');
-		$main->attr('class', $this->getStatus());
+		$main->attr('class', $status);
 
-		$status = '<span class="'.$this->getStatus().'">' .  __('art-status-' . $this->getStatus()) . '</span>';
+		$statusHtml = '<span class="'.$status.'">' .  __('art-status-' . $status) . '</span>';
 		if (self::STATUS_PUBLISHED !== $status) {
 			if (self::STATUS_REVIEW === $status) {
-				$status .= ', <span class="approves">' . $this->getApproveCount() . ' approve(s)</span>, <span class="blocks">' . $this->getBlockingDiscussionsCount() . ' unresolved block(s)</span>';
+				$statusHtml .= ', <span class="approves">' . $this->getApproveCount() . ' '.__('art-approve(s)') . '</span>, <span class="blocks">' . $this->getBlockingDiscussionsCount() . ' ' . __('art-unresolved-block(s)') . '</span>';
 			}
 			$titleElement = $this->findBySelector('#pagename');
-			$titleElement->after('<div class="review-info">' . $status . '</div>');
+			$titleElement->after('<div class="review-info">' . $statusHtml . '</div>');
 		}
 	}
 
