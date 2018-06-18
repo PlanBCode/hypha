@@ -941,9 +941,9 @@ class peer_reviewed_article extends defaultDataType {
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
 				<strong><label for="$authorFieldName"> $author </label></strong><br><input type="text" id="$authorFieldName" name="$authorFieldName" />
 			</div>
-			<!--div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
+			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
 				<strong><label for="$excerptFieldName"> $excerpt </label></strong><editor name="$excerptFieldName"></editor>
-			</div-->
+			</div>
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
 				<strong><label for="$textFieldName"> $text </label></strong><editor name="$textFieldName"></editor>
 			</div>
