@@ -526,6 +526,8 @@ class peer_reviewed_article extends defaultDataType {
 			$discussionsContainer->append($list);
 		}
 
+		$status = $this->getStatus();
+
 		// [open => [blocking, non-blocking], closed => [blocking, non-blocking]]
 		$reviewCommentContainersSorted = [0 => [0 => [], 1 => [],], 1 => [0 => [], 1 => [],],];
 
@@ -600,7 +602,7 @@ class peer_reviewed_article extends defaultDataType {
 			}
 
 			// display comment form if the discussion is still open
-			if ($hasComments && !$closed) {
+			if ($hasComments && !$closed && self::STATUS_PUBLISHED !== $status) {
 				$replyForm = $this->createDiscussionCommentForm($discussion);
 				$list->append($replyForm->elem->children());
 			}
@@ -616,8 +618,10 @@ class peer_reviewed_article extends defaultDataType {
 			}
 		}
 
-		$commentForm = $this->createDiscussionForm($type);
-		$discussionsContainer->append($commentForm->elem->children());
+		if (self::STATUS_PUBLISHED !== $status) {
+			$commentForm = $this->createDiscussionForm($type);
+			$discussionsContainer->append($commentForm->elem->children());
+		}
 	}
 
 	private function getApprovesContainer() {
