@@ -452,7 +452,7 @@ class peer_reviewed_article extends defaultDataType {
 			}
 			if (isAdmin()) {
 				$path = $this->language . '/' . $this->pagename . '/' . self::PATH_DELETE;
-				$commands->append(makeButton(__(self::PATH_DELETE), 'if(confirm(\'' . __('sure-to-delete') . '\'))' . makeAction($path, self::PATH_DELETE, '')));
+				$commands->append(makeButton(__(self::PATH_DELETE), 'if(confirm(\'' . __('sure-to-delete') . '\'))' . makeAction($path, self::FORM_CMD_DELETE, '')));
 			}
 		}
 
