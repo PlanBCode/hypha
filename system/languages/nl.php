@@ -326,7 +326,8 @@
 		"art-invalid-code" => "ongeldige code",
 
 		"art-start-review" => "start beoordeling",
-
+		"art-approve(s)" => "beoordeling(en)",
+		"art-unresolved-block(s)" => "onopgeloste breekpunt(en)",
 	);
 
 	return $LANG;

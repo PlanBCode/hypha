@@ -331,6 +331,8 @@
 		"art-invalid-code" => "invalid code",
 
 		"art-start-review" => "start review",
+		"art-approve(s)" => "approve(s)",
+		"art-unresolved-block(s)" => "unresolved block(s)",
 	);
 
 	return $LANG;

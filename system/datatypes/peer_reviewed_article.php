@@ -442,7 +442,7 @@ class peer_reviewed_article extends defaultDataType {
 			if (self::STATUS_REVIEW === $status) {
 				$userId = $this->getHyphaUser()->getAttribute('id');
 				if (!$this->hasUserApproved($userId)) {
-					$commands->append($this->makeActionButton(__(self::PATH_APPROVE), self::PATH_APPROVE));
+					$commands->append($this->makeActionButton(__('art-' . self::PATH_APPROVE), self::PATH_APPROVE));
 				}
 			} else {
 				foreach ($this->statusMtx[$status] as $newStatus => $option) {
