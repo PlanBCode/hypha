@@ -62,7 +62,8 @@
 	*/
 
 	// Build request
-	$rootPath = dirname($_SERVER['SCRIPT_NAME']) . '/';
+	$rootPath = dirname($_SERVER['SCRIPT_NAME']);
+	$rootPath .= substr($rootPath, -1) === '/' ? '' : '/';
 	$hyphaRequest = new HyphaRequest($rootPath, $isoLangList);
 	$hyphaQuery = $hyphaRequest->getRequestQuery();
 	$hyphaUrl = $hyphaRequest->getRootUrl();
