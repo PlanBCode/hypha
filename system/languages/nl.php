@@ -187,6 +187,7 @@
 		"missing-arguments" => "argumenten ontbreken",
 		"archive" => "archief",
 		"sure-to-delete" => "Weet je zeker dat je deze pagina wilt verwijderen",
+		"reviewtitle" => "Pagina's om te beoordelen",
 
 		// textpage
 		"datatype.name.textpage" => "webpagina",

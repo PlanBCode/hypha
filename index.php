@@ -29,7 +29,7 @@
 	session_start();
 	session_write_close();
 
-	$DEBUG = false;
+	$DEBUG = true;
 	ini_set('display_errors', $DEBUG ? true : false);
 
 	if (strnatcmp(phpversion(),'5.4') < 0) die('Error: you are running php version '.substr(phpversion(),0,strpos(phpversion(), '-')).'; Hypha works only with php version 5.4 and higher');
@@ -107,6 +107,13 @@
 	 * @deprecated Use O_O instead
 	 */
 	$hyphaContentLanguage = $O_O->getContentLanguage();
+
+		/*
+		*	load a list of articles that need a review
+		*/
+		$hyphaHtml->writeToElement('review', hypha_getReview($hyphaContentLanguage));
+		/*** einde toevoeging ************************************/
+
 
 	// Load page and execute the posted command. This
 	// is tried twice, since some commands need to run before

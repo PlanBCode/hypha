@@ -66,6 +66,10 @@ a.nopagelink {
   text-decoration: none;
   border-bottom: 1px dotted; }
 
+span.reviewtitle{
+  color: var(--color-secondary-1-1);
+  font-size: 0.5em;}
+
 #navContainer {
   padding: 0; }
   #navContainer nav {

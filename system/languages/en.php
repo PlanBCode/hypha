@@ -187,7 +187,7 @@
 		"missing-arguments" => "missing arguments",
 		"archive" => "archive",
 		"sure-to-delete" => "Are you sure you want to delete this page",
-
+		"reviewtitle" => "Pages to be reviewed",
 		// textpage
 		"datatype.name.textpage" => 'web page',
 

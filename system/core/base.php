@@ -287,6 +287,7 @@
 		return getInnerHtml($hyphaXml->getElementsByTagName('menu')->Item(0));
 	}
 
+
 	/*
 		Function: hypha_setMenu
 		sets hypha menu html
@@ -299,7 +300,19 @@
 		$hyphaXml->requireLock();
 		setInnerHtml($hyphaXml->getElementsByTagName('menu')->Item(0), $html);
 	}
+	/*
+	Function: hypha_getReview
+	returns hypha list of pages to be reviewed
 
+	Parameters
+	$language
+*/
+function hypha_getReview($language) {
+	global $hyphaXml;
+	$review = getInnerHtml($hyphaXml->getElementsByTagName('review')->Item(0));
+	$review .= hypha_reviewPages($language);
+	return $review;
+}
 	/*
 		Function: hypha_getUserlist
 		returns hypha userlist DOMElement
@@ -706,3 +719,33 @@
 	function hypha_indexFiles() {
 		return 'file index is not yet implemented';
 	}
+
+			/*
+			Function: hypha_reviewPages
+			returns alphabetical overview of all pages that need te be reviewed
+			Parameters:
+			$language
+		*/
+		function hypha_reviewPages($language) {
+			// get list of available pages that need to be reviewed and sort alphabetically
+
+			if (!isUser()) return '';//'log in to get list of review pages';
+			$lines = 0;
+			foreach(hypha_getPageList() as $page) {
+				if ($page->getAttribute('type')=='peer_reviewed_article') {
+					$lang = hypha_pageGetLanguage($page, $language);
+					if ($lang) {
+					 $pageList[] = $language.'/'.$lang->getAttribute('name');
+					 $lines +=1;
+					}
+				}
+			}
+
+			if ($pageList) array_multisort(array_map('strtolower', $pageList), $pageList);
+			$html = '<span class="reviewtitle">'.$lines.' '.__('reviewtitle').'</span><br>';
+			foreach($pageList as $pagename) {
+				$spagename = preg_replace('(../)','',$pagename);
+				$html.='<a id="'.$spagename.'" href="'.$pagename.'" name="'.$spagename.'">'.$spagename.'</a>';
+			}
+			return $html;
+		} //end review pages
