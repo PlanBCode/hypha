@@ -2,25 +2,25 @@
 @import url("css/picnic.css");
 @import url("css/fontello.css");
 @import url("css/festival.css");
-/* CSS - Cascading Style Sheet */
-/* Palette color codes */
-/* Palette URL: http://paletton.com/#uid=33h0u0kllllaFw0g0qFqFg0w0aF */
-/* Feel free to copy&paste color codes to your application */
+
+
+
+
 :root {
   --color-primary-0: #226765;
-  /* Main Primary color */
+
   --color-primary-1: #679B99;
   --color-primary-2: #41817F;
   --color-primary-3: #0D4D4B;
   --color-primary-4: #003432;
   --color-secondary-1-0: #AA8439;
-  /* Main Secondary color (1) */
+
   --color-secondary-1-1: #FFE2AA;
   --color-secondary-1-2: #D4B06A;
   --color-secondary-1-3: #805B15;
   --color-secondary-1-4: #553800;
   --color-secondary-2-0: #A8383B;
-  /* Main Secondary color (2) */
+
   --color-secondary-2-1: #FDA8AB;
   --color-secondary-2-2: #D3696C;
   --color-secondary-2-3: #7E1518;
@@ -36,7 +36,7 @@
   --menubackground: var(--color-secondary-1-2);
   --formheaderback: var(--color-primary-0); }
 
-/* Variables end */
+
 body {
   font-family: var(--textfont);
   color: var(--textcolor);
@@ -65,11 +65,6 @@ a.otherlanguagelink {
 a.nopagelink {
   text-decoration: none;
   border-bottom: 1px dotted; }
-
-span.reviewtitle {
-  font-size: 0.75em;
-  color: var(--color-primary-3);
-}
 
 .navContainer {
   padding: 0; }
@@ -100,6 +95,53 @@ span.reviewtitle {
         margin-right: 5px; }
       .navContainer nav #hyphaCommands .menu-item {
         padding-right: 10px; }
+.topnav {
+    overflow: hidden;
+    background-color: #333;
+}
+.topnav a {
+  float: left;
+  display: block;
+  color: #f2f2f2;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+  font-size: 17px;
+}
+.topnav a:hover {
+  background-color: #4caf50;
+  color: black;
+}
+
+.icon {
+  display: block;
+  color: white;
+  background-color:red;
+}
+@media screen and (max-with: 600px;) {
+  .topnav a:not(:first-child) {display: none;}
+  .topnav a.icon {
+    float:right;
+    display:block;
+  }
+}
+.icon:hover {
+	background-color: #ddeedd;
+	}
+.icon
+@media screen and (max-width: 600px) {
+  .topnav.responsive {position:relative;}
+  .topnav.responsive.icon {
+    position:absolute;
+    right: 0;
+    top: 0;
+  }
+  .topnav .responsive a {
+    float: none;
+    display: block;
+    text-align:  left;
+  }
+}
 
 .headerContainer {
   background-color: var(--headercolor); }
@@ -180,7 +222,7 @@ span.reviewtitle {
 
 #footerContainer {
   padding-bottom: 2em;
-  background: #eee; }
+  background: #eaa; }
 
 #versionList {
   clear: both;
@@ -408,3 +450,8 @@ input {
       padding-left: 0; }
     .review-comment-wrapper li p {
       margin: 0; }
+    .review-comment-wrapper.collapsed.closed {
+	 color: grey;
+     background: #daffb3;
+		border-bottom: 4px solid var(--bordercolor);}
+

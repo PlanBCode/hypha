@@ -187,7 +187,7 @@
 		"missing-arguments" => "missing arguments",
 		"archive" => "archive",
 		"sure-to-delete" => "Are you sure you want to delete this page",
-		"reviewtitle" => "Pages to be reviewed",
+
 		// textpage
 		"datatype.name.textpage" => 'web page',
 
@@ -301,9 +301,14 @@
 		"art-review-comments" => "review comments",
 		"art-no-comments-yet" => "no comments yet",
 		"art-add-review-comment" => "add review comment",
+		"art-start-review-comment" => "start new discussion",
 		"art-add-comment" => "add comment",
 		"art-comment" => "comment",
 		"art-comments" => "comments",
+		"art-title" => "title",
+		"art-continue-discussion" => "Contribute",
+        "art-start-discussion" => "Start new discussion",
+
 
 		// peer_reviewed_article - edit
 		"art-cancel" => "cancel",
@@ -331,8 +336,7 @@
 		"art-invalid-code" => "invalid code",
 
 		"art-start-review" => "start review",
-		"art-approve(s)" => "approve(s)",
-		"art-unresolved-block(s)" => "unresolved block(s)",
+		"art-is-closed" => "discussion closed",
 	);
 
 	return $LANG;

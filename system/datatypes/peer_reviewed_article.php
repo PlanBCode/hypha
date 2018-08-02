@@ -6,6 +6,13 @@ require_once __DIR__ . '/defaultDataType.php';
  * Module: peer_reviewed_article
  *
  * Article features.
+ *
+ * bz aangepast om voor de gebruiker duidelijker te maken hoe de discussies werken.
+ * door discussies een nmmer te geven en de comment invoer velden duidelijker te labelen
+ * discussies zijn onderscheiden door een onderwerp / subject
+ * de knoppen geven de actie aan (vervolg discussie / nieuwe discussie
+ * de set as closed is nu vertaald (taal afhankelijk gemaakt)
+ * misschien de styling gebruiken om gesloten discussies te onderscheiden.
  */
 
 use DOMWrap\NodeList;
@@ -30,6 +37,7 @@ class peer_reviewed_article extends defaultDataType {
 	const FIELD_NAME_DISCUSSION_BLOCKING = 'blocking';
 	const FIELD_NAME_DISCUSSION_BLOCK_RESOLVED = 'block_resolved';
 	const FIELD_NAME_DISCUSSION_CLOSED = 'closed';
+	const FIELD_NAME_DISCUSSION_SUBJECT = 'subject';
 	const FIELD_NAME_DISCUSSION_COMMENT = 'discussion_comment';
 	const FIELD_NAME_DISCUSSION_COMMENT_PENDING = 'pending';
 	const FIELD_NAME_DISCUSSION_COMMENT_CONFIRM_CODE = 'confirm_code';
@@ -75,8 +83,8 @@ class peer_reviewed_article extends defaultDataType {
 
 	const FORM_CMD_EDIT = 'edit';
 	const FORM_CMD_DELETE = 'delete';
-	const FORM_CMD_DISCUSSION = 'discussion';
-	const FORM_CMD_COMMENT = 'comment';
+	const FORM_CMD_DISCUSSION = 'start discussion';
+	const FORM_CMD_COMMENT = 'add comment';
 	const FORM_CMD_DISCUSSION_RESOLVED = 'discussion_resolved';
 	const FORM_CMD_DISCUSSION_CLOSED = 'discussion_closed';
 
@@ -293,17 +301,16 @@ class peer_reviewed_article extends defaultDataType {
 	}
 
 	public function beforeProcessRequest() {
-		$status = $this->getStatus();
 		$main = $this->findBySelector('#main');
-		$main->attr('class', $status);
+		$main->attr('class', $this->getStatus());
 
-		$statusHtml = '<span class="'.$status.'">' .  __('art-status-' . $status) . '</span>';
+		$status = '<span class="'.$this->getStatus().'">' .  __('art-status-' . $this->getStatus()) . '</span>';
 		if (self::STATUS_PUBLISHED !== $status) {
 			if (self::STATUS_REVIEW === $status) {
-				$statusHtml .= ', <span class="approves">' . $this->getApproveCount() . ' '.__('art-approve(s)') . '</span>, <span class="blocks">' . $this->getBlockingDiscussionsCount() . ' ' . __('art-unresolved-block(s)') . '</span>';
+				$status .= ', <span class="approves">' . $this->getApproveCount() . ' approve(s)</span>, <span class="blocks">' . $this->getBlockingDiscussionsCount() . ' unresolved block(s)</span>';
 			}
 			$titleElement = $this->findBySelector('#pagename');
-			$titleElement->after('<div class="review-info">' . $statusHtml . '</div>');
+			$titleElement->after('<div class="review-info">' . $status . '</div>');
 		}
 	}
 
@@ -442,7 +449,7 @@ class peer_reviewed_article extends defaultDataType {
 			if (self::STATUS_REVIEW === $status) {
 				$userId = $this->getHyphaUser()->getAttribute('id');
 				if (!$this->hasUserApproved($userId)) {
-					$commands->append($this->makeActionButton(__('art-' . self::PATH_APPROVE), self::PATH_APPROVE));
+					$commands->append($this->makeActionButton(__(self::PATH_APPROVE), self::PATH_APPROVE));
 				}
 			} else {
 				foreach ($this->statusMtx[$status] as $newStatus => $option) {
@@ -452,7 +459,7 @@ class peer_reviewed_article extends defaultDataType {
 			}
 			if (isAdmin()) {
 				$path = $this->language . '/' . $this->pagename . '/' . self::PATH_DELETE;
-				$commands->append(makeButton(__(self::PATH_DELETE), 'if(confirm(\'' . __('sure-to-delete') . '\'))' . makeAction($path, self::FORM_CMD_DELETE, '')));
+				$commands->append(makeButton(__(self::PATH_DELETE), 'if(confirm(\'' . __('sure-to-delete') . '\'))' . makeAction($path, self::PATH_DELETE, '')));
 			}
 		}
 
@@ -526,12 +533,12 @@ class peer_reviewed_article extends defaultDataType {
 			$discussionsContainer->append($list);
 		}
 
-		$status = $this->getStatus();
-
 		// [open => [blocking, non-blocking], closed => [blocking, non-blocking]]
 		$reviewCommentContainersSorted = [0 => [0 => [], 1 => [],], 1 => [0 => [], 1 => [],],];
-
+		$_bzdiscussionnumber = 0; // to be replaced by page title.
 		foreach ($discussions as $discussion) {
+			$_bzdiscussionnumber += 1;
+			$_bzdiscussionsubject = (string)$discussion-> getAttr(self::FIELD_NAME_DISCUSSION_SUBJECT);
 			$blocking = (bool)$discussion->getAttr(self::FIELD_NAME_DISCUSSION_BLOCKING);
 			$closed = (bool)$discussion->getAttr(self::FIELD_NAME_DISCUSSION_CLOSED);
 			$resolved = (bool)$discussion->getAttr(self::FIELD_NAME_DISCUSSION_BLOCK_RESOLVED);
@@ -541,6 +548,12 @@ class peer_reviewed_article extends defaultDataType {
 			$list = $this->getXml()->createElement('ul');
 			/** @var HyphaDomElement $reviewCommentContainer */
 			$reviewCommentContainer = $this->getXml()->createElement('div');
+
+			// *** bz aangepast display discussionnumber
+				$_bzdiscussionnumberlabel = __('art-title').': '.$_bzdiscussionsubject.'(nr '.$_bzdiscussionnumber.')';
+				$reviewCommentContainer = $this->getXml()->createElement('div',$_bzdiscussionnumberlabel);
+			// *** bz aangepast display discussionnumber
+
 			$class = 'review-comment-wrapper collapsed';
 			foreach (['blocking' => $blocking, 'resolved' => $resolved, 'closed' => $closed] as $name => $isTrue) {
 				if ($isTrue) {
@@ -548,6 +561,9 @@ class peer_reviewed_article extends defaultDataType {
 				}
 			}
 			$reviewCommentContainer->attr('class', $class);
+			if ($closed) {
+				$reviewCommentContainer->append('<span style="float:right;">'.__('art-is-closed').' </span>');
+			}
 			$reviewCommentContainer->append($list);
 
 			$hasComments = false;
@@ -590,10 +606,10 @@ class peer_reviewed_article extends defaultDataType {
 				$msgId = null;
 				if ($blocking) {
 					if (!$resolved && ($discussion->getAttr(self::FIELD_NAME_USER) === $this->getHyphaUser()->getAttribute('id') || isAdmin())) {
-						$msgId = 'set as resolved';
+						$msgId = 'art-set-as-resolved';
 					}
 				} elseif (!$closed) {
-					$msgId = 'set as closed';
+					$msgId = 'art-set-as-closed';
 				}
 				if (null !== $msgId) {
 					$path = str_replace('{id}', $discussion->getId(), self::PATH_DISCUSSION_CLOSED);
@@ -602,7 +618,7 @@ class peer_reviewed_article extends defaultDataType {
 			}
 
 			// display comment form if the discussion is still open
-			if ($hasComments && !$closed && self::STATUS_PUBLISHED !== $status) {
+			if ($hasComments && !$closed) {
 				$replyForm = $this->createDiscussionCommentForm($discussion);
 				$list->append($replyForm->elem->children());
 			}
@@ -618,10 +634,8 @@ class peer_reviewed_article extends defaultDataType {
 			}
 		}
 
-		if (self::STATUS_PUBLISHED !== $status) {
-			$commentForm = $this->createDiscussionForm($type);
-			$discussionsContainer->append($commentForm->elem->children());
-		}
+		$commentForm = $this->createDiscussionForm($type);
+		$discussionsContainer->append($commentForm->elem->children());
 	}
 
 	private function getApprovesContainer() {
@@ -727,6 +741,7 @@ class peer_reviewed_article extends defaultDataType {
 			$form->validateEmailField(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL);
 		}
 		$form->validateRequiredField(self::FIELD_NAME_DISCUSSION_COMMENT . '/new_' . $type);
+		$form->validateRequiredField(self::FIELD_NAME_DISCUSSION_SUBJECT);
 
 		// process form if it was posted
 		if ($formPosted && empty($form->errors)) {
@@ -742,7 +757,13 @@ class peer_reviewed_article extends defaultDataType {
 				$discussion->setAttr(self::FIELD_NAME_DISCUSSION_BLOCK_RESOLVED, false);
 			}
 			$discussion->setAttr(self::FIELD_NAME_DISCUSSION_CLOSED, false);
+			$subject = $form->dataFor(self::FIELD_NAME_DISCUSSION_SUBJECT);
+///***
+			$discussion->setAttr(self::FIELD_NAME_DISCUSSION_SUBJECT,$subject);
+///***
+
 			$commentText = $form->dataFor(self::FIELD_NAME_DISCUSSION_COMMENT . '/new_' . $type);
+
 			$comment = $this->createDiscussionComment($discussion, $commentText, $form);
 			$this->saveAndUnlock();
 			$this->resetDocPagesMtx();
@@ -946,9 +967,9 @@ class peer_reviewed_article extends defaultDataType {
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
 				<strong><label for="$authorFieldName"> $author </label></strong><br><input type="text" id="$authorFieldName" name="$authorFieldName" />
 			</div>
-			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
+			<!--div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
 				<strong><label for="$excerptFieldName"> $excerpt </label></strong><editor name="$excerptFieldName"></editor>
-			</div>
+			</div-->
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
 				<strong><label for="$textFieldName"> $text </label></strong><editor name="$textFieldName"></editor>
 			</div>
@@ -1015,12 +1036,29 @@ EOF;
 		$comment = __('art-comment');
 		$new = $discussion === null;
 		$commentFieldName = self::FIELD_NAME_DISCUSSION_COMMENT . '/' . ($new ? 'new_' . $type : $discussion->getId());
+		if (strpos($commentFieldName, 'new_review') > 0)  {
+			$_bzDiscussieLabel = __('art-start-discussion');
+			$_bzDiscussieSamenvatting = __('art-title');
 		$html = <<<EOF
 			<div class="new-comment $type">
 			<div>
-				<strong><label for="$commentFieldName"> $comment </label></strong><textarea name="$commentFieldName" id="$commentFieldName" cols="36" rows="4"></textarea>
+				<strong><label for="$commentFieldName">$_bzDiscussieLabel</label></strong>
+				  $_bzDiscussieSamenvatting<br><input type="text" name="subject"><br>
+             $comment<br>
+				<textarea name="$commentFieldName" id="$commentFieldName" cols="36" rows="4"></textarea>
 			</div>
 EOF;
+		}
+		else
+		{
+			$_bzDiscussieLabel = __('art-continue-discussion');
+		$html = <<<EOF
+			<div class="new-comment $type">
+			<div>
+				<strong><label for="$commentFieldName">$_bzDiscussieLabel</label></strong><textarea name="$commentFieldName" id="$commentFieldName" cols="36" rows="4"></textarea>
+			</div>
+EOF;
+		}
 		if ($new && self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER === $type && !in_array($this->getStatus(), [self::STATUS_APPROVED, self::STATUS_PUBLISHED])) {
 			$blocking = __('art-blocking');
 			$commentBlockingFieldName = self::FIELD_NAME_DISCUSSION_BLOCKING;
@@ -1051,7 +1089,11 @@ EOF;
 		} else {
 			$path = str_replace('{id}', $discussion->getId(), self::PATH_DISCUSSION_COMMENT);
 		}
-		$label = 'review' === $type ? __('art-add-review-comment') : __('art-add-comment');
+		if ($new) {
+			$label = 'review' === $type ? __('art-start-review-comment') : __('art-add-comment');
+		} else {
+			$label = 'review' === $type ? __('art-add-review-comment') : __('art-add-comment');
+		}
 		$command = $new ? self::FORM_CMD_DISCUSSION : self::FORM_CMD_COMMENT;
 		$html .= $this->makeActionButton($label, $path, $command);
 		$html .= '</div>';

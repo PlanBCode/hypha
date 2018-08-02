@@ -187,7 +187,6 @@
 		"missing-arguments" => "argumenten ontbreken",
 		"archive" => "archief",
 		"sure-to-delete" => "Weet je zeker dat je deze pagina wilt verwijderen",
-		"reviewtitle" => "Pagina's om te beoordelen",
 
 		// textpage
 		"datatype.name.textpage" => "webpagina",
@@ -297,10 +296,14 @@
 		"art-review-comments" => "beoordelingsopmerkingen",
 		"art-no-comments-yet" => "nog geen opmerkingen",
 		"art-add-review-comment" => "voeg beoordelingsopmerking toe",
+		"art-start-review-comment" => "start nieuwe beoordeling",
 		"art-add-comment" => "voeg opmerking toe",
 		"art-comment" => "opmerking",
 		"art-comments" => "opmerkingen",
-
+		"art-title" => "titel",
+		"art-continue-discussion" => "vervolg beoordeling",
+        "art-start-discussion" => "Start nieuwe beoordeling",
+        
 		// peer_reviewed_article - edit
 		"art-cancel" => "afbreken",
 		"art-save" => "opslaan",
@@ -327,8 +330,8 @@
 		"art-invalid-code" => "ongeldige code",
 
 		"art-start-review" => "start beoordeling",
-		"art-approve(s)" => "beoordeling(en)",
-		"art-unresolved-block(s)" => "onopgeloste breekpunt(en)",
+		"art-is-closed" => "discussie is gesloten",
+
 	);
 
 	return $LANG;
