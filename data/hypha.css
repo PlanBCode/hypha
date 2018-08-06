@@ -455,3 +455,8 @@ input {
      background: #daffb3;
 		border-bottom: 4px solid var(--bordercolor);}
 
+div.comment_subject {
+      font-style: italic;
+      font-size: 1.2em;
+      font-weight: bolder;
+    }

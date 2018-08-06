@@ -550,8 +550,9 @@ class peer_reviewed_article extends defaultDataType {
 			$reviewCommentContainer = $this->getXml()->createElement('div');
 
 			// *** bz aangepast display discussionnumber
-				$_bzdiscussionnumberlabel = __('art-title').': '.$_bzdiscussionsubject.'(nr '.$_bzdiscussionnumber.')';
-				$reviewCommentContainer = $this->getXml()->createElement('div',$_bzdiscussionnumberlabel);
+			$_bzdiscussionnumberlabel = __('art-title').': '.$_bzdiscussionsubject.'(nr '.$_bzdiscussionnumber.')';
+			$reviewTitle = $this->getXml()->createElement('div',$_bzdiscussionnumberlabel);
+			$reviewTitle->attr('class','comment_subject');
 			// *** bz aangepast display discussionnumber
 
 			$class = 'review-comment-wrapper collapsed';
@@ -561,6 +562,7 @@ class peer_reviewed_article extends defaultDataType {
 				}
 			}
 			$reviewCommentContainer->attr('class', $class);
+			$reviewCommentContainer->append($reviewTitle);
 			if ($closed) {
 				$reviewCommentContainer->append('<span style="float:right;">'.__('art-is-closed').' </span>');
 			}
