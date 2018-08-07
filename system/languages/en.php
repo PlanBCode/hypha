@@ -7,6 +7,8 @@
 		"submit" => "submit",
 		"save" => "save",
 		"edit" => "edit",
+		"approve" => "approve",
+		"delete" => "delete",
 		"translate" => "translate",
 		"revert" => "revert",
 		"login" => "login",
@@ -277,6 +279,7 @@
 		"art-insufficient-rights-to-set-as-closed" => "you have insufficient rights to close",
 		"art-unsupported-status-change" => "this status change is not supported",
 		"art-no-approves-yet" => "there are no approves yet",
+		"art-can-you-approve" => "Please approve this article for publication",
 		"art-successfully-updated" => "successfully updated",
 		"art-status-changed-in-between" => "the status has been changed in between",
 

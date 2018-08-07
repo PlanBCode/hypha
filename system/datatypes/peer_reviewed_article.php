@@ -443,6 +443,7 @@ class peer_reviewed_article extends defaultDataType {
 
 		if (isUser()) {
 			$commands = $this->findBySelector('#pageCommands');
+			$commandsAtEnd = $this->findBySelector('#pageEndCommands');
 			$commands->append($this->makeActionButton(__(self::PATH_EDIT), self::PATH_EDIT));
 
 			// the status change from review to approved is done automatically
@@ -450,6 +451,8 @@ class peer_reviewed_article extends defaultDataType {
 				$userId = $this->getHyphaUser()->getAttribute('id');
 				if (!$this->hasUserApproved($userId)) {
 					$commands->append($this->makeActionButton(__(self::PATH_APPROVE), self::PATH_APPROVE));
+									$commandsAtEnd->append("<hr><h5>".__('art-can-you-approve')."</h5>");
+									$commandsAtEnd->append($this->makeActionButton(__(self::PATH_APPROVE), self::PATH_APPROVE));
 				}
 			} else {
 				foreach ($this->statusMtx[$status] as $newStatus => $option) {
@@ -991,6 +994,9 @@ EOF;
 		$commands = $this->findBySelector('#pageCommands');
 		$commands->append($this->makeActionButton(__('art-cancel')));
 		$commands->append($this->makeActionButton(__('art-save'), self::PATH_EDIT, self::FORM_CMD_EDIT));
+		$commandsAtEnd = $this->findBySelector('#pageEndCommands');
+		$commandsAtEnd->append($this->makeActionButton(__('art-cancel')));
+		$commandsAtEnd->append($this->makeActionButton(__('art-save'), self::PATH_EDIT, self::FORM_CMD_EDIT));
 
 		return $this->createForm($elem, $data);
 	}

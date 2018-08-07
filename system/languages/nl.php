@@ -7,6 +7,8 @@
 		"submit" => "versturen",
 		"save" => "opslaan",
 		"edit" => "bewerken",
+		"approve" => "goed keuren",
+		"delete" => "voorgoed verwijderen",
 		"translate" => "vertalen",
 		"revert" => "terugdraaien",
 		"login" => "inloggen",
@@ -272,6 +274,7 @@
 		"art-insufficient-rights-to-set-as-closed" => "je hebt niet genoeg rechten om dit te sluiten",
 		"art-unsupported-status-change" => "deze status verandering wordt niet ondersteund",
 		"art-no-approves-yet" => "er zijn nog geen goedkeuringen ontvangen",
+		"art-can-you-approve" => "Verdient dit artikel je goedkeuring voor publicatie",
 		"art-successfully-updated" => "succesvol bijgewerkt",
 		"art-status-changed-in-between" => "de status is tussentijds aangepast",
 
@@ -303,7 +306,7 @@
 		"art-title" => "titel",
 		"art-continue-discussion" => "vervolg beoordeling",
         "art-start-discussion" => "Start nieuwe beoordeling",
-        
+
 		// peer_reviewed_article - edit
 		"art-cancel" => "afbreken",
 		"art-save" => "opslaan",
