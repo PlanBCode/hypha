@@ -173,7 +173,7 @@
 				}
 
 				if ($attending) {
-					foreach(split(',', $attending) as $day) {
+					foreach(explode(',', $attending) as $day) {
 						$this->array_set_if_unset($daystats, $day, ['count' => 0]);
 						$daystats[$day]['count'] += 1;
 					}
