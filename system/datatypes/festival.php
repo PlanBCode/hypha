@@ -666,10 +666,13 @@ EOF;
 		 * lineup.
 		 */
 		function buildContribution($contribution) {
+			global $hyphaUrl, $hyphaLanguage;
 			$html = '<div class="infoact">';
 			// artist and title
 			$id = $contribution->getAttribute('xml:id');
 			$url = $hyphaUrl . $hyphaLanguage . '/' . $this->pagename . '/lineup#' . $id;
+			$editurl = $hyphaLanguage .'/'.$this->pagename.'/contribute/'.$contribution->getAttribute('xml:id');
+
 			$title = '';
 			if ($contribution->getAttribute('category'))
 				$title .= $contribution->getAttribute('category') . ': ';
@@ -681,6 +684,8 @@ EOF;
 				$title .= $contribution->getAttribute('title');
 
 			$html.= '<a id="'.$id.'" href="'.$url.'" style="font-size:15pt; font-weight:bold; clear:left;">'.$title.'</a>';
+			if (isUser())
+				$html.= ' (<a class="edit" href="'.$editurl.'">'.__('festival-edit-contribution').'</a>)';
 			$html.= '<p/>';
 			// image and description
 			$image_filename = $contribution->getAttribute('image');
