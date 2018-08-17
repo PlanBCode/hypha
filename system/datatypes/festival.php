@@ -645,6 +645,7 @@ EOF;
 		 * lineup.
 		 */
 		function buildContribution($contribution) {
+			global $hyphaUrl, $hyphaLanguage;
 			$html = '<div class="infoact">';
 			// artist and title
 			$id = $contribution->getAttribute('xml:id');
