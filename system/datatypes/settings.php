@@ -455,7 +455,7 @@
 							echo makeButton(__('edit'), makeAction('settings/user/'.$user->getAttribute('username'), '', ''));
 
 						if ($user->getAttribute('rights')=='none') echo makeButton(__('restore'), makeAction('settings', 'settingsRestore', $user->getAttribute('id')));
-						else echo makeButton(__('remove'), makeAction('settings', 'settingsRemove', $user->getAttribute('id')));
+						else echo makeButton(__('remove'), makeCommitAction('settings', 'settingsRemove', $user->getAttribute('id'),__('remove')." ".$user->getAttribute('fullname').'\r\n'.__('are-you-sure')));
 
 						if ($user->getAttribute('rights')=='invitee') echo makeButton(__('remind'), makeAction('settings', 'settingsRemind', $user->getAttribute('id')));
 						elseif ($user->getAttribute('rights') !== 'none') {

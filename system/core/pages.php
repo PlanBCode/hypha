@@ -91,11 +91,18 @@
 		obj.value = val;
 		obj.setSelectionRange(pos, pos);
 	}
+
 	function newPage() {
-		html = '<table class="section"><tr><th colspan="2"><?=__('create-new-page')?></td><tr>';
+		html = '<table class="section"><tr><th colspan="2"><?=__('create-new-page')?>';
+		html+= createInfo('infocnp','<?=__('create-new-page')?>','en');
+		html+= '</td></tr>';
 		// TODO [LRM]: find better way to set default new page type.
-		html+= '<tr><th><?=__('type')?></th><td><select id="newPageType" name="newPageType">' + '<?php foreach($types as $type => $datatypeName) echo '<option value="'.$type.'"'.($type=='peer_reviewed_article' ? 'selected="selected"' : '').'>'.$datatypeName.'</option>'; ?>' + '</select></td></tr>';
-		html+= '<tr><th><?=__('name')?></th><td><input type="text" id="newPagename" value="<?=$pagename?>" onblur="validatePagename(this);" onkeyup="validatePagename(this); document.getElementById(\'newPageSubmit\').disabled = this.value ? false : true;"/></td></tr>';
+		html+= '<tr><th onmouseover="showinfo(\'infopagetype\',\'help voor pagina type\',\'nl\')" onmouseout="hideinfo(\'infopagetype\')"><?=__('page-type')?></th><td><select id="newPageType" name="newPageType">' + '<?php foreach($types as $type => $datatypeName)  echo '<option value="'.$type.'"'.($type=='peer_reviewed_article' ? 'selected="selected"' : '').'>'.$datatypeName.'</option>'; ?>' + '</select></td></tr>';
+        html+= '</tr>';
+		html+= '<tr><td colspan="2""><div id = "infopagetype" style="visibility: hidden;"> info tekst</div></td></tr>';
+        html+= '<tr><th class="tooltip"><?=__('page-name')?>';
+		html+= '<span class="tooltiptext">Geef de pagina een naam die gebruikt kan woorden als referentie</span>';
+		html+= '</th><td><input type="text" id="newPagename" value="<?=$pagename?>" onblur="validatePagename(this);" onkeyup="validatePagename(this); document.getElementById(\'newPageSubmit\').disabled = this.value ? false : true;"/></td></tr>';
 		html+= '<tr><td></td><td><input type="checkbox" id="newPagePrivate" name="newPagePrivate"/> <?=__('private-page')?></td></tr>';
 		html+= '<tr><td></td><td><input type="button" class="button" value="<?=__('cancel')?>" onclick="document.getElementById(\'popup\').style.visibility=\'hidden\';" />';
 		html+= '<input type="submit" id="newPageSubmit" class="button editButton" value="<?=__('create')?>" <?= $pagename ? '' : 'disabled="true"' ?> onclick="hypha(\'<?=$hyphaLanguage?>/\' + document.getElementById(\'newPagename\').value + \'/edit\', \'newPage\', document.getElementById(\'newPagename\').value);" /></td></tr></table>';
@@ -105,6 +112,19 @@
 		document.getElementById('popup').style.visibility = 'visible';
 		document.getElementById('newPagename').focus();
 	}
+
+	function createInfo(elementId,buttonName,language) {
+			_html = "";
+			_html+= '<div class="hyphaInfoButton" onclick="showinfod(\'' + elementId + '\',\''+ buttonName + '\',\''+ language + '\')">i</div>';
+			_html+= '<div id ="'+elementId+'" class="hypha_popup_bkgr" style="display: none;">';
+			_html+= '<span class="helper"></span>';
+			_html+= '<div>';
+			_html+= '<div onclick="hideinfod(\''+elementId+'\')" class="hyphaCloseButton">X</div>';
+			_html+= '<p>uitleg voor <br \>' + buttonName + '<br \> ín de taal :' + language + '</p>';
+			_html+= '</div>';
+			_html+= '</div>';
+			return _html;
+		}
 </script>
 <?php
 		$html->writeScript(ob_get_clean());
@@ -122,11 +142,19 @@
 	*/
 	function loadPage(RequestContext $O_O) {
 		global $isoLangList, $hyphaHtml, $hyphaPage, $hyphaUrl;
-
+		//$hyphaHtml->writeToElement('status',"loadpage:");
 		$request = $O_O->getRequest();
+		//$hyphaHtml->writeToElement('status',$request->getPageName());
 		$args = $request->getArgs();
+			echo 'hypha_loadpage : <br>';
+						if ($request->isSystemPage()) echo '<br> system page name' . $request->getSystemPage();
+						else echo '<br>page name ' . $request->getPageName().' \n';
+						echo '<br> language ' . $request->getLanguage().' ';
+						echo '<br> request parts ' . var_dump($request->getRequestParts()).' ';
+						echo '<br> query ' . $request->getRequestQuery() .' ';
 
 		if (!$request->isSystemPage()) {
+			global $O_O;
 			// fetch the requested page
 			$_name = $request->getPageName();
 			if ($_name === null) {
@@ -155,7 +183,6 @@
 		// has sufficient elements.
 		while (count($args) < 1)
 			array_push($args, null);
-
 		switch ($request->getSystemPage()) {
 			case HyphaRequest::HYPHA_SYSTEM_PAGE_FILES:
 				serveFile('data/files/' . $args[0], 'data/files');
@@ -164,7 +191,6 @@
 				serveFile('data/images/' . $args[0], 'data/images');
 				exit;
 			case HyphaRequest::HYPHA_SYSTEM_PAGE_INDEX:
-				$hyphaHtml->writeToElement('langList', hypha_indexLanguages('', ''));
 				switch ($args[0]) {
 					case 'images':
 						$hyphaHtml->writeToElement('pagename', __('image-index'));
@@ -174,12 +200,35 @@
 						$hyphaHtml->writeToElement('pagename', __('file-index'));
 						$hyphaHtml->writeToElement('main', hypha_indexFiles());
 						break;
+					case 'help': // bz help index  aanroep /index/help/<language>
+						if ($request->isSystemPage()) echo '<br> system page name' . $request->getSystemPage();
+						else echo '<br>page name ' . $request->getPageName.' ';
+						echo '<br> language ' . $request->getLanguage().' ';
+						echo '<br> request parts ' . var_dump($request->getRequestParts()).' ';
+						echo '<br> query ' . $request->getRequestQuery() .' ';
+						echo '<br> argumenten : ' . var_dump($args);
+						$hyphaHtml->writeToElement('pagename', 'Help index');
+						$hyphaPage = new helpPage($args);
+						if (count($args) == 2) {
+							$hyphaHtml->writeToElement('langList', hypha_indexLanguages($request->getPageName(), $args[1],'hindex/help/'));
+						} else {
+							$hyphaHtml->writeToElement('langlist', hypha_indexLanguages($request->getPageName(),$O_O->getContentLanguage(),'hindex/help/'));
+						}
+						break;
 					default:
-						$languageName = $isoLangList[$O_O->getContentLanguage()];
+						$languageName = $isoLangList[$request->getRequestParts()[1]];
 						$languageName = substr($languageName, 0, strpos($languageName, ' ('));
 						$hyphaHtml->writeToElement('pagename', __('page-index').': '.$languageName);
-						$hyphaHtml->writeToElement('main', hypha_indexPages($O_O->getContentLanguage()));
-						break;
+						if ($request->isSystemPage()) echo '<br> system page name' . $request->getSystemPage();
+						else echo '<br>page name ' . $request->getPageName;
+						echo '<br> language ' . $request->getLanguage();
+						echo '<br> request parts <br>' . var_dump($request->getRequestParts());
+						echo '<br> query ' . $request->getRequestQuery();
+						echo '<br> dictionary' . var_dump($O_O->getDictionary());
+						
+						$hyphaHtml->writeToElement('main', hypha_indexPages($request->getRequestParts()[1]));
+						$hyphaHtml->writeToElement('langList', hypha_indexLanguages('',$request->getRequestParts()[1]));
+					break;
 				}
 				break;
 			case HyphaRequest::HYPHA_SYSTEM_PAGE_SETTINGS:
@@ -191,6 +240,22 @@
 					exit;
 				}
 				break;
+
+				case HyphaRequest::HYPHA_SYSTEM_PAGE_HELP: //bz help
+				if ($args[0] == 'button') {
+							echo getButtonInfo($args);
+						exit;
+				} else {
+					$hyphaPage = new helpPage($args);
+					if (count($args) == 1) if (hypha_isLanguage($args[0])) {
+						$hyphaHtml->writeToElement('langList', hypha_indexLanguages('', $args[0]));
+					} else {
+						$contentLanguage = $O_O->getContentLanguage();
+						$hyphaHtml->writeToElement('langList', hypha_indexLanguages('', $contentLanguage));
+					}
+				}
+				break;
+
 			case HyphaRequest::HYPHA_SYSTEM_PAGE_UPLOAD:
 				if ($args[0]=='image') {
 					if(!$_FILES['wymFile']) $response = __('too-big-file').ini_get('upload_max_filesize');
@@ -247,6 +312,7 @@
 		Handles the newPage command by creating a new page and redirecting to its edit interface.
 	*/
 	registerCommandCallback('newPage', 'newPage');
+
 	function newPage($newName) {
 		global $hyphaXml, $hyphaUrl, $hyphaLanguage;
 
@@ -518,3 +584,25 @@
 		}
 		return true;
 	}
+function getButtonInfo($_args) {
+	// dummy responce function, to test the ajax server communication
+	// must be replaced by one in helpPages.php
+	/* 0 = buttonName
+	*  1 = buttonName
+	*  2 = language (or null)
+	*/
+	$_button = "";
+	$_language = "";
+	if ($_args[1]) {$_button = $_args[1];} else {$_button = "undifined";}
+	if ($_args[2]) {$_language = $_args[2];} else {$_language=hypha_getDefaultLanguage();}
+	//echo "getbuttoninfo(".$_button.','.$_language.")";
+	return "AJAX - Help voor <br>" . $_button . "<br> in de taal: ". $_language;
+}
+
+function hypha_isLanguage($id) {
+	// language check, must be replaced by formal one //
+	if ($isoLangList) {echo 'language check formal'; return array_key_exists($id, $isoLangList);
+	} else {echo 'language check informal'; $pageLangList = array("nl","en","de");
+		return in_array($id,$pageLangList,true);
+	}
+}

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hyphahelp schemaversion="1.0">
+  <title>
+    <language id ="nl">Hypha help system</language>
+    <language id ="en">Hypha help system page</language>
+  </title>
+  <items>
+    <item subject="user">
+        <content language="nl">
+            Een gebruiker kan alle artikelen zien.
+            Alleen als een gebruiker admin rechten heeft kan deze gebruiker ook bijdragen aan artikelen/pagina's
+            of eigen pagina's toevoegen
+        </content>
+        <content language="en">
+            A user help page
+        </content>
+    </item>
+    <item subject="pagina">
+        <content language="nl">
+            Een gebruiker kan alle artikelen zien.
+            Alleen als een gebruiker admin rechten heeft kan deze gebruiker ook bijdragen aan artikelen/pagina's
+            of eigen pagina's toevoegen
+        </content>
+        <content language="en">
+            Apage help page
+        </content>
+    </item>
+    <item subject="menu">
+        <content language="nl">
+            Een gebruiker met admin rechten kan een menu samenstellen.
+            Dit menu vervang automatisch het bestaande menu
+            Er is geen "ga terug naar vorige versie"
+            Met de test knop kun je het menu testen voordat je het definitief maakt.
+        </content>
+        <content language="en">
+            A help page for menu
+        </content>
+    </item>
+    <item subject="help">
+        <content language = "nl">
+                Dit
+        </content>
+        <content language = "en">
+                This
+        </content>
+    </item>
+</items>
+</hyphahelp>

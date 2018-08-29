@@ -60,6 +60,103 @@
 		Javascript variable containing the base url from the document location object.
 	*/
 	var postProcessingList = new Array();
+	
+	/* Function: showinfo()
+* get the help info from the help Pages
+* the object must be available, or "no info" wil be returned
+* and show this info in a popup
+* Author: bz
+*
+* Parameters:
+* id - html id of element
+* object - get help info for this object e.g. "button/save"
+* language - the language to use for the help text if available, else en
+*/
+	function showinfo(id,subject,language) {
+  		 var info = document.getElementById(id);
+			 url = "help/button/" + subject + "/" + language;
+			 hypha_ajax(url, function() {
+				 var info = document.getElementById(id);
+				 info.innerHTML = this;
+		var popup = document.getElementById(id);
+		info.style.visibility="visible";
+	} );
+	info.innerHTML = "info over " + id;
+	info.style.visibility= "visible";
+	}
+
+
+	 /* Function: hideinfo(id)
+	*  make html element with id invisible
+	* Author: bz
+	*
+	* Parameters:
+	* id - html id of element
+	*/
+	function hideinfo(id){
+		var popup = document.getElementById(id);
+		popup.innerHTML = "not shown";
+		popup.style.visibility = "hidden";
+	}
+	/*
+	* Function: hypha_ajax()
+	* author: bz
+	* simple ajax request / responce to get help on an object
+	*/
+	var clicked=false;
+	function showinfod(id,subject,language) {
+	  var info = document.getElementById(id);
+	  if (info) {
+	    if (clicked) {hideinfod(id); return;}
+	    clicked=true;
+	    /* get the help info from the hypha server */
+	      url = "help/button/" + subject + "/" + language;
+	      hypha_ajax(url, function() {
+	        var info = document.getElementById(id);
+					var text = info.getElementsByTagName("p").item(0);
+					text.innerHTML = this;
+					info.style.display= "block";
+	      } );
+	      /* help info added, position the popup */
+	    info.style.display = "block";
+	    info.position = "absolute";
+			var text = info.getElementsByTagName("p").item(0);
+			text.innerHTML = this;
+	    var infopos = info.getBoundingClientRect();
+	    }
+	    else { alert("Er mist een object");}
+	    }
+
+	function hideinfod(id) {
+	  var info = document.getElementById(id);
+	  info.style.display = "none";
+	  clicked=false;
+	}
+
+function hypha_ajax(url, callback) {
+	// simple basic ajax request
+  var httpRequest; // create our XMLHttpRequest object
+  if (window.XMLHttpRequest) {
+    httpRequest = new XMLHttpRequest();
+  } else if (window.ActiveXObject) {
+    // Internet Explorer
+    httpRequest = new
+    ActiveXObject("Microsoft.XMLHTTP");
+  }
+  httpRequest.onreadystatechange = function() {
+    // inline function to check the status
+    // of our request
+    // this is called on every state change
+    if (httpRequest.readyState === 4 &&
+      httpRequest.status === 200) {
+      callback.call(httpRequest.responseText);
+      // call the callback function
+    }
+  };
+  httpRequest.open('GET', url, true);
+  httpRequest.send();
+}
+
 
 	/*
 		Function: hypha
@@ -189,6 +286,31 @@
 	function makeAction($langPageView, $command, $argument) {
 		return 'hypha(\''.$langPageView.'\', \''.$command.'\', \''.$argument.'\');';
 	}
+
+  /*
+  * Function: makeCommitAction()
+  * generate a hypha action that first askes for a commitment
+  *
+  * befor the action takes place the user sees a popup message
+  * The message names the action (e.g. Delete user 5)
+  * and asks the user to confirm the action (e.g. Are you sure)
+  *
+  * Parameters:
+  * $langePageView - hypha language of the actual page
+  * $command - hypha command to perform
+  * $argument -the argument(s) for the action (e.g. user id)
+  * $commitQuestion - String that wil be displayed to the user
+  */
+
+  function makeCommitAction($langPageView, $command, $argument, $commitQuestion='Are-you-Sure?') {
+	 $_hulp = "";
+    if (strlen($commitQuestion) == 0) {
+      $hulp = 'if(confirm('.__('Are-you-sure').'))hypha(\''.$langPageView.'\', \''.$command.'\', \''.$argument.'\');';
+    } else {
+      $hulp = 'if(confirm(\''.$commitQuestion.'\'))hypha(\''.$langPageView.'\', \''.$command.'\', \''.$argument.'\');';
+	   }
+     return $hulp;
+  }
 
 	/*
 		Function: createGotoPageButton
@@ -444,6 +566,7 @@
 		Javascript function which handles removal of notifications after some time passed by.
 	*/
 	function notifyTimer() {
+		var debug = false;
 		if(document.getElementById('hyphaNotify')) {
 			var now = new Date().getTime();
 			var msgbox = document.getElementById('hyphaNotify');

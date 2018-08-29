@@ -1,4 +1,5 @@
 <?php
+
 	// Hypha is intended to support groups who work on a project, and is distributed under a Simple Public License 2.0 from www.hypha.net
 
 	/*
@@ -29,7 +30,7 @@
 	session_start();
 	session_write_close();
 
-	$DEBUG = true;
+	$DEBUG = false;
 	ini_set('display_errors', $DEBUG ? true : false);
 
 	if (strnatcmp(phpversion(),'5.4') < 0) die('Error: you are running php version '.substr(phpversion(),0,strpos(phpversion(), '-')).'; Hypha works only with php version 5.4 and higher');
@@ -42,6 +43,15 @@
 		- *dataypes* Include modules for available datatypes: textpage, mailinglist, blog et cetera
 		- *languages* Compile a list of available user interface languages
 	*/
+/* toevoeging index.php
+*/
+
+$_path = substr($_SERVER["PHP_SELF"],0,strpos($_SERVER["PHP_SELF"], 'index.php'));
+$hyphaUrl = 'http://'.$_SERVER["SERVER_NAME"].$_path;
+$hyphaQuery = substr($_SERVER["REQUEST_URI"],strlen($_path));
+
+$parampos = strpos($hyphaQuery,'?');
+if ($parampos !== false) $hyphaQuery = substr($hyphaQuery,0,$parampos);
 
 	$_handle = opendir("system/core/");
 	while ($_file = readdir($_handle)) if (substr($_file, -4) == '.php') require_once("system/core/" . $_file);
@@ -62,17 +72,17 @@
 	*/
 
 	// Build request
+	error_log("index.php build request \n",3,"/tmp/hypha_errors.log");
 	$rootPath = dirname($_SERVER['SCRIPT_NAME']);
 	$rootPath .= substr($rootPath, -1) === '/' ? '' : '/';
 	$hyphaRequest = new HyphaRequest($rootPath, $isoLangList);
 	$hyphaQuery = $hyphaRequest->getRequestQuery();
 	$hyphaUrl = $hyphaRequest->getRootUrl();
-
 	// Shortcut for direct file requests
 	if ($hyphaQuery == 'data/hypha.css') serveFile($hyphaQuery, false);
+	//if (startsWith($hyphaQuery, 'data/css')) serveFile($hyphaQuery,'data/css');
 	if (startsWith($hyphaQuery, 'system/wymeditor')) serveFile($hyphaQuery, 'system/wymeditor');
 	if (startsWith($hyphaQuery, 'system/bowser')) serveFile($hyphaQuery, 'system/bowser');
-
 	/*
 		Group: Stage 4 - Load website data
 		Website data is loaded, see chapter about <Base> functions. The HTMLDocument $hyphaHtml is loaded with the website default layout.
@@ -133,7 +143,8 @@
 	registerPostProcessingFunction('dewikify');
 
 	// add hypha commands and navigation
-	$_cmds[] = '<a href="index/'.$hyphaLanguage.'">'.__('index').'</a>';
+	$_cmds[] = '<a href="hindex/'.$hyphaLanguage.'">'.__('index').'</a>';
+	$_cmds[] = '<a href="hindex/help/'.$hyphaLanguage.'">'.__('help').'</a>'; //bz help
 	if (!$O_O->isUser()) {
 		addLoginRoutine($hyphaHtml);
 		$_cmds[] = '<a href="javascript:login();">'.__('login').'</a>';

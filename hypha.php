@@ -146,9 +146,9 @@
 				unlink($_POST['argument']);
 				break;
 		}
-		$localIndex = index();
-		$serverIndex = unserialize(file_get_contents($hyphaServer.'?file=index'));
-		ksort($serverIndex);
+		$localindex = index();
+		$serverindex = unserialize(file_get_contents($hyphaServer.'?file=index'));
+		ksort($serverindex);
 		ob_start();
 ?>
 			<div style="width:600px;">
@@ -165,10 +165,10 @@
 			<table class="section">
 				<tr><th style="text-align:left">file</th><th colspan="2">action</th></tr>
 <?php
-		foreach ($serverIndex as $file => $info) {
+		foreach ($serverindex as $file => $info) {
 			echo '<tr><td style="white-space:nowrap;">'.$file.'</td>';
-			if (array_key_exists($file, $localIndex)) {
-				echo '<td><input type="button" value="'.($localIndex[$file] < $serverIndex[$file] ? 'update' : 'reset').'" onclick="hypha(\'add\', \''.$file.'\');" /></td>';
+			if (array_key_exists($file, $localindex)) {
+				echo '<td><input type="button" value="'.($localindex[$file] < $serverindex[$file] ? 'update' : 'reset').'" onclick="hypha(\'add\', \''.$file.'\');" /></td>';
 				$path = pathinfo($file);
 
 				$dir = explode('/', $path['dirname']);
@@ -353,8 +353,8 @@
 		produces html page for selecting hypha modules and languages to package in a new hypha.php install script
 	*/
 	function build() {
-		$localIndex = index();
-		arsort($localIndex);
+		$localindex = index();
+		arsort($localindex);
 		ob_start();
 ?>
 			<div style="width:600px;">
@@ -373,7 +373,7 @@
 				<tr name="datatype">
 					<th style="text-align:right; white-space:nowrap;">modules to include:</th><td>
 <?php
-		foreach ($localIndex as $file => $timestamp) {
+		foreach ($localindex as $file => $timestamp) {
 			if (substr($file, 0, 17) == 'system/datatypes/') {
 				$name = substr($file, 17, -4);
 				if ($name!='settings') echo '<input type="checkbox" name="build_'.substr($file,0,-4).'"'.($name == 'text' ? ' checked="checked"' : '').' /> '.$name.'<br/>'."\n";
@@ -384,7 +384,7 @@
 				<tr name="language">
 					<th style="text-align:right; white-space:nowrap;">languages to include:</th><td>
 <?php
-		foreach ($localIndex as $file => $timestamp) {
+		foreach ($localindex as $file => $timestamp) {
 			if (substr($file, 0, 17) == 'system/languages/') {
 				$name = substr($file, 17, -4);
 				echo '<input type="checkbox" name="build_'.substr($file,0,-4).'"'.($name == 'en' ? ' checked="checked"' : '').' /> '.$name.'<br/>'."\n";

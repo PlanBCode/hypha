@@ -4,10 +4,11 @@
 		/** TODO[LRM]: allow registration of system pages, then inject system pages in constructor */
 		const HYPHA_SYSTEM_PAGE_FILES = 'files';
 		const HYPHA_SYSTEM_PAGE_IMAGES = 'images';
-		const HYPHA_SYSTEM_PAGE_INDEX = 'index';
+		const HYPHA_SYSTEM_PAGE_INDEX = 'hindex';
 		const HYPHA_SYSTEM_PAGE_SETTINGS = 'settings';
 		const HYPHA_SYSTEM_PAGE_UPLOAD = 'upload';
 		const HYPHA_SYSTEM_PAGE_CHOOSER = 'chooser';
+		const HYPHA_SYSTEM_PAGE_HELP = 'help'; // bz help
 
 		/** @var string */
 		private $rootPath;
@@ -84,6 +85,7 @@
 				HyphaRequest::HYPHA_SYSTEM_PAGE_SETTINGS,
 				HyphaRequest::HYPHA_SYSTEM_PAGE_UPLOAD,
 				HyphaRequest::HYPHA_SYSTEM_PAGE_CHOOSER,
+				HyphaRequest::HYPHA_SYSTEM_PAGE_HELP, // bz help
 			];
 		}
 
@@ -170,3 +172,32 @@
 			return $this->args;
 		}
 	}
+	    function hypha_helpindex($language = 'nl') {
+			if (!$language) $language='nl';
+        if (file_exists('data/help.xml')) {
+            $xml = simplexml_load_file('data/help.xml');
+            $html = 		"<h5>index helponderwerpen (taal =";
+            $html .= $language;
+            $html .= ")</h5>";
+		    $html .= '<table>';
+            /* For each help */
+            foreach ($xml->items->item as $helpitem) {
+                $html .= '<tr><td>';
+                $html .= $helpitem['subject'];
+                $html .= '</td><td>';
+                foreach ($helpitem->content as $taal) {
+                   if  ($taal['language'] ==$language){
+                    $html .= '<br>';
+                    $html .= $taal;
+                    $html .= '</td><td>';
+                   }
+                }
+                $html .= '</td>';
+            }
+            $html .= "</table>";
+            return $html;
+        } else {
+            return 'help page not found';
+        }
+    }
+

@@ -646,7 +646,8 @@ function hypha_getReview($language) {
 		$page - DOMElement containing page settings
 		$language - page language
 	*/
-	function hypha_indexLanguages($page, $language) {
+	function hypha_indexLanguages($page, $language, $_defaultPage = HyphaRequest::HYPHA_SYSTEM_PAGE_INDEX.'/') {
+		if ($_defaultPage) echo '650 default' . $_defaultPage;
 		$langList = array();
 		foreach(hypha_getPageList() as $_page) foreach($_page->getElementsByTagName('language') as $_lang) {
 			if (!in_array($_lang->getAttribute('id'), $langList)) $langList[] = $_lang->getAttribute('id');
@@ -662,8 +663,10 @@ function hypha_getReview($language) {
 		foreach($langList as $lang) {
 			if ($lang == $language) $index.= '<span class="language selected">'.$lang.'</span>';
 			elseif (!$page || array_key_exists($lang, $pageLangList)) {
-				if ($page) $index.= '<span class="language"><a href="'.$lang.'/'.$pageLangList[$lang].'">'.$lang.'</a></span>';
-				else $index.= '<span class="language"><a href="'.$lang.'/index">'.$lang.'</a></span>';
+				if ($page) {
+					$index.= '<span class="language"><a href="'.$lang.'/'.$pageLangList[$lang].'">'.$lang.'</a></span>';
+				}
+				else $index.= '<span class="language"><a href="'.$_defaultPage.$lang.'">'.$lang.'</a></span>';
 			}
 			else $index.= '<span class="language disabled">'.$lang.'</span>';
 		}
@@ -682,7 +685,8 @@ function hypha_getReview($language) {
 		foreach(hypha_getPageList() as $page) {
 			$lang = hypha_pageGetLanguage($page, $language);
 			if ($lang) if (isUser() || ($page->getAttribute('private')!='on')) $pageList[] = $lang->getAttribute('name').($page->getAttribute('private')=='on' ? '&#;' : '');
-		}
+//      $pageList[] = $lang->getAttribute('name')." (".$lang->getAttribute('id').")".($page->getAttribute('private')=='on' ? '&#;' : '');
+	}
 		if ($pageList) array_multisort(array_map('strtolower', $pageList), $pageList);
 
 		// add capitals
@@ -695,14 +699,17 @@ function hypha_getReview($language) {
 			}
 			$privatePos = strpos($pagename, '&#;');
 			if ($privatePos) $pagename = substr($pagename, 0, $privatePos);
-			$htmlList[] = '<a href="'.$language.'/'.$pagename.'">'.showPagename($pagename).'</a>'.asterisk($privatePos).'<br/>';
-		}
+			//$closed = strpos($pagename,"(");
+			//if ($closed) $pagenameLink = substr(pagename,0,$closed);
+			//$htmlList[] = '<a href="'.$language.'/'.$pagenamelink.'">'.showPagename($pagename).'</a>'.asterisk($privatePos).'<br/>';
+$htmlList[] = '<a href="'.$language.'/'.$pagename.'">'.showPagename($pagename).'</a>'.asterisk($privatePos).'<br/>';		}
 
 		// output list in a maximum of 3 colunms with a minimum of 10 lines per column
 		$lines = count($htmlList);
 		$columns = min($lines/10, 3);
 		$i = 0;
-		$html = '<table><tr>';
+		$html = "<h5>".__('index')."</h5>";
+		$html .= '<table><tr>';
 		for ($column=1; $column<$columns+1; $column++) {
 			$html.= '<td>';
 			while($i<$lines && $i<$lines*$column/$columns) $html.= $htmlList[$i++];

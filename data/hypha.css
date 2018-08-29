@@ -460,3 +460,123 @@ div.comment_subject {
       font-size: 1.2em;
       font-weight: bolder;
     }
+    
+.hypha_popup_bkgr{
+            background:rgba(0,0,0,.4);
+            cursor:pointer;
+            visibility: visible;
+        	width: 300px;
+            height: 200px;
+        /*    position:fixed;  */
+            text-align:center;
+            top:50px;
+        	left: 200px;
+         	position: absolute;
+            z-index:10000;
+        }
+.hypha_popup_bkgr .helper{
+            display:inline-block;
+            height:100%;
+            vertical-align:middle;
+        }
+
+.hypha_popup_bkgr > div {
+            background-color: #fff;
+            box-shadow: 10px 10px 60px #555;
+            display: inline-block;
+            height: auto;
+            max-width: 551px;
+            min-height: 100px;
+            vertical-align: middle;
+            width: 60%;
+            position: relative;
+            border-radius: 8px;
+            padding: 15px 5%;
+        }
+.hypha_popup_bkgr > div > p {
+        	overflow: auto;
+        	max-height: 100px;
+        }
+
+/* icons for information and close */
+.hyphaCloseButton {
+            background-color: #f00;
+            border: 2px solid #f00;
+        	  color: #000;
+            cursor: pointer;
+            display: inline-block;
+            font-family: arial;
+            font-weight: bold;
+            position: absolute;
+            top: -10px;
+            font-size: 15px;
+            line-height: 15px;
+            width: 15px;
+            height: 15px;
+            text-align: center;
+        }
+
+.hyphaCloseButton:hover {
+            background-color: #fff;
+        	color: #f;
+        }
+
+.hyphaInfoButton {
+          margin-left: 10px;
+        	background-color: #00f;
+        	border: 2px solid #00f;
+        	color: #FFF;
+        	cursor: pointer;
+            display: inline-block;
+            font-family: arial;
+            font-weight: bold;
+            /*position: absolute;*/
+            top: -20px;
+            right: -20px;
+            font-size: 15px;
+            line-height: 15px;
+            width: 20px;
+            height: 20px;
+        	border-radius: 50%;
+            text-align: center;
+        }
+.hyphaInfoButton:hover {
+        	background-color: #fff;
+        	color: #00f;
+        }
+/* hypha information Popup box END */
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -60px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.tooltip .tooltiptext::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #555 transparent transparent transparent;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
+/* einde bz toevoegingen */
+
