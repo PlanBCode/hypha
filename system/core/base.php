@@ -647,7 +647,7 @@ function hypha_getReview($language) {
 		$language - page language
 	*/
 	function hypha_indexLanguages($page, $language, $_defaultPage = HyphaRequest::HYPHA_SYSTEM_PAGE_INDEX.'/') {
-		if ($_defaultPage) echo '650 default' . $_defaultPage;
+		//if ($_defaultPage) echo '650 default' . $_defaultPage;
 		$langList = array();
 		foreach(hypha_getPageList() as $_page) foreach($_page->getElementsByTagName('language') as $_lang) {
 			if (!in_array($_lang->getAttribute('id'), $langList)) $langList[] = $_lang->getAttribute('id');

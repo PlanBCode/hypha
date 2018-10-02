@@ -146,12 +146,12 @@
 		$request = $O_O->getRequest();
 		//$hyphaHtml->writeToElement('status',$request->getPageName());
 		$args = $request->getArgs();
-			echo 'hypha_loadpage : <br>';
-						if ($request->isSystemPage()) echo '<br> system page name' . $request->getSystemPage();
-						else echo '<br>page name ' . $request->getPageName().' \n';
-						echo '<br> language ' . $request->getLanguage().' ';
-						echo '<br> request parts ' . var_dump($request->getRequestParts()).' ';
-						echo '<br> query ' . $request->getRequestQuery() .' ';
+			//echo 'hypha_loadpage : <br>';
+						//if ($request->isSystemPage()) echo '<br> system page name' . $request->getSystemPage();
+						//else echo '<br>page name ' . $request->getPageName().' \n';
+						//echo '<br> language ' . $request->getLanguage().' ';
+						//echo '<br> request parts ' . var_dump($request->getRequestParts()).' ';
+						//echo '<br> query ' . $request->getRequestQuery() .' ';
 
 		if (!$request->isSystemPage()) {
 			global $O_O;
@@ -202,11 +202,11 @@
 						break;
 					case 'help': // bz help index  aanroep /index/help/<language>
 						if ($request->isSystemPage()) echo '<br> system page name' . $request->getSystemPage();
-						else echo '<br>page name ' . $request->getPageName.' ';
-						echo '<br> language ' . $request->getLanguage().' ';
-						echo '<br> request parts ' . var_dump($request->getRequestParts()).' ';
-						echo '<br> query ' . $request->getRequestQuery() .' ';
-						echo '<br> argumenten : ' . var_dump($args);
+						//else echo '<br>page name ' . $request->getPageName.' ';
+						//echo '<br> language ' . $request->getLanguage().' ';
+						//echo '<br> request parts ' . var_dump($request->getRequestParts()).' ';
+						//echo '<br> query ' . $request->getRequestQuery() .' ';
+						//echo '<br> argumenten : ' . var_dump($args);
 						$hyphaHtml->writeToElement('pagename', 'Help index');
 						$hyphaPage = new helpPage($args);
 						if (count($args) == 2) {
@@ -219,12 +219,12 @@
 						$languageName = $isoLangList[$request->getRequestParts()[1]];
 						$languageName = substr($languageName, 0, strpos($languageName, ' ('));
 						$hyphaHtml->writeToElement('pagename', __('page-index').': '.$languageName);
-						if ($request->isSystemPage()) echo '<br> system page name' . $request->getSystemPage();
-						else echo '<br>page name ' . $request->getPageName;
-						echo '<br> language ' . $request->getLanguage();
-						echo '<br> request parts <br>' . var_dump($request->getRequestParts());
-						echo '<br> query ' . $request->getRequestQuery();
-						echo '<br> dictionary' . var_dump($O_O->getDictionary());
+						//if ($request->isSystemPage()) echo '<br> system page name' . $request->getSystemPage();
+						//else echo '<br>page name ' . $request->getPageName;
+						//echo '<br> language ' . $request->getLanguage();
+						//echo '<br> request parts <br>' . var_dump($request->getRequestParts());
+						//echo '<br> query ' . $request->getRequestQuery();
+						//echo '<br> dictionary' . var_dump($O_O->getDictionary());
 						
 						$hyphaHtml->writeToElement('main', hypha_indexPages($request->getRequestParts()[1]));
 						$hyphaHtml->writeToElement('langList', hypha_indexLanguages('',$request->getRequestParts()[1]));
