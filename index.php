@@ -36,40 +36,29 @@
 	if (function_exists('apache_get_modules') && !in_array('mod_rewrite', apache_get_modules())) die ('Error: Apache should have mod_rewrite enabled');
 
 	/*
-		Group: Stage 2 - Get query and handle direct file requests
-		Here we extract our page query from the php $_SERVER data. Page requests should be formatted in a directory like structure, e.g. http://www.dom.ain/en/home/edit, the first level usually being a language id, the second level begin a page id, and the third level being an optional view.
-		Some requests don't need the whole script to run. Certain file requests (css, javascript) can be handled directly here.
-	*/
-
-	$_path = substr($_SERVER["PHP_SELF"], 0, strpos($_SERVER["PHP_SELF"], 'index.php'));
-	$hyphaUrl = 'http://'.$_SERVER["SERVER_NAME"].$_path;
-	$hyphaQuery = substr($_SERVER["REQUEST_URI"], strlen($_path));
-	// Strip off any query parameters
-	$parampos = strpos($hyphaQuery, '?');
-	if ($parampos !== false)
-		$hyphaQuery = substr($hyphaQuery, 0, $parampos);
-//	$hyphaQuery = urldecode(substr($_SERVER["REQUEST_URI"], strlen($_path)));
-
-
-	/*
-		Group: Stage 3 - Build hypha script
+		Group: Stage 2 - Build hypha script
 		Additional scripts and data are included.
 		- *core* Include core scripts
 		- *dataypes* Include modules for available datatypes: textpage, mailinglist, blog et cetera
 		- *languages* Compile a list of available user interface languages
 	*/
 
-	$_handle = opendir("system/core/");
-	while ($_file = readdir($_handle)) if (substr($_file, -4) == '.php') require_once("system/core/".$_file);
-	closedir($_handle);
+	foreach (scandir("system/core/") as $_file) if (substr($_file, -4) == '.php') require_once("system/core/" . $_file);
 
-	$_handle = opendir("system/datatypes/");
-	while ($_file = readdir($_handle)) if (substr($_file, -4) == '.php') include_once("system/datatypes/".$_file);
-	closedir($_handle);
+	foreach (scandir("system/datatypes/") as $_file) if (substr($_file, -4) == '.php') include_once("system/datatypes/" . $_file);
 
-	$_handle = opendir("system/languages/");
-	while ($_file = readdir($_handle)) if (substr($_file, -4) == '.php') $uiLangList[] = basename($_file, '.php');
-	closedir($_handle);
+	foreach (scandir("system/languages/") as $_file) if (substr($_file, -4) == '.php') $uiLangList[] = basename($_file, '.php');
+
+	/*
+		Group: Stage 3 - Get query and handle direct file requests
+		Here we extract our page query from the php $_SERVER data. Page requests should be formatted in a directory like structure, e.g. http://www.dom.ain/en/home/edit, the first level usually being a language id, the second level begin a page id, and the third level being an optional view.
+		Some requests don't need the whole script to run. Certain file requests (css, javascript) can be handled directly here.
+	*/
+
+	// Build request
+	$hyphaRequest = new HyphaRequest($isoLangList);
+	$hyphaQuery = $hyphaRequest->getRelativeUrlPath();
+	$hyphaUrl = $hyphaRequest->getRootUrl();
 
 	// Shortcut for direct file requests
 	if ($hyphaQuery == 'data/hypha.css')
@@ -94,7 +83,6 @@
 		Check is a user is logged in and load user data. Add login/logout functionality according to session login status.
 	*/
 
-	$hyphaRequest = new HyphaRequest($hyphaQuery, $isoLangList);
 	loadLanguage($hyphaRequest);
 
 	// Load user and page and execute the posted command. The latter
@@ -130,7 +118,7 @@
 	$hyphaHtml->writeToElement('hyphaCommands', implode(' - ', $_cmds));
 	if ($hyphaUser) $hyphaHtml->writeToElement('hyphaCommands', '<br/><span id="loggedIn">'.__('logged-in-as').' `'.$hyphaUser->getAttribute('username').'`'.asterisk(isAdmin()).'</span>');
 
-	// obfuscate email addresses to strangers. It's ok to send readible addresses to logged in members. This also prevents conflicts in the editor.
+	// obfuscate email addresses to strangers. It's ok to send readable addresses to logged in members. This also prevents conflicts in the editor.
 //	if (!$hyphaUser) registerPostProcessingFunction('obfuscateEmail');
 
 	// poor man's cron job
@@ -144,4 +132,3 @@
 	header('Content-Type: text/html; charset=utf-8');
 	print $hyphaHtml->toString();
 	exit;
-?>

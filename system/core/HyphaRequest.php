@@ -1,5 +1,13 @@
 <?php
 
+	/**
+	 * HyphaRequest will breakdown the request and determine
+	 * - rootUrlPath
+	 * - relativeUrlPath
+	 * - language
+	 * - pageName
+	 * - arguments
+	 */
 	class HyphaRequest {
 		/** TODO[LRM]: allow registration of system pages, then inject system pages in constructor */
 		const HYPHA_SYSTEM_PAGE_FILES = 'files';
@@ -10,13 +18,16 @@
 		const HYPHA_SYSTEM_PAGE_CHOOSER = 'chooser';
 
 		/** @var string */
-		private $requestQuery;
+		private $rootUrlPath;
+
+		/** @var string */
+		private $relativeUrlPath;
 
 		/** @var array */
 		private $isoLangList;
 
 		/** @var array */
-		private $requestParts;
+		private $relativeUrlPathParts;
 
 		/** @var null|string */
 		private $language;
@@ -31,39 +42,71 @@
 		private $args = [];
 
 		/**
-		 * @param $requestQuery
 		 * @param array $isoLangList Associative array containing connecting iso639 language codes with their native name (and english translation)
+		 * @param null|string $rootUrlPath If it is not given it will be determined.
+		 * @param null|string $relativeUrlPath If it is not given it will be determined.
 		 */
-		public function __construct($requestQuery, array $isoLangList) {
-			$this->requestQuery = $requestQuery;
+		public function __construct(array $isoLangList, $rootUrlPath = null, $relativeUrlPath = null) {
 			$this->isoLangList = $isoLangList;
+
+			/**
+			 * in case of hypha instance in the root
+			 * request uri: http://www.my-org.net/en/my-page?foo=bar
+			 * $_SERVER['SCRIPT_NAME'] is expected to be "/index.php"
+			 * $_SERVER['REQUEST_URI'] is expected to be "/en/my-page?foo=bar"
+			 * $rootUrlPath will be "/"
+			 * $relativeUrlPath will be "en/my-page"
+			 */
+			/**
+			 * in case of hypha instance in sub directory
+			 * request uri: http://www.my-org.net/my-hypha/en/my-page?foo=bar
+			 * $_SERVER['SCRIPT_NAME'] is expected to be "/my-hypha/index.php"
+			 * $_SERVER['REQUEST_URI'] is expected to be "/my-hypha/en/my-page?foo=bar"
+			 * $rootUrlPath will be "/my-hypha/"
+			 * $relativeUrlPath will be "en/my-page"
+			 */
+			if (null === $rootUrlPath) {
+				$rootUrlPath = dirname($_SERVER['SCRIPT_NAME']);
+				$rootUrlPath .= substr($rootUrlPath, -1) === '/' ? '' : '/';
+			}
+			$this->rootUrlPath = $rootUrlPath;
+
+			if (null === $relativeUrlPath) {
+				$relativeUrlPath = substr($_SERVER['REQUEST_URI'], strlen($this->rootUrlPath));
+				// Strip off any query parameters
+				if (($paramPos = strpos($relativeUrlPath, '?')) && $paramPos !== false){
+					$relativeUrlPath = substr($relativeUrlPath, 0, $paramPos);
+				}
+			}
+			$this->relativeUrlPath = $relativeUrlPath;
+
 			$this->processRequest();
 		}
 
 		private function processRequest() {
-			$this->requestParts = $requestParts = array_filter(explode('/', $this->requestQuery));
+			$this->relativeUrlPathParts = $relativeUrlPathParts = array_filter(explode('/', $this->relativeUrlPath));
 
-			$firstPart = reset($requestParts);
+			$firstPart = reset($relativeUrlPathParts);
 			if ($firstPart !== false && array_key_exists($firstPart, $this->isoLangList)) {
-				$this->language = array_shift($requestParts);
+				$this->language = array_shift($relativeUrlPathParts);
 			}
 
-			$systemPage = reset($requestParts);
+			$systemPage = reset($relativeUrlPathParts);
 			if ($this->language === null && $systemPage !== false && in_array($systemPage, HyphaRequest::getSystemPages())) {
-				$this->systemPage = array_shift($requestParts);
+				$this->systemPage = array_shift($relativeUrlPathParts);
 			}
 
-			$pageType = reset($requestParts);
+			$pageType = reset($relativeUrlPathParts);
 			if ($pageType !== false && $this->systemPage === null && $this->language === null) {
-				array_shift($requestParts);
+				array_shift($relativeUrlPathParts);
 			}
 
-			$pageName = reset($requestParts);
+			$pageName = reset($relativeUrlPathParts);
 			if ($pageName !== false && $this->systemPage === null) {
-				$this->pageName = array_shift($requestParts);
+				$this->pageName = array_shift($relativeUrlPathParts);
 			}
 
-			$this->args = $requestParts;
+			$this->args = $relativeUrlPathParts;
 		}
 
 		public static function getSystemPages() {
@@ -77,31 +120,61 @@
 			];
 		}
 
+		public function getRootUrl() {
+			$scheme = $this->getScheme();
+			$https = 'https' === $scheme;
+			$host = $this->getHost();
+			$port = (int)$this->getPort();
+
+			$hasAltPort = (!$https && $port !== 80) || ($https && $port !== 443);
+			$altPort = $hasAltPort ? ':' . $port : '';
+
+			return sprintf('%s://%s%s%s', $scheme, $host, $altPort, $this->rootUrlPath);
+		}
+
+		public function getScheme() {
+			return $_SERVER['REQUEST_SCHEME'];
+		}
+
+		public function getHost() {
+			return $_SERVER['HTTP_HOST'];
+		}
+
+		public function getPort() {
+			return $_SERVER['SERVER_PORT'];
+		}
+
 		/**
+		 * Returns the relative URL path, with or without the language.
+		 *
 		 * @param bool $excludeLanguage
 		 *
 		 * @return string
 		 */
-		public function getRequestQuery($excludeLanguage = true) {
-			return implode('/', $this->getRequestParts($excludeLanguage));
+		public function getRelativeUrlPath($excludeLanguage = true) {
+			return implode('/', $this->getRelativeUrlPathParts($excludeLanguage));
 		}
 
 		/**
+		 * Returns the relative URL path parts, with or without the language.
+		 *
 		 * @param bool $excludeLanguage
 		 *
 		 * @return array
 		 */
-		public function getRequestParts($excludeLanguage = true) {
-			$requestParts = $this->requestParts;
+		public function getRelativeUrlPathParts($excludeLanguage = true) {
+			$relativeUrlPathParts = $this->relativeUrlPathParts;
 
-			if ($excludeLanguage && reset($requestParts) === $this->language) {
-				array_shift($requestParts);
+			if ($excludeLanguage && reset($relativeUrlPathParts) === $this->language) {
+				array_shift($relativeUrlPathParts);
 			}
 
-			return $requestParts;
+			return $relativeUrlPathParts;
 		}
 
 		/**
+		 * Return the language if it could be found
+		 *
 		 * @return null|string
 		 */
 		public function getLanguage() {
@@ -109,6 +182,8 @@
 		}
 
 		/**
+		 * Indicates if the current request is a system page
+		 *
 		 * @return bool
 		 */
 		public function isSystemPage() {
@@ -116,6 +191,8 @@
 		}
 
 		/**
+		 * Returns the system page if the current request is a system page
+		 *
 		 * @return string|null
 		 */
 		public function getSystemPage() {
@@ -123,6 +200,8 @@
 		}
 
 		/**
+		 * Returns the page name if the current request is not a system page
+		 *
 		 * @return string|null
 		 */
 		public function getPageName() {
@@ -130,6 +209,8 @@
 		}
 
 		/**
+		 * Returns the request arguments
+		 *
 		 * @return array
 		 */
 		public function getArgs() {
