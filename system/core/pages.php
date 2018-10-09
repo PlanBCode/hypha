@@ -43,7 +43,7 @@
 		protected function replacePageListNode($node) {
 			global $O_O;
 			$this->pageListNode = $node;
-			$this->privateFlag = ($node->getAttribute('private') == 'on' ? true : false);
+			$this->privateFlag = in_array($node->getAttribute('private'), ['true', '1', 'on']);
 			$language = hypha_pageGetLanguage($node, $O_O->getContentLanguage());
 			$this->language = $language->getAttribute('id');
 			$this->pagename = $language->getAttribute('name');
@@ -133,7 +133,7 @@
 			}
 			$_node = hypha_getPage($O_O->getContentLanguage(), $_name);
 
-			if ($_node) {
+			if ($_node && (!in_array($_node->getAttribute('private'), ['true', '1', 'on']) || isUser())) {
 				$_type = $_node->getAttribute('type');
 				$hyphaPage = new $_type($_node, $args);
 

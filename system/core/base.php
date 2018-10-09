@@ -528,6 +528,7 @@
 				$page->appendChild($newLanguage);
 			}
 		}
+		$private = in_array($private, ['true', '1', 'on']) ? 'on' : 'off';
 		if ($private!=$page->getAttribute('private')) $page->setAttribute('private', $private);
 
 		return false;
@@ -664,7 +665,10 @@
 		// get list of available pages and sort alphabetically
 		foreach(hypha_getPageList() as $page) {
 			$lang = hypha_pageGetLanguage($page, $language);
-			if ($lang) if (isUser() || ($page->getAttribute('private')!='on')) $pageList[] = $lang->getAttribute('name').($page->getAttribute('private')=='on' ? '&#;' : '');
+			if ($lang) if (isUser() || ($page->getAttribute('private')!='on')) {
+				$pageList[] = $lang->getAttribute('name').($page->getAttribute('private')=='on' ? '&#;' : '');
+				$pageListDatatype[$lang->getAttribute('name')] = $page->getAttribute('type');
+			}
 		}
 		if ($pageList) array_multisort(array_map('strtolower', $pageList), $pageList);
 
