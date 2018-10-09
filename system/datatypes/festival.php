@@ -306,7 +306,7 @@ EOF;
 		 * pay.
 		 */
 		function handleSignup($arg) {
-			global $hyphaUrl, $hyphaLanguage, $hyphaPage;
+			global $hyphaUrl, $hyphaContentLanguage, $hyphaPage;
 			$form = new HTMLForm($this->getConfigElement('signup-form')->cloneNode(true));
 			$form->setData($_POST);
 			$form->validateRequiredField('name');
@@ -339,18 +339,18 @@ EOF;
 			$this->xml->saveAndUnlock();
 
 			notify('success', __('festival-successful-signup-for') . $this->getConfig('festival-title'));
-			$contribute_url = $hyphaUrl . $hyphaLanguage . '/' . $this->pagename . '/contribute/' . $participant->getAttribute('xml:id') . '/' . $participant->getAttribute('key');
+			$contribute_url = $hyphaUrl . $hyphaContentLanguage . '/' . $this->pagename . '/contribute/' . $participant->getAttribute('xml:id') . '/' . $participant->getAttribute('key');
 			$digest = htmlspecialchars($participant->getAttribute('name') . __('festival-signed-up-for') . $this->getConfig('festival-title'));
 			$digest .= ' (<a href="' . $contribute_url . '">Add contribution</a>)';
 			writeToDigest($digest, 'festival-registration');
 
 			if ((float)$form->dataFor('amount', 0) > 0) {
-				$next_url = $hyphaUrl . $hyphaLanguage . '/' . $this->pagename . '/pay/' . $participant->getAttribute('xml:id') . '/' . $participant->getAttribute('key');
+				$next_url = $hyphaUrl . $hyphaContentLanguage . '/' . $this->pagename . '/pay/' . $participant->getAttribute('xml:id') . '/' . $participant->getAttribute('key');
 			} else {
-				$next_url = $hyphaUrl . $hyphaLanguage . '/' . $this->pagename . '/confirmation-needed';
+				$next_url = $hyphaUrl . $hyphaContentLanguage . '/' . $this->pagename . '/confirmation-needed';
 
 				// Send email
-				$confirm_url = $hyphaUrl . $hyphaLanguage . '/' . $this->pagename . '/confirm/' . $participant->getAttribute('xml:id') . '/' . $participant->getAttribute('key');
+				$confirm_url = $hyphaUrl . $hyphaContentLanguage . '/' . $this->pagename . '/confirm/' . $participant->getAttribute('xml:id') . '/' . $participant->getAttribute('key');
 				$append = '<p><a href="'.htmlspecialchars($confirm_url).'">'.__('festival-confirm-email') . '</a></p>';
 				$this->sendMail($participant->getAttribute('email'), 'mail-confirm-email', $append);
 			}
@@ -373,7 +373,7 @@ EOF;
 		 * clicked to confirm the registration.
 		 */
 		function showConfirm() {
-			global $hyphaUrl, $hyphaLanguage;
+			global $hyphaUrl, $hyphaContentLanguage;
 
 			$this->xml->lockAndReload();
 			$participant = $this->checkKeyArguments(['participant']);
@@ -381,7 +381,7 @@ EOF;
 				$this->xml->unlock();
 				return;
 			}
-			$contribute_url = $hyphaUrl . $hyphaLanguage . '/' . $this->pagename . '/contribute/' . $participant->getAttribute('xml:id') . '/' . $participant->getAttribute('key');
+			$contribute_url = $hyphaUrl . $hyphaContentLanguage . '/' . $this->pagename . '/contribute/' . $participant->getAttribute('xml:id') . '/' . $participant->getAttribute('key');
 
 			if ($participant->getAttribute('email-confirmed')) {
 				$this->xml->unlock();
@@ -414,7 +414,7 @@ EOF;
 		 * /contribute page.
 		 */
 		function showPay() {
-			global $hyphaUrl, $hyphaLanguage;
+			global $hyphaUrl, $hyphaContentLanguage;
 
 			$this->xml->lockAndReload();
 			$participant = $this->checkKeyArguments(['participant']);
@@ -428,7 +428,7 @@ EOF;
 			$this->xml->saveAndUnlock();
 
 			if ($participant->getAttribute('payment-timestamp')) {
-				$url = $hyphaUrl . $hyphaLanguage . '/' . $this->pagename . '/contribute/' . $participant->getAttribute('xml:id') . '/' . $participant->getAttribute('key');
+				$url = $hyphaUrl . $hyphaContentLanguage . '/' . $this->pagename . '/contribute/' . $participant->getAttribute('xml:id') . '/' . $participant->getAttribute('key');
 				notify('success', __('festival-successful-payment'));
 				return ['redirect', $url];
 			}
@@ -450,7 +450,7 @@ EOF;
 		 * to the /contribute page.
 		 */
 		function handlePay() {
-			global $hyphaUrl, $hyphaLanguage;
+			global $hyphaUrl, $hyphaContentLanguage;
 			$this->xml->lockAndReload();
 			$participant = $this->checkKeyArguments(['participant']);
 			if(!$participant) {
@@ -467,7 +467,7 @@ EOF;
 			// contribute page. Otherwise, redirect to
 			// payment provider.
 			if (!$url)
-				$url = $hyphaUrl . $hyphaLanguage . '/' . $this->pagename . '/contribute/' . $participant->getAttribute('xml:id') . '/' . $participant->getAttribute('key');
+				$url = $hyphaUrl . $hyphaContentLanguage . '/' . $this->pagename . '/contribute/' . $participant->getAttribute('xml:id') . '/' . $participant->getAttribute('key');
 
 			return ['redirect', $url];
 		}
@@ -529,7 +529,7 @@ EOF;
 		 * Handle the contribution form.
 		 */
 		function handleContribute() {
-			global $hyphaUrl, $hyphaLanguage, $hyphaPage, $hyphaUser;
+			global $hyphaUrl, $hyphaContentLanguage, $hyphaPage, $hyphaUser;
 			$this->xml->lockAndReload();
 
 			$obj = $this->checkKeyArguments(['contribution', 'participant'], true);
@@ -588,7 +588,7 @@ EOF;
 			$notes->setText($form->dataFor('notes', ''));
 
 			$this->xml->saveAndUnlock();
-			$edit_url = $hyphaUrl . $hyphaLanguage . '/' . $this->pagename . '/contribute/' . $contribution->getAttribute('xml:id') . '/' . $contribution->getAttribute('key');
+			$edit_url = $hyphaUrl . $hyphaContentLanguage . '/' . $this->pagename . '/contribute/' . $contribution->getAttribute('xml:id') . '/' . $contribution->getAttribute('key');
 
 			if (isUser()) {
 				$name = htmlspecialchars(getNameForUser());
@@ -613,7 +613,7 @@ EOF;
 			writeToDigest($digest, 'festival-contribution');
 
 			if (!$editing && $email) {
-				$edit_url = $hyphaUrl . $hyphaLanguage . '/' . $this->pagename . '/contribute/' . $contribution->getAttribute('xml:id') . '/' . $contribution->getAttribute('key');
+				$edit_url = $hyphaUrl . $hyphaContentLanguage . '/' . $this->pagename . '/contribute/' . $contribution->getAttribute('xml:id') . '/' . $contribution->getAttribute('key');
 				$append = '<p><a href="'.htmlspecialchars($edit_url).'">'.__('festival-edit-contribution') . '</a></p>';
 				$this->sendMail($email, 'mail-added-contribution', $append);
 			}
@@ -623,7 +623,7 @@ EOF;
 			else
 				notify('success', __('festival-contribution-added'));
 
-			$lineup_url = $hyphaUrl . $hyphaLanguage . '/' . $this->pagename . '/lineup';
+			$lineup_url = $hyphaUrl . $hyphaContentLanguage . '/' . $this->pagename . '/lineup';
 			return ['redirect', $lineup_url];
 		}
 
@@ -645,12 +645,12 @@ EOF;
 		 * lineup.
 		 */
 		function buildContribution($contribution) {
-			global $hyphaUrl, $hyphaLanguage;
+			global $hyphaUrl, $hyphaContentLanguage;
 			$html = '<div class="infoact">';
 			// artist and title
 			$id = $contribution->getAttribute('xml:id');
-			$url = $hyphaUrl . $hyphaLanguage . '/' . $this->pagename . '/lineup#' . $id;
-			$editurl = $hyphaLanguage .'/'.$this->pagename.'/contribute/'.$contribution->getAttribute('xml:id');
+			$url = $hyphaUrl . $hyphaContentLanguage . '/' . $this->pagename . '/lineup#' . $id;
+			$editurl = $hyphaContentLanguage .'/'.$this->pagename.'/contribute/'.$contribution->getAttribute('xml:id');
 
 			$title = '';
 			if ($contribution->getAttribute('category'))
@@ -721,7 +721,7 @@ EOF;
 		}
 
 		function showTimetable() {
-			global $hyphaHtml, $hyphaLanguage, $hyphaUrl;
+			global $hyphaHtml, $hyphaContentLanguage, $hyphaUrl;
 
 			// Make a list of all days, and per day all
 			// locations and the begin and end time.
@@ -810,7 +810,7 @@ EOF;
 							$id = "a".$d.'_'.$l.'_'.$r;
 							if ($timeslot[0] - $t) $html.= '<td class="'.($line%2 ? 'tableRowOdd' : 'tableRowEven').'" colspan="'.($timeslot[0] - $t).'"></td>';
 							//$html.= '<td id="'.$id.'" class="hover tableAct '.($line%2 ? 'tableRowOddAct' : 'tableRowEvenAct').'" colspan="'.($timeslot[1] - $timeslot[0]).'" onmouseover="showhide(\''.$id.'\',-120,0,\'act\',\''.$timeslot[3].'\');" onmouseout="showhide();">'.$timeslot[2];
-							$lineup_url = $hyphaUrl . $hyphaLanguage . '/' . $this->pagename . '/lineup';
+							$lineup_url = $hyphaUrl . $hyphaContentLanguage . '/' . $this->pagename . '/lineup';
 							$html.= '<td id="'.$id.'" class="hover tableAct '.($line%2 ? 'tableRowOddAct' : 'tableRowEvenAct').'" colspan="'.($timeslot[1] - $timeslot[0]).'"><a href="'.htmlspecialchars($lineup_url).'#'.htmlspecialchars($timeslot[3]).'">'.htmlspecialchars($timeslot[2]);
 							if ($timeslot[2] && $timeslot[4]) $html.= ' - ';
 							$html.= '<i>'.$timeslot[4].'</i></a></td>';
@@ -860,10 +860,10 @@ EOF;
 		 * Should be called with the XML lock held.
 		 */
 		function createPayment($participant) {
-			global $hyphaUrl, $hyphaLanguage;
+			global $hyphaUrl, $hyphaContentLanguage;
 			$participant->ownerDocument->requireLock();
-			$complete_url = $hyphaUrl . $hyphaLanguage . '/' . $this->pagename . '/pay/' . $participant->getAttribute('xml:id') . '/' . $participant->getAttribute('key');
-			$hook_url = $hyphaUrl . $hyphaLanguage . '/' . $this->pagename . '/paymenthook/' . $participant->getAttribute('xml:id') . '/' . $participant->getAttribute('key');
+			$complete_url = $hyphaUrl . $hyphaContentLanguage . '/' . $this->pagename . '/pay/' . $participant->getAttribute('xml:id') . '/' . $participant->getAttribute('key');
+			$hook_url = $hyphaUrl . $hyphaContentLanguage . '/' . $this->pagename . '/paymenthook/' . $participant->getAttribute('xml:id') . '/' . $participant->getAttribute('key');
 
 			// load Mollie script
 			require_once('system/Mollie/API/Autoloader.php');
@@ -938,14 +938,14 @@ EOF;
 		 * digest.
 		 */
 		function processPaymentChange($participant, $payment, $mail_failed) {
-			global $hyphaUrl, $hyphaLanguage;
+			global $hyphaUrl, $hyphaContentLanguage;
 			$participant->setAttribute('payment-status', $payment->status);
 			if ($payment->isPaid()) {
 				if (!$participant->getAttribute('payment-timestamp')) {
 					$participant->setAttribute('payment-timestamp', $payment->paidDatetime);
 
 					// Send email
-					$contribute_url = $hyphaUrl . $hyphaLanguage . '/' . $this->pagename . '/contribute/' . $participant->getAttribute('xml:id') . '/' . $participant->getAttribute('key');
+					$contribute_url = $hyphaUrl . $hyphaContentLanguage . '/' . $this->pagename . '/contribute/' . $participant->getAttribute('xml:id') . '/' . $participant->getAttribute('key');
 					$append = '<p><a href="'.htmlspecialchars($contribute_url).'">'.__('festival-contribute') . '</a></p>';
 					$this->sendMail($participant->getAttribute('email'), 'mail-signed-up-payed', $append);
 
@@ -968,7 +968,7 @@ EOF;
 			];
 			if (in_array($payment->status, $error_statuses)) {
 				if ($mail_failed) {
-					$pay_url = $hyphaUrl . $hyphaLanguage . '/' . $this->pagename . '/pay/' . $participant->getAttribute('xml:id') . '/' . $participant->getAttribute('key');
+					$pay_url = $hyphaUrl . $hyphaContentLanguage . '/' . $this->pagename . '/pay/' . $participant->getAttribute('xml:id') . '/' . $participant->getAttribute('key');
 					$append = '<p><a href="'.htmlspecialchars($pay_url).'">'.__('festival-restart-payment') . '</a></p>';
 					$this->sendMail($participant->getAttribute('email'), 'mail-payment-failed', $append);
 				}

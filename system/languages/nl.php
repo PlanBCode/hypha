@@ -97,6 +97,7 @@
 		"changed-css" => " CSS layout van de website bewerkt",
 		"changed-html" => " HTML structuur van de website bewerkt",
 		"changed-page" => " van de website is de volgende pagina bewerkt:",
+		"deleted-page" => " heeft de volgende pagina verwijderd: ",
 		"translated-page" => " de volgende pagina is vertaald: ",
 		"reverted-page" => " de volgende pagina is teruggezet naar een oudere versie: ",
 		"granted-admin-rights-to" => " adminrechten zijn toegekend aan ",
@@ -185,6 +186,7 @@
 		"unable-to-edit" => "kan niet worden bewerkt",
 		"missing-arguments" => "argumenten ontbreken",
 		"archive" => "archief",
+		"sure-to-delete" => "Weet je zeker dat je deze pagina wilt verwijderen",
 
 		// festival - digest
 		"festival-edited-contribution" => " heeft festivalbijdrage aangepast: ",
@@ -253,3 +255,5 @@
 		"mailing-sender-email" => "e-mail",
 		"mailing-sender-name" => "naam",
 	);
+
+	return $LANG;
