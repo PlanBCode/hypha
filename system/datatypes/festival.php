@@ -6,8 +6,6 @@
 	timetables.
  */
 
-	$hyphaPageTypes[] = 'festivalpage';
-
 /*
 	Class: festivalpage
 */
@@ -22,6 +20,10 @@
 			registerCommandCallback('contribute', Array($this, 'handleContribute'));
 			registerCommandCallback('pay', Array($this, 'handlePay'));
 			registerCommandCallback('delete', Array($this, 'handleDelete'));
+		}
+
+		public static function getDatatypeName() {
+			return __('datatype.name.festivalpage');
 		}
 
 		function build() {

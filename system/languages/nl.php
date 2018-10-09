@@ -188,6 +188,12 @@
 		"archive" => "archief",
 		"sure-to-delete" => "Weet je zeker dat je deze pagina wilt verwijderen",
 
+		// textpage
+		"datatype.name.textpage" => "webpagina",
+
+		// festival
+		"datatype.name.festivalpage" => "festival pagina",
+
 		// festival - digest
 		"festival-edited-contribution" => " heeft festivalbijdrage aangepast: ",
 		"festival-added-contribution" => " heeft een festivalbijdrage toegevoegd: ",
@@ -221,6 +227,9 @@
 
 		// festival - other
 		"festival-participant-status" => "status",
+
+		// mailing list
+		"datatype.name.mailinglist" => "mailinglist",
 
 		// mailing list
 		"ml-view-addresses" => "bekijk adressen",

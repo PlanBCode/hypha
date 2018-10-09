@@ -6,8 +6,6 @@
 	See Also:
 	<Page>
 */
-	$hyphaPageTypes[] = 'textpage';
-
 	class textpage extends Page {
 		public $xml;
 
@@ -19,6 +17,10 @@
 			registerCommandCallback('textSave', Array($this, 'save'));
 			registerCommandCallback('textRevert', Array($this, 'revert'));
 			registerCommandCallback('textDelete', Array($this, 'delete'));
+		}
+
+		public static function getDatatypeName() {
+			return __('datatype.name.textpage');
 		}
 
 		function build() {

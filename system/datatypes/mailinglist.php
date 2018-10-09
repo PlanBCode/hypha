@@ -10,8 +10,6 @@ require_once __DIR__ . '/../core/WymHTMLForm.php';
 
 use DOMWrap\NodeList;
 
-$hyphaPageTypes[] = 'mailinglist';
-
 /*
 	Class: mailinglist
 */
