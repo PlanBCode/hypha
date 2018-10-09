@@ -482,6 +482,15 @@
 		return hypha_setPage($newPage, $language, $name, $private);
 	}
 
+	function hypha_deletePage($id) {
+		global $hyphaXml;
+		$hyphaXml->requireLock();
+		$targetPage = hypha_getPageById($id);
+		if ($targetPage instanceof HyphaDomElement) {
+			$hyphaXml->getElementsByTagName('pageList')->Item(0)->removeChild($targetPage);
+		}
+	}
+
 	/*
 		Function: hypha_setPage
 		updates page settings. Parameters which are left empty are not updated. Returns false on success, error message on failure.

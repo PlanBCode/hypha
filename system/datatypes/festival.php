@@ -21,6 +21,7 @@
 			registerCommandCallback('signup', Array($this, 'handleSignup'));
 			registerCommandCallback('contribute', Array($this, 'handleContribute'));
 			registerCommandCallback('pay', Array($this, 'handlePay'));
+			registerCommandCallback('delete', Array($this, 'handleDelete'));
 		}
 
 		function build() {
@@ -54,6 +55,12 @@
 				$action = makeAction($this->language . '/' . $this->pagename . '/timetable', '', '');
 				$button = makeButton(__('festival-timetable'), $action);
 				$commands->append($button);
+
+				if (isAdmin()) {
+					$action = 'if(confirm(\'' . __('sure-to-delete') . '\'))' . makeAction($this->language . '/' . $this->pagename, 'delete', '');
+					$button = makeButton(__('delete'), $action);
+					$commands->append($button);
+				}
 			}
 
 			switch ($this->getArg(0)) {
@@ -282,6 +289,18 @@ EOF;
 			$this->setConfig('festival-title', $form->dataFor('festival-title'));
 			$this->xml->saveAndUnlock();
 			return 'reload';
+		}
+
+		function handleDelete() {
+			// throw error if delete is requested without admin logged in
+			if (!isAdmin()) return notify('error', __('login-as-admin-to-delete'));
+
+			global $hyphaUrl;
+
+			$this->deletePage();
+
+			notify('success', ucfirst(__('page-successfully-deleted')));
+			return ['redirect', $hyphaUrl];
 		}
 
 		/**

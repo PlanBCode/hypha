@@ -21,6 +21,21 @@
 				$this->replacePageListNode($node);
 		}
 
+		protected function deletePage() {
+			global $hyphaXml, $hyphaUser;
+			$id = $this->pageListNode->getAttribute('id');
+			$hyphaXml->lockAndReload();
+			hypha_deletePage($id);
+			$hyphaXml->saveAndUnlock();
+
+			$file = 'data/pages/' . $id;
+			if (file_exists($file)) {
+				unlink($file);
+			}
+
+			writeToDigest($hyphaUser->getAttribute('fullname').__('deleted-page').$this->language.'/'.$this->pagename, 'page delete');
+		}
+
 		protected function replacePageListNode($node) {
 			global $O_O;
 			$this->pageListNode = $node;
