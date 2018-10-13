@@ -6,10 +6,12 @@
 		Parameters:
 		$msgid - identifier used as a key to fetch the corresponding string from the dictionary.
 	*/
-	function __($msgid) {
+	function __($msgid, $args = null) {
 		global $O_O;
 		$hyphaDictionary = $O_O->getDictionary();
-		return array_key_exists($msgid, $hyphaDictionary) ? $hyphaDictionary[$msgid] : $msgid;
+		$msg = array_key_exists($msgid, $hyphaDictionary) ? $hyphaDictionary[$msgid] : $msgid;
+		if ($args) foreach($args as $key => $val) $msg = str_replace('[['.$key.']]', $val, $msg);
+		return $msg;
 	}
 
 	/*
