@@ -172,18 +172,44 @@
 				break;
 			case HyphaRequest::HYPHA_SYSTEM_PAGE_UPLOAD:
 				if ($args[0]=='image') {
-					if(!$_FILES['wymFile']) $response = __('too-big-file').ini_get('upload_max_filesize');
+					$return = null;
+					if(!$_FILES['uploadedfile']) $response = __('too-big-file').ini_get('upload_max_filesize');
 					else {
-						$ext = strtolower(substr(strrchr($_FILES['wymFile']['name'], '.'), 1));
-						@$size = getimagesize($_FILES['wymFile']['tmp_name']);
+						$ext = strtolower(substr(strrchr($_FILES['uploadedfile']['name'], '.'), 1));
+						@$size = getimagesize($_FILES['uploadedfile']['tmp_name']);
 						if(!$size || !in_array($ext, array('jpg','jpeg','png','gif','bmp'))) $response = __('invalid-image-file').ini_get('upload_max_filesize');
 						else {
-							$filename = uniqid().'.'.$ext;
-							if(!move_uploaded_file($_FILES['wymFile']['tmp_name'], 'data/images/'.$filename)) $response = __('server-error');
-							else $response = 'images/'.$filename;
+							$maxSize = [1120, 800];
+							$needResize = $size[0] > $maxSize[0] || $size[1] > $maxSize[1];
+							$filename = uniqid() . '.' . $ext;
+							$destinations = ['org' => 'data/images/org/' . $filename, 'img' => 'data/images/' . $filename];
+							$destinationPaths = ['org' => 'images/org/' . $filename, 'img' => 'images/' . $filename];
+							if ($needResize && !file_exists('data/images/org/')) {
+								mkdir('data/images/org/', 0777, true);
+							}
+							$orgUrlIndex = $needResize ? 'org' : 'img';
+							if (move_uploaded_file($_FILES['uploadedfile']['tmp_name'], $destinations[$orgUrlIndex])) {
+								$response = 'images/' . $filename . '?' . 'w=' . $size[0] . '&h=' . $size[1];
+								if ($needResize) {
+									if (true !== image_resize($destinations[$orgUrlIndex], $destinations['img'], $maxSize[0], $maxSize[1])) {
+										$response = __('server-error-resize-image');
+									}
+								}
+								$return = [[
+									'original_filename' => $_FILES['uploadedfile']['name'],             // The original filename, this will be put in as the "alt" text
+									'downloadUrl'       => $hyphaUrl . $destinationPaths[$orgUrlIndex], // The URL to the original file to be downloaded. This is not used by image_upload, but by site_links
+									'thumbUrl'          => $hyphaUrl . $destinationPaths['img'],        // The URL to be used, it's called a Thumb URL because you may have used $_POST['thumbnailSize'] to resize it. This is used by site_links but not image_upload
+								]];
+							} else {
+								$response = __('server-error');
+							}
 						}
 					}
-					echo '<script language="javascript" type="text/javascript">window.top.window.uploadResponse(\''.$response.'\');</script>';
+					if ($return !== null) {
+						echo json_encode($return);
+					} else {
+						echo '<script language="javascript" type="text/javascript">window.top.window.uploadResponse(\''.$response.'\');</script>';
+					}
 				}
 				exit;
 			case HyphaRequest::HYPHA_SYSTEM_PAGE_CHOOSER:
@@ -444,4 +470,42 @@
 		}
 		else $html = __('no-versions');
 		return $html;
+	}
+
+	function image_resize($src, $dst, $width, $height) {
+		list($w, $h) = getimagesize($src);
+
+		$type = strtolower(substr(strrchr($src,"."),1));
+		if ($type == 'jpeg') $type = 'jpg';
+		switch ($type) {
+			case 'bmp': $img = imagecreatefromwbmp($src); break;
+			case 'gif': $img = imagecreatefromgif($src); break;
+			case 'jpg': $img = imagecreatefromjpeg($src); break;
+			case 'png': $img = imagecreatefrompng($src); break;
+			default : return "Unsupported picture type!";
+		}
+
+		// resize
+		$ratio = min($width/$w, $height/$h);
+		$width = $w * $ratio;
+		$height = $h * $ratio;
+
+		$new = imagecreatetruecolor($width, $height);
+
+		// preserve transparency
+		if ($type == 'gif' || $type == 'png') {
+			imagecolortransparent($new, imagecolorallocatealpha($new, 0, 0, 0, 127));
+			imagealphablending($new, false);
+			imagesavealpha($new, true);
+		}
+
+		imagecopyresampled($new, $img, 0, 0, 0, 0, $width, $height, $w, $h);
+
+		switch($type){
+			case 'bmp': imagewbmp($new, $dst); break;
+			case 'gif': imagegif($new, $dst); break;
+			case 'jpg': imagejpeg($new, $dst); break;
+			case 'png': imagepng($new, $dst); break;
+		}
+		return true;
 	}
