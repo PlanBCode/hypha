@@ -68,6 +68,9 @@
 	if (startsWith($hyphaQuery, 'system/wymeditor')) serveFile($hyphaQuery, 'system/wymeditor');
 	if (startsWith($hyphaQuery, 'system/bowser')) serveFile($hyphaQuery, 'system/bowser');
 
+	// jump to installation procedure when hypha.xml is missing
+	if (!is_file('data/hypha.xml')) header('Location: ' . $hyphaUrl . 'hypha.php');
+
 	/*
 		Group: Stage 4 - Load website data
 		Website data is loaded, see chapter about <Base> functions. The HTMLDocument $hyphaHtml is loaded with the website default layout.

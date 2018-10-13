@@ -41,7 +41,6 @@
 	include_once ('language.php');
 	include_once ('crypto.php');
 
-	if (!is_file('data/hypha.xml')) die('serious error: missing system file hypha.xml');
 	$hyphaXml = new Xml('project', Xml::multiLingualOff, Xml::versionsOff);
 	$hyphaXml->loadFromFile('data/hypha.xml');
 
