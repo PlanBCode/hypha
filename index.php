@@ -45,7 +45,10 @@
 
 	foreach (scandir("system/core/") as $_file) if (substr($_file, -4) == '.php') require_once("system/core/" . $_file);
 
+	$pageTypeIndex = count(get_declared_classes()) -1;
 	foreach (scandir("system/datatypes/") as $_file) if (substr($_file, -4) == '.php') include_once("system/datatypes/" . $_file);
+	$hyphaPageTypes = [];
+	foreach (array_slice(get_declared_classes(), $pageTypeIndex) as $class) if (in_array('Page', class_parents($class)) && (new \ReflectionClass($class))->isInstantiable()) $hyphaPageTypes[] = $class;
 
 	foreach (scandir("system/languages/") as $_file) if (substr($_file, -4) == '.php') $uiLangList[] = basename($_file, '.php');
 

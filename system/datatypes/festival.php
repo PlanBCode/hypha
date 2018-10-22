@@ -6,8 +6,6 @@
 	timetables.
  */
 
-	$hyphaPageTypes[] = 'festivalpage';
-
 /*
 	Class: festivalpage
 */

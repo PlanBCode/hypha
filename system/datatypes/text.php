@@ -6,8 +6,6 @@
 	See Also:
 	<Page>
 */
-	$hyphaPageTypes[] = 'textpage';
-
 	class textpage extends Page {
 		public $xml;
 
