@@ -128,7 +128,11 @@
 		$_cmds[] = '<a href="javascript:login();">'.__('login').'</a>';
 	}
 	else {
-		addNewPageRoutine($hyphaHtml, explode('/', $hyphaQuery), $hyphaPageTypes);
+		$dataTypeMtx = [];
+		foreach ($hyphaPageTypes as $className) {
+			$dataTypeMtx[$className] = call_user_func($className . '::getDatatypeName');
+		}
+		addNewPageRoutine($hyphaHtml, explode('/', $hyphaQuery), $dataTypeMtx);
 		$_cmds[] = makeLink(__('new-page'), 'newPage();');
 		$_cmds[] = makeLink(__('settings'), makeAction('settings', '', ''));
 		$_cmds[] = makeLink(__('logout'), makeAction($hyphaQuery, 'logout', ''));
