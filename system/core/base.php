@@ -533,6 +533,29 @@
 		return false;
 	}
 
+	function hypha_setBodyClass(HyphaRequest $hyphaRequest, $hyphaPage) {
+		/** @var \DOMWrap\NodeList $bodyElement */
+		$bodyElement = $hyphaPage->html->find('body');
+		$classes = explode(' ', $bodyElement->attr('class'));
+		if (isset($hyphaPage->pagename)) {
+			$classes[] = $hyphaPage->pagename;
+			if ($hyphaPage->pagename === hypha_getDefaultPage()) {
+				$classes[] = 'is_home';
+			}
+		}
+		$classes[] = isUser() ? 'is_logged_in' : '';
+		$classes[] = isAdmin() ? 'is_admin' : '';
+		$classes[] = 'type_' . get_class($hyphaPage);
+
+		if ($hyphaRequest->getLanguage()) {
+			$classes[] = 'lang_' . $hyphaRequest->getLanguage();
+		}
+		if ($hyphaRequest->isSystemPage()) {
+			$classes[] = implode('_', $hyphaRequest->getRelativeUrlPathParts());
+		}
+		$bodyElement->attr('class', implode(' ', array_filter($classes)));
+	}
+
 	/*
 		Function: hypha_make_absolute
 		If the url is relative, make it absolute by prefixing $hyphaUrl.
@@ -664,34 +687,35 @@
 		// get list of available pages and sort alphabetically
 		foreach(hypha_getPageList() as $page) {
 			$lang = hypha_pageGetLanguage($page, $language);
-			if ($lang) if (isUser() || ($page->getAttribute('private')!='on')) $pageList[] = $lang->getAttribute('name').($page->getAttribute('private')=='on' ? '&#;' : '');
+			if ($lang) if (isUser() || ($page->getAttribute('private')!='on')) {
+				$pageList[] = $lang->getAttribute('name').($page->getAttribute('private')=='on' ? '&#;' : '');
+				$pageListDatatype[$lang->getAttribute('name')] = $page->getAttribute('type');
+			}
 		}
 		if ($pageList) array_multisort(array_map('strtolower', $pageList), $pageList);
 
 		// add capitals
 		$capital = 'A';
+		$first = true;
 		if ($pageList) foreach($pageList as $pagename) {
 			while($capital < strtoupper($pagename[0])) $capital++;
 			if (strtoupper($pagename[0]) == $capital) {
-				$htmlList[] = '<div style="text-align:center;">- '.$capital.' -</div>';
+				if (!$first) {
+					$htmlList[] = '</div>';
+				}
+				$htmlList[] = '<div class="letter-wrapper">';
+				$htmlList[] = '<div class="letter">'.$capital.'</div>';
 				$capital++;
+				$first = false;
 			}
 			$privatePos = strpos($pagename, '&#;');
 			if ($privatePos) $pagename = substr($pagename, 0, $privatePos);
-			$htmlList[] = '<a href="'.$language.'/'.$pagename.'">'.showPagename($pagename).'</a>'.asterisk($privatePos).'<br/>';
+			$htmlList[] = '<div class="index-item type_'.$pageListDatatype[$pagename].'"><a href="'.$language.'/'.$pagename.'">'.showPagename($pagename).'</a>'.asterisk($privatePos).'</div>';
 		}
 
-		// output list in a maximum of 3 colunms with a minimum of 10 lines per column
-		$lines = count($htmlList);
-		$columns = min($lines/10, 3);
-		$i = 0;
-		$html = '<table><tr>';
-		for ($column=1; $column<$columns+1; $column++) {
-			$html.= '<td>';
-			while($i<$lines && $i<$lines*$column/$columns) $html.= $htmlList[$i++];
-			$html.= '</td>';
-		}
-		$html.= '</tr></table>';
+		$html = '<div class="index">';
+		foreach($htmlList as $htmlLine) $html.= $htmlLine;
+		$html.= '</div>';
 		return $html;
 	}
 

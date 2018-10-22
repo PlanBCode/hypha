@@ -65,6 +65,8 @@
 
 	// Shortcut for direct file requests
 	if ($hyphaQuery == 'data/hypha.css') serveFile($hyphaQuery, false);
+	if ($hyphaQuery == 'data/css/normalize.css') serveFile($hyphaQuery, false);
+	if (strpos($hyphaQuery, 'data/fonts/') === 0) serveFile($hyphaQuery, false);
 	if (startsWith($hyphaQuery, 'system/wymeditor')) serveFile($hyphaQuery, 'system/wymeditor');
 	if (startsWith($hyphaQuery, 'system/bowser')) serveFile($hyphaQuery, 'system/bowser');
 
@@ -143,11 +145,13 @@
 		$_cmds[] = makeLink(__('settings'), makeAction('settings', '', ''));
 		$_cmds[] = makeLink(__('logout'), makeAction($hyphaQuery, 'logout', ''));
 	}
-	$hyphaHtml->writeToElement('hyphaCommands', implode(' - ', $_cmds));
-	if ($O_O->isUser()) $hyphaHtml->writeToElement('hyphaCommands', '<br/><span id="loggedIn">'.__('logged-in-as').' `'.$O_O->getUser()->getAttribute('username').'`'.asterisk(isAdmin()).'</span>');
+	$hyphaHtml->writeToElement('hyphaCommands', implode('', $_cmds));
+	if ($O_O->isUser()) $hyphaHtml->writeToElement('hyphaCommands', '<br/><div id="loggedIn">'.__('logged-in-as').' `'.$O_O->getUser()->getAttribute('username').'`'.asterisk(isAdmin()).'</div>');
 
 	// obfuscate email addresses to strangers. It's ok to send readable addresses to logged in members. This also prevents conflicts in the editor.
 //	if (!$O_O->isUser()) registerPostProcessingFunction('obfuscateEmail');
+
+	if ($hyphaPage) hypha_setBodyClass($hyphaRequest, $hyphaPage);
 
 	// poor man's cron job
 	if (time() - hypha_getLastDigestTime() >= hypha_getDigestInterval()) flushDigest();
