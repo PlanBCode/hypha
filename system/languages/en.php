@@ -97,6 +97,7 @@
 		"changed-css" => " edited the website's CSS layout",
 		"changed-html" => " edited the website's HTML structure",
 		"changed-page" => " edited the following page: ",
+		"deleted-page" => " deleted the following page: ",
 		"translated-page" => " translated the following page: ",
 		"reverted-page" => " reverted the following page to an older version: ",
 		"granted-admin-rights-to" => " granted admin rights to ",
@@ -185,6 +186,7 @@
 		"unable-to-edit" => "unable to edit",
 		"missing-arguments" => "missing arguments",
 		"archive" => "archive",
+		"sure-to-delete" => "Are you sure you want to delete this page",
 
 		// festival - digest
 		"festival-edited-contribution" => " edited contribution: ",
