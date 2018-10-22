@@ -1470,96 +1470,25 @@ WYMeditor.editor.prototype.dialog = function (
         return false;
     }
 
-    if (pDialogWindowFeatures) {
-        // Provided argument
-        dialogWindowFeatures = pDialogWindowFeatures;
-    } else if (dialogObject && dialogObject.getWindowFeatures) {
-        // Dialog's code
-        dialogWindowFeatures = dialogObject.getWindowFeatures.call(wym);
-    } else if (options.dialogFeatures) {
-        // Provided option
-        dialogWindowFeatures = options.dialogFeatures;
-    } else {
-        // Default
-        dialogWindowFeatures = [
-            "menubar=no",
-            "titlebar=no",
-            "toolbar=no",
-            "resizable=no",
-            "width=560",
-            "height=300",
-            "top=0",
-            "left=0"
-        ].join(",");
-    }
+    // Close any existing dialog, just in case
+    if (wym.opened_dialog)
+        wym.opened_dialog.close();
 
-    wDialog = wym._openPopupWindow(dialogWindowFeatures);
-
-    if (
-        typeof wDialog !== "object" ||
-        wDialog.window !== wDialog
-    ) {
-        WYMeditor.console.warn("Could not create a dialog window");
-        return false;
-    }
-
-    // In the case where a dialog window already exists, it will be reused.
-    // If it is in the background, behind another window, without the following
-    // `focus` call, it will remain in the background and the user may not
-    // understand where it is. This `focus` call brings the dialog to the
-    // foreground, making reasonably sure the user notices it.
-    wDialog.focus();
-
-    // Construct the dialog
-    dialogHtml = options.dialogHtml || String() +
-        '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" ' +
-                '"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">' +
-        '<html dir="' + WYMeditor.DIRECTION + '">' +
-            '<head>' +
-                '<title>' + WYMeditor.DIALOG_TITLE + '</title>' +
-            '</head>' +
-            WYMeditor.DIALOG_BODY +
-        '</html>';
-
-    // HTML template replacements
-    htmlStrReplacements = [
-        {
-            placeholder: WYMeditor.DIRECTION,
-            replacement: options.direction
-        },
-        {
-            placeholder: WYMeditor.DIALOG_TITLE,
-            replacement: dialogObject ?
-                wym._encloseString(dialogObject.title) : "Dialog"
-        },
-        {
-            placeholder: WYMeditor.DIALOG_BODY,
-            replacement: pBodyHtml || dialogObject.getBodyHtml.call(wym)
-        }
-    ];
-
-    // Perform HTML template replacements
-    for (i = 0; i < htmlStrReplacements.length; i++) {
-        dialogHtml = WYMeditor.Helper.replaceAllInStr(
-            dialogHtml,
-            htmlStrReplacements[i].placeholder,
-            htmlStrReplacements[i].replacement
-        );
-    }
-
+    dialogHtml = pBodyHtml || dialogObject.getBodyHtml.call(wym);
     dialogHtml = wym.replaceStrings(dialogHtml);
+    dialogHtml = '<div class="wym_dialog">' + dialogHtml + '</div>';
+    dialog = jQuery(dialogHtml).insertAfter(wym.element);
 
-    doc = wDialog.document;
-    doc.write(dialogHtml);
     if (dialogObject && dialogObject.getBodyClass) {
-        jQuery(doc.body).addClass(dialogObject.getBodyClass.call(wym));
+        jQuery(dialog).addClass(dialogObject.getBodyClass.call(wym));
     }
-    doc.close();
 
-    selectedContainer = wym.selectedContainer();
-
-    wDialog.onbeforeunload = function () {
-        wym.focusOnDocument();
+    // Fake a popup window object
+    wDialog = wym.opened_dialog = {
+        close: function() {
+            dialog.remove();
+            wym.opened_dialog = undefined;
+        }
     };
 
     // Pre-init function
@@ -1573,14 +1502,18 @@ WYMeditor.editor.prototype.dialog = function (
     }
 
     if (dialogObject && dialogObject.submitHandler) {
-        jQuery("form", doc).submit(function () {
+        // TODO: One alternative could be to remove this code and let
+        // dialogObject.initialize() register its own handler (and use
+        // it's own class or id for the form).
+        jQuery("form.wym_dialog_submit", dialog).submit(function () {
             dialogObject.submitHandler.call(wym, wDialog);
         });
     }
 
     // Cancel button
-    jQuery(options.cancelSelector, doc).click(function () {
+    jQuery(options.cancelSelector, dialog).click(function () {
         wDialog.close();
+        wym.focusOnDocument();
     });
 
     // Post-init function
@@ -1620,7 +1553,7 @@ WYMeditor.DIALOGS = {
         getBodyHtml: function () {
             var wym = this;
             return wym._options.dialogLinkHtml || String() +
-                '<form>' +
+                '<form class="wym_dialog_submit">' +
                     '<fieldset>' +
                         '<input type="hidden" class="wym_dialog_type" ' +
                             'value="' + WYMeditor.DIALOG_LINK + '" />' +
@@ -1714,7 +1647,7 @@ WYMeditor.DIALOGS = {
         getBodyHtml: function () {
             var wym = this;
             return wym._options.dialogImageHtml || String() +
-                '<form>' +
+                '<form class="wym_dialog_submit">' +
                     '<fieldset>' +
                         '<input type="hidden" class="wym_dialog_type" ' +
                             'value="' + WYMeditor.DIALOG_IMAGE + '" />' +
@@ -1814,7 +1747,7 @@ WYMeditor.DIALOGS = {
         getBodyHtml: function () {
             var wym = this;
             return wym._options.dialogTableHtml || String() +
-                '<form>' +
+                '<form class="wym_dialog_submit">' +
                     '<fieldset>' +
                         '<input type="hidden" class="wym_dialog_type" ' +
                             'value="' + WYMeditor.DIALOG_TABLE + '" />' +
@@ -1874,7 +1807,7 @@ WYMeditor.DIALOGS = {
         getBodyHtml: function () {
             var wym = this;
             return wym._options.dialogPasteHtml || String() +
-                '<form>' +
+                '<form class="wym_dialog_submit">' +
                     '<input type="hidden" class="wym_dialog_type" ' +
                         'value="' + WYMeditor.DIALOG_PASTE + '" />' +
                     '<fieldset>' +
@@ -2156,7 +2089,7 @@ WYMeditor.editor.prototype._init = function () {
 
     wym._iframe = jQuery(wym._box).find('iframe')[0];
 
-    jQuery(wym._iframe).load(function () {
+    jQuery(wym._iframe).on('load', function () {
         wym._onEditorIframeLoad(wym);
     });
 
