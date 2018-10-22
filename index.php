@@ -43,17 +43,11 @@
 		- *languages* Compile a list of available user interface languages
 	*/
 
-	$_handle = opendir("system/core/");
-	while ($_file = readdir($_handle)) if (substr($_file, -4) == '.php') require_once("system/core/".$_file);
-	closedir($_handle);
+	foreach (scandir("system/core/") as $_file) if (substr($_file, -4) == '.php') require_once("system/core/" . $_file);
 
-	$_handle = opendir("system/datatypes/");
-	while ($_file = readdir($_handle)) if (substr($_file, -4) == '.php') include_once("system/datatypes/".$_file);
-	closedir($_handle);
+	foreach (scandir("system/datatypes/") as $_file) if (substr($_file, -4) == '.php') include_once("system/datatypes/" . $_file);
 
-	$_handle = opendir("system/languages/");
-	while ($_file = readdir($_handle)) if (substr($_file, -4) == '.php') $uiLangList[] = basename($_file, '.php');
-	closedir($_handle);
+	foreach (scandir("system/languages/") as $_file) if (substr($_file, -4) == '.php') $uiLangList[] = basename($_file, '.php');
 
 	/*
 		Group: Stage 3 - Get query and handle direct file requests
