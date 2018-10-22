@@ -43,7 +43,7 @@
 		protected function replacePageListNode($node) {
 			global $O_O;
 			$this->pageListNode = $node;
-			$this->privateFlag = ($node->getAttribute('private') == 'on' ? true : false);
+			$this->privateFlag = in_array($node->getAttribute('private'), ['true', '1', 'on']);
 			$language = hypha_pageGetLanguage($node, $O_O->getContentLanguage());
 			$this->language = $language->getAttribute('id');
 			$this->pagename = $language->getAttribute('name');
@@ -133,7 +133,8 @@
 			}
 			$_node = hypha_getPage($O_O->getContentLanguage(), $_name);
 
-			if ($_node) {
+			$isPrivate = in_array($_node->getAttribute('private'), ['true', '1', 'on']);
+			if ($_node && (!$isPrivate || isUser())) {
 				$_type = $_node->getAttribute('type');
 				$hyphaPage = new $_type($_node, $args);
 
@@ -142,7 +143,11 @@
 					hypha_incrementStats(hypha_getLastDigestTime() + hypha_getDigestInterval());
 			} else {
 				http_response_code(404);
-				notify('error', __('no-page'));
+				if ($isPrivate && !isUser()) {
+					notify('error', __('login-to-view'));
+				} else {
+					notify('error', __('no-page'));
+				}
 				if (isUser()) $hyphaHtml->writeToElement('main', '<span class="right""><input type="button" class="button" value="' . __('create') . '" onclick="newPage();"></span>');
 				$hyphaPage = false;
 			}
