@@ -258,3 +258,5 @@
 		"mailing-sender-email" => "email",
 		"mailing-sender-name" => "name",
 	);
+
+	return $LANG;

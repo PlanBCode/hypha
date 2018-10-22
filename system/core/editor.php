@@ -12,10 +12,6 @@
 	*/
 	$jquerySource = 'http://code.jquery.com/jquery-1.7.1.min.js';
 	$jqueryuiSource = 'https://code.jquery.com/ui/1.11.4/jquery-ui.min.js';
-	$wymeditorSources = [
-		$hyphaUrl.'system/wymeditor/jquery.wymeditor.min.js',
-		$hyphaUrl.'system/wymeditor/plugins/embed/jquery.wymeditor.embed.js',
-	];
 
 	/*
 		Function: loadEditor
@@ -27,18 +23,24 @@
 
 	registerPostProcessingFunction('loadEditor');
 	function loadEditor($html) {
+		global $O_O;
 		global $jquerySource;
 		global $jqueryuiSource;
-		global $wymeditorSources;
-		global $hyphaUrl;
-		global $hyphaLanguage;
+
+		$rootUrl = $O_O->getRequest()->getRootUrl();
+		$language = $O_O->getContentLanguage();
+
+		$wymeditorSources = [
+			$rootUrl.'system/wymeditor/jquery.wymeditor.min.js',
+			$rootUrl.'system/wymeditor/plugins/embed/jquery.wymeditor.embed.js',
+		];
 
 		// only add the editor code when the document contains an <editor> element
 		if ($html->getElementsByTagName('editor')->length) {
 			$html->linkScript($jquerySource);
 			foreach ($wymeditorSources as $src)
 				$html->linkScript($src);
-			$html->linkStyle($hyphaUrl.'system/wymeditor/skins/default/skin.css');
+			$html->linkStyle($rootUrl.'system/wymeditor/skins/default/skin.css');
 
 			/*
 				Section: jQuery wymeditor
@@ -53,7 +55,7 @@
 				Property: iframeBasePath
 				Basic WYMeditor markup to start from
 			*/
-			iframeBasePath: "<?=$hyphaUrl?>system/wymeditor/iframe/pretty/",
+			iframeBasePath: "<?=$rootUrl?>system/wymeditor/iframe/pretty/",
 			/*
 				Property: boxHtml
 				Customizes the XHTML structure of WYMeditor.
@@ -69,7 +71,7 @@
 			*/
 			dialogHtml: "<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>\n"
 				+ "<html><head>\n"
-				+ "<link rel='stylesheet' type='text/css' media='screen' href='<?=$hyphaUrl?>data/hypha.css' />\n"
+				+ "<link rel='stylesheet' type='text/css' media='screen' href='<?=$rootUrl?>data/hypha.css' />\n"
 				+ "<link rel='stylesheet' type='text/css' href='//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css' />\n"
 				+ "<title>" + WYMeditor.DIALOG_TITLE + "</title>\n"
 				+ "<script type='text/javascript' src='<?=$jquerySource?>'><\/script>\n"
@@ -82,7 +84,7 @@
 				+ "	if (response.charAt(0) == '~') alert(response.substring(1));\n"
 				+ "	else {\n"
 				+ "		window.opener.WYMeditor.INSTANCES[0].insert('<img id=\"hyphaInsertImage\" alt=\"' + jQuery(document.body).find('input[name=wymAlt]').val() + '\" title=\"' + jQuery(document.body).find('input[name=wymTitle]').val() + '\"/>');\n"
-				+ "		jQuery(window.opener.WYMeditor.INSTANCES[0]._doc.body).find('#hyphaInsertImage').attr('src', '<?=$hyphaUrl?>' + response);\n"
+				+ "		jQuery(window.opener.WYMeditor.INSTANCES[0]._doc.body).find('#hyphaInsertImage').attr('src', '<?=$rootUrl?>' + response);\n"
 				+ "		jQuery(window.opener.WYMeditor.INSTANCES[0]._doc.body).find('#hyphaInsertImage').removeAttr('id');\n"
 				+ " }\n"
 				+ "	window.close();\n"
@@ -181,8 +183,8 @@
 
 		// if existing link is edited retrieve link parameters
 		if (selObj) {
-			var href = selObj.attr('href').replace('<?=$hyphaUrl?>', '');
-			var match = /^<?=$hyphaLanguage?>\/([^\/]*)$/.exec(href);
+			var href = selObj.attr('href').replace('<?=$rootUrl?>', '');
+			var match = /^<?=$language?>\/([^\/]*)$/.exec(href);
 			if (match !== null) {
 				wdw.$('#selectLinkSourceLocal').attr('checked', 'checked');
 				jQuery(body).filter('.wym_dialog_link').find('.wymLinkUrl').css("display", "none");
@@ -202,7 +204,7 @@
 		}
 		else wdw.$('#localLinkName').val(selection.toString());
 
-		wdw.$('#localLinkName').autocomplete({source:"<?=$hyphaUrl?>chooser/<?=$hyphaLanguage?>/"});
+		wdw.$('#localLinkName').autocomplete({source:"<?=$rootUrl?>chooser/<?=$language?>/"});
 
 		// FIXME: add if statement to see if we'll have link dialog...
 		jQuery(body).find('input[name=wymHypharef]').focus();
@@ -228,7 +230,7 @@
 			switch(jQuery(body).find('input:radio[name=linkType]:checked').val()) {
 				case 'local':
 					var page = jQuery(body).find('input[name=wymHypharef]').val();
-					var href = '<?=$hyphaUrl?><?=$hyphaLanguage?>/' + page.replace(/\s/g, '_');
+					var href = '<?=$rootUrl?><?=$language?>/' + page.replace(/\s/g, '_');
 					if (selObj) selObj.replaceWith('<a href="' + href + '">' + page + '</a>');
 					else wym.link({href:href});
 					break;
@@ -271,7 +273,7 @@
 					break;
 				case 'file':
 					jQuery(body).find('.feedback').html('<?=__('uploading')?>...');
-					jQuery(body).find('.wymImageForm').attr('action', '<?=$hyphaUrl?>upload/image/');
+					jQuery(body).find('.wymImageForm').attr('action', '<?=$rootUrl?>upload/image/');
 					jQuery(body).find('.wymImageForm').attr('method', 'post');
 					jQuery(body).find('.wymImageForm').attr('enctype', 'multipart/form-data');
 					jQuery(body).find('.wymImageForm').attr('target', 'uploadTarget');

@@ -30,9 +30,6 @@
 		Variable: $hyphaLanguage
 		hypha language, e.g. 'en'. This is the language of the content that is served, not to be mistaken for the user interface language. This variable is set in 'index.php' by invoking <loadPage>.
 
-		Variable: $hyphaDictionary
-		array containing user interface translations. This array is by invoking <loadUser> which in turn calls <setLanguage>.
-
 		Variable: $isoLangList
 		array containing language codes and their full name accoring to ISO639-1 standard , e.g. en -> English. This array is loaded in 'system/core/language.php'
 

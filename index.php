@@ -61,10 +61,8 @@
 	$hyphaUrl = $hyphaRequest->getRootUrl();
 
 	// Shortcut for direct file requests
-	if ($hyphaQuery == 'data/hypha.css')
-		serveFile($hyphaQuery, false);
-	if (startsWith($hyphaQuery, 'system/wymeditor'))
-		serveFile($hyphaQuery, 'system/wymeditor');
+	if ($hyphaQuery == 'data/hypha.css') serveFile($hyphaQuery, false);
+	if (startsWith($hyphaQuery, 'system/wymeditor')) serveFile($hyphaQuery, 'system/wymeditor');
 
 	/*
 		Group: Stage 4 - Load website data
@@ -83,14 +81,32 @@
 		Check is a user is logged in and load user data. Add login/logout functionality according to session login status.
 	*/
 
-	loadLanguage($hyphaRequest);
+	// Build request context
+	$O_O = new RequestContext($hyphaRequest, hypha_getDefaultLanguage());
 
-	// Load user and page and execute the posted command. The latter
+	/**
+	 * Set user as global variable.
+	 * @deprecated Use O_O instead
+	 */
+	$hyphaUser = $O_O->getUser();
+
+	/**
+	 * Set language as global variable.
+	 * @deprecated Use O_O instead
+	 */
+	$hyphaLanguage = $O_O->getInterfaceLanguage();
+
+	/**
+	 * Set content language as global variable.
+	 * @deprecated Use O_O instead
+	 */
+	$hyphaContentLanguage = $O_O->getContentLanguage();
+
+	// Load page and execute the posted command. This
 	// is tried twice, since some commands need to run before
 	// loading the page, and some commands need to run after.
-	loadUser();
 	executePostedCommand(); // Might redirect and exit
-	loadPage($hyphaRequest);
+	loadPage($O_O);
 	executePostedCommand(); // Might redirect and exit
 
 	/*
@@ -105,7 +121,7 @@
 
 	// add hypha commands and navigation
 	$_cmds[] = '<a href="index/'.$hyphaLanguage.'">'.__('index').'</a>';
-	if (!$hyphaUser) {
+	if (!$O_O->isUser()) {
 		addLoginRoutine($hyphaHtml);
 		$_cmds[] = '<a href="javascript:login();">'.__('login').'</a>';
 	}
@@ -116,10 +132,10 @@
 		$_cmds[] = makeLink(__('logout'), makeAction($hyphaQuery, 'logout', ''));
 	}
 	$hyphaHtml->writeToElement('hyphaCommands', implode(' - ', $_cmds));
-	if ($hyphaUser) $hyphaHtml->writeToElement('hyphaCommands', '<br/><span id="loggedIn">'.__('logged-in-as').' `'.$hyphaUser->getAttribute('username').'`'.asterisk(isAdmin()).'</span>');
+	if ($O_O->isUser()) $hyphaHtml->writeToElement('hyphaCommands', '<br/><span id="loggedIn">'.__('logged-in-as').' `'.$O_O->getUser()->getAttribute('username').'`'.asterisk(isAdmin()).'</span>');
 
 	// obfuscate email addresses to strangers. It's ok to send readable addresses to logged in members. This also prevents conflicts in the editor.
-//	if (!$hyphaUser) registerPostProcessingFunction('obfuscateEmail');
+//	if (!$O_O->isUser()) registerPostProcessingFunction('obfuscateEmail');
 
 	// poor man's cron job
 	if (time() - hypha_getLastDigestTime() >= hypha_getDigestInterval()) flushDigest();

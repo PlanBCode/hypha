@@ -11,23 +11,6 @@
 	*/
 
 	/*
-		Function: loadUser
-		sets UI language according to user preference and returns DOMElement containing user data
-
-		Parameters:
-		$id
-	*/
-	function loadUser() {
-		global $hyphaUser;
-
-		if (isset($_SESSION['hyphaLogin'])) $hyphaUser = hypha_getUserById($_SESSION['hyphaLogin']);
-		else $hyphaUser = false;
-
-		if ($hyphaUser) loadUserInterfaceLanguage('system/languages', $hyphaUser->getAttribute('language'));
-		else loadUserInterfaceLanguage('system/languages', hypha_getDefaultLanguage());
-	}
-
-	/*
 		Function: login
 		logs in user, setting SESSION variable hyphaLogin. Returns 'reload' on success.
 	*/
@@ -85,8 +68,8 @@
 		returns true if user is logged in.
 	*/
 	function isUser() {
-		global $hyphaUser;
-		return !!$hyphaUser;
+		global $O_O;
+		return $O_O->isUser();
 	}
 
 	/*
@@ -94,8 +77,8 @@
 		returns true if user has admin rights.
 	*/
 	function isAdmin() {
-		global $hyphaUser;
-		return $hyphaUser->getAttribute('rights') === 'admin';
+		global $O_O;
+		return $O_O->isAdmin();
 	}
 
 	/*
