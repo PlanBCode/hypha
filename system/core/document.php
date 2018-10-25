@@ -34,6 +34,8 @@
 	*/
 
 	class HTMLDocument extends DOMWrap\Document {
+		const XML_HTML_UNKNOWN_TAG = 801;
+
 		/*
 			Function: __construct
 			creates an empty HTML file
@@ -49,7 +51,16 @@
 				$contents = $file->read();
 			else
 				$contents = '<html><head></head><body></body></html>';
+			$previousSetting = libxml_use_internal_errors(true);
 			$this->loadHTML('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">'.$contents);
+			$map = [LIBXML_ERR_WARNING => E_PARSE, LIBXML_ERR_ERROR => E_WARNING, LIBXML_ERR_FATAL => E_ERROR];
+			foreach (libxml_get_errors() as $error) {
+				// Ignore warnings for unknown tags, log the rest
+				if (XML_HTML_UNKNOWN_TAG !== $error->code) {
+					error_log($error->message, $map[$error->level]);
+				}
+			}
+			libxml_use_internal_errors($previousSetting);
 			$this->documentElement->setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
 			$metaMime = $this->createElement('meta', '');
 			$metaMime->setAttribute('http-equiv', "Content-Type");
