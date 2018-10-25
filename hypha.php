@@ -60,6 +60,7 @@
 		$path = pathinfo($file);
 		$dir = preg_replace('#[\./]*(.*)/*#', '$1', $path['dirname']);
 		$file = $path['basename'];
+		if ($dir == '' && $file == '.htaccess') return true;
 		if ($dir == '' && $file == 'index.php') return true;
 		if ($dir == '' && $file == 'documentation.txt') return true;
 		if ($dir == 'data' && $file == 'hypha.html') return true;
@@ -217,9 +218,6 @@
 			// create data folders
 			mkdir('data/pages', 0755);
 			mkdir('data/images', 0755);
-
-			// create .htaccess file
-			file_put_contents('.htaccess', "php_flag short_open_tag on\nphp_flag display_errors on\nRewriteEngine On\nRewriteRule hypha.php$ hypha.php [L]\nRewriteRule ^(.*)$ index.php [L]\n");
 
 			// create default page
 			$id = uniqid();
