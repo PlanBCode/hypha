@@ -67,6 +67,10 @@
 			 */
 			if (null === $rootUrlPath) {
 				$rootUrlPath = dirname($_SERVER['SCRIPT_NAME']);
+				// On Windows, dirname returns \ when it strips the last path component (it
+				// leaves all other (back)slashes as-is)
+				if ($rootUrlPath === '\\')
+					$rootUrlPath = '/';
 				$rootUrlPath .= substr($rootUrlPath, -1) === '/' ? '' : '/';
 			}
 			$this->rootUrlPath = $rootUrlPath;
