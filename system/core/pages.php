@@ -21,11 +21,30 @@
 				$this->replacePageListNode($node);
 		}
 
+		public static function getDatatypeName() {
+			return str_replace('_', ' ', get_called_class());
+		}
+
+		protected function deletePage() {
+			global $hyphaXml, $hyphaUser;
+			$id = $this->pageListNode->getAttribute('id');
+			$hyphaXml->lockAndReload();
+			hypha_deletePage($id);
+			$hyphaXml->saveAndUnlock();
+
+			$file = 'data/pages/' . $id;
+			if (file_exists($file)) {
+				unlink($file);
+			}
+
+			writeToDigest($hyphaUser->getAttribute('fullname').__('deleted-page').$this->language.'/'.$this->pagename, 'page delete');
+		}
+
 		protected function replacePageListNode($node) {
-			global $hyphaLanguage;
+			global $O_O;
 			$this->pageListNode = $node;
-			$this->privateFlag = ($node->getAttribute('private') == 'on' ? true : false);
-			$language = hypha_pageGetLanguage($node, $hyphaLanguage);
+			$this->privateFlag = in_array($node->getAttribute('private'), ['true', '1', 'on']);
+			$language = hypha_pageGetLanguage($node, $O_O->getContentLanguage());
 			$this->language = $language->getAttribute('id');
 			$this->pagename = $language->getAttribute('name');
 		}
@@ -73,7 +92,8 @@
 	}
 	function newPage() {
 		html = '<table class="section"><tr><th colspan="2"><?=__('create-new-page')?></td><tr>';
-		html+= '<tr><th><?=__('type')?></th><td><select id="newPageType" name="newPageType">' + '<?php foreach($types as $type) echo '<option value="'.$type.'"'.($type=='textPage' ? 'selected="selected"' : '').'>'.$type.'</option>'; ?>' + '</select></td></tr>';
+		// TODO [LRM]: find better way to set default new page type.
+		html+= '<tr><th><?=__('type')?></th><td><select id="newPageType" name="newPageType">' + '<?php foreach($types as $type => $datatypeName) echo '<option value="'.$type.'"'.($type=='textpage' ? 'selected="selected"' : '').'>'.$datatypeName.'</option>'; ?>' + '</select></td></tr>';
 		html+= '<tr><th><?=__('name')?></th><td><input type="text" id="newPagename" value="<?=$pagename?>" onblur="validatePagename(this);" onkeyup="validatePagename(this); document.getElementById(\'newPageSubmit\').disabled = this.value ? false : true;"/></td></tr>';
 		html+= '<tr><td></td><td><input type="checkbox" id="newPagePrivate" name="newPagePrivate"/> <?=__('private-page')?></td></tr>';
 		html+= '<tr><td></td><td><input type="button" class="button" value="<?=__('cancel')?>" onclick="document.getElementById(\'popup\').style.visibility=\'hidden\';" />';
@@ -90,28 +110,6 @@
 	}
 
 	/*
-		Function: loadLanguage
-		Pulls the language from the url.
-
-		Parameters:
-		HyphaRequest $hyphaRequest
-	*/
-	function loadLanguage(HyphaRequest $hyphaRequest) {
-		global $hyphaLanguage;
-
-		$language = $hyphaRequest->getLanguage();
-
-		// set wiki language. we want to store this in a session variable, so we don't loose language when an image or the settingspage are requested
-		$hyphaLanguage = $language !== null ? $language : hypha_getDefaultLanguage();
-
-		if (!isset($_SESSION['hyphaLanguage']) || $hyphaLanguage != $_SESSION['hyphaLanguage']) {
-			session_start();
-			$_SESSION['hyphaLanguage'] = $hyphaLanguage;
-			session_write_close();
-		}
-	}
-
-	/*
 		Function: loadPage
 		loads all html needed for page pagename/view
 
@@ -121,20 +119,22 @@
 		See Also:
 		<buildhtml>
 	*/
-	function loadPage(HyphaRequest $hyphaRequest) {
-		global $isoLangList, $hyphaHtml, $hyphaPage, $hyphaLanguage, $hyphaUrl;
+	function loadPage(RequestContext $O_O) {
+		global $isoLangList, $hyphaHtml, $hyphaPage, $hyphaUrl;
 
-		$args = $hyphaRequest->getArgs();
+		$request = $O_O->getRequest();
+		$args = $request->getArgs();
 
-		if (!$hyphaRequest->isSystemPage()) {
+		if (!$request->isSystemPage()) {
 			// fetch the requested page
-			$_name = $hyphaRequest->getPageName();
+			$_name = $request->getPageName();
 			if ($_name === null) {
 				$_name = hypha_getDefaultPage();
 			}
-			$_node = hypha_getPage($hyphaLanguage, $_name);
+			$_node = hypha_getPage($O_O->getContentLanguage(), $_name);
 
-			if ($_node) {
+			$isPrivate = in_array($_node->getAttribute('private'), ['true', '1', 'on']);
+			if ($_node && (!$isPrivate || isUser())) {
 				$_type = $_node->getAttribute('type');
 				$hyphaPage = new $_type($_node, $args);
 
@@ -143,7 +143,11 @@
 					hypha_incrementStats(hypha_getLastDigestTime() + hypha_getDigestInterval());
 			} else {
 				http_response_code(404);
-				notify('error', __('no-page'));
+				if ($isPrivate && !isUser()) {
+					notify('error', __('login-to-view'));
+				} else {
+					notify('error', __('no-page'));
+				}
 				if (isUser()) $hyphaHtml->writeToElement('main', '<span class="right""><input type="button" class="button" value="' . __('create') . '" onclick="newPage();"></span>');
 				$hyphaPage = false;
 			}
@@ -156,7 +160,7 @@
 		while (count($args) < 1)
 			array_push($args, null);
 
-		switch ($hyphaRequest->getSystemPage()) {
+		switch ($request->getSystemPage()) {
 			case HyphaRequest::HYPHA_SYSTEM_PAGE_FILES:
 				serveFile('data/files/' . $args[0], 'data/files');
 				exit;
@@ -175,10 +179,10 @@
 						$hyphaHtml->writeToElement('main', hypha_indexFiles());
 						break;
 					default:
-						$languageName = $isoLangList[$hyphaLanguage];
+						$languageName = $isoLangList[$O_O->getContentLanguage()];
 						$languageName = substr($languageName, 0, strpos($languageName, ' ('));
 						$hyphaHtml->writeToElement('pagename', __('page-index').': '.$languageName);
-						$hyphaHtml->writeToElement('main', hypha_indexPages($hyphaLanguage));
+						$hyphaHtml->writeToElement('main', hypha_indexPages($O_O->getContentLanguage()));
 						break;
 				}
 				break;
@@ -193,18 +197,44 @@
 				break;
 			case HyphaRequest::HYPHA_SYSTEM_PAGE_UPLOAD:
 				if ($args[0]=='image') {
-					if(!$_FILES['wymFile']) $response = __('too-big-file').ini_get('upload_max_filesize');
+					$return = null;
+					if(!$_FILES['uploadedfile']) $response = __('too-big-file').ini_get('upload_max_filesize');
 					else {
-						$ext = strtolower(substr(strrchr($_FILES['wymFile']['name'], '.'), 1));
-						@$size = getimagesize($_FILES['wymFile']['tmp_name']);
+						$ext = strtolower(substr(strrchr($_FILES['uploadedfile']['name'], '.'), 1));
+						@$size = getimagesize($_FILES['uploadedfile']['tmp_name']);
 						if(!$size || !in_array($ext, array('jpg','jpeg','png','gif','bmp'))) $response = __('invalid-image-file').ini_get('upload_max_filesize');
 						else {
-							$filename = uniqid().'.'.$ext;
-							if(!move_uploaded_file($_FILES['wymFile']['tmp_name'], 'data/images/'.$filename)) $response = __('server-error');
-							else $response = 'images/'.$filename;
+							$maxSize = [1120, 800];
+							$needResize = $size[0] > $maxSize[0] || $size[1] > $maxSize[1];
+							$filename = uniqid() . '.' . $ext;
+							$destinations = ['org' => 'data/images/org/' . $filename, 'img' => 'data/images/' . $filename];
+							$destinationPaths = ['org' => 'images/org/' . $filename, 'img' => 'images/' . $filename];
+							if ($needResize && !file_exists('data/images/org/')) {
+								mkdir('data/images/org/', 0777, true);
+							}
+							$orgUrlIndex = $needResize ? 'org' : 'img';
+							if (move_uploaded_file($_FILES['uploadedfile']['tmp_name'], $destinations[$orgUrlIndex])) {
+								$response = 'images/' . $filename . '?' . 'w=' . $size[0] . '&h=' . $size[1];
+								if ($needResize) {
+									if (true !== image_resize($destinations[$orgUrlIndex], $destinations['img'], $maxSize[0], $maxSize[1])) {
+										$response = __('server-error-resize-image');
+									}
+								}
+								$return = [[
+									'original_filename' => $_FILES['uploadedfile']['name'],             // The original filename, this will be put in as the "alt" text
+									'downloadUrl'       => $hyphaUrl . $destinationPaths[$orgUrlIndex], // The URL to the original file to be downloaded. This is not used by image_upload, but by site_links
+									'thumbUrl'          => $hyphaUrl . $destinationPaths['img'],        // The URL to be used, it's called a Thumb URL because you may have used $_POST['thumbnailSize'] to resize it. This is used by site_links but not image_upload
+								]];
+							} else {
+								$response = __('server-error');
+							}
 						}
 					}
-					echo '<script language="javascript" type="text/javascript">window.top.window.uploadResponse(\''.$response.'\');</script>';
+					if ($return !== null) {
+						echo json_encode($return);
+					} else {
+						echo '<script language="javascript" type="text/javascript">window.top.window.uploadResponse(\''.$response.'\');</script>';
+					}
 				}
 				exit;
 			case HyphaRequest::HYPHA_SYSTEM_PAGE_CHOOSER:
@@ -465,4 +495,42 @@
 		}
 		else $html = __('no-versions');
 		return $html;
+	}
+
+	function image_resize($src, $dst, $width, $height) {
+		list($w, $h) = getimagesize($src);
+
+		$type = strtolower(substr(strrchr($src,"."),1));
+		if ($type == 'jpeg') $type = 'jpg';
+		switch ($type) {
+			case 'bmp': $img = imagecreatefromwbmp($src); break;
+			case 'gif': $img = imagecreatefromgif($src); break;
+			case 'jpg': $img = imagecreatefromjpeg($src); break;
+			case 'png': $img = imagecreatefrompng($src); break;
+			default : return "Unsupported picture type!";
+		}
+
+		// resize
+		$ratio = min($width/$w, $height/$h);
+		$width = $w * $ratio;
+		$height = $h * $ratio;
+
+		$new = imagecreatetruecolor($width, $height);
+
+		// preserve transparency
+		if ($type == 'gif' || $type == 'png') {
+			imagecolortransparent($new, imagecolorallocatealpha($new, 0, 0, 0, 127));
+			imagealphablending($new, false);
+			imagesavealpha($new, true);
+		}
+
+		imagecopyresampled($new, $img, 0, 0, 0, 0, $width, $height, $w, $h);
+
+		switch($type){
+			case 'bmp': imagewbmp($new, $dst); break;
+			case 'gif': imagegif($new, $dst); break;
+			case 'jpg': imagejpeg($new, $dst); break;
+			case 'png': imagepng($new, $dst); break;
+		}
+		return true;
 	}

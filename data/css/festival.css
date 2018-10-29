@@ -1,0 +1,43 @@
+/* Festival */
+.festivalTimetable, .festivalTimetable a {
+	color: white;
+}
+.festivalTimetable .timeGridOdd {
+	text-align:left;
+	vertical-align:top;
+}
+.festivalTimetable .timeGridOdd {
+	text-align:left;
+	vertical-align:top;
+	background-color:#ddd;
+}
+.festivalTimetable .tableRowOdd {
+	background-color:#fff;
+}
+.festivalTimetable .tableRowEven {
+	background-color:#ddd;
+}
+.festivalTimetable .tableAct {
+	text-align:center;
+}
+.festivalTimetable .tableRowOddAct {
+	background-color:#c63;
+	color:#fff;
+	font-weight:bold;
+}
+.festivalTimetable .tableRowEvenAct {
+	background-color:#36c;
+	color:#fff;
+	font-weight:bold;
+}
+.festivalTimetable .tableRowHeading {
+	text-align:left;
+	font-weight:bold;
+	padding:5px;
+}
+.festivalTimetable .tableRowHeadingOdd {
+	background-color:#ddd;
+}
+.festivalTimetable .tableRowHeadingEven {
+	background-color:#bbb;
+}

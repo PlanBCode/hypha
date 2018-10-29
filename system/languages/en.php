@@ -97,6 +97,7 @@
 		"changed-css" => " edited the website's CSS layout",
 		"changed-html" => " edited the website's HTML structure",
 		"changed-page" => " edited the following page: ",
+		"deleted-page" => " deleted the following page: ",
 		"translated-page" => " translated the following page: ",
 		"reverted-page" => " reverted the following page to an older version: ",
 		"granted-admin-rights-to" => " granted admin rights to ",
@@ -185,6 +186,13 @@
 		"unable-to-edit" => "unable to edit",
 		"missing-arguments" => "missing arguments",
 		"archive" => "archive",
+		"sure-to-delete" => "Are you sure you want to delete this page",
+
+		// textpage
+		"datatype.name.textpage" => 'web page',
+
+		// festival
+		"datatype.name.festivalpage" => "festival page",
 
 		// festival - digest
 		"festival-edited-contribution" => " edited contribution: ",
@@ -226,6 +234,9 @@
 		"festival-participant-status" => "status",
 
 		// mailing list
+		"datatype.name.mailinglist" => "mailinglist",
+
+		// mailing list
 		"ml-view-addresses" => "view addresses",
 		"ml-date-format" => "d/m/Y",
 		"ml-received-by" => "received by",
@@ -257,4 +268,71 @@
 		// mailing
 		"mailing-sender-email" => "email",
 		"mailing-sender-name" => "name",
+
+		// peer_reviewed_article
+		"datatype.name.peer_reviewed_article" => "peer reviewed article",
+
+		// peer_reviewed_article - action
+		"art-login-preform-action" => "you need to be logged on in order to preform this action",
+		"art-insufficient-rights-to-set-as-closed" => "you have insufficient rights to close",
+		"art-unsupported-status-change" => "this status change is not supported",
+		"art-no-approves-yet" => "there are no approves yet",
+		"art-successfully-updated" => "successfully updated",
+		"art-status-changed-in-between" => "the status has been changed in between",
+
+		// peer_reviewed_article - mail
+		"art-a-new-article-has-been-submitted-for-review" => "A new article can be reviewed",
+		"art-the-status-of-an-article-has-been-updated" => "The status of an article has been updated",
+		"art-a-blocking-comment-has-been-submitted" => "A blocking comment has been submitted",
+		"art-a-blocking-comment-has-been-resolved" => "A blocking comment has been resolved",
+		"art-please-confirm" => "Please confirm",
+		"art-please-confirm-you-just-added-a-comment" => "You have just added a comment, please confirm",
+		"art-confirm" => "confirm",
+
+		// peer_reviewed_article - status
+		"art-status-draft" => "draft",
+		"art-status-review" => "review",
+		"art-status-approved" => "approved",
+		"art-status-published" => "published",
+		"art-status-retracted" => "retracted",
+
+		// peer_reviewed_article - comment
+		"art-blocking" => "blocking",
+		"art-review-comments" => "review comments",
+		"art-no-comments-yet" => "no comments yet",
+		"art-add-review-comment" => "add review comment",
+		"art-add-comment" => "add comment",
+		"art-comment" => "comment",
+		"art-comments" => "comments",
+
+		// peer_reviewed_article - edit
+		"art-cancel" => "cancel",
+		"art-save" => "save",
+
+		// peer_reviewed_article
+		"art-by" => "by",
+		"art-at" => "at",
+		"art-method" => "method",
+		"art-sources" => "sources",
+		"art-is-resolved" => "is resolved",
+		"art-is-blocking" => "is blocking",
+		"art-set-as-resolved" => "set as resolved",
+		"art-set-as-closed" => "set as closed",
+		"art-approves" => "approved",
+		"art-approve" => "approve",
+		"art-publish" => "publish",
+		"art-title" => "title",
+		"art-name" => "name",
+		"art-email" => "email",
+		"art-author" => "author",
+		"art-excerpt" => "excerpt",
+		"art-article" => "article",
+		"art-missing-arguments" => "missing arguments",
+		"art-invalid-code" => "invalid code",
+
+		"art-start-review" => "start review",
+		"art-approve(s)" => "approve(s)",
+		"art-unresolved-block(s)" => "unresolved block(s)",
 	);
+
+	return $LANG;

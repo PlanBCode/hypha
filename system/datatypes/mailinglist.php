@@ -10,8 +10,6 @@ require_once __DIR__ . '/../core/WymHTMLForm.php';
 
 use DOMWrap\NodeList;
 
-$hyphaPageTypes[] = 'mailinglist';
-
 /*
 	Class: mailinglist
 */
@@ -30,6 +28,7 @@ class mailinglist extends Page {
 
 	const FORM_CMD_LIST_SUBSCRIBE = 'subscribe';
 	const FORM_CMD_LIST_EDIT = 'edit';
+	const FORM_CMD_LIST_DELETE = 'delete';
 	const FORM_CMD_MAILING_SAVE = 'save';
 	const FORM_CMD_MAILING_SEND = 'send';
 
@@ -49,11 +48,9 @@ class mailinglist extends Page {
 	 * @param array $args
 	 */
 	public function __construct(DOMElement $pageListNode, $args) {
-		global $hyphaLanguage;
 		parent::__construct($pageListNode, $args);
 		$this->xml = new Xml('mailinglist', Xml::multiLingualOn, Xml::versionsOff);
 		$this->xml->loadFromFile('data/pages/' . $pageListNode->getAttribute('id'));
-		$this->language = $hyphaLanguage;
 	}
 
 	/**
@@ -76,6 +73,8 @@ class mailinglist extends Page {
 				return $this->indexAction();
 			case 'edit':
 				return $this->editAction();
+			case 'delete':
+				return $this->deleteAction();
 			case 'confirm':
 				return $this->confirmAction();
 			case 'unsubscribe':
@@ -169,6 +168,10 @@ class mailinglist extends Page {
 		if (isUser()) {
 			$commands = $this->findBySelector('#pageCommands');
 			$commands->append($this->makeActionButton(__('edit'), 'edit'));
+			if (isAdmin()) {
+				$path = $this->language . '/' . $this->pagename . '/delete';
+				$commands->append(makeButton(__('delete'), 'if(confirm(\'' . __('sure-to-delete') . '\'))' . makeAction($path, self::FORM_CMD_LIST_DELETE, '')));
+			}
 		}
 
 		// display page name and description
@@ -305,6 +308,21 @@ class mailinglist extends Page {
 		$this->findBySelector('#main')->append($form->elem->children());
 
 		return null;
+	}
+
+	public function deleteAction() {
+		// check if form is posted and get form data
+		$formPosted = $this->isPosted(self::FORM_CMD_LIST_DELETE);
+		if (!$formPosted) {
+			return null;
+		}
+
+		global $hyphaUrl;
+
+		$this->deletePage();
+
+		notify('success', ucfirst(__('page-successfully-deleted')));
+		return ['redirect', $hyphaUrl];
 	}
 
 	private function confirmAction() {

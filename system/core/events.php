@@ -74,7 +74,7 @@
 		document.getElementById('argument').value = arg;
 		document.forms['hyphaForm'].action = url;
 		for(i=0; i<postProcessingList.length; i++) postProcessingList[i]();
-		if (cmd||arg) document.forms['hyphaForm'].submit();
+		if (cmd||arg) $(document.forms['hyphaForm']).submit();
 		else window.location = url;
 	}
 
@@ -451,7 +451,7 @@
 					var next = msg.nextSibling;
 					if (msg.nodeType === 1) {
 						if(!msg.hasAttribute('time')) msg.setAttribute('time', now);
-						else if (now - msg.getAttribute('time') > 5000) msg.parentNode.removeChild(msg);
+						else if (now - msg.getAttribute('time') > 10000) msg.parentNode.removeChild(msg);
 					}
 					msg = next;
 				}

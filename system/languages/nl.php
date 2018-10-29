@@ -91,23 +91,24 @@
 		"invalid-password" => "ongeldig wachtwoord",
 		"error-save-settings" => "instellingen zijn niet opgeslagen",
 		"csrf-error" => "Er is een probleem bij het verzenden van een commando of formulier, probeer het nogmaals",
-		"changed-header" => " header van de website bewerkt",
-		"changed-footer" => " footer van de website bewerkt",
-		"changed-menu" => " hoofdmenu van de website bewerkt",
-		"changed-css" => " CSS layout van de website bewerkt",
-		"changed-html" => " HTML structuur van de website bewerkt",
-		"changed-page" => " van de website is de volgende pagina bewerkt:",
-		"translated-page" => " de volgende pagina is vertaald: ",
-		"reverted-page" => " de volgende pagina is teruggezet naar een oudere versie: ",
-		"granted-admin-rights-to" => " adminrechten zijn toegekend aan ",
-		"has-invited" => " een uitnodiging om deel te nemen aan het project is verstuurd aan ",
+		"changed-header" => " heeft de header van de website bewerkt",
+		"changed-footer" => " heeft de footer van de website bewerkt",
+		"changed-menu" => " heeft het hoofdmenu van de website bewerkt",
+		"changed-css" => " heeft de CSS layout van de website bewerkt",
+		"changed-html" => " heeft de HTML structuur van de website bewerkt",
+		"changed-page" => " heeft de volgende pagina bewerkt: ",
+		"deleted-page" => " heeft de volgende pagina verwijderd: ",
+		"translated-page" => " heeft de volgende pagina vertaald: ",
+		"reverted-page" => " heeft de volgende pagina teruggezet naar een oudere versie: ",
+		"granted-admin-rights-to" => " heeft adminrechten toegekend aan ",
+		"has-invited" => " heeft de volgende persoon/personen uitgenodigd om toe te treden tot het projectteam: ",
 		"invites-to-join" => " nodigt je uit om aan het project deel te nemen ",
 		"invitation" => "Uitnodiging om aan het project deel te nemen ",
 		"was-invited" => " is uitgenodigd om aan het project deel te nemen",
-		"invitation-pending" => "uitnodiging in afwachting",
+		"invitation-pending" => "uitnodiging loopt",
 		"remind-to-join" => "Dit is een herinnering om aan het project deel te nemen ",
 		"has-joined" => " neemt deel aan het project",
-		"removed-from-user-list" => " de volgende deelnemer is uit de lijst verwijderd: ",
+		"removed-from-user-list" => " heeft de volgende persoon uit de projectteamlijst verwijderd: ",
 		"registration-successful" => "registratie successvol, je kunt nu inloggen en aan het project deelnemen.",
 		"follow-link-to-register" => "om te registreren, volg onderstaande link",
 		"reregister-to" => "om te registreren, volg onderstaande link",
@@ -185,6 +186,13 @@
 		"unable-to-edit" => "kan niet worden bewerkt",
 		"missing-arguments" => "argumenten ontbreken",
 		"archive" => "archief",
+		"sure-to-delete" => "Weet je zeker dat je deze pagina wilt verwijderen",
+
+		// textpage
+		"datatype.name.textpage" => "webpagina",
+
+		// festival
+		"datatype.name.festivalpage" => "festival pagina",
 
 		// festival - digest
 		"festival-edited-contribution" => " heeft festivalbijdrage aangepast: ",
@@ -221,6 +229,9 @@
 		"festival-participant-status" => "status",
 
 		// mailing list
+		"datatype.name.mailinglist" => "mailinglist",
+
+		// mailing list
 		"ml-view-addresses" => "bekijk adressen",
 		"ml-date-format" => "d-m-Y",
 		"ml-received-by" => "ontvangen door",
@@ -252,4 +263,71 @@
 		// mailing
 		"mailing-sender-email" => "e-mail",
 		"mailing-sender-name" => "naam",
+
+		// peer_reviewed_article
+		"datatype.name.peer_reviewed_article" => "artikel met review",
+
+		// peer_reviewed_article - action
+		"art-login-preform-action" => "je moet ingelogd zijn om deze actie te kunnen uitvoeren",
+		"art-insufficient-rights-to-set-as-closed" => "je hebt niet genoeg rechten om dit te sluiten",
+		"art-unsupported-status-change" => "deze status verandering wordt niet ondersteund",
+		"art-no-approves-yet" => "er zijn nog geen goedkeuringen ontvangen",
+		"art-successfully-updated" => "succesvol bijgewerkt",
+		"art-status-changed-in-between" => "de status is tussentijds aangepast",
+
+		// peer_reviewed_article - mail
+		"art-a-new-article-has-been-submitted-for-review" => "Een nieuw artikel kan beoordeeld worden",
+		"art-the-status-of-an-article-has-been-updated" => "De status van een artikel is geüpdate",
+		"art-a-blocking-comment-has-been-submitted" => "Een breekpunt is toegevoegd",
+		"art-a-blocking-comment-has-been-resolved" => "Een breekpunt is opgelost",
+		"art-please-confirm" => "Graag een bevestiging",
+		"art-please-confirm-you-just-added-a-comment" => "Bevestigingt u aub dat u zojuist een opmerking heeft toegevoegd",
+		"art-confirm" => "bevestiging",
+
+		// peer_reviewed_article - status
+		"art-status-draft" => "schets",
+		"art-status-review" => "in beoordeling",
+		"art-status-approved" => "goedgekeurd",
+		"art-status-published" => "gepubliceerd",
+		"art-status-retracted" => "teruggetrokken",
+
+		// peer_reviewed_article - comment
+		"art-blocking" => "breekpunt",
+		"art-review-comments" => "beoordelingsopmerkingen",
+		"art-no-comments-yet" => "nog geen opmerkingen",
+		"art-add-review-comment" => "voeg beoordelingsopmerking toe",
+		"art-add-comment" => "voeg opmerking toe",
+		"art-comment" => "opmerking",
+		"art-comments" => "opmerkingen",
+
+		// peer_reviewed_article - edit
+		"art-cancel" => "afbreken",
+		"art-save" => "opslaan",
+
+		// peer_reviewed_article
+		"art-by" => "door",
+		"art-at" => "om",
+		"art-method" => "bijsluiter",
+		"art-sources" => "bronnen",
+		"art-is-resolved" => "is opgelost",
+		"art-is-blocking" => "is een breekpunt",
+		"art-set-as-resolved" => "zet op opgelost",
+		"art-set-as-closed" => "zet op gesloten",
+		"art-approves" => "goedkeuringen",
+		"art-approve" => "geef goedkeuring",
+		"art-publish" => "publiceer",
+		"art-title" => "titel",
+		"art-name" => "naam",
+		"art-email" => "e-mail",
+		"art-author" => "auteur",
+		"art-excerpt" => "uittreksel",
+		"art-article" => "artikel",
+		"art-missing-arguments" => "missende argumenten",
+		"art-invalid-code" => "ongeldige code",
+
+		"art-start-review" => "start beoordeling",
+		"art-approve(s)" => "beoordeling(en)",
+		"art-unresolved-block(s)" => "onopgeloste breekpunt(en)",
 	);
+
+	return $LANG;

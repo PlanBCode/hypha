@@ -30,9 +30,6 @@
 		Variable: $hyphaLanguage
 		hypha language, e.g. 'en'. This is the language of the content that is served, not to be mistaken for the user interface language. This variable is set in 'index.php' by invoking <loadPage>.
 
-		Variable: $hyphaDictionary
-		array containing user interface translations. This array is by invoking <loadUser> which in turn calls <setLanguage>.
-
 		Variable: $isoLangList
 		array containing language codes and their full name accoring to ISO639-1 standard , e.g. en -> English. This array is loaded in 'system/core/language.php'
 
@@ -44,7 +41,6 @@
 	include_once ('language.php');
 	include_once ('crypto.php');
 
-	if (!is_file('data/hypha.xml')) die('serious error: missing system file hypha.xml');
 	$hyphaXml = new Xml('project', Xml::multiLingualOff, Xml::versionsOff);
 	$hyphaXml->loadFromFile('data/hypha.xml');
 
@@ -329,7 +325,7 @@
 		$username - identifier for the user
 	*/
 	function hypha_getUserByName($username) {
-		foreach(hypha_getUserList() as $user) if ($user->getAttribute('username') == $username) return $user;
+		foreach(hypha_getUserList() as $user) if (strtolower($user->getAttribute('username')) == strtolower($username)) return $user;
 		return false;
 	}
 
@@ -485,6 +481,15 @@
 		return hypha_setPage($newPage, $language, $name, $private);
 	}
 
+	function hypha_deletePage($id) {
+		global $hyphaXml;
+		$hyphaXml->requireLock();
+		$targetPage = hypha_getPageById($id);
+		if ($targetPage instanceof HyphaDomElement) {
+			$hyphaXml->getElementsByTagName('pageList')->Item(0)->removeChild($targetPage);
+		}
+	}
+
 	/*
 		Function: hypha_setPage
 		updates page settings. Parameters which are left empty are not updated. Returns false on success, error message on failure.
@@ -522,9 +527,33 @@
 				$page->appendChild($newLanguage);
 			}
 		}
+		$private = in_array($private, ['true', '1', 'on']) ? 'on' : 'off';
 		if ($private!=$page->getAttribute('private')) $page->setAttribute('private', $private);
 
 		return false;
+	}
+
+	function hypha_setBodyClass(HyphaRequest $hyphaRequest, $hyphaPage) {
+		/** @var \DOMWrap\NodeList $bodyElement */
+		$bodyElement = $hyphaPage->html->find('body');
+		$classes = explode(' ', $bodyElement->attr('class'));
+		if (isset($hyphaPage->pagename)) {
+			$classes[] = $hyphaPage->pagename;
+			if ($hyphaPage->pagename === hypha_getDefaultPage()) {
+				$classes[] = 'is_home';
+			}
+		}
+		$classes[] = isUser() ? 'is_logged_in' : '';
+		$classes[] = isAdmin() ? 'is_admin' : '';
+		$classes[] = 'type_' . get_class($hyphaPage);
+
+		if ($hyphaRequest->getLanguage()) {
+			$classes[] = 'lang_' . $hyphaRequest->getLanguage();
+		}
+		if ($hyphaRequest->isSystemPage()) {
+			$classes[] = implode('_', $hyphaRequest->getRelativeUrlPathParts());
+		}
+		$bodyElement->attr('class', implode(' ', array_filter($classes)));
 	}
 
 	/*
@@ -658,34 +687,35 @@
 		// get list of available pages and sort alphabetically
 		foreach(hypha_getPageList() as $page) {
 			$lang = hypha_pageGetLanguage($page, $language);
-			if ($lang) if (isUser() || ($page->getAttribute('private')!='on')) $pageList[] = $lang->getAttribute('name').($page->getAttribute('private')=='on' ? '&#;' : '');
+			if ($lang) if (isUser() || ($page->getAttribute('private')!='on')) {
+				$pageList[] = $lang->getAttribute('name').($page->getAttribute('private')=='on' ? '&#;' : '');
+				$pageListDatatype[$lang->getAttribute('name')] = $page->getAttribute('type');
+			}
 		}
 		if ($pageList) array_multisort(array_map('strtolower', $pageList), $pageList);
 
 		// add capitals
 		$capital = 'A';
+		$first = true;
 		if ($pageList) foreach($pageList as $pagename) {
 			while($capital < strtoupper($pagename[0])) $capital++;
 			if (strtoupper($pagename[0]) == $capital) {
-				$htmlList[] = '<div style="text-align:center;">- '.$capital.' -</div>';
+				if (!$first) {
+					$htmlList[] = '</div>';
+				}
+				$htmlList[] = '<div class="letter-wrapper">';
+				$htmlList[] = '<div class="letter">'.$capital.'</div>';
 				$capital++;
+				$first = false;
 			}
 			$privatePos = strpos($pagename, '&#;');
 			if ($privatePos) $pagename = substr($pagename, 0, $privatePos);
-			$htmlList[] = '<a href="'.$language.'/'.$pagename.'">'.showPagename($pagename).'</a>'.asterisk($privatePos).'<br/>';
+			$htmlList[] = '<div class="index-item type_'.$pageListDatatype[$pagename].'"><a href="'.$language.'/'.$pagename.'">'.showPagename($pagename).'</a>'.asterisk($privatePos).'</div>';
 		}
 
-		// output list in a maximum of 3 colunms with a minimum of 10 lines per column
-		$lines = count($htmlList);
-		$columns = min($lines/10, 3);
-		$i = 0;
-		$html = '<table><tr>';
-		for ($column=1; $column<$columns+1; $column++) {
-			$html.= '<td>';
-			while($i<$lines && $i<$lines*$column/$columns) $html.= $htmlList[$i++];
-			$html.= '</td>';
-		}
-		$html.= '</tr></table>';
+		$html = '<div class="index">';
+		foreach($htmlList as $htmlLine) $html.= $htmlLine;
+		$html.= '</div>';
 		return $html;
 	}
 
