@@ -72,7 +72,7 @@
 		types - array with available page types (i.e. 'text', 'blog' etc)
 	*/
 	function addNewPageRoutine($html, $query, $types) {
-		global $hyphaLanguage;
+		global $hyphaContentLanguage;
 		// If a pagename is specified that does not exist yet,
 		// prefill that page name
 		if (count($query) >= 2 && !hypha_getPage($query[0], $query[1]))
@@ -97,7 +97,7 @@
 		html+= '<tr><th><?=__('name')?></th><td><input type="text" id="newPagename" value="<?=$pagename?>" onblur="validatePagename(this);" onkeyup="validatePagename(this); document.getElementById(\'newPageSubmit\').disabled = this.value ? false : true;"/></td></tr>';
 		html+= '<tr><td></td><td><input type="checkbox" id="newPagePrivate" name="newPagePrivate"/> <?=__('private-page')?></td></tr>';
 		html+= '<tr><td></td><td><input type="button" class="button" value="<?=__('cancel')?>" onclick="document.getElementById(\'popup\').style.visibility=\'hidden\';" />';
-		html+= '<input type="submit" id="newPageSubmit" class="button editButton" value="<?=__('create')?>" <?= $pagename ? '' : 'disabled="true"' ?> onclick="hypha(\'<?=$hyphaLanguage?>/\' + document.getElementById(\'newPagename\').value + \'/edit\', \'newPage\', document.getElementById(\'newPagename\').value);" /></td></tr></table>';
+		html+= '<input type="submit" id="newPageSubmit" class="button editButton" value="<?=__('create')?>" <?= $pagename ? '' : 'disabled="true"' ?> onclick="hypha(\'<?=$hyphaContentLanguage?>/\' + document.getElementById(\'newPagename\').value + \'/edit\', \'newPage\', document.getElementById(\'newPagename\').value);" /></td></tr></table>';
 		document.getElementById('popup').innerHTML = html;
 		document.getElementById('popup').style.left = document.getElementById('hyphaCommands').offsetLeft + 'px';
 		document.getElementById('popup').style.top = (document.getElementById('hyphaCommands').offsetTop + 25) + 'px';
@@ -264,19 +264,19 @@
 	*/
 	registerCommandCallback('newPage', 'newPage');
 	function newPage($newName) {
-		global $hyphaXml, $hyphaUrl, $hyphaLanguage;
+		global $hyphaXml, $hyphaUrl, $hyphaContentLanguage;
 
 
 		$newName = validatePagename($newName);
 		if (isUser()) {
 			$hyphaXml->lockAndReload();
-			$error = hypha_addPage($_POST['newPageType'], $hyphaLanguage, $newName, isset($_POST['newPagePrivate']));
+			$error = hypha_addPage($_POST['newPageType'], $hyphaContentLanguage, $newName, isset($_POST['newPagePrivate']));
 			$hyphaXml->saveAndUnlock();
 			if ($error) {
 				notify('error', $error);
 				return 'reload';
 			} else {
-				return ['redirect', $hyphaUrl . $hyphaLanguage . '/' . $newName . '/edit'];
+				return ['redirect', $hyphaUrl . $hyphaContentLanguage . '/' . $newName . '/edit'];
 			}
 		}
 	}
@@ -321,7 +321,7 @@
 
 	function dewikify_link($node) {
 		global $hyphaXml, $isoLangList;
-		global $hyphaLanguage;
+		global $hyphaContentLanguage;
 		global $hyphaPage;
 
 		$uri = $node->getAttribute('href');
@@ -338,7 +338,7 @@
 		// Find out what language to use (current language,
 		// default language, or any language offered by the
 		// page).
-		$language = hypha_pageGetLanguage($page, $hyphaLanguage);
+		$language = hypha_pageGetLanguage($page, $hyphaContentLanguage);
 		if (!$language) $language = hypha_pageGetLanguage($page, hypha_getDefaultLanguage());
 		if (!$language) $language = $page->getElementsByTagName('language')->Item(0);
 		if (!$language)
@@ -360,7 +360,7 @@
 		}
 
 		// Add appropriate class and/or title attributes
-		if ($language->getAttribute('id') != $hyphaLanguage) {
+		if ($language->getAttribute('id') != $hyphaContentLanguage) {
 			if (!$node->getAttribute('title'))
 				$node->setAttribute('title', __('page-in-other-language'));
 			$node->addClass('otherLanguageLink');

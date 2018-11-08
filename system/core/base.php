@@ -27,7 +27,7 @@
 		Variable: $hyphaPageTypes
 		array containing available datatypes. The array is filled by the pagetype scripts in 'system/datatypes/' which are loaded in 'index.php'.
 
-		Variable: $hyphaLanguage
+		Variable: $hyphaContentLanguage
 		hypha language, e.g. 'en'. This is the language of the content that is served, not to be mistaken for the user interface language. This variable is set in 'index.php' by invoking <loadPage>.
 
 		Variable: $isoLangList
