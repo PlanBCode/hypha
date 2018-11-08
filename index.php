@@ -65,7 +65,7 @@
 
 	// Shortcut for direct file requests
 	if ($hyphaQuery == 'data/hypha.css') serveFile($hyphaQuery, false);
-	if ($hyphaQuery == 'data/css/normalize.css') serveFile($hyphaQuery, false);
+	if (strpos($hyphaQuery, 'data/css/') === 0) serveFile($hyphaQuery, false);
 	if (strpos($hyphaQuery, 'data/fonts/') === 0) serveFile($hyphaQuery, false);
 	if (startsWith($hyphaQuery, 'system/wymeditor')) serveFile($hyphaQuery, 'system/wymeditor');
 	if (startsWith($hyphaQuery, 'system/bowser')) serveFile($hyphaQuery, 'system/bowser');
