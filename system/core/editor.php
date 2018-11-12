@@ -30,6 +30,7 @@
 			$rootUrl.'system/wymeditor/lang/'.$language.'.js',
 			$rootUrl.'system/wymeditor/skins/default/skin.js',
 			$rootUrl.'system/wymeditor/plugins/jquery.iframe-post-form.js',
+			$rootUrl.'system/wymeditor/plugins/embed/jquery.wymeditor.embed.js',
 			$rootUrl.'system/wymeditor/plugins/image_upload/jquery.wymeditor.image_upload.js',
 			$rootUrl.'system/wymeditor/plugins/site_links/jquery.wymeditor.site_links.js',
 		];
