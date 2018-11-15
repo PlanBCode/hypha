@@ -15,6 +15,7 @@
 		In this stage additional code can be loaded into the HTML document, for example the editor. By doing this in the end we can make the data load as light as possible, e.g. not load an editor when there's no need for it.
 	*/
 	$postProcessingList = array();
+	const XML_HTML_UNKNOWN_TAG = 801;
 
 	/*
 		Function: registerPostProcessingFunction
@@ -34,8 +35,6 @@
 	*/
 
 	class HTMLDocument extends DOMWrap\Document {
-		const XML_HTML_UNKNOWN_TAG = 801;
-
 		/*
 			Function: __construct
 			creates an empty HTML file
@@ -257,7 +256,7 @@
 
 			Parameters:
 			$form - A DOMWrap\Element that contains the form
-			        fields.
+							fields.
 		*/
 		function __construct($form, $data = array()) {
 			$this->elem = $form;

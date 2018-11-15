@@ -195,16 +195,13 @@
 					exit;
 				}
 				break;
-        // hier invoegen
-        case HyphaRequest::HYPHA_SYSTEM_PAGE_SEARCH: //bz search
-          $hyphaHtml->writeToElement('pagetitle',__('searchresults')); //add searchtitle to languages
-          $hyphaPage = new searchPage($args);
-           $contentLanguage = $O_O->getContentLanguage();
-           $hyphaHtml->writeToElement('langList', hypha_indexLanguages('', $contentLanguage));
-        break;
-        // einde search 
-
-			case HyphaRequest::HYPHA_SYSTEM_PAGE_UPLOAD:
+				case HyphaRequest::HYPHA_SYSTEM_PAGE_SEARCH:
+					$hyphaHtml->writeToElement('pagename',__('searchresult'));
+					$hyphaPage = new searchPage($args);
+					$contentLanguage = $O_O->getContentLanguage();
+					$hyphaHtml->writeToElement('langList', hypha_indexLanguages('', $contentLanguage));
+				break;
+				case HyphaRequest::HYPHA_SYSTEM_PAGE_UPLOAD:
 				if ($args[0]=='image') {
 					$return = null;
 					if(!$_FILES['uploadedfile']) $response = __('too-big-file').ini_get('upload_max_filesize');

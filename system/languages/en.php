@@ -10,9 +10,10 @@
 		"translate" => "translate",
 		"revert" => "revert",
 		"login" => "login",
-    "search" => "search",
-    "nosearchresult"=> "search did not find any results",
-   	"searchresult" => "Search results",
+		"search" => "search",
+		"nosearchresult"=> "search did not find any results",
+		"searchresult" => "Search results",
+		"search-no-content-found" => "No content found for this articla/page in the data dir",// this message is not shown if empty e.g. ""
 		"logout" => "logout",
 		"quit" => "unsubscribe",
 		"logged-in-as" => "logged in as",

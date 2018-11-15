@@ -10,9 +10,10 @@
 		"translate" => "vertalen",
 		"revert" => "terugdraaien",
 		"login" => "inloggen",
-    "search" => "zoek",
-    "nosearchresult"=> "Zoek heeft geen resultaten opgeleverd",
-    "searchresult" => "Zoek resultaat",
+		"search" => "zoek",
+		"nosearchresult"=> "Zoek heeft geen resultaten opgeleverd",
+		"searchresult" => "Zoek resultaat",
+		"search-no-content-found" => "Dit artikel is niet gevonden in de data map",// this message is not shown if empty e.g. ""
 		"logout" => "uitloggen",
 		"quit" => "stop",
 		"logged-in-as" => "ingelogd als",
