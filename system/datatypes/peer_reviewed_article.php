@@ -486,7 +486,7 @@ class peer_reviewed_article extends Page {
 		$main = $this->findBySelector('#main');
 
 		if ($author) {
-			$main->append('<div class="author">' . __('art-by') . ' ' . $author . '</div>');
+			$main->append('<div class="author">' . __('art-by') . ' ' . htmlspecialchars($author) . '</div>');
 		}
 
 		$article = $content->getChild(self::FIELD_NAME_TEXT)->getHtml();
@@ -590,11 +590,11 @@ class peer_reviewed_article extends Page {
 					} else {
 						$committerName = $comment->getAttr(self::FIELD_NAME_DISCUSSION_COMMENTER_NAME);
 					}
-					$html = $comment->getText();
-					$html .= '<p>' . __('art-by') . ' <strong>' . $committerName . '</strong> ' . __('art-at') . ' ' . $createdAt;
+					$html = htmlspecialchars($comment->getText());
+					$html .= '<p>' . __('art-by') . ' <strong>' . htmlspecialchars($committerName) . '</strong> ' . __('art-at') . ' ' . htmlspecialchars($createdAt);
 					if (self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER !== $type && isUser()) {
 						$committerEmail = $comment->getAttr(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL);
-						$html .= ' <span> | ' . __('art-email') . ': <a href="mailto:' . $committerEmail . '">' . $committerEmail . '</a></span>';
+						$html .= ' <span> | ' . __('art-email') . ': <a href="mailto:' . htmlspecialchars($committerEmail) . '">' . htmlspecialchars($committerEmail) . '</a></span>';
 					}
 					if ($firstComment) {
 						if ($blocking) {
