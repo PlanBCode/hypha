@@ -590,7 +590,7 @@ class peer_reviewed_article extends Page {
 					} else {
 						$committerName = $comment->getAttr(self::FIELD_NAME_DISCUSSION_COMMENTER_NAME);
 					}
-					$html = htmlspecialchars($comment->getText());
+					$html = nl2br(htmlspecialchars($comment->getText()));
 					$html .= '<p>' . __('art-by') . ' <strong>' . htmlspecialchars($committerName) . '</strong> ' . __('art-at') . ' ' . htmlspecialchars($createdAt);
 					if (self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER !== $type && isUser()) {
 						$committerEmail = $comment->getAttr(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL);
