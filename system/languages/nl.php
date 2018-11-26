@@ -17,6 +17,7 @@
 		"login-failed" => "inloggen mislukt. Klik hier als je je wachtwoord bent vergeten: ",
 		"reregister" => "heraanmelden",
 		"name" => "naam",
+		"pagename" => "paginanaam",
 		"username" => "gebruikersnaam",
 		"fullname" => "volledige naam",
 		"password" => "wachtwoord",

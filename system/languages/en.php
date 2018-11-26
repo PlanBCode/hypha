@@ -17,6 +17,7 @@
 		"login-failed" => "login failed. If you forgot your password, click here: ",
 		"reregister" => "recover account",
 		"name" => "name",
+		"pagename" => "pagename",
 		"username" => "username",
 		"fullname" => "full name",
 		"password" => "password",
