@@ -498,8 +498,9 @@ input {
  margin-right: 5px; }
 }
 
-.wym_iframe.wym_section iframe {
+.wym_box .wym_area_main .wym_iframe iframe {
  resize: vertical;
+ height: 250px;
 }
 
 .buttongroup {
