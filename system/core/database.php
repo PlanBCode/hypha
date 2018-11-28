@@ -428,7 +428,7 @@
 			if ($copy) {
 				if (strlen(implode(' ',$insert))) {
 					$diff.= '@@+'.implode(' ',$insert);
-					unset($insert);
+					$insert = array();
 				}
 				$diff.= '@@='.$copy['offset'].','.$copy['length'];
 				for ($i=0; $i<$copy['length']; $i++) array_shift($t);
