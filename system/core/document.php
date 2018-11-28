@@ -56,7 +56,7 @@
 			$map = [LIBXML_ERR_WARNING => E_PARSE, LIBXML_ERR_ERROR => E_WARNING, LIBXML_ERR_FATAL => E_ERROR];
 			foreach (libxml_get_errors() as $error) {
 				// Ignore warnings for unknown tags, log the rest
-				if (XML_HTML_UNKNOWN_TAG !== $error->code) {
+				if (self::XML_HTML_UNKNOWN_TAG !== $error->code) {
 					error_log($error->message, $map[$error->level]);
 				}
 			}
