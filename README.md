@@ -1,5 +1,5 @@
 Hypha is a lightweight CMS for small to medium sized communities and project teams, offering the possibility to create a basic website that is easy to set up and maintain.
-It is open source and doesn't rely on third party code, making it a safe tool that can be self hosted. Hypha is written in php.
+It is open source and doesn't rely on proprietary third party code, making it a safe tool that can be self hosted. Hypha is written in php.
 
 The saying goes: "If you can't open it you don't own it." We'd like to add however: "It's no good if you have to use a screwdriver to simply turn it on."
 
