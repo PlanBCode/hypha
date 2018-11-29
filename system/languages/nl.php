@@ -274,6 +274,7 @@
 		"art-insufficient-rights-to-set-as-closed" => "je hebt niet genoeg rechten om dit te sluiten",
 		"art-unsupported-status-change" => "deze status verandering wordt niet ondersteund",
 		"art-no-approves-yet" => "er zijn nog geen goedkeuringen ontvangen",
+		"art-can-you-approve" => "Please approve this article for publication",
 		"art-successfully-updated" => "succesvol bijgewerkt",
 		"art-status-changed-in-between" => "de status is tussentijds aangepast",
 
