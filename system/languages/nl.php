@@ -8,6 +8,7 @@
 		"submit" => "versturen",
 		"save" => "opslaan",
 		"edit" => "bewerken",
+		"delete" => "verwijderen",
 		"translate" => "vertalen",
 		"revert" => "terugdraaien",
 		"login" => "inloggen",
