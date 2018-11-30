@@ -724,3 +724,6 @@ th{
 .festivalTimetable .tableRowHeadingEven {
 	background-color:#bbb;
 }
+body.type_peer_reviewed_article .input-wrapper.field_type_editor:not(.field_name_text) .wym_iframe iframe {
+	height: 150px;
+}
