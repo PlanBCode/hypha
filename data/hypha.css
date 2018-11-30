@@ -597,6 +597,12 @@ input {
  background-color:  var(--menulinkhoverback);
 }
 
+div.comment-subject {
+  font-style: italic;
+  font-size:  1.2em;
+  font-weight: bolder;
+}
+
 .review-comment-wrapper li p {
  margin: 0;
 }

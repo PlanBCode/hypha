@@ -554,7 +554,10 @@ class peer_reviewed_article extends Page {
 		// [open => [blocking, non-blocking], closed => [blocking, non-blocking]]
 		$reviewCommentContainersSorted = [0 => [0 => [], 1 => [],], 1 => [0 => [], 1 => [],],];
 
+		$_discussionnumber = 0;
 		foreach ($discussions as $discussion) {
+			$_discussionnumber+=1;
+			$_discussionnumberlabel = "nr.".$_discussionnumber;
 			$blocking = (bool)$discussion->getAttr(self::FIELD_NAME_DISCUSSION_BLOCKING);
 			$closed = (bool)$discussion->getAttr(self::FIELD_NAME_DISCUSSION_CLOSED);
 			$resolved = (bool)$discussion->getAttr(self::FIELD_NAME_DISCUSSION_BLOCK_RESOLVED);
@@ -564,6 +567,8 @@ class peer_reviewed_article extends Page {
 			$list = $this->xml->createElement('ul');
 			/** @var HyphaDomElement $reviewCommentContainer */
 			$reviewCommentContainer = $this->xml->createElement('div');
+			$reviewTitle = $this->getXml()->createelement('div',$_discussionnumberlabel);
+			$reviewTitle->attr('class','comment-subject');
 			$class = 'review-comment-wrapper collapsed';
 			foreach (['blocking' => $blocking, 'resolved' => $resolved, 'closed' => $closed] as $name => $isTrue) {
 				if ($isTrue) {
@@ -571,6 +576,7 @@ class peer_reviewed_article extends Page {
 				}
 			}
 			$reviewCommentContainer->attr('class', $class);
+			$reviewCommentContainer->append($reviewTitle);
 			if ($closed) {
 				$reviewCommentContainer->append('<span style="float:right;">'.__('art-is-closed').' </span>');
 			}
