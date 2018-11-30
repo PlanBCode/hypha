@@ -124,7 +124,7 @@
 <div class="section" style="padding:5px; margin-bottom:5px;">
 <?php if($this->privateFlag) { ?>
 <input type="hidden" name="textPrivate" value="on" />
-<? } ?>
+<?php } ?>
 <b><?=__('language')?></b> <select name="textLanguage"><?=languageOptionList(null, $this->language)?></select>
 &nbsp;<b><?=__('title')?></b> <input type="text" name="textPagename" value="<?=showPagename($this->pagename)?>" onblur="validatePagename(this);" onkeyup="validatePagename(this);" />
 </div>
