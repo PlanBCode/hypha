@@ -980,12 +980,12 @@ class peer_reviewed_article extends Page {
 			</div>
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
 				<div class="input-wrapper field_type_editor field_name_$methodFieldName">
-					<strong><label for="$methodFieldName"> $method </label></strong><br><textarea name="$methodFieldName"></textarea>
+					<strong><label for="$methodFieldName"> $method </label></strong><br><editor name="$methodFieldName"></editor>
 				</div>
 			</div>
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
 				<div class="input-wrapper field_type_editor field_name_$sourcesFieldName">
-					<strong><label for="$sourcesFieldName"> $sources </label></strong><br><textarea name="$sourcesFieldName"></textarea>
+					<strong><label for="$sourcesFieldName"> $sources </label></strong><br><editor name="$sourcesFieldName"></editor>
 				</div>
 			</div>
 EOF;
