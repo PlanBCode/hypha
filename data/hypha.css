@@ -593,6 +593,9 @@ input {
 .review-comment-wrapper li.first-comment {
  padding-left: 0;
 }
+.review-comment-wrapper.collapsed.closed, .review-comment-wrapper.collapsed.blocking.closed {
+ background-color:  var(--menulinkhoverback);
+}
 
 .review-comment-wrapper li p {
  margin: 0;

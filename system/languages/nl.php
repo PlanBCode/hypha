@@ -316,6 +316,7 @@
 		"art-is-blocking" => "is een breekpunt",
 		"art-set-as-resolved" => "zet op opgelost",
 		"art-set-as-closed" => "zet op gesloten",
+		"art-is-closed"=> "discussie gesloten",
 		"art-approves" => "goedkeuringen",
 		"art-approve" => "geef goedkeuring",
 		"art-publish" => "publiceer",

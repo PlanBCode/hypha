@@ -571,6 +571,9 @@ class peer_reviewed_article extends Page {
 				}
 			}
 			$reviewCommentContainer->attr('class', $class);
+			if ($closed) {
+				$reviewCommentContainer->append('<span style="float:right;">'.__('art-is-closed').' </span>');
+			}
 			$reviewCommentContainer->append($list);
 
 			$hasComments = false;

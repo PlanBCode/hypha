@@ -321,6 +321,7 @@
 		"art-is-blocking" => "is blocking",
 		"art-set-as-resolved" => "set as resolved",
 		"art-set-as-closed" => "set as closed",
+		"art-is-closed" => "discussion closed",
 		"art-approves" => "approved",
 		"art-approve" => "approve",
 		"art-publish" => "publish",
