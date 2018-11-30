@@ -959,22 +959,34 @@ class peer_reviewed_article extends Page {
 		$sourcesFieldName = self::FIELD_NAME_SOURCES;
 		$html = <<<EOF
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
-				<strong><label for="$titleFieldName">$title</label></strong><br><input type="text" id="$titleFieldName" name="$titleFieldName" />
+				<div class="input-wrapper field_type_text field_name_$titleFieldName">
+					<strong><label for="$titleFieldName">$title</label></strong><br><input type="text" id="$titleFieldName" name="$titleFieldName" />
+				</div>
 			</div>
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
-				<strong><label for="$authorFieldName"> $author </label></strong><br><input type="text" id="$authorFieldName" name="$authorFieldName" />
+				<div class="input-wrapper field_type_text field_name_$authorFieldName">
+					<strong><label for="$authorFieldName"> $author </label></strong><br><input type="text" id="$authorFieldName" name="$authorFieldName" />
+				</div>
 			</div>
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
-				<strong><label for="$textFieldName"> $text </label></strong><editor name="$textFieldName"></editor>
+				<div class="input-wrapper field_type_editor field_name_$textFieldName">
+					<strong><label for="$textFieldName"> $text </label></strong><br><editor name="$textFieldName"></editor>
+				</div>
 			</div>
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
-				<strong><label for="$excerptFieldName"> $excerpt </label></strong><br><editor style="width: 700px; height: 300px;" name="$excerptFieldName"></editor>
+				<div class="input-wrapper field_type_editor field_name_$excerptFieldName">
+					<strong><label for="$excerptFieldName"> $excerpt </label></strong><br><editor name="$excerptFieldName"></editor>
+				</div>
 			</div>
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
-				<strong><label for="$methodFieldName"> $method </label></strong><br><textarea style="width: 700px; height: 300px;" name="$methodFieldName"></textarea>
+				<div class="input-wrapper field_type_editor field_name_$methodFieldName">
+					<strong><label for="$methodFieldName"> $method </label></strong><br><textarea name="$methodFieldName"></textarea>
+				</div>
 			</div>
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
-				<strong><label for="$sourcesFieldName"> $sources </label></strong><br><textarea style="width: 700px; height: 300px;" name="$sourcesFieldName"></textarea>
+				<div class="input-wrapper field_type_editor field_name_$sourcesFieldName">
+					<strong><label for="$sourcesFieldName"> $sources </label></strong><br><textarea name="$sourcesFieldName"></textarea>
+				</div>
 			</div>
 EOF;
 		/** @var HyphaDomElement $form */
