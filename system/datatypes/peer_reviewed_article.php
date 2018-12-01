@@ -34,6 +34,7 @@ class peer_reviewed_article extends Page {
 	const FIELD_NAME_DISCUSSION_BLOCKING = 'blocking';
 	const FIELD_NAME_DISCUSSION_BLOCK_RESOLVED = 'block_resolved';
 	const FIELD_NAME_DISCUSSION_CLOSED = 'closed';
+	const FIELD_NAME_DISCUSSION_SUBJECT = 'subject';
 	const FIELD_NAME_DISCUSSION_COMMENT = 'discussion_comment';
 	const FIELD_NAME_DISCUSSION_COMMENT_PENDING = 'pending';
 	const FIELD_NAME_DISCUSSION_COMMENT_CONFIRM_CODE = 'confirm_code';
@@ -553,11 +554,10 @@ class peer_reviewed_article extends Page {
 
 		// [open => [blocking, non-blocking], closed => [blocking, non-blocking]]
 		$reviewCommentContainersSorted = [0 => [0 => [], 1 => [],], 1 => [0 => [], 1 => [],],];
-
 		$_discussionnumber = 0;
 		foreach ($discussions as $discussion) {
 			$_discussionnumber+=1;
-			$_discussionnumberlabel = "nr.".$_discussionnumber;
+			$_discussionsubject = (string)$discussion->getAttr(self::FIELD_NAME_DISCUSSION_SUBJECT);
 			$blocking = (bool)$discussion->getAttr(self::FIELD_NAME_DISCUSSION_BLOCKING);
 			$closed = (bool)$discussion->getAttr(self::FIELD_NAME_DISCUSSION_CLOSED);
 			$resolved = (bool)$discussion->getAttr(self::FIELD_NAME_DISCUSSION_BLOCK_RESOLVED);
@@ -567,6 +567,7 @@ class peer_reviewed_article extends Page {
 			$list = $this->xml->createElement('ul');
 			/** @var HyphaDomElement $reviewCommentContainer */
 			$reviewCommentContainer = $this->xml->createElement('div');
+			$_discussionnumberlabel = __('art-title') . ":" . $_discussionsubject . '(nr. ' . $_discussionnumber . ')';
 			$reviewTitle = $this->getXml()->createelement('div',$_discussionnumberlabel);
 			$reviewTitle->attr('class','comment-subject');
 			$class = 'review-comment-wrapper collapsed';
@@ -757,7 +758,7 @@ class peer_reviewed_article extends Page {
 			$form->validateEmailField(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL);
 		}
 		$form->validateRequiredField(self::FIELD_NAME_DISCUSSION_COMMENT . '/new_' . $type);
-
+		$form->validateRequiredField(self::FIELD_NAME_DISCUSSION_SUBJECT);
 		// process form if it was posted
 		if ($formPosted && empty($form->errors)) {
 			$container = $type === 'review' ? self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER : self::FIELD_NAME_DISCUSSION_PUBLIC_CONTAINER;
@@ -772,6 +773,8 @@ class peer_reviewed_article extends Page {
 				$discussion->setAttr(self::FIELD_NAME_DISCUSSION_BLOCK_RESOLVED, false);
 			}
 			$discussion->setAttr(self::FIELD_NAME_DISCUSSION_CLOSED, false);
+			$subject = $form->dataFor(self::FIELD_NAME_DISCUSSION_SUBJECT);
+			$discussion ->setAttr(self::FIELD_NAME_DISCUSSION_SUBJECT,$subject);
 			$commentText = $form->dataFor(self::FIELD_NAME_DISCUSSION_COMMENT . '/new_' . $type);
 			$comment = $this->createDiscussionComment($discussion, $commentText, $form);
 			$this->saveAndUnlock();
@@ -1048,12 +1051,27 @@ EOF;
 		$comment = __('art-comment');
 		$new = $discussion === null;
 		$commentFieldName = self::FIELD_NAME_DISCUSSION_COMMENT . '/' . ($new ? 'new_' . $type : $discussion->getId());
-		$html = <<<EOF
+		if (strpos($commentFieldName, 'new_review') > 0) {
+			$_discussionLabel = __('art-start-discussion');
+			$_discussionShortTitle = __('art-title');
+
+			$html = <<<EOF
 			<div class="new-comment $type">
 			<div>
-				<strong><label for="$commentFieldName"> $comment </label></strong><textarea name="$commentFieldName" id="$commentFieldName" cols="36" rows="4"></textarea>
-			</div>
+				<strong><label for="$commentFieldName">$_discussionLabel</label></strong>
+				$_discussionShortTitle<br><input type="text" name="subject"><br>
+				$comment<br>
+				<textarea name="$commentFieldName" id="$commentFieldName" cols="36" rows="4"></textarea>
 EOF;
+}
+else {
+	$html = <<<EOF
+	<div class="new-comment $type">
+	<div>
+		<strong><label for="$commentFieldName"> $comment </label></strong><textarea name="$commentFieldName" id="$commentFieldName" cols="36" rows="4"></textarea>
+	</div>
+EOF;
+}
 		if ($new && self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER === $type && !in_array($this->getStatus(), [self::STATUS_APPROVED, self::STATUS_PUBLISHED])) {
 			$blocking = __('art-blocking');
 			$commentBlockingFieldName = self::FIELD_NAME_DISCUSSION_BLOCKING;

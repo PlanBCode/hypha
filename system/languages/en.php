@@ -307,6 +307,10 @@
 		"art-add-comment" => "add comment",
 		"art-comment" => "comment",
 		"art-comments" => "comments",
+		"art-title" => "title",
+		"art-continue-discussion" => "contribute",
+		"art-start-discussion" => "Start new discussion",
+		
 
 		// peer_reviewed_article - edit
 		"art-cancel" => "cancel",

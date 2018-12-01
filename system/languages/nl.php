@@ -302,6 +302,10 @@
 		"art-add-comment" => "voeg opmerking toe",
 		"art-comment" => "opmerking",
 		"art-comments" => "opmerkingen",
+		"art-title" => "titel",
+		"art-continue-discussion" => "vervolg beoordeling",
+		"art-start-discussion" => "Start nieuwe beoordeling",
+
 
 		// peer_reviewed_article - edit
 		"art-cancel" => "afbreken",
