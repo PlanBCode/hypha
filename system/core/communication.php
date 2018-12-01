@@ -56,7 +56,7 @@
 				$error[] = $receiver;
 				continue;
 			}
-			$success = mail($receiver, $subject, $messageHtml, $headers . 'To: ' . $receiver, '-f ' . $senderEmail);
+			$success = mail($receiver, $subject, $messageHtml, $headers, '-f '.$senderEmail);
 			if (!$success) {
 				$error[] = $receiver;
 			}
