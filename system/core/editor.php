@@ -143,9 +143,6 @@
 				// align Containers/Styles dropdown menu next to the tools box
 				jQuery(wym._box).find(".wym_area_top .wym_section").css("float", "left").css("margin-right", "5px");
 
-				// adjust the editor's height
-				jQuery(wym._box).find(wym._options.iframeSelector).css('height', '250px');
-
 				// set focus to the first editor
 				if (!this.isFocusSet) {
 					$(wym._iframe).focus();
