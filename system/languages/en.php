@@ -18,6 +18,7 @@
 		"reregister" => "recover account",
 		"name" => "name",
 		"pagename" => "pagename",
+		"instruction-new-page" => "(choose the right pagetype!)",
 		"username" => "username",
 		"fullname" => "full name",
 		"password" => "password",

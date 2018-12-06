@@ -18,6 +18,7 @@
 		"reregister" => "heraanmelden",
 		"name" => "naam",
 		"pagename" => "paginanaam",
+		"instruction-new-page" => "(kies het juiste paginatype!)",
 		"username" => "gebruikersnaam",
 		"fullname" => "volledige naam",
 		"password" => "wachtwoord",
