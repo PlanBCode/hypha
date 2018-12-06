@@ -245,7 +245,7 @@
 
 		// mailing list - response
 		"ml-no-sender" => "no sender, please edit the mailing list",
-		"ml-mail-has-invalid-status" => "de mail heeft een onjuiste status",
+		"ml-mail-has-invalid-status" => "this email has an invalid status",
 		"ml-invalid-command" => "invalid command",
 		"ml-inconsistent-parameters" => "the given parameters are inconsistent",
 		"ml-successfully-subscribed" => "successfully subscribed",
@@ -257,7 +257,7 @@
 		// mailing list - mail
 		"ml-please-confirm-email" => "please confirm the email",
 		"ml-unsubscribe" => "unsubscribe",
-		"ml-if-unreadable-use-link" => "if the mail is unreadable, please use the link",
+		"ml-if-unreadable-use-link" => "if this email is unreadable, please use the link",
 
 		// mailing list - status
 		"ml-mailing-status-draft" => "draft",

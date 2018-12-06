@@ -252,7 +252,7 @@
 		// mailing list - mail
 		"ml-please-confirm-email" => "bevestig de e-mail",
 		"ml-unsubscribe" => "afmelden",
-		"ml-if-unreadable-use-link" => "als het onleesbaar is, gebruik dan de link",
+		"ml-if-unreadable-use-link" => "klik op deze link als deze email onleesbaar is",
 
 		// mailing list - status
 		"ml-mailing-status-draft" => "in opmaak",
