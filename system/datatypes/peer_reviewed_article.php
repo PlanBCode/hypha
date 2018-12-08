@@ -675,8 +675,8 @@ class peer_reviewed_article extends Page {
 			$formData = [
 				self::FIELD_NAME_TITLE => html_entity_decode(strip_tags($this->getDocPageByName(self::FIELD_NAME_TITLE)->getText())),
 				self::FIELD_NAME_AUTHOR => $this->getAttr(self::FIELD_NAME_CONTEXT, self::FIELD_NAME_AUTHOR),
-				self::FIELD_NAME_EXCERPT => $this->getDocPageByName(self::FIELD_NAME_EXCERPT)->getHtml(),
 				self::FIELD_NAME_TEXT => $this->getDocPageByName(self::FIELD_NAME_TEXT)->getHtml(),
+				self::FIELD_NAME_EXCERPT => $this->getDocPageByName(self::FIELD_NAME_EXCERPT)->getHtml(),
 				self::FIELD_NAME_METHOD => $this->getDocPageByName(self::FIELD_NAME_METHOD)->getHtml(),
 				self::FIELD_NAME_SOURCES => $this->getDocPageByName(self::FIELD_NAME_SOURCES)->getHtml(),
 			];
@@ -692,10 +692,10 @@ class peer_reviewed_article extends Page {
 			$this->getDocPageByName(self::FIELD_NAME_CONTEXT)->setAttr(self::FIELD_NAME_AUTHOR, $author);
 			$title = $this->getDocPageByName(self::FIELD_NAME_TITLE);
 			$title->setText($form->dataFor(self::FIELD_NAME_TITLE));
-			$excerpt = $this->getDocPageByName(self::FIELD_NAME_EXCERPT);
-			$excerpt->setHtml($form->dataFor(self::FIELD_NAME_EXCERPT), true);
 			$text = $this->getDocPageByName(self::FIELD_NAME_TEXT);
 			$text->setHtml($form->dataFor(self::FIELD_NAME_TEXT), true);
+			$excerpt = $this->getDocPageByName(self::FIELD_NAME_EXCERPT);
+			$excerpt->setHtml($form->dataFor(self::FIELD_NAME_EXCERPT), true);
 			$method = $this->getDocPageByName(self::FIELD_NAME_METHOD);
 			$method->setHtml($form->dataFor(self::FIELD_NAME_METHOD), true);
 			$sources = $this->getDocPageByName(self::FIELD_NAME_SOURCES);
@@ -949,32 +949,44 @@ class peer_reviewed_article extends Page {
 		$titleFieldName = self::FIELD_NAME_TITLE;
 		$author = __('art-author');
 		$authorFieldName = self::FIELD_NAME_AUTHOR;
-		$excerpt = __('art-excerpt');
-		$excerptFieldName = self::FIELD_NAME_EXCERPT;
 		$text = __('art-article');
 		$textFieldName = self::FIELD_NAME_TEXT;
+		$excerpt = __('art-excerpt');
+		$excerptFieldName = self::FIELD_NAME_EXCERPT;
 		$method = __('art-method');
 		$methodFieldName = self::FIELD_NAME_METHOD;
 		$sources = __('art-sources');
 		$sourcesFieldName = self::FIELD_NAME_SOURCES;
 		$html = <<<EOF
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
-				<strong><label for="$titleFieldName">$title</label></strong><br><input type="text" id="$titleFieldName" name="$titleFieldName" />
+				<div class="input-wrapper field_type_text field_name_$titleFieldName">
+					<strong><label for="$titleFieldName">$title</label></strong><br><input type="text" id="$titleFieldName" name="$titleFieldName" />
+				</div>
 			</div>
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
-				<strong><label for="$authorFieldName"> $author </label></strong><br><input type="text" id="$authorFieldName" name="$authorFieldName" />
+				<div class="input-wrapper field_type_text field_name_$authorFieldName">
+					<strong><label for="$authorFieldName"> $author </label></strong><br><input type="text" id="$authorFieldName" name="$authorFieldName" />
+				</div>
 			</div>
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
-				<strong><label for="$excerptFieldName"> $excerpt </label></strong><br><editor style="width: 700px; height: 300px;" name="$excerptFieldName"></editor>
+				<div class="input-wrapper field_type_editor field_name_$textFieldName">
+					<strong><label for="$textFieldName"> $text </label></strong><br><editor name="$textFieldName"></editor>
+				</div>
 			</div>
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
-				<strong><label for="$textFieldName"> $text </label></strong><editor name="$textFieldName"></editor>
+				<div class="input-wrapper field_type_editor field_name_$excerptFieldName">
+					<strong><label for="$excerptFieldName"> $excerpt </label></strong><br><editor name="$excerptFieldName"></editor>
+				</div>
 			</div>
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
-				<strong><label for="$methodFieldName"> $method </label></strong><br><textarea style="width: 700px; height: 300px;" name="$methodFieldName"></textarea>
+				<div class="input-wrapper field_type_editor field_name_$methodFieldName">
+					<strong><label for="$methodFieldName"> $method </label></strong><br><editor name="$methodFieldName"></editor>
+				</div>
 			</div>
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
-				<strong><label for="$sourcesFieldName"> $sources </label></strong><br><textarea style="width: 700px; height: 300px;" name="$sourcesFieldName"></textarea>
+				<div class="input-wrapper field_type_editor field_name_$sourcesFieldName">
+					<strong><label for="$sourcesFieldName"> $sources </label></strong><br><editor name="$sourcesFieldName"></editor>
+				</div>
 			</div>
 EOF;
 		/** @var HyphaDomElement $form */
