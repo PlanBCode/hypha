@@ -131,6 +131,7 @@
 
 	// add hypha commands and navigation
 	$_cmds[] = '<a href="index/'.$hyphaLanguage.'">'.__('index').'</a>';
+	$_cmds[] = '<a href="help/index/'.$hyphaLanguage.'">'.__('help').'</a>';
 	if (!$O_O->isUser()) {
 		addLoginRoutine($hyphaHtml);
 		$_cmds[] = '<a href="javascript:login();">'.__('login').'</a>';
@@ -145,6 +146,7 @@
 		$_cmds[] = makeLink(__('settings'), makeAction('settings', '', ''));
 		$_cmds[] = makeLink(__('logout'), makeAction($hyphaQuery, 'logout', ''));
 	}
+	$_cmds[] = createInfo('infowelcome','welcome','en');
 	$hyphaHtml->writeToElement('hyphaCommands', implode('', $_cmds));
 	if ($O_O->isUser()) $hyphaHtml->writeToElement('hyphaCommands', '<br/><div id="loggedIn">'.__('logged-in-as').' `'.$O_O->getUser()->getAttribute('username').'`'.asterisk(isAdmin()).'</div>');
 

@@ -110,3 +110,16 @@
 	function makeLink($label, $action) {
 		return '<a href="javascript:'.$action.'">'.$label.'</a>';
 	}
+
+	function createInfo($elementId,$buttonName,$language) {
+			$_html = "";
+			$_html.= '<div class="hyphaInfoButton" onclick="showinfod(event,'."'" . $elementId ."','" . $buttonName . "'" . ')">i</div>';
+			$_html.= '<div id ="' . $elementId . '" class="hypha_popup_bkgr" style="display: none;">';
+			$_html.= '<span class="helper"></span>';
+			$_html.= '<div>';
+			$_html.= '<div onclick="hideinfod(' . "'"  . $elementId . "'" .')" class="hyphaCloseButton">X</div>';
+			$_html.= '<p>uitleg voor <br \>' . $buttonName . '<br \> ín de taal :' . $language . '</p>';
+			$_html.= '</div>';
+			$_html.= '</div>';
+			return $_html;
+		}

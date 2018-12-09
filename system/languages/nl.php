@@ -329,6 +329,7 @@
 		"art-start-review" => "start beoordeling",
 		"art-approve(s)" => "beoordeling(en)",
 		"art-unresolved-block(s)" => "onopgeloste breekpunt(en)",
+		"help-pagetitle" => "Index hulp onderwerpen",
 	);
 
 	return $LANG;

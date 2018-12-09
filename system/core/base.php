@@ -676,6 +676,40 @@
 		return $index;
 	}
 
+	function hypha_helpLanguages($subject,$language) {
+	//	echo "hypha_helplanguages" . $subject . " taal:" . $language . "<br>\n";
+		// returns a list of languages for the help subject
+			$languagelist = array();
+				$index = "";
+				if (file_exists('data/help.xml')) {
+					$xml = simplexml_load_file('data/help.xml');
+					if (!$subject) {
+						foreach ($xml->title->language as $tlanguage) {
+							$languagelist[] = $tlanguage['id'];
+						}
+					}
+					else {
+						foreach ($xml->items->item as $helpitem) {
+							if ($helpitem['subject'] === $subject){
+								//  subject gevonden
+								foreach ($helpitem->content as $taal) {
+									$languagelist[] = $taal['language'];
+								}
+							}
+						}
+					}
+					foreach($languagelist as $lang) {
+							if ($lang == $language) $index.= '<span class="language selected">'.$lang.'</span>';
+							else $index.= '<span class="language"><a href="help/index/'.$lang.'">'.$lang.'</a></span>';
+							}
+			}
+			else {
+				$index .='<span class="language disabled">ERROR: no help database available</span>';
+			}
+	return $index;
+	}
+
+
 	/*
 		Function: hypha_indexPages
 		returns alphabetical overview of all pages in the given language
@@ -725,4 +759,33 @@
 
 	function hypha_indexFiles() {
 		return 'file index is not yet implemented';
+	}
+
+	function hypha_helpindex($language = 'nl') {
+		if (!$language) $language='nl';
+		if (file_exists('data/help.xml')) {
+			$xml = simplexml_load_file('data/help.xml');
+			$html ="<h5>index helponderwerpen (taal =";
+			$html .= $language;
+			$html .= ")</h5>";
+			$html .= '<table>';
+			/* For each help */
+			foreach ($xml->items->item as $helpitem) {
+				$html .= '<tr><td>';
+				$html .= $helpitem['subject'];
+				$html .= '</td><td>';
+				foreach ($helpitem->content as $taal) {
+					if  ($taal['language'] ==$language){
+						$html .= '<br>';
+						$html .= $taal;
+						$html .= '</td><td>';
+					}
+				}
+			$html .= '</td>';
+			}
+			$html .= "</table>";
+			return $html;
+		} else {
+			return 'help page not found';
+		}
 	}

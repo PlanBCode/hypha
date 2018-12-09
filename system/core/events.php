@@ -58,7 +58,95 @@
 		Javascript variable containing the base url from the document location object.
 	*/
 	var postProcessingList = new Array();
+/* *******************************************
+ * handeling of info help requests
+ */
 
+ /* Function: showinfod(e,id,subject)
+ * Shows the requsted help information for the subject in an popup
+ * Parameters:
+ * e - object
+ * id - html ellement to show the requested information
+ * subject - Keyword to determine the help information from the help database
+ * language = language to show the information in (if available)
+ * clicked - dictionary {popup-id: value} to determine the state of the popup
+ *           grows dynamically if more popup are opened
+ *   value   true = popup shown
+ *           false = popup not shown
+*/
+	var clicked = {}; // create empty dictionary {key:value, key2:vale} to store the status of popups dynamically
+
+	function showinfod(e,id,subject) {
+		// if a popup with the id is open then close it
+		var x = e.screenX;
+		var y = e.screenY
+		//var coords = "X coords: " + x + ", Y coords: " + y;
+		//alert(coords);
+		var info = document.getElementById(id);
+	  if (info) {
+			// check if id has an entry in clicked
+			for(var key in clicked) {
+				if (key == id)
+				 if (clicked[key] == true){hideinfod(id); return;}
+			 }
+			 clicked[id] = true;
+			 	/* get the help info from the hypha server */
+					var pageLanguage = document.getElementById('langList')
+					var language = pageLanguage.getElementsByClassName('selected');
+		      url = "help/help/" + subject + "/" + language[0].innerHTML;
+					//alert(language[0].innerHTML + url);
+		      hypha_ajax(url, function() {
+		        var info = document.getElementById(id);
+						var text = info.getElementsByTagName("p").item(0);
+						text.innerHTML = this;
+						info.style.display= "block";
+						info.top = x;
+						info.left = y;
+		      } );
+		      /* help info added, position the popup */
+		    info.style.display = "block";
+		    info.position = "absolute";
+				info.top = x;
+				info.left = y;
+				var text = info.getElementsByTagName("p").item(0);
+				text.innerHTML = this;
+			}
+	    else { alert("Er mist een object");}
+	    }
+
+	function hideinfod(id) {
+	  var info = document.getElementById(id);
+	  info.style.display = "none";
+	  clicked[id]=false;
+	}
+
+function hypha_ajax(url, callback) {
+	// simple basic ajax request
+  var httpRequest; // create our XMLHttpRequest object
+  if (window.XMLHttpRequest) {
+    httpRequest = new XMLHttpRequest();
+  } else if (window.ActiveXObject) {
+    // Internet Explorer
+    httpRequest = new
+    ActiveXObject("Microsoft.XMLHTTP");
+  }
+  httpRequest.onreadystatechange = function() {
+    // inline function to check the status
+    // of our request
+    // this is called on every state change
+    if (httpRequest.readyState === 4 &&
+      httpRequest.status === 200) {
+      callback.call(httpRequest.responseText);
+      // call the callback function
+    }
+  };
+  httpRequest.open('GET', url, true);
+  httpRequest.send();
+
+}
+/*
+* handeling of info help requests
+* *******************************************/
 	/*
 		Function: hypha
 		Javascript function to load another page or view.
@@ -74,7 +162,7 @@
 		document.getElementById('argument').value = arg;
 		document.forms['hyphaForm'].action = url;
 		for(i=0; i<postProcessingList.length; i++) postProcessingList[i]();
-		if (cmd||arg) $(document.forms['hyphaForm']).submit();
+		if (cmd||arg) (document.forms['hyphaForm']).submit();
 		else window.location = url;
 	}
 

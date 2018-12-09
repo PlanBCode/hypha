@@ -334,6 +334,7 @@
 		"art-start-review" => "start review",
 		"art-approve(s)" => "approve(s)",
 		"art-unresolved-block(s)" => "unresolved block(s)",
+		"help-pagetitle" => "Help index",
 	);
 
 	return $LANG;
