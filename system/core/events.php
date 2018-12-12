@@ -74,7 +74,7 @@
 		document.getElementById('argument').value = arg;
 		document.forms['hyphaForm'].action = url;
 		for(i=0; i<postProcessingList.length; i++) postProcessingList[i]();
-		if (cmd||arg) $(document.forms['hyphaForm']).submit();
+		if (cmd||arg) (document.forms['hyphaForm']).submit();
 		else window.location = url;
 	}
 
