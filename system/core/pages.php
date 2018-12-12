@@ -195,6 +195,12 @@
 					exit;
 				}
 				break;
+				case HyphaRequest::HYPHA_SYSTEM_PAGE_SEARCH: //bz search
+				$hyphaHtml->writeToElement('pagetitle',__('searchresults')); //add searchtitle to languages
+				$hyphaPage = new searchPage($args);
+				$contentLanguage = $O_O->getContentLanguage();
+				$hyphaHtml->writeToElement('langList', hypha_indexLanguages('', $contentLanguage));
+				break;
 			case HyphaRequest::HYPHA_SYSTEM_PAGE_UPLOAD:
 				if ($args[0]=='image') {
 					$return = null;

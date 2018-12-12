@@ -22,7 +22,7 @@
  --menulinkhoverback: #aaa;
  --menulinkactiveback: #ccc;
  --sidebarbackgroundcolor: #ddddff;
- 
+
 }
 
 /* dosis-regular - latin */
@@ -412,11 +412,11 @@ code {
  color: #825500;
 }
  /* ---- Images ---- */
- 
+
 img {
  border: 0px;
 }
- 
+
 #main img {
  margin: 1.1em 0 0.7em;
  max-width: 100%;
@@ -722,4 +722,66 @@ th{
 }
 .festivalTimetable .tableRowHeadingEven {
 	background-color:#bbb;
+}
+.topnav .search-container {
+	float: right;
+}
+.searchinput[type=text] {
+	padding: 6px;
+	margin-top: 8px;
+	font-size: 14px;
+	border: none;
+}
+
+.topnav .search-container button {
+	float: rigth;
+	padding: 6px 10px;
+	margin-top: 8px;
+	margin-right: 16px;
+	background: #ddd;
+	font-size: 14px;
+	border: none;
+	cursor: pointer;
+}
+
+.topnav .search-container button:hover {
+	background: #ccc;
+}
+
+button.searchbutton{
+ min-height: 30px;
+ margin-right: 10px;
+ padding-right: 20px;
+ padding-left: 20px;
+ font-weight: bold;
+ background: #999;
+ color: #FFFFFF;
+ border: none;
+ border-radius: 5px;
+ margin-left: 15px;
+ margin-right: 15px;
+ background-color: #0000e6;
+ color: white;
+ font-size: 14px;
+}
+
+@media screen and (max-width: 600px) {
+	.topnav .search-container {
+		float: none;
+	}
+	.topnav a, .topnav searchinput[type=text], .topnav .search-container searchbutton {
+		float: none;
+		display: block;
+		test-align: left;
+		width: 100%;
+		margin: o;
+		padding: 14px;
+	}
+	.topnav searchinput[type=text] {
+		border: 1px solid #ccc;
+	}
+}
+
+span.searchpattern {
+  color: #0000ff;
 }

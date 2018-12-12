@@ -16,6 +16,7 @@
 		const HYPHA_SYSTEM_PAGE_SETTINGS = 'settings';
 		const HYPHA_SYSTEM_PAGE_UPLOAD = 'upload';
 		const HYPHA_SYSTEM_PAGE_CHOOSER = 'chooser';
+		const HYPHA_SYSTEM_PAGE_SEARCH = 'search';
 
 		/** @var string */
 		private $rootUrlPath;
@@ -121,6 +122,7 @@
 				HyphaRequest::HYPHA_SYSTEM_PAGE_SETTINGS,
 				HyphaRequest::HYPHA_SYSTEM_PAGE_UPLOAD,
 				HyphaRequest::HYPHA_SYSTEM_PAGE_CHOOSER,
+				HyphaRequest::HYPHA_SYSTEM_PAGE_SEARCH,
 			];
 		}
 

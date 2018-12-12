@@ -130,6 +130,7 @@
 	registerPostProcessingFunction('dewikify');
 
 	// add hypha commands and navigation
+	$_cmds[] = createSearch(); // insert as the first element, due to float right the barappears in front of commands
 	$_cmds[] = '<a href="index/'.$hyphaLanguage.'">'.__('index').'</a>';
 	if (!$O_O->isUser()) {
 		addLoginRoutine($hyphaHtml);
@@ -164,3 +165,22 @@
 	header('Content-Type: text/html; charset=utf-8');
 	print $hyphaHtml->toString();
 	exit;
+	/* Function:
+	* createSearch
+	* makes the html for the search bar
+	*/
+function createSearch()
+{
+	$search = __('search');
+	$searchbar= <<<EOF
+	<!-- HTML for SEARCH BAR -->
+	<span >
+	<input id="searchPattern" type="text" class="searchinput" placeholder="$search ..." name="searchbar">
+	<button  class="searchbutton" type="search"
+	onclick="hypha('search/text/' + document.getElementById('searchPattern').value, 'hypha_searchPages',
+	document.getElementById('searchPattern').value);"">
+EOF;
+	$searchbar .= $search; // add search to languages
+	$searchbar .= "</button></span>";
+	return $searchbar;
+}
