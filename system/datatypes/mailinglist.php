@@ -150,7 +150,9 @@ class mailinglist extends Page {
 					$link = $this->constructFullPath(sprintf('%s/confirm?code=%s', urlencode($this->pagename), urlencode($code)));
 					$confirmTxt = __('ml-please-confirm-email');
 					$link = '<a href="' . $link . '">' . $confirmTxt . '</a>';
-					$welcomeText = $this->getDoc()->getOrCreate('email-welcome-text')->getHtml();
+					$emailWelcomeText = $this->getDoc()->getOrCreate('email-welcome-text');
+					dewikify($emailWelcomeText);
+					$welcomeText = $emailWelcomeText->getHtml();
 					$welcomeText .= '<br><br>' . $link;
 					$subject = hypha_getTitle() . ' - ' . __('ml-confirmation-email-subject');
 					$this->send($subject, $welcomeText, [$email]);
