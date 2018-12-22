@@ -64,9 +64,7 @@
 	$hyphaUrl = $hyphaRequest->getRootUrl();
 
 	// Shortcut for direct file requests
-	if ($hyphaQuery == 'data/hypha.css') serveFile($hyphaQuery, false);
-	if (strpos($hyphaQuery, 'data/css/') === 0) serveFile($hyphaQuery, false);
-	if (strpos($hyphaQuery, 'data/fonts/') === 0) serveFile($hyphaQuery, false);
+	if (strpos($hyphaQuery, 'data/themes/') === 0) serveFile($hyphaQuery, false);
 	if (startsWith($hyphaQuery, 'system/wymeditor')) serveFile($hyphaQuery, 'system/wymeditor');
 	if (startsWith($hyphaQuery, 'system/bowser')) serveFile($hyphaQuery, 'system/bowser');
 
@@ -79,7 +77,7 @@
 	*/
 
 	$hyphaHtml = new HTMLDocument(Hypha::$data->html, $hyphaUrl);
-	$hyphaHtml->linkStyle('data/hypha.css');
+	$hyphaHtml->linkStyle('data/themes/default/hypha.css');
 	$hyphaHtml->linkScript('http://code.jquery.com/jquery-1.7.1.min.js');
 	$hyphaHtml->setTitle(hypha_getTitle());
 	$hyphaHtml->writeToElement('header', hypha_getHeader());

@@ -55,8 +55,8 @@
 	}
 
 	Hypha::$data = new StdClass();
-	Hypha::$data->css = new HyphaFile('data/hypha.css');
-	Hypha::$data->html = new HyphaFile('data/hypha.html');
+	Hypha::$data->css = new HyphaFile('data/themes/default/hypha.css');
+	Hypha::$data->html = new HyphaFile('data/themes/default/hypha.html');
 	Hypha::$data->digest = new HyphaFile('data/digest');
 	Hypha::$data->stats = new HyphaFile('data/hypha.stats');
 
