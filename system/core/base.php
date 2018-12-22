@@ -55,8 +55,9 @@
 	}
 
 	Hypha::$data = new StdClass();
-	Hypha::$data->css = new HyphaFile('data/themes/default/hypha.css');
-	Hypha::$data->html = new HyphaFile('data/themes/default/hypha.html');
+	Hypha::$data->theme = hypha_getTheme();
+	Hypha::$data->css = new HyphaFile('data/themes/' . Hypha::$data->theme . '/hypha.css');
+	Hypha::$data->html = new HyphaFile('data/themes/' . Hypha::$data->theme . '/hypha.html');
 	Hypha::$data->digest = new HyphaFile('data/digest');
 	Hypha::$data->stats = new HyphaFile('data/hypha.stats');
 
@@ -168,6 +169,32 @@
 		global $hyphaXml;
 		$hyphaXml->requireLock();
 		$hyphaXml->documentElement->setAttribute('lastDigestTime', $string);
+	}
+
+	/*
+		Function: hypha_getTheme
+		returns hypha theme attribute
+	*/
+	function hypha_getTheme() {
+		global $hyphaXml;
+		$theme = $hyphaXml->documentElement->getAttribute('theme');
+		if ('' === $theme) {
+			$theme = 'default';
+		}
+		return $theme;
+	}
+
+	/*
+		Function: hypha_setTheme
+		sets hypha theme attribute
+
+		Parameters:
+		$string - new theme value
+	*/
+	function hypha_setTheme($string) {
+		global $hyphaXml;
+		$hyphaXml->requireLock();
+		$hyphaXml->documentElement->setAttribute('theme', $string);
 	}
 
 	/*

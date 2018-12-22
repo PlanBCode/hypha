@@ -20,6 +20,7 @@
 			registerCommandCallback('settingsSaveAccount', Array($this, 'saveAccount'));
 			registerCommandCallback('settingsSaveHyphaSettings', Array($this, 'saveHyphaSettings'));
 			registerCommandCallback('settingsSaveMarkup', Array($this, 'saveMarkup'));
+			registerCommandCallback('settingsSaveTheme', Array($this, 'saveTheme'));
 			registerCommandCallback('settingsSaveStyles', Array($this, 'saveStyles'));
 			registerCommandCallback('settingsSaveSiteElements', Array($this, 'saveSiteElements'));
 			registerCommandCallback('settingsSaveMenu', Array($this, 'saveMenu'));
@@ -37,6 +38,7 @@
 				case 'register': $this->editRegistration($this->getArg(1)); break;
 				case 'hypha': $this->editHyphaSettings(); break;
 				case 'markup': $this->editMarkup(); break;
+				case 'theme': $this->editTheme(); break;
 				case 'styles': $this->editStyles(); break;
 				case 'elements': $this->editSiteElements(); break;
 				case 'menu': $this->editMenu(); break;
@@ -289,9 +291,36 @@
 			return 'reload';
 		}
 
+		function editTheme() {
+			if (isAdmin()) {
+				ob_start();
+				echo '<select name="editTheme" id="editTheme">';
+				foreach (scandir('data/themes/') as $theme) {
+					if ('.' !== $theme[0]) {
+						echo '<option' . (Hypha::$data->theme === $theme ? ' selected' : '') . '>' . htmlspecialchars($theme) . '</option>';
+					}
+				}
+				echo '</select>';
+				$this->html->writeToElement('main', ob_get_clean());
+				$this->html->writeToElement('pagename', __('select-theme'));
+				$this->html->writeToElement('pageCommands', makeButton(__('cancel'), makeAction('settings', '', '')));
+				$this->html->writeToElement('pageCommands', makeButton(__('save'), makeAction('settings', 'settingsSaveTheme', '')));
+			}
+		}
+
+		function saveTheme($argument) {
+			if (isAdmin()) {
+				global $hyphaUrl, $hyphaXml;
+				$hyphaXml->lockAndReload();
+				hypha_setTheme($_POST['editTheme']);
+				$hyphaXml->saveAndUnlock();
+			}
+			return 'reload';
+		}
+
 		function editStyles() {
 			if (isAdmin()) {
-				$this->html->writeToElement('pagename', __('edit-css'));
+				$this->html->writeToElement('pagename', __('edit-css-of-theme') . ' "' . Hypha::$data->theme . '"');
 				$this->html->writeToElement('pageCommands', makeButton(__('cancel'), makeAction('settings', '', '')));
 				$this->html->writeToElement('pageCommands', makeButton(__('save'), makeAction('settings', 'settingsSaveStyles', '')));
 				ob_start();
@@ -391,6 +420,7 @@
 				$this->html->writeToElement('pageCommands', makeButton(__('system-tools'), makeAction('hypha.php?maintenance', '', '')));
 				$this->html->writeToElement('pageCommands', makeButton(__('hypha-settings'), makeAction('settings/hypha', '', '')));
 				$this->html->writeToElement('pageCommands', makeButton(__('markup'), makeAction('settings/markup', '', '')));
+				$this->html->writeToElement('pageCommands', makeButton(__('theme'), makeAction('settings/theme', '', '')));
 				$this->html->writeToElement('pageCommands', makeButton(__('styles'), makeAction('settings/styles', '', '')));
 				$this->html->writeToElement('pageCommands', makeButton(__('site-elements'), makeAction('settings/elements', '', '')));
 				$this->html->writeToElement('pageCommands', makeButton(__('menu'), makeAction('settings/menu', '', '')));
