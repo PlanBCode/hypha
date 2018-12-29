@@ -249,6 +249,7 @@
 		"ml-successfully-unsubscribed" => "u heeft zich succesvol afgemeld",
 		"ml-successfully-created" => "succesvol aangemaakt",
 		"ml-successfully-updated" => "succesvol bijgewerkt",
+		"ml-successfully-sent" => "succesvol verstuurd",
 		"ml-confirmation-mail-sent" => "U ontvangt spoedig een email met een link. Bevestig uw aanmelding door op de link in de e-mail te klikken. Heeft u de email niet ontvangen? Kijk dan in uw spam folder.",
 
 		// mailing list - mail
