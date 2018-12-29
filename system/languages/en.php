@@ -238,13 +238,15 @@
 		"datatype.name.mailinglist" => "mailinglist",
 
 		// mailing list
+		"ml-test-send" => "test-send",
 		"ml-view-addresses" => "view addresses",
 		"ml-date-format" => "d/m/Y",
 		"ml-received-by" => "received by",
+		"ml-sure-to-send" => "Are you sure to send off this mailing to [[count]] recipient(s)?",
 
 		// mailing list - response
 		"ml-no-sender" => "no sender, please edit the mailing list",
-		"ml-mail-has-invalid-status" => "de mail heeft een onjuiste status",
+		"ml-mail-has-invalid-status" => "the mail has an invalid status",
 		"ml-invalid-command" => "invalid command",
 		"ml-inconsistent-parameters" => "the given parameters are inconsistent",
 		"ml-successfully-subscribed" => "successfully subscribed",
