@@ -31,6 +31,7 @@ class mailinglist extends Page {
 	const FORM_CMD_LIST_DELETE = 'delete';
 	const FORM_CMD_MAILING_SAVE = 'save';
 	const FORM_CMD_MAILING_SEND = 'send';
+	const FORM_CMD_MAILING_TEST_SEND = 'test_send';
 
 	const MAILING_STATUS_DRAFT = 'draft';
 	const MAILING_STATUS_SENT = 'sent';
@@ -509,9 +510,10 @@ class mailinglist extends Page {
 	 * @return array|null
 	 */
 	private function showMailingAction($mailingId) {
-		if ($this->isPosted(self::FORM_CMD_MAILING_SEND)) {
+		if ($this->isPosted(self::FORM_CMD_MAILING_SEND) || $this->isPosted(self::FORM_CMD_MAILING_TEST_SEND)) {
 			try {
-				$this->sendMailing($mailingId);
+				if ($this->isPosted(self::FORM_CMD_MAILING_SEND)) $this->sendMailing($mailingId);
+				if ($this->isPosted(self::FORM_CMD_MAILING_TEST_SEND)) $this->testSendMailing($mailingId);
 				$msg = ucfirst(__('ml-successfully-sent'));
 				$msgType = 'success';
 			} catch (\Exception $e) {
@@ -568,6 +570,7 @@ class mailinglist extends Page {
 		if ($inDraft) {
 			$commands->append($this->makeActionButton(__('edit'), $mailingId . '/edit'));
 			$commands->append($this->makeActionButton(__('send'), $mailingId, self::FORM_CMD_MAILING_SEND));
+			$commands->append(makeButton(__('ml-test-send'), 'hypha(\''.$path.'\', \''.self::FORM_CMD_MAILING_TEST_SEND.'\', prompt(\'' . __('email') . '\'));'));
 		}
 
 		return null;
@@ -746,6 +749,19 @@ EOF;
 		$this->xml->saveAndUnlock();
 
 		return $mailing;
+	}
+
+	private function testSendMailing($mailingId, $email) {
+		if (!$this->hasSender()) {
+			throw new \Exception(__('ml-no-sender'));
+		}
+
+		$senderName = $this->getDoc()->getAttribute('sender-name');
+		$senderEmail = $this->getDoc()->getAttribute('sender-email');
+
+		/** @var HyphaDomElement $mailing */
+		$mailing = $this->xml->document()->getElementById($mailingId);
+		$this->send($mailing->getAttribute('subject'), $mailing->getHtml(), [$email], $senderEmail, $senderName);
 	}
 
 	/**

@@ -238,6 +238,7 @@
 		"datatype.name.mailinglist" => "mailinglist",
 
 		// mailing list
+		"ml-test-send" => "test-send",
 		"ml-view-addresses" => "view addresses",
 		"ml-date-format" => "d/m/Y",
 		"ml-received-by" => "received by",
