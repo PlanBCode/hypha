@@ -234,6 +234,7 @@
 		"datatype.name.mailinglist" => "mailinglist",
 
 		// mailing list
+		"ml-test-send" => "test-verzending",
 		"ml-view-addresses" => "bekijk adressen",
 		"ml-date-format" => "d-m-Y",
 		"ml-received-by" => "ontvangen door",
