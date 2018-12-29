@@ -243,6 +243,7 @@
 		"ml-view-addresses" => "view addresses",
 		"ml-date-format" => "d/m/Y",
 		"ml-received-by" => "received by",
+		"ml-sure-to-send" => "Are you sure to send off this mailing to [[count]] recipient(s)?",
 
 		// mailing list - response
 		"ml-no-sender" => "no sender, please edit the mailing list",

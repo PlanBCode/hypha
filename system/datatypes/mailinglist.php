@@ -578,7 +578,10 @@ class mailinglist extends Page {
 		// add edit button when in draft
 		if ($inDraft) {
 			$commands->append($this->makeActionButton(__('edit'), $mailingId . '/edit'));
-			$commands->append($this->makeActionButton(__('send'), $mailingId, self::FORM_CMD_MAILING_SEND));
+			$num = count($this->getDoc()->findXPath('//address[@status="' . self::ADDRESS_STATUS_CONFIRMED . '"]'));
+
+			$path = $this->language . '/' . $this->pagename . '/' . $mailingId;
+			$commands->append(makeButton(__('send'), 'if(confirm(\'' . __('ml-sure-to-send', array("count" => $num)) . '\'))' . makeAction($path, self::FORM_CMD_MAILING_SEND, '')));
 			$commands->append(makeButton(__('ml-test-send'), 'hypha(\''.$path.'\', \''.self::FORM_CMD_MAILING_TEST_SEND.'\', prompt(\'' . __('email') . '\'));'));
 		}
 
