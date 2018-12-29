@@ -155,7 +155,7 @@
 		"general-info" => "algemene informatie",
 		"lineup" => "lineup",
 		"timetable" => "blokkenschema",
-		"view" => "view",
+		"view" => "bekijk",
 		"artist" => "artiest",
 		"program" => "programma",
 		"venues" => "locaties",
