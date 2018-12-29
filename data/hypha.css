@@ -644,8 +644,17 @@ img.centered{
 }
 
 #hyphaNotify{
+ position: fixed;
+ z-index:999;
+ top: 0px;
+ right: 0px;
  border: 1px solid var(--primarycolor);
  background: #FFC0CB;
+}
+
+.success {
+ padding: 10px;
+ background: #00FFCB;
 }
 
 table{
