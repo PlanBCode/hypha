@@ -248,14 +248,15 @@
 		"ml-mail-has-invalid-status" => "this email has an invalid status",
 		"ml-invalid-command" => "invalid command",
 		"ml-inconsistent-parameters" => "the given parameters are inconsistent",
-		"ml-successfully-subscribed" => "successfully subscribed",
-		"ml-successfully-unsubscribed" => "successfully unsubscribed",
+		"ml-successfully-subscribed" => "you have successfully subscribed",
+		"ml-successfully-unsubscribed" => "you have successfully unsubscribed",
 		"ml-successfully-created" => "successfully created",
 		"ml-successfully-updated" => "successfully updated",
-		"ml-successfully-sent" => "successfully sent",
+		"ml-confirmation-mail-sent" => "You will soon receive an email with a link. Please confirm your subscription. If you do not get the email, it may have landed in your spam folder.",
 
 		// mailing list - mail
-		"ml-please-confirm-email" => "please confirm the email",
+		"ml-please-confirm-email" => "Please confirm your subscription by clicking this link",
+		"ml-confirmation-email-subject" => "Please confirm your subscription",
 		"ml-unsubscribe" => "unsubscribe",
 		"ml-if-unreadable-use-link" => "if this email is unreadable, please use the link",
 

@@ -148,10 +148,10 @@ class mailinglist extends Page {
 					// send email so that action can be confirmed
 					$link = $this->constructFullPath(sprintf('%s/confirm?code=%s', urlencode($this->pagename), urlencode($code)));
 					$confirmTxt = __('ml-please-confirm-email');
-					$subject = hypha_getTitle() . ' - ' . $confirmTxt;
+					$subject = hypha_getTitle() . ' - ' . __('ml-confirmation-email-subject');
 					$this->send($subject, '<a href="' . $link . '">' . $confirmTxt . '</a>', [$email]);
 
-					notify('success', ucfirst(__('ml-successfully-sent') . ', ' . $confirmTxt));
+					notify('success', ucfirst(__('ml-confirmation-mail-sent')));
 				} else {
 					notify('success', ucfirst(__('ml-successfully-subscribed')));
 				}
