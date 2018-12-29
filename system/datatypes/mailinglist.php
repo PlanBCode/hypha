@@ -32,6 +32,7 @@ class mailinglist extends Page {
 	const FORM_CMD_LIST_DELETE = 'delete';
 	const FORM_CMD_MAILING_SAVE = 'save';
 	const FORM_CMD_MAILING_SEND = 'send';
+	const FORM_CMD_MAILING_TEST_SEND = 'test_send';
 
 	const MAILING_STATUS_DRAFT = 'draft';
 	const MAILING_STATUS_SENT = 'sent';
@@ -235,7 +236,7 @@ class mailinglist extends Page {
 				$date = '';
 			}
 			$row->addCell($date);
-			$buttons = $this->makeActionButton(__('read'), $mailing->getId());
+			$buttons = $this->makeActionButton(__('view'), $mailing->getId());
 			if (self::MAILING_STATUS_DRAFT == $status) {
 				$buttons .= $this->makeActionButton(__('edit'), $mailing->getId() . '/edit');
 			}
@@ -450,14 +451,13 @@ class mailinglist extends Page {
 			return null;
 		}
 
-		$sendMailing = $this->isPosted(self::FORM_CMD_MAILING_SEND);
 		$saveMailing = $this->isPosted(self::FORM_CMD_MAILING_SAVE);
-		if ($this->isPosted() && !$sendMailing && !$saveMailing) {
+		if ($this->isPosted() && !$saveMailing) {
 			notify('error', __('ml-invalid-command'));
 
 			return null;
 		}
-		$isPosted = $sendMailing || $saveMailing;
+		$isPosted = $saveMailing;
 
 		if (isset($_POST[self::FIELD_NAME_ID])) {
 			if (null == $mailingId) {
@@ -480,7 +480,7 @@ class mailinglist extends Page {
 			}
 			// check if status is correct
 			$status = $mailing->getAttribute('status');
-			if (self::MAILING_STATUS_SENT == $status && $sendMailing) {
+			if (self::MAILING_STATUS_SENT == $status) {
 				notify('success', ucfirst(__('ml-successfully-sent')));
 				return ['redirect', $this->constructFullPath($this->pagename . '/' . $mailingId)];
 			}
@@ -499,20 +499,8 @@ class mailinglist extends Page {
 			// get the mailing id, it could be that it was created by handling the form
 			$mailingId = $form->dataFor(self::FIELD_NAME_ID);
 
-			// send form if send button was used
-			if ($sendMailing) {
-				try {
-					$this->sendMailing($mailingId);
-					$msg = ucfirst(__('ml-successfully-sent'));
-					$msgType = 'success';
-				} catch (\Exception $e) {
-					$msg = $e->getMessage();
-					$msgType = 'error';
-				}
-			} else {
-				$msg = ucfirst(__('ml-successfully-created'));
-				$msgType = 'success';
-			}
+			$msg = ucfirst(__('ml-successfully-created'));
+			$msgType = 'success';
 
 			// goto view page with notification
 			notify($msgType, $msg);
@@ -531,9 +519,10 @@ class mailinglist extends Page {
 	 * @return array|null
 	 */
 	private function showMailingAction($mailingId) {
-		if ($this->isPosted(self::FORM_CMD_MAILING_SEND)) {
+		if ($this->isPosted(self::FORM_CMD_MAILING_SEND) || $this->isPosted(self::FORM_CMD_MAILING_TEST_SEND)) {
 			try {
-				$this->sendMailing($mailingId);
+				if ($this->isPosted(self::FORM_CMD_MAILING_SEND)) $this->sendMailing($mailingId);
+				if ($this->isPosted(self::FORM_CMD_MAILING_TEST_SEND)) $this->testSendMailing($mailingId‚ $_POST['argument']);
 				$msg = ucfirst(__('ml-successfully-sent'));
 				$msgType = 'success';
 			} catch (\Exception $e) {
@@ -589,7 +578,11 @@ class mailinglist extends Page {
 		// add edit button when in draft
 		if ($inDraft) {
 			$commands->append($this->makeActionButton(__('edit'), $mailingId . '/edit'));
-			$commands->append($this->makeActionButton(__('send'), $mailingId, self::FORM_CMD_MAILING_SEND));
+			$num = count($this->getDoc()->findXPath('//address[@status="' . self::ADDRESS_STATUS_CONFIRMED . '"]'));
+
+			$path = $this->language . '/' . $this->pagename . '/' . $mailingId;
+			$commands->append(makeButton(__('send'), 'if(confirm(\'' . __('ml-sure-to-send', array("count" => $num)) . '\'))' . makeAction($path, self::FORM_CMD_MAILING_SEND, '')));
+			$commands->append(makeButton(__('ml-test-send'), 'hypha(\''.$path.'\', \''.self::FORM_CMD_MAILING_TEST_SEND.'\', prompt(\'' . __('email') . '\'));'));
 		}
 
 		return null;
@@ -695,21 +688,12 @@ EOF;
 		// buttons
 		$commands = $this->findBySelector('#pageCommands');
 
-		// disable send button if there is no sender.
-		$canSend = $this->hasSender();
-
 		if (isset($data[self::FIELD_NAME_ID])) {
 			$commands->append($this->makeActionButton(__('cancel'), $data[self::FIELD_NAME_ID]));
 			$commands->append($this->makeActionButton(__('save'), $data[self::FIELD_NAME_ID] . '/edit', self::FORM_CMD_MAILING_SAVE));
-			if ($canSend) {
-				$commands->append($this->makeActionButton(__('send'), $data[self::FIELD_NAME_ID] . '/edit', self::FORM_CMD_MAILING_SEND));
-			}
 		} else {
 			$commands->append($this->makeActionButton(__('cancel')));
 			$commands->append($this->makeActionButton(__('save'), 'create', self::FORM_CMD_MAILING_SAVE));
-			if ($canSend) {
-				$commands->append($this->makeActionButton(__('send'), 'create', self::FORM_CMD_MAILING_SEND));
-			}
 		}
 
 		return $this->createForm($elem, $data);
@@ -783,6 +767,19 @@ EOF;
 		$this->xml->saveAndUnlock();
 
 		return $mailing;
+	}
+
+	private function testSendMailing($mailingId, $email) {
+		if (!$this->hasSender()) {
+			throw new \Exception(__('ml-no-sender'));
+		}
+
+		$senderName = $this->getDoc()->getAttribute('sender-name');
+		$senderEmail = $this->getDoc()->getAttribute('sender-email');
+
+		/** @var HyphaDomElement $mailing */
+		$mailing = $this->xml->document()->getElementById($mailingId);
+		$this->send($mailing->getAttribute('subject'), $mailing->getHtml(), [$email], $senderEmail, $senderName);
 	}
 
 	/**

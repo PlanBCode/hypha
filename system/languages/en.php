@@ -239,9 +239,11 @@
 		"datatype.name.mailinglist" => "mailinglist",
 
 		// mailing list
+		"ml-test-send" => "test-send",
 		"ml-view-addresses" => "view addresses",
 		"ml-date-format" => "d/m/Y",
 		"ml-received-by" => "received by",
+		"ml-sure-to-send" => "Are you sure to send off this mailing to [[count]] recipient(s)?",
 
 		// mailing list - response
 		"ml-no-sender" => "no sender, please edit the mailing list",
@@ -252,6 +254,7 @@
 		"ml-successfully-unsubscribed" => "you have successfully unsubscribed",
 		"ml-successfully-created" => "successfully created",
 		"ml-successfully-updated" => "successfully updated",
+		"ml-successfully-sent" => "successfully sent",
 		"ml-confirmation-mail-sent" => "You will soon receive an email with a link. Please confirm your subscription. If you do not get the email, it may have landed in your spam folder.",
 
 		// mailing list - mail
