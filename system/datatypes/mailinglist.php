@@ -441,14 +441,13 @@ class mailinglist extends Page {
 			return null;
 		}
 
-		$sendMailing = $this->isPosted(self::FORM_CMD_MAILING_SEND);
 		$saveMailing = $this->isPosted(self::FORM_CMD_MAILING_SAVE);
-		if ($this->isPosted() && !$sendMailing && !$saveMailing) {
+		if ($this->isPosted() && !$saveMailing) {
 			notify('error', __('ml-invalid-command'));
 
 			return null;
 		}
-		$isPosted = $sendMailing || $saveMailing;
+		$isPosted = $saveMailing;
 
 		if (isset($_POST[self::FIELD_NAME_ID])) {
 			if (null == $mailingId) {
@@ -471,7 +470,7 @@ class mailinglist extends Page {
 			}
 			// check if status is correct
 			$status = $mailing->getAttribute('status');
-			if (self::MAILING_STATUS_SENT == $status && $sendMailing) {
+			if (self::MAILING_STATUS_SENT == $status) {
 				notify('success', ucfirst(__('ml-successfully-sent')));
 				return ['redirect', $this->constructFullPath($this->pagename . '/' . $mailingId)];
 			}
@@ -490,20 +489,8 @@ class mailinglist extends Page {
 			// get the mailing id, it could be that it was created by handling the form
 			$mailingId = $form->dataFor(self::FIELD_NAME_ID);
 
-			// send form if send button was used
-			if ($sendMailing) {
-				try {
-					$this->sendMailing($mailingId);
-					$msg = ucfirst(__('ml-successfully-sent'));
-					$msgType = 'success';
-				} catch (\Exception $e) {
-					$msg = $e->getMessage();
-					$msgType = 'error';
-				}
-			} else {
-				$msg = ucfirst(__('ml-successfully-created'));
-				$msgType = 'success';
-			}
+			$msg = ucfirst(__('ml-successfully-created'));
+			$msgType = 'success';
 
 			// goto view page with notification
 			notify($msgType, $msg);
@@ -680,21 +667,12 @@ EOF;
 		// buttons
 		$commands = $this->findBySelector('#pageCommands');
 
-		// disable send button if there is no sender.
-		$canSend = $this->hasSender();
-
 		if (isset($data[self::FIELD_NAME_ID])) {
 			$commands->append($this->makeActionButton(__('cancel'), $data[self::FIELD_NAME_ID]));
 			$commands->append($this->makeActionButton(__('save'), $data[self::FIELD_NAME_ID] . '/edit', self::FORM_CMD_MAILING_SAVE));
-			if ($canSend) {
-				$commands->append($this->makeActionButton(__('send'), $data[self::FIELD_NAME_ID] . '/edit', self::FORM_CMD_MAILING_SEND));
-			}
 		} else {
 			$commands->append($this->makeActionButton(__('cancel')));
 			$commands->append($this->makeActionButton(__('save'), 'create', self::FORM_CMD_MAILING_SAVE));
-			if ($canSend) {
-				$commands->append($this->makeActionButton(__('send'), 'create', self::FORM_CMD_MAILING_SEND));
-			}
 		}
 
 		return $this->createForm($elem, $data);
