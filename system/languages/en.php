@@ -7,6 +7,7 @@
 		"submit" => "submit",
 		"save" => "save",
 		"edit" => "edit",
+		"help-pagetitle" => "Help index",
 		"translate" => "translate",
 		"revert" => "revert",
 		"login" => "login",

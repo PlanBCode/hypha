@@ -7,6 +7,7 @@
 		"submit" => "versturen",
 		"save" => "opslaan",
 		"edit" => "bewerken",
+		"help-pagetitle" => "Hulp onderwerpen",
 		"translate" => "vertalen",
 		"revert" => "terugdraaien",
 		"login" => "inloggen",

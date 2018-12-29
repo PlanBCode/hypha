@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hyphahelp schemaversion="1.0">
+  <title>
+    <language id ="nl">Hypha help system</language>
+    <language id ="en">Hypha help system page</language>
+  </title>
+  <items>
+    <item subject="maak nieuwe pagina">
+        <content language="nl">
+          Maak een nieuwe Hypha pagina:
+          Kies het type
+          Geef je de pagina een naam voor referentie.
+        </content>
+        <content language="en">
+          Make a new page in hypha:
+          - Choose a type
+          - Give the page a name for references.
+        </content>
+    </item>
+    <item subject="page_name">
+        <content language="nl">
+          Geef de pagina een naam, die gebruikt kan worden als referentie
+        </content>
+        <content language="en">
+          Name the page.
+          This name is used as a reference.
+          (not the name of the author)
+        </content>
+    </item>
+    <item subject="languages_info">
+        <content language="nl">
+          De pagina is beschikbaar in deze talen.
+          Klik op een taal om de "vertaling" te zien.
+        </content>
+        <content language="en">
+          This page is available in different languages.
+          Choose one from the list.
+        </content>
+    </item>
+    <item subject="user">
+        <content language="nl">
+            Een gebruiker kan alle artikelen zien.
+            Alleen als een gebruiker admin rechten heeft kan deze gebruiker ook bijdragen aan artikelen/pagina's
+            of eigen pagina's toevoegen
+        </content>
+        <content language="en">
+            A user help page
+        </content>
+    </item>
+    <item subject="pagina">
+        <content language="nl">
+            Een gebruiker kan alle artikelen zien.
+            Alleen als een gebruiker admin rechten heeft kan deze gebruiker ook bijdragen aan artikelen/pagina's
+            of eigen pagina's toevoegen
+        </content>
+        <content language="en">
+            A page help page
+        </content>
+    </item>
+    <item subject="menu">
+        <content language="nl">
+            Een gebruiker met admin rechten kan een menu samenstellen.
+            Dit menu vervang automatisch het bestaande menu
+            Er is geen "ga terug naar vorige versie"
+            Met de test knop kun je het menu testen voordat je het definitief maakt.
+        </content>
+        <content language="en">
+            A help page for menu
+        </content>
+    </item>
+    <item subject="help">
+        <content language = "nl">
+                Dit
+        </content>
+        <content language = "en">
+                This
+        </content>
+    </item>
+</items>
+</hyphahelp>

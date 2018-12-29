@@ -92,6 +92,7 @@
 	}
 	function newPage() {
 		html = '<table class="section"><tr><th colspan="2"><?=__('create-new-page')?></td><tr>';
+		html+= "<span onclick=\"position(event,'maak nieuwe pagina','en',this)\" class=\"hyphaInfoButton\">i</span>";
 		// TODO [LRM]: find better way to set default new page type.
 		html+= '<tr><th><?=__('type')?></th><td><select id="newPageType" name="newPageType">' + '<?php foreach($types as $type => $datatypeName) echo '<option value="'.$type.'"'.($type=='textpage' ? 'selected="selected"' : '').'>'.$datatypeName.'</option>'; ?>' + '</select></td></tr>';
 		html+= '<tr><th><?=__('pagename')?></th><td><input type="text" id="newPagename" value="<?=$pagename?>" onblur="validatePagename(this);" onkeyup="validatePagename(this); document.getElementById(\'newPageSubmit\').disabled = this.value ? false : true;"/></td></tr>';
@@ -186,6 +187,23 @@
 						break;
 				}
 				break;
+			case HyphaRequest::HYPHA_SYSTEM_PAGE_HELP: //bz help
+				if ($args[0] == 'help') {
+					echo getButtonInfo($args);
+					exit;
+				} else {
+					$hyphaHtml->find('#pagename')->text( __('help-pagetitle'));  //"help-pagetitle" => "Help index",
+					$hyphaPage = new helpPage($args);
+					//echo "pages: 222<br>\n";
+					if (count($args) == 2) if (hypha_isLanguage($args[1])) {//echo " -pages.php 222- " . $args[1];
+						$hyphaHtml->writeToElement('langList', hypha_helpLanguages('',$args[1]));
+					} else {
+						$contentLanguage = $O_O->getContentLanguage();
+						$hyphaHtml->writeToElement('langList', hypha_helpLanguages('',$contentLanguage));
+					}
+				}
+				break;
+
 			case HyphaRequest::HYPHA_SYSTEM_PAGE_SETTINGS:
 				if (isUser() || $args[0]=='register') {
 					$hyphaPage = new settingspage($args);
@@ -533,4 +551,9 @@
 			case 'png': imagepng($new, $dst); break;
 		}
 		return true;
+	}
+
+	function hypha_isLanguage($id) {
+		$pageLangList = array("nl","en","de"); // replace by hypha language list
+		return in_array($id,$pageLangList,true);
 	}
