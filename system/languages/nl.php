@@ -266,6 +266,7 @@
 		// mailing
 		"mailing-sender-email" => "e-mail",
 		"mailing-sender-name" => "naam",
+		"email-welcome-text" => "email welkomsbericht",
 
 		// peer_reviewed_article
 		"datatype.name.peer_reviewed_article" => "artikel met review",

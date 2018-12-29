@@ -18,6 +18,7 @@ class mailinglist extends Page {
 
 	const FIELD_NAME_EMAIL = 'email';
 	const FIELD_NAME_DESCRIPTION = 'description';
+	const FIELD_NAME_EMAIL_WELCOME_TEXT = 'email_welcome_text';
 	const FIELD_NAME_PRIVATE = 'private';
 	const FIELD_NAME_PAGE_NAME = 'page_name';
 	const FIELD_NAME_SUBJECT = 'subject';
@@ -148,8 +149,13 @@ class mailinglist extends Page {
 					// send email so that action can be confirmed
 					$link = $this->constructFullPath(sprintf('%s/confirm?code=%s', urlencode($this->pagename), urlencode($code)));
 					$confirmTxt = __('ml-please-confirm-email');
+					$link = '<a href="' . $link . '">' . $confirmTxt . '</a>';
+					$emailWelcomeText = $this->getDoc()->getOrCreate('email-welcome-text');
+					dewikify($emailWelcomeText);
+					$welcomeText = $emailWelcomeText->getHtml();
+					$welcomeText .= '<br><br>' . $link;
 					$subject = hypha_getTitle() . ' - ' . __('ml-confirmation-email-subject');
-					$this->send($subject, '<a href="' . $link . '">' . $confirmTxt . '</a>', [$email]);
+					$this->send($subject, $welcomeText, [$email]);
 
 					notify('success', ucfirst(__('ml-confirmation-mail-sent')));
 				} else {
@@ -257,6 +263,7 @@ class mailinglist extends Page {
 				self::FIELD_NAME_SENDER_EMAIL => $senderData['email'],
 				self::FIELD_NAME_SENDER_NAME => $senderData['name'],
 				self::FIELD_NAME_DESCRIPTION => $this->getDoc()->getOrCreate('description'),
+				self::FIELD_NAME_EMAIL_WELCOME_TEXT => $this->getDoc()->getOrCreate('email-welcome-text'),
 			];
 		}
 
@@ -295,6 +302,8 @@ class mailinglist extends Page {
 				/** @var HyphaDomElement $description */
 				$description = $this->getDoc()->getOrCreate('description');
 				$description->setHtml(wikify_html($form->dataFor(self::FIELD_NAME_DESCRIPTION)));
+				$emailWelcomeText = $this->getDoc()->getOrCreate('email-welcome-text');
+				$emailWelcomeText->setHtml(wikify_html($form->dataFor(self::FIELD_NAME_EMAIL_WELCOME_TEXT)));
 				$this->xml->saveAndUnlock();
 
 				notify('success', ucfirst(__('ml-successfully-updated')));
@@ -628,6 +637,8 @@ EOF;
 		$privateFieldName = self::FIELD_NAME_PRIVATE;
 		$description = __('description');
 		$descriptionFieldName = self::FIELD_NAME_DESCRIPTION;
+		$emailWelcomeText = __('email-welcome-text');
+		$emailWelcomeTextFieldName = self::FIELD_NAME_EMAIL_WELCOME_TEXT;
 		$html = <<<EOF
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
 				<strong><label for="$pageNameFieldName">$title</label></strong> <input type="text" id="$pageNameFieldName" name="$pageNameFieldName" />
@@ -638,7 +649,11 @@ EOF;
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
 				<strong><label for="$descriptionFieldName"> $description </label></strong><editor name="$descriptionFieldName"></editor>
 			</div>
+			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
+				<strong><label for="$emailWelcomeTextFieldName"> $emailWelcomeText </label></strong><editor name="$emailWelcomeTextFieldName"></editor>
+			</div>
 EOF;
+		
 		/** @var HyphaDomElement $form */
 		$form = $this->html->createElement('form');
 		/** @var \DOMWrap\Element $elem */

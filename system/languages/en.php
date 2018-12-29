@@ -271,6 +271,7 @@
 		// mailing
 		"mailing-sender-email" => "email",
 		"mailing-sender-name" => "name",
+		"email-welcome-text" => "email welcome message",
 
 		// peer_reviewed_article
 		"datatype.name.peer_reviewed_article" => "peer reviewed article",
