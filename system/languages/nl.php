@@ -18,6 +18,7 @@
 		"reregister" => "heraanmelden",
 		"name" => "naam",
 		"pagename" => "paginanaam",
+		"instruction-new-page" => "(kies het juiste paginatype!)",
 		"username" => "gebruikersnaam",
 		"fullname" => "volledige naam",
 		"password" => "wachtwoord",
@@ -240,18 +241,19 @@
 		// mailing list - response
 		"ml-no-sender" => "geen afzender, pas de mailinglist aan",
 		"ml-mail-has-invalid-status" => "de mail heeft een onjuiste status",
-		"ml-invalid-command" => "de command is onjuist",
+		"ml-invalid-command" => "het commando is onjuist",
 		"ml-inconsistent-parameters" => "de parameters zijn inconsistent",
-		"ml-successfully-subscribed" => "succesvol aangemeld",
-		"ml-successfully-unsubscribed" => "succesvol afgemeld",
+		"ml-successfully-subscribed" => "u heeft zich succesvol aangemeld",
+		"ml-successfully-unsubscribed" => "u heeft zich succesvol afgemeld",
 		"ml-successfully-created" => "succesvol aangemaakt",
 		"ml-successfully-updated" => "succesvol bijgewerkt",
-		"ml-successfully-sent" => "succesvol verstuurd",
+		"ml-confirmation-mail-sent" => "U ontvangt spoedig een email met een link. Bevestig uw aanmelding door op de link in de e-mail te klikken. Heeft u de email niet ontvangen? Kijk dan in uw spam folder.",
 
 		// mailing list - mail
-		"ml-please-confirm-email" => "bevestig de e-mail",
+		"ml-please-confirm-email" => "Bevestig uw aanmelding door op deze link te klikken.",
+		"ml-confirmation-email-subject" => "Bevestig uw aanmelding",
 		"ml-unsubscribe" => "afmelden",
-		"ml-if-unreadable-use-link" => "als het onleesbaar is, gebruik dan de link",
+		"ml-if-unreadable-use-link" => "klik op deze link als deze email onleesbaar is",
 
 		// mailing list - status
 		"ml-mailing-status-draft" => "in opmaak",
