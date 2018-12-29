@@ -230,7 +230,7 @@ class mailinglist extends Page {
 				$date = '';
 			}
 			$row->addCell($date);
-			$buttons = $this->makeActionButton(__('read'), $mailing->getId());
+			$buttons = $this->makeActionButton(__('view'), $mailing->getId());
 			if (self::MAILING_STATUS_DRAFT == $status) {
 				$buttons .= $this->makeActionButton(__('edit'), $mailing->getId() . '/edit');
 			}
