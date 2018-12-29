@@ -237,6 +237,7 @@
 		"ml-view-addresses" => "bekijk adressen",
 		"ml-date-format" => "d-m-Y",
 		"ml-received-by" => "ontvangen door",
+		"ml-sure-to-send" => "Je staat op het punt om deze mailing naar [[count]] adres(sen) te versturen. Wil je doorgaan?",
 
 		// mailing list - response
 		"ml-no-sender" => "geen afzender, pas de mailinglist aan",
