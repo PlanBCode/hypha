@@ -53,11 +53,11 @@
 				$contents = '<html><head></head><body></body></html>';
 			$previousSetting = libxml_use_internal_errors(true);
 			$this->loadHTML('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">'.$contents);
-			$map = [LIBXML_ERR_WARNING => E_PARSE, LIBXML_ERR_ERROR => E_WARNING, LIBXML_ERR_FATAL => E_ERROR];
+			$map = [LIBXML_ERR_WARNING => E_USER_WARNING, LIBXML_ERR_ERROR => E_USER_WARNING, LIBXML_ERR_FATAL => E_USER_WARNING];
 			foreach (libxml_get_errors() as $error) {
 				// Ignore warnings for unknown tags, log the rest
-				if (XML_HTML_UNKNOWN_TAG !== $error->code) {
-					error_log($error->message, $map[$error->level]);
+				if (self::XML_HTML_UNKNOWN_TAG !== $error->code) {
+					trigger_error($error->message, $map[$error->level]);
 				}
 			}
 			libxml_use_internal_errors($previousSetting);

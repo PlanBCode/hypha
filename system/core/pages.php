@@ -314,7 +314,7 @@
 		doc - A DomWrap\Element to process
 	*/
 	function dewikify($element) {
-		foreach ($element->findXPath("//a[@href]") as $node) {
+		foreach ($element->findXPath(".//a[@href]") as $node) {
 			dewikify_link($node);
 		}
 	}
@@ -399,7 +399,7 @@
 		doc - A DomWrap\Element to process
 	*/
 	function wikify($elem) {
-		foreach ($elem->findXPath("//*[@href] | //*[@src]") as $node) {
+		foreach ($elem->findXPath(".//*[@href] | .//*[@src]") as $node) {
 			// Make all urls relative
 			foreach (['href', 'src'] as $attr) {
 				if ($node->hasAttribute($attr))
