@@ -522,7 +522,7 @@ class mailinglist extends Page {
 		if ($this->isPosted(self::FORM_CMD_MAILING_SEND) || $this->isPosted(self::FORM_CMD_MAILING_TEST_SEND)) {
 			try {
 				if ($this->isPosted(self::FORM_CMD_MAILING_SEND)) $this->sendMailing($mailingId);
-				if ($this->isPosted(self::FORM_CMD_MAILING_TEST_SEND)) $this->testSendMailing($mailingId‚ $_POST['argument']);
+				if ($this->isPosted(self::FORM_CMD_MAILING_TEST_SEND)) $this->testSendMailing($mailingId, $_POST['argument']);
 				$msg = ucfirst(__('ml-successfully-sent'));
 				$msgType = 'success';
 			} catch (\Exception $e) {
