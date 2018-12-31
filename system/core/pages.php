@@ -134,7 +134,7 @@
 			}
 			$_node = hypha_getPage($O_O->getContentLanguage(), $_name);
 
-			$isPrivate = in_array($_node->getAttribute('private'), ['true', '1', 'on']);
+			$isPrivate = $_node && in_array($_node->getAttribute('private'), ['true', '1', 'on']);
 			if ($_node && (!$isPrivate || isUser())) {
 				$_type = $_node->getAttribute('type');
 				$hyphaPage = new $_type($_node, $args);
