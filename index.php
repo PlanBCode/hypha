@@ -69,6 +69,7 @@
 	if (strpos($hyphaQuery, 'data/fonts/') === 0) serveFile($hyphaQuery, false);
 	if (startsWith($hyphaQuery, 'system/wymeditor')) serveFile($hyphaQuery, 'system/wymeditor');
 	if (startsWith($hyphaQuery, 'system/bowser')) serveFile($hyphaQuery, 'system/bowser');
+	if ($hyphaQuery == 'system/js/help.js') serveFile($hyphaQuery, false);
 
 	// jump to installation procedure when hypha.xml is missing
 	if (!is_file('data/hypha.xml')) header('Location: ' . $hyphaUrl . 'hypha.php');
@@ -81,6 +82,7 @@
 	$hyphaHtml = new HTMLDocument(Hypha::$data->html, $hyphaUrl);
 	$hyphaHtml->linkStyle('data/hypha.css');
 	$hyphaHtml->linkScript('http://code.jquery.com/jquery-1.7.1.min.js');
+	$hyphaHtml->linkScript('system/js/help.js');
 	$hyphaHtml->setTitle(hypha_getTitle());
 	$hyphaHtml->writeToElement('header', hypha_getHeader());
 	$hyphaHtml->writeToElement('footer', hypha_getFooter());
@@ -147,7 +149,7 @@
 		$_cmds[] = makeLink(__('settings'), makeAction('settings', '', ''));
 		$_cmds[] = makeLink(__('logout'), makeAction($hyphaQuery, 'logout', ''));
 	}
-	$_cmds[] =  "<span onclick=\"position(event,'welcome','".$hyphaLanguage."',this)\" class=\"hyphaInfoButton\">i</span>";
+	$_cmds[] =  "<span onclick=\"makeInfoPopup(event,'welcome','".$hyphaLanguage."',this)\" class=\"hyphaInfoButton\">i</span>";
 	$hyphaHtml->writeToElement('hyphaCommands', implode('', $_cmds));
 	if ($O_O->isUser()) $hyphaHtml->writeToElement('hyphaCommands', '<br/><div id="loggedIn">'.__('logged-in-as').' `'.$O_O->getUser()->getAttribute('username').'`'.asterisk(isAdmin()).'</div>');
 

@@ -92,7 +92,7 @@
 	}
 	function newPage() {
 		html = '<table class="section"><tr><th colspan="2"><?=__('create-new-page')?></td><tr>';
-		html+= "<span onclick=\"position(event,'maak nieuwe pagina','en',this)\" class=\"hyphaInfoButton\">i</span>";
+		html+= "<span onclick=\"makeInfoPopup(event,'maak nieuwe pagina','en',this)\" class=\"hyphaInfoButton\">i</span>";
 		// TODO [LRM]: find better way to set default new page type.
 		html+= '<tr><th><?=__('type')?></th><td><select id="newPageType" name="newPageType">' + '<?php foreach($types as $type => $datatypeName) echo '<option value="'.$type.'"'.($type=='textpage' ? 'selected="selected"' : '').'>'.$datatypeName.'</option>'; ?>' + '</select></td></tr>';
 		html+= '<tr><th><?=__('pagename')?></th><td><input type="text" id="newPagename" value="<?=$pagename?>" onblur="validatePagename(this);" onkeyup="validatePagename(this); document.getElementById(\'newPageSubmit\').disabled = this.value ? false : true;"/></td></tr>';
@@ -187,23 +187,22 @@
 						break;
 				}
 				break;
-			case HyphaRequest::HYPHA_SYSTEM_PAGE_HELP: //bz help
+			case HyphaRequest::HYPHA_SYSTEM_PAGE_HELP:
 				if ($args[0] == 'help') {
 					echo getButtonInfo($args);
 					exit;
 				} else {
-					$hyphaHtml->find('#pagename')->text( __('help-pagetitle'));  //"help-pagetitle" => "Help index",
+					$hyphaHtml->writeToElement('pagename', __('helppagetitle'));
 					$hyphaPage = new helpPage($args);
-					//echo "pages: 222<br>\n";
-					if (count($args) == 2) if (hypha_isLanguage($args[1])) {//echo " -pages.php 222- " . $args[1];
-						$hyphaHtml->writeToElement('langList', hypha_helpLanguages('',$args[1]));
+					$infoIcone = "<span onclick=\"makeInfoPopup(event,'helplanguages_info','".$hyphalanguage."',this)\" class=\"hyphaInfoButton\">i</span>";
+					if (count($args) == 2) if (hypha_isLanguage($args[1])) {
+						$hyphaHtml->writeToElement('langList',hypha_helpLanguages('',$args[1]) . $infoIcone);
 					} else {
 						$contentLanguage = $O_O->getContentLanguage();
-						$hyphaHtml->writeToElement('langList', hypha_helpLanguages('',$contentLanguage));
+						$hyphaHtml->writeToElement('langList',hypha_helpLanguages('',$contentLanguage) . $infoIcone);
 					}
 				}
 				break;
-
 			case HyphaRequest::HYPHA_SYSTEM_PAGE_SETTINGS:
 				if (isUser() || $args[0]=='register') {
 					$hyphaPage = new settingspage($args);
@@ -553,7 +552,59 @@
 		return true;
 	}
 
+	function getButtonInfo($_args) {
+		/* 0 = buttonName
+		*  1 = buttonName
+		*  2 = language (or null)
+		*/
+		Global $O_O;
+		$_button = "";
+		$_language = "";
+
+		if (sizeof($_args) > 1) {$_button = $_args[1];} else {$_button = "undifined";}
+		$a = array("%20","%22");
+		$b = array(" "," ");
+	  $_button = str_replace($a,$b,$_button);
+		if (sizeof($_args) > 2) {$_language = $_args[2];} else {$_language=$O_O->getInterfaceLanguage();} //$_language=$O_O->getContentLanguage(); //DefaultLanguage();
+		$info = hypha_searchhelp($_button,$_language);
+		return $info ; // "AJAX - Help voor <br>" . $_button . "<br> in de taal: ". $_language;
+	}
+
 	function hypha_isLanguage($id) {
-		$pageLangList = array("nl","en","de"); // replace by hypha language list
+		$pageLangList = array("nl","en","de");
 		return in_array($id,$pageLangList,true);
+	}
+
+	function hypha_searchhelp($subject,$language = 'en') {
+		if (!$language) $language='en';
+			if (file_exists('data/help.xml')) {
+				$html = "";
+					$xml = simplexml_load_file('data/help.xml');
+					foreach ($xml->items->item as $helpitem) {
+					if ($helpitem['subject'] == $subject){
+						//  subject gevonden
+						foreach ($helpitem->content as $taal) {
+							if  ($taal['language'] == $language){
+								 $html = $taal;
+							}
+							if  ($taal['language'] == 'en'){
+								$enhtml = $taal;
+						 	}
+						}
+						if (strlen($html) > 0) {
+							return str_replace("\n","<br>",$html);
+						}	else {
+							if (strlen($enhtml) > 0) {
+								return str_replace("\n","<br>",$enhtml);
+							} else {
+								return "ERROR: database keyword info for a language not found";
+							}
+						}
+					}
+
+				}
+				return "Subject: \"" . $subject . "\" not found<br>\n";
+			} else {
+				return "**ERROR help database not found";
+			}
 	}

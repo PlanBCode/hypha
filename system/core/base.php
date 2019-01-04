@@ -665,6 +665,7 @@
 		}
 
 		$index = '<span class="prefix">' . __('languages') . ': </span>';
+		$index .= "<span onclick=\"makeInfoPopup(event,'languages_info','".$hyphalanguage."',this)\" class=\"hyphaInfoButton\">i</span>";
 		foreach($langList as $lang) {
 			if ($lang == $language) $index.= '<span class="language selected">'.$lang.'</span>';
 			elseif (!$page || array_key_exists($lang, $pageLangList)) {
@@ -753,4 +754,36 @@
 		} else {
 			return 'help page not found';
 		}
+	}
+	function hypha_helpLanguages($subject,$language) {
+		//echo "hypha_helplanguages" . $subject . " taal:" . $language . "<br>\n";
+		// returns a list of languages for the help subject
+			$languagelist = array();
+				$index = "";
+				if (file_exists('data/help.xml')) {
+					$xml = simplexml_load_file('data/help.xml');
+					if (!$subject) {
+						foreach ($xml->title->language as $tlanguage) {
+							$languagelist[] = $tlanguage['id'];
+						}
+					}
+					else {
+						foreach ($xml->items->item as $helpitem) {
+							if ($helpitem['subject'] === $subject){
+								//  subject gevonden
+								foreach ($helpitem->content as $taal) {
+									$languagelist[] = $taal['language'];
+								}
+							}
+						}
+					}
+					foreach($languagelist as $lang) {
+							if ($lang == $language) $index.= '<span class="language selected">'.$lang.'</span>';
+							else $index.= '<span class="language"><a href="help/index/'.$lang.'">'.$lang.'</a></span>';
+							}
+			}
+			else {
+				$index .='<span class="language disabled">ERROR: no help database available</span>';
+			}
+	return $index;
 	}

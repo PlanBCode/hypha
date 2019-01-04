@@ -5,6 +5,14 @@
     <language id ="en">Hypha help system page</language>
   </title>
   <items>
+    <item subject="welcome">
+        <content language="nl">
+          Dit is hypha:
+        </content>
+        <content language="en">
+          This is Hypha, a light weight context system.
+        </content>
+    </item>
     <item subject="maak nieuwe pagina">
         <content language="nl">
           Maak een nieuwe Hypha pagina:
@@ -34,6 +42,16 @@
         </content>
         <content language="en">
           This page is available in different languages.
+          Choose one from the list.
+        </content>
+    </item>
+    <item subject="helplanguages_info">
+        <content language="nl">
+          Klik op een andere taal.
+          om de help "vertaling" te zien.
+        </content>
+        <content language="en">
+          This help index page is available in different languages.
           Choose one from the list.
         </content>
     </item>
