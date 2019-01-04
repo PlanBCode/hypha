@@ -455,3 +455,13 @@ input {
      background: #daffb3;
 		border-bottom: 4px solid var(--bordercolor);}
 
+.comment-title {
+  background-color: #ffffff;
+}
+.comment-title .number{
+  background: #ffff00;
+  margin-right: 3px;
+}
+.comment-title .title{
+  background-color: #00ff00;
+}

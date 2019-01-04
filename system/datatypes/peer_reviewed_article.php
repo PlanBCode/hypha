@@ -510,7 +510,7 @@ class peer_reviewed_article extends defaultDataType {
 			/** @var HyphaDomElement $discussionsContainer */
 			$discussionsContainer = $this->getXml()->createElement('div');
 			$discussionsContainer->attr('class', 'public-comments-wrapper');
-			$discussionsContainer->append('<h2>' . __('art-comments') . '</h2>');
+			$discussionsContainer->append('<h2>' . __('art-public-comments') . '</h2>');
 			$this->updateDiscussionsContainer('public', $discussionsContainer);
 			$main->append($discussionsContainer);
 		}
@@ -535,10 +535,10 @@ class peer_reviewed_article extends defaultDataType {
 
 		// [open => [blocking, non-blocking], closed => [blocking, non-blocking]]
 		$reviewCommentContainersSorted = [0 => [0 => [], 1 => [],], 1 => [0 => [], 1 => [],],];
-		$_bzdiscussionnumber = 0; // to be replaced by page title.
+		$discussionnumber = 0; // to be replaced by page title.
 		foreach ($discussions as $discussion) {
-			$_bzdiscussionnumber += 1;
-			$_bzdiscussionsubject = (string)$discussion-> getAttr(self::FIELD_NAME_DISCUSSION_SUBJECT);
+			$discussionnumber += 1;
+			if ($type === self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER) { $discussionsubject = (string)$discussion-> getAttr(self::FIELD_NAME_DISCUSSION_SUBJECT);}
 			$blocking = (bool)$discussion->getAttr(self::FIELD_NAME_DISCUSSION_BLOCKING);
 			$closed = (bool)$discussion->getAttr(self::FIELD_NAME_DISCUSSION_CLOSED);
 			$resolved = (bool)$discussion->getAttr(self::FIELD_NAME_DISCUSSION_BLOCK_RESOLVED);
@@ -549,10 +549,20 @@ class peer_reviewed_article extends defaultDataType {
 			/** @var HyphaDomElement $reviewCommentContainer */
 			$reviewCommentContainer = $this->getXml()->createElement('div');
 
-			// *** bz aangepast display discussionnumber
-				$_bzdiscussionnumberlabel = __('art-title').': '.$_bzdiscussionsubject.'(nr '.$_bzdiscussionnumber.')';
-				$reviewCommentContainer = $this->getXml()->createElement('div',$_bzdiscussionnumberlabel);
-			// *** bz aangepast display discussionnumber
+			if ($type === self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER){
+				// display discussion number and title
+				$reviewCommentTitleLine = $this->getXml()->createElement('h3','');
+				$reviewCommentTitleLine->addClass('comment-title');
+				$discussionNumberLabel = $this->getXml()->createElement('span','# '.$discussionnumber);
+				$discussionNumberLabel->addClass('number');
+				$reviewCommentTitleLine->append($discussionNumberLabel);
+				$reviewCommentTitle = $this->getXml()->createElement('span',$discussionsubject);
+				$reviewCommentTitle->addClass('title');
+				$reviewCommentTitleLine->append($reviewCommentTitle);
+				$reviewCommentContainer->append($reviewCommentTitleLine);
+			// end discussion container
+		}
+
 
 			$class = 'review-comment-wrapper collapsed';
 			foreach (['blocking' => $blocking, 'resolved' => $resolved, 'closed' => $closed] as $name => $isTrue) {
@@ -741,7 +751,7 @@ class peer_reviewed_article extends defaultDataType {
 			$form->validateEmailField(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL);
 		}
 		$form->validateRequiredField(self::FIELD_NAME_DISCUSSION_COMMENT . '/new_' . $type);
-		$form->validateRequiredField(self::FIELD_NAME_DISCUSSION_SUBJECT);
+		if ($type ==='review') $form->validateRequiredField(self::FIELD_NAME_DISCUSSION_SUBJECT);
 
 		// process form if it was posted
 		if ($formPosted && empty($form->errors)) {
@@ -1033,29 +1043,44 @@ EOF;
 	 * @return string
 	 */
 	private function getCommentFormHtml($type, DocPage $discussion = null) {
-		$comment = __('art-comment');
 		$new = $discussion === null;
 		$commentFieldName = self::FIELD_NAME_DISCUSSION_COMMENT . '/' . ($new ? 'new_' . $type : $discussion->getId());
+		$comment = ($type ==='review' ? __('art-review-comment') : __('art-public-comment'));
+		// $ type public or review
 		if (strpos($commentFieldName, 'new_review') > 0)  {
-			$_bzDiscussieLabel = __('art-start-discussion');
-			$_bzDiscussieSamenvatting = __('art-title');
-		$html = <<<EOF
-			<div class="new-comment $type">
-			<div>
-				<strong><label for="$commentFieldName">$_bzDiscussieLabel</label></strong>
-				  $_bzDiscussieSamenvatting<br><input type="text" name="subject"><br>
-             $comment<br>
-				<textarea name="$commentFieldName" id="$commentFieldName" cols="36" rows="4"></textarea>
-			</div>
+				// new review subject
+				$DiscussieLabel = __('art-start-discussion');
+				$DiscussieSamenvatting = __('art-title');
+				$html = <<<EOF
+				<div class="new-comment $type">
+				<div>
+					<strong><label for="$commentFieldName">$DiscussieLabel</label></strong>
+					$DiscussieSamenvatting<br><input type="text" name="subject"><br>
+					$comment<br>
+					<textarea name="$commentFieldName" id="$commentFieldName" cols="36" rows="4"></textarea>
+				</div>
 EOF;
-		}
+			}
+			else if (strpos($commentFieldName, 'new_public') > 0)
+			// continue review
+			{
+				$DiscussieLabel = __('art-start-comment');
+				$html = <<<EOF
+				<div class="new-comment $type">
+				<div>
+						<strong><label for="$commentFieldName">$DiscussieLabel</label></strong>
+						<textarea name="$commentFieldName" id="$commentFieldName" cols="36" rows="4"></textarea>
+					</div>
+EOF;
+			}
 		else
 		{
-			$_bzDiscussieLabel = __('art-continue-discussion');
-		$html = <<<EOF
+			$DiscussieLabel = __('art-continue-discussion');
+			$html = <<<EOF
 			<div class="new-comment $type">
 			<div>
-				<strong><label for="$commentFieldName">$_bzDiscussieLabel</label></strong><textarea name="$commentFieldName" id="$commentFieldName" cols="36" rows="4"></textarea>
+				<strong><label for="$commentFieldName">$DiscussieLabel</label></strong>
+				<textarea name="$commentFieldName" id="$commentFieldName" cols="36" rows="4"></textarea>
 			</div>
 EOF;
 		}
@@ -1092,7 +1117,7 @@ EOF;
 		if ($new) {
 			$label = 'review' === $type ? __('art-start-review-comment') : __('art-add-comment');
 		} else {
-			$label = 'review' === $type ? __('art-add-review-comment') : __('art-add-comment');
+			$label = 'review' === $type ? __('art-add-review-comment') : __('art-continue-comment');
 		}
 		$command = $new ? self::FORM_CMD_DISCUSSION : self::FORM_CMD_COMMENT;
 		$html .= $this->makeActionButton($label, $path, $command);

@@ -293,17 +293,21 @@
 
 		// peer_reviewed_article - comment
 		"art-blocking" => "breekpunt",
-		"art-review-comments" => "beoordelingsopmerkingen",
 		"art-no-comments-yet" => "nog geen opmerkingen",
 		"art-add-review-comment" => "voeg beoordelingsopmerking toe",
 		"art-start-review-comment" => "start nieuwe beoordeling",
 		"art-add-comment" => "voeg opmerking toe",
-		"art-comment" => "opmerking",
-		"art-comments" => "opmerkingen",
+		"art-continue-comment"=> "voeg jouw opmerking toe",
+		"art-review-comments" => "beoordelingen",
+		"art-review-comment" => "beoordeling",
+		"art-public-comment " => "opmerking",
+		"art-public-comments" => "opmerkingen",
 		"art-title" => "titel",
-		"art-continue-discussion" => "vervolg beoordeling",
-        "art-start-discussion" => "Start nieuwe beoordeling",
-        
+		"art-start-comment" => "begin nieuwe opmerking",
+		"art-continue-comment"=> "Vul aan",
+		"art-start-discussion" => "start nieuwe beoordeling",
+		"art-continue-discussion" => "voeg toe",
+
 		// peer_reviewed_article - edit
 		"art-cancel" => "afbreken",
 		"art-save" => "opslaan",

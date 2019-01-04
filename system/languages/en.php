@@ -298,17 +298,19 @@
 
 		// peer_reviewed_article - comment
 		"art-blocking" => "blocking",
-		"art-review-comments" => "review comments",
 		"art-no-comments-yet" => "no comments yet",
 		"art-add-review-comment" => "add review comment",
 		"art-start-review-comment" => "start new discussion",
 		"art-add-comment" => "add comment",
-		"art-comment" => "comment",
-		"art-comments" => "comments",
+		"art-review-comment" => "review",
+		"art-review-comments" => "reviews",
+		"art-public-comment " => "comment",
+		"art-public-comments" => "comments",
 		"art-title" => "title",
+		"art-start-comment" => "Contribute",
+		"art-continue-comment"=> "Add your comment",
+		"art-start-discussion" => "Start new discussion",
 		"art-continue-discussion" => "Contribute",
-        "art-start-discussion" => "Start new discussion",
-
 
 		// peer_reviewed_article - edit
 		"art-cancel" => "cancel",
