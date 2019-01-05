@@ -396,7 +396,6 @@
 		$body = $html->getElementsByTagName('body')->Item(0);
 		$msgdiv = $html->createElement('div', '');
 		$msgdiv->setAttribute('id', 'hyphaNotify');
-		$msgdiv->setAttribute('style', 'visibility:'.(count($hyphaNotificationList)?'visible':'hidden').';');
 		$body->appendChild($msgdiv);
 
 		// Show any notifications from before a redirect. The
@@ -457,10 +456,8 @@
 				}
 			}
 			if (msgbox.children.length) {
-				document.getElementById('hyphaNotify').style.visibility = 'visible';
 				setTimeout(notifyTimer, 100);
 			}
-			else document.getElementById('hyphaNotify').style.visibility = 'hidden';
 		}
 	}
 	setTimeout(notifyTimer, 1000);
