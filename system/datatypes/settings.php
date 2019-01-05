@@ -296,7 +296,7 @@
 				$this->html->writeToElement('pageCommands', makeButton(__('save'), makeAction('settings', 'settingsSaveStyles', '')));
 				ob_start();
 ?>
-<textarea class="section" name="editCss" id="editCss" cols="100%" rows="18" wrap="off"><?=file_get_contents('data/hypha.css')?></textarea>
+<textarea class="section" name="editCss" id="editCss" cols="100%" rows="18" wrap="off"><?=Hypha::$data->css->read()?></textarea>
 <?php
 				$this->html->writeToElement('main', ob_get_clean());
 			}
