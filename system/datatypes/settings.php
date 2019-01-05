@@ -208,7 +208,7 @@
 					writeToDigest($user->getAttribute('fullname').' '.__('has-joined'), 'settings');
 					notify('success', __('registration-successful'));
 					$hyphaXml->saveAndUnlock();
-					return 'reload';
+					return ['redirect', $hyphaUrl];
 				}
 			}
 			$hyphaXml->unlock();

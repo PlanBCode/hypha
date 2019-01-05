@@ -392,12 +392,6 @@
 	$GLOBALS['hyphaNotificationList'] = array();
 	function addNotifier($html) {
 		global $hyphaNotificationList;
-		// add hyphaNotify element to body
-		$body = $html->getElementsByTagName('body')->Item(0);
-		$msgdiv = $html->createElement('div', '');
-		$msgdiv->setAttribute('id', 'hyphaNotify');
-		$msgdiv->setAttribute('style', 'visibility:'.(count($hyphaNotificationList)?'visible':'hidden').';');
-		$body->appendChild($msgdiv);
 
 		// Show any notifications from before a redirect. The
 		// notifications themselves are stored in the session
@@ -416,6 +410,13 @@
 			}
 			session_write_close();
 		}
+
+
+		// Compatibility for older version that did not have the
+		// #hyphaNotify element in their html. Add to the
+		// header, to ensure it will be seen.
+		if (!$html->getElementById('hyphaNotify'))
+			$html->writeToElement('header', '<div id="hyphaNotify"></div>');
 
 		if (count($hyphaNotificationList))
 			foreach ($hyphaNotificationList as $msg)
@@ -457,10 +458,8 @@
 				}
 			}
 			if (msgbox.children.length) {
-				document.getElementById('hyphaNotify').style.visibility = 'visible';
 				setTimeout(notifyTimer, 100);
 			}
-			else document.getElementById('hyphaNotify').style.visibility = 'hidden';
 		}
 	}
 	setTimeout(notifyTimer, 1000);

@@ -652,6 +652,10 @@ img.centered{
  background: #FFC0CB;
 }
 
+#hyphaNotify:empty{
+	visibility: hidden;
+}
+
 .success {
  padding: 10px;
  background: #00FFCB;
