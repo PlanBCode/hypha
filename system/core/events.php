@@ -392,11 +392,6 @@
 	$GLOBALS['hyphaNotificationList'] = array();
 	function addNotifier($html) {
 		global $hyphaNotificationList;
-		// add hyphaNotify element to body
-		$body = $html->getElementsByTagName('body')->Item(0);
-		$msgdiv = $html->createElement('div', '');
-		$msgdiv->setAttribute('id', 'hyphaNotify');
-		$body->appendChild($msgdiv);
 
 		// Show any notifications from before a redirect. The
 		// notifications themselves are stored in the session
