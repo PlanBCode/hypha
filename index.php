@@ -64,7 +64,7 @@
 	$hyphaUrl = $hyphaRequest->getRootUrl();
 
 	// Shortcut for direct file requests
-	if (strpos($hyphaQuery, 'data/themes/') === 0) serveFile($hyphaQuery, 'data/themes');
+	if (startsWith($hyphaQuery, 'data/themes/')) serveFile($hyphaQuery, 'data/themes');
 	if (startsWith($hyphaQuery, 'system/wymeditor')) serveFile($hyphaQuery, 'system/wymeditor');
 	if (startsWith($hyphaQuery, 'system/bowser')) serveFile($hyphaQuery, 'system/bowser');
 
