@@ -411,6 +411,13 @@
 			session_write_close();
 		}
 
+
+		// Compatibility for older version that did not have the
+		// #hyphaNotify element in their html. Add to the
+		// header, to ensure it will be seen.
+		if (!$html->getElementById('hyphaNotify'))
+			$html->writeToElement('header', '<div id="hyphaNotify"></div>');
+
 		if (count($hyphaNotificationList))
 			foreach ($hyphaNotificationList as $msg)
 				$html->writeToElement('hyphaNotify', $msg);
