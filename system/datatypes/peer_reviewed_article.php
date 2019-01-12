@@ -610,10 +610,10 @@ class peer_reviewed_article extends Page {
 				$msgId = null;
 				if ($blocking) {
 					if (!$resolved && ($discussion->getAttr(self::FIELD_NAME_USER) === $this->hyphaUser->getAttribute('id') || isAdmin())) {
-						$msgId = 'set as resolved';
+						$msgId = __('art-set-as-resolved');
 					}
 				} elseif (!$closed) {
-					$msgId = 'set as closed';
+					$msgId = __('art-set-as-closed');
 				}
 				if (null !== $msgId) {
 					$path = str_replace('{id}', $discussion->getId(), self::PATH_DISCUSSION_CLOSED);
