@@ -4,6 +4,7 @@
 		"languages" => "talen",
 		"language" => "taal",
 		"cancel" => "annuleren",
+		"delete" => "verwijderen",
 		"submit" => "versturen",
 		"save" => "opslaan",
 		"edit" => "bewerken",
@@ -38,7 +39,7 @@
 		"settings" => "instellingen",
 		"create" => "maak",
 		"create-new-page" => "maak nieuwe pagina",
-		"private-page" => "prive pagina",
+		"private-page" => "privepagina",
 		"title" => "titel",
 		"message" => "bericht",
 		"system-email" => "systeememail",
@@ -289,7 +290,7 @@
 		"art-a-blocking-comment-has-been-submitted" => "Een breekpunt is toegevoegd",
 		"art-a-blocking-comment-has-been-resolved" => "Een breekpunt is opgelost",
 		"art-please-confirm" => "Graag een bevestiging",
-		"art-please-confirm-you-just-added-a-comment" => "Bevestigingt u aub dat u zojuist een opmerking heeft toegevoegd",
+		"art-please-confirm-you-just-added-a-comment" => "Bevestigt u aub dat u zojuist een opmerking heeft toegevoegd",
 		"art-confirm" => "bevestiging",
 
 		// peer_reviewed_article - status
@@ -302,11 +303,12 @@
 		// peer_reviewed_article - comment
 		"art-blocking" => "breekpunt",
 		"art-review-comments" => "beoordelingsopmerkingen",
-		"art-no-comments-yet" => "nog geen opmerkingen",
+		"art-no-comments-yet" => "nog geen reacties",
 		"art-add-review-comment" => "voeg beoordelingsopmerking toe",
-		"art-add-comment" => "voeg opmerking toe",
-		"art-comment" => "opmerking",
+		"art-add-comment" => "voeg reactie toe",
+		"art-comment" => "reageer op het artikel",
 		"art-comments" => "opmerkingen",
+		"art-discussion" => "discussier mee",
 
 		// peer_reviewed_article - edit
 		"art-cancel" => "afbreken",
@@ -319,7 +321,7 @@
 		"art-sources" => "bronnen",
 		"art-is-resolved" => "is opgelost",
 		"art-is-blocking" => "is een breekpunt",
-		"art-set-as-resolved" => "zet op opgelost",
+		"art-set-as-resolved" => "breekpunt opgelost",
 		"art-set-as-closed" => "zet op gesloten",
 		"art-approves" => "goedkeuringen",
 		"art-approve" => "geef goedkeuring",
