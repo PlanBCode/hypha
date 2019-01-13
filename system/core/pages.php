@@ -347,7 +347,7 @@
 
 		// Use the page name (in the appropriate language) as
 		// the link text
-		if ($node->text() == '')
+		if ($node->html() == '')
 			$node->text(showPagename($language->getAttribute('name')));
 
 		// Check permissions, replace by a span with just the
@@ -355,7 +355,7 @@
 		// page
 		if(!isUser() && $page->getAttribute('private') == 'on') {
 			$span = $page->createElement('span');
-			$span->text($node->text());
+			$span->html($node->html());
 			$node->replaceWith($span);
 			return;
 		}
