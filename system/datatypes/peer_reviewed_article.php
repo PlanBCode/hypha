@@ -254,14 +254,20 @@ class peer_reviewed_article extends Page {
 		}
 
 		$code = $comment->getAttr(self::FIELD_NAME_DISCUSSION_COMMENT_CONFIRM_CODE);
+		$commentBody = $comment->getDoc()->textContent;
 
+		$title = $this->getTitle();
 		$path = str_replace(['{id}', '{code}'], [$param['id'], $code], self::PATH_DISCUSSION_COMMENT_CONFIRM);
 		$linkToConfirm = $this->constructFullPath($this->pagename . '/' . $path);
 
 		$email = $comment->getAttr(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL);
-		$subject = __('art-please-confirm');
-		$message = __('art-please-confirm-you-just-added-a-comment');
-		$message .= '<p><a href="'.$linkToConfirm.'">'.__('art-confirm').'</a></p>';
+		$subject = __('art-confirm-comment-subject');
+		$message = __('art-confirm-comment-body', array(
+			"sitename" => hypha_getTitle(),
+			"title" => $title,
+			"comment" => $commentBody,
+			"link" => $linkToConfirm
+		));
 		$this->sendMail($email, $subject, $message);
 	}
 
@@ -475,7 +481,7 @@ class peer_reviewed_article extends Page {
 
 		if (!(bool)$comment->getAttribute(self::FIELD_NAME_DISCUSSION_COMMENT_PENDING)) {
 			$this->xml->unlock();
-			notify('success', ucfirst(__('art-successfully-updated')));
+			notify('success', ucfirst(__('art-comment-received')));
 			return ['redirect', $this->constructFullPath($this->pagename)];
 		}
 
