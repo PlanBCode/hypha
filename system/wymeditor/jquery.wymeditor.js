@@ -2145,6 +2145,7 @@ WYMeditor.editor.prototype._isDesignModeOn = function () {
     @param wym The editor instance that's being initialized.
 */
 WYMeditor.editor.prototype._onEditorIframeLoad = function (wym) {
+    wym._setBaseUrl();
     wym._assignWymDoc();
     wym._enableDesignModeOnDocument();
     wym._afterDesignModeOn();
@@ -2238,6 +2239,29 @@ WYMeditor.editor.prototype._uiQuirks = function () {
     return;
 };
 
+
+/**
+    WYMeditor.editor._setBaseUrl
+    ===================================
+
+    This is part of the initialization of an editor, designed to be called
+    soon after the editor iframe is created. It adds a base tag to the
+    iframe based on the parent document's base url, so any relative
+    links inside the iframe will be resolved in the same way as outside
+    of it.
+*/
+WYMeditor.editor.prototype._setBaseUrl = function () {
+    var wym = this;
+    // This creates an images with an empty src url and lets the browser
+    // resolve it to figure out the base url used by the parent
+    // document. See https://stackoverflow.com/a/49299675/740048
+    var base_url = $('<img src="">')[0].src;
+
+    // Insert a base tag into the iframe
+    var base = wym._iframe.contentDocument.createElement("base");
+    base.setAttribute('href', base_url);
+    wym._iframe.contentDocument.getElementsByTagName("head")[0].appendChild(base);
+}
 
 /**
     WYMeditor.editor._afterDesignModeOn
