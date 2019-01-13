@@ -110,3 +110,15 @@
 	function makeLink($label, $action) {
 		return '<a href="javascript:'.$action.'">'.$label.'</a>';
 	}
+
+	/*
+		Function: makeInfoButton
+		Generate span with an onClick to toggle an info popup with the given tag
+
+		Parameters:
+		$tag - tag for which to get the information.
+	*/
+	function makeInfoButton($tag) {
+		global $O_O;
+		return '<span onclick="toggleInfoPopup(event, \''.$tag.'\', \'' . $O_O->getInterfaceLanguage() . '\', this)" class="hyphaInfoButton"></span>';
+	}

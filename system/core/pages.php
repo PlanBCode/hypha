@@ -187,6 +187,11 @@
 						break;
 				}
 				break;
+			case HyphaRequest::HYPHA_SYSTEM_PAGE_HELP:
+				$subject = isset($args[0]) ? urldecode($args[0]) : 'undefined';
+				$helpLanguage = isset($args[1]) ? $args[1] : $O_O->getInterfaceLanguage();
+				echo hypha_searchHelp($O_O, $subject, $helpLanguage);
+				exit;
 			case HyphaRequest::HYPHA_SYSTEM_PAGE_SETTINGS:
 				if (isUser() || $args[0]=='register') {
 					$hyphaPage = new settingspage($args);
@@ -534,4 +539,15 @@
 			case 'png': imagepng($new, $dst); break;
 		}
 		return true;
+	}
+
+	function hypha_searchHelp(RequestContext $O_O, $subject, $lang = 'en') {
+		$options = [$lang, $O_O->getInterfaceLanguage(), $O_O->getContentLanguage()];
+		foreach ($options as $lang) {
+			$dict = $O_O->getDictionaryByLanguage($lang);
+			if (null !== $dict && array_key_exists($subject, $dict)) {
+				return nl2br($dict[$subject]);
+			}
+		}
+		return 'Subject: "' . $subject . '" not found';
 	}
