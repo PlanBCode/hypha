@@ -159,13 +159,29 @@ class peer_reviewed_article extends Page {
 		}
 
 		$title = $this->getTitle();
+		$author = $this->hyphaUser->getAttribute('fullname');
 		$linkToPage = $this->constructFullPath($this->pagename);
 		if (self::STATUS_REVIEW === $statusArray['new']) {
-			$subject = __('art-a-new-article-has-been-submitted-for-review');
-			$message = '<p>' . $subject . '</p><a href="' . $linkToPage . '">' . $title . '</a>';
+			$subject = __('art-review-request-subject', array(
+				"title" => $title,
+				"author" => $author
+			));
+			$message = __('art-review-request-body', array(
+				"link" => $linkToPage,
+				"title" => $title,
+				"author" => $author
+			));
 		} else {
-			$subject = __('art-the-status-of-an-article-has-been-updated');
-			$message = '<p>' . $subject . '</p><a href="' . $linkToPage . '">' . $title . '</a> now has \'' . $statusArray['new'] . '\' as status';
+			$subject = __('art-status-update-subject', array(
+				"status" => $statusArray['new'],
+				"title" => $title
+			));
+			$message = __('art-status-update-body', array(
+				"link" => $linkToPage,
+				"title" => $title,
+				"author" => $author,
+				"status" => $statusArray['new']
+			));
 		}
 		$this->sendMail(getUserEmailList(), $subject, $message);
 	}

@@ -292,6 +292,8 @@
 		"art-please-confirm" => "Graag een bevestiging",
 		"art-please-confirm-you-just-added-a-comment" => "Bevestigt u aub dat u zojuist een opmerking heeft toegevoegd",
 		"art-confirm" => "bevestiging",
+		"art-status-update-subject" => "Status '[[status]]' voor '[[title]]'",
+		"art-status-update-body" => "De status van het artikel '<a href=\"[[link]]\">[[title]]</a>' is veranderd in '[[status]]'.<br />------------------------------<br />Dit is een geautomatiseerde mail. Antwoorden hierop heeft geen zin.",
 
 		// peer_reviewed_article - status
 		"art-status-draft" => "schets",

@@ -297,6 +297,8 @@
 		"art-please-confirm" => "Please confirm",
 		"art-please-confirm-you-just-added-a-comment" => "You have just added a comment, please confirm",
 		"art-confirm" => "confirm",
+		"art-status-update-subject" => "Status update article: [[title]]",
+		"art-status-update-body" => "The article with the title:<br /><br /><a href=\"[[link]]\">[[title]]</a><br /><br />changed status. The current status is:<br /><br />[[status]]",
 
 		// peer_reviewed_article - status
 		"art-status-draft" => "draft",
