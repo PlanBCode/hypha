@@ -301,6 +301,8 @@
 		"art-block-resolved-body" => "A blocking comment was resolved by [[author]] for:<br /><br /><a href=\"[[link]]\">[[title]]</a>",
 		"art-confirm-comment-subject" => "Please confirm post of your comment",
 		"art-confirm-comment-body" => "When you wish this comment to be published, you need to confirm. This action is needed to avoid spam.<br /><a href=\"[[link]]\">[[link]]</a><br />On the website of [[sitename]] you (or someone that used your email address) have submitted a comment at the article: [[title]].<br /><br /> ------------------------------ <br />Your comment was:<br />[[comment]]<br />------------------------------<br />This is an automatised mail. Replying to this mail is useless.",
+		"art-comment-subject" => "New comment by [[name]] to '[[title]]'",
+		"art-comment-body" => "[[name]] wrote this comment to '<a href=\"[[link]]\">[[title]]</a>':<br />[[comment]]<br /><br />------------------------------<br />This is an automatised mail. Replying to this mail is useless.",
 
 		// peer_reviewed_article - status
 		"art-status-draft" => "draft",

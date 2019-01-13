@@ -250,6 +250,8 @@ class peer_reviewed_article extends Page {
 		$comment = $this->getDocPageById($param['id']);
 		$pending = (bool)$comment->getAttr(self::FIELD_NAME_DISCUSSION_COMMENT_PENDING);
 		if (!$pending) {
+			// send message when comment was made by a user
+			$this->sendNewCommentMessage($comment->getDoc());
 			return;
 		}
 
@@ -487,7 +489,31 @@ class peer_reviewed_article extends Page {
 
 		$comment->setAttribute(self::FIELD_NAME_DISCUSSION_COMMENT_PENDING, false);
 		$this->xml->saveAndUnlock();
+
+		// send message when comment was confirmed by a visitor
+		$this->sendNewCommentMessage($comment);
+
 		return ['redirect', $this->constructFullPath($this->pagename)];
+	}
+
+	protected function sendNewCommentMessage($comment) {
+		// send fresh readers comment to all users
+		$title = $this->getTitle();
+		$linkToPage = $this->constructFullPath($this->pagename);
+		$name = $comment->getAttribute(self::FIELD_NAME_DISCUSSION_COMMENTER_NAME);
+		$commentBody = $comment->getText();
+		
+		$subject = __('art-comment-subject', array(
+			"name" => $name,
+			"title" => $title
+		));
+		$message = __('art-comment-body', array(
+			"name" => $name,
+			"link" => $linkToPage,
+			"title" => $title,
+			"comment" => $commentBody
+		));
+		$this->sendMail(getUserEmailList(), $subject, $message);
 	}
 
 	public function indexAction() {

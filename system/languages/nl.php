@@ -296,6 +296,8 @@
 		"art-block-resolved-body" => "[[author]] hief een breekpunt op bij '<a href=\"[[link]]\">[[title]]</a>'.<br />------------------------------<br />Dit is een geautomatiseerde mail. Antwoorden hierop heeft geen zin.",
 		"art-confirm-comment-subject" => "Bevestig de plaatsing van uw reactie",
 		"art-confirm-comment-body" => "Als u wilt dat deze reactie geplaatst wordt, dan dient u deze te bevestigen. Deze actie is nodig om spam te voorkomen.<br /><a href=\"[[link]]\">[[link]]</a><br />Op de website van [[sitename]] heeft u (of iemand die uw emailadres gebruikte) net een reactie geplaatst bij het artikel: [[title]].<br /><br /> ------------------------------ <br />Uw reactie was:<br />[[comment]]<br />------------------------------<br />Dit is een geautomatiseerde mail. Antwoorden hierop heeft geen zin.",
+		"art-comment-subject" => "Nieuw commentaar door [[name]] bij '[[title]]'",
+		"art-comment-body" => "[[name]] schreef het volgende commentaar bij '<a href=\"[[link]]\">[[title]]</a>':<br />[[comment]]<br /><br />------------------------------<br />Dit is een geautomatiseerde mail. Antwoorden hierop heeft geen zin.",
 
 		// peer_reviewed_article - status
 		"art-status-draft" => "schets",
