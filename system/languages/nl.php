@@ -336,6 +336,13 @@
 		"art-start-review" => "start beoordeling",
 		"art-approve(s)" => "beoordeling(en)",
 		"art-unresolved-block(s)" => "onopgeloste breekpunt(en)",
+
+		// help_icon_texts
+		"help-private-page" => "een privepagina is alleen zichtbaar voor degenen die zijn ingelogd",
+		"help-version-management" => "hier kunt u terug naar een vorige versie van de pagina. Die keuze kunt u definitief maken door te klikken op Terugdraaien",
+		"help-version-revert" => "hier bevestigt u de keuze om de actuele pagina te vervangen voor deze. Wilt u dat niet? Kies dan in de versielijst weer de bovenste pagina",
+		"help-blocking-comment" => "als je een artikel blokkeert ben jij de enige die die blokkade weer weg kan nemen, bijvoorbeeld als de auteur voldoende wijzigingen heeft gemaakt",
+		"help-page-name" => "de paginanaam wordt gebruikt in de URL van de pagina",
 	);
 
 	return $LANG;

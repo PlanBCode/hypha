@@ -1054,9 +1054,10 @@ EOF;
 		if ($new && self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER === $type && !in_array($this->getStatus(), [self::STATUS_APPROVED, self::STATUS_PUBLISHED])) {
 			$blocking = __('art-blocking');
 			$commentBlockingFieldName = self::FIELD_NAME_DISCUSSION_BLOCKING;
+			$infoBlocking = makeInfoButton('help-blocking-comment');
 			$html .= <<<EOF
 			<div>
-				<strong><label for="$commentBlockingFieldName"> $blocking </label></strong><input type="checkbox" name="$commentBlockingFieldName" id="$commentBlockingFieldName" />
+				<strong><label for="$commentBlockingFieldName"> $blocking </label></strong><input type="checkbox" name="$commentBlockingFieldName" id="$commentBlockingFieldName" /> $infoBlocking
 			</div>
 EOF;
 		}

@@ -341,6 +341,13 @@
 		"art-start-review" => "start review",
 		"art-approve(s)" => "approve(s)",
 		"art-unresolved-block(s)" => "unresolved block(s)",
+
+		// help_icon_texts
+		"help-private-page" => "a private page is only visible to users who are logged in",
+		"help-version-management" => "here you can go back to a previous version of this page. You can make this choice final by clicking revert",
+		"help-version-revert" => "here you confirm the choice to replace the current page for this one. If that is not what you want, you can choose the top page in the version management list",
+		"help-blocking-comment" => "if you block an article you are the only one who can unblock it again, for instance after the writer has made sufficient changes",
+		"help-page-name" => "the page name will be used in the URL of the page",
 	);
 
 	return $LANG;
