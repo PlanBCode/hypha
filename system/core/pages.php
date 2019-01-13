@@ -95,8 +95,10 @@
 		html = '<table class="section"><tr><th colspan="2"><?=__('create-new-page').'<br/>'.__('instruction-new-page')?></td><tr>';
 		// TODO [LRM]: find better way to set default new page type.
 		html+= '<tr><th><?=__('type')?></th><td><select id="newPageType" name="newPageType">' + '<?php foreach($types as $type => $datatypeName) echo '<option value="'.$type.'"'.($type=='textpage' ? 'selected="selected"' : '').'>'.$datatypeName.'</option>'; ?>' + '</select></td></tr>';
-		html+= '<tr><th><?=__('pagename')?></th><td><input type="text" id="newPagename" value="<?=$pagename?>" onblur="validatePagename(this);" onkeyup="validatePagename(this); document.getElementById(\'newPageSubmit\').disabled = this.value ? false : true;"/></td></tr>';
-		html+= '<tr><td></td><td><input type="checkbox" id="newPagePrivate" name="newPagePrivate"/> <?=__('private-page')?></td></tr>';
+		var infoPageName = <?=json_encode(makeInfoButton('help-page-name'));?>;
+		html+= '<tr><th><?=__('pagename')?></th><td><input type="text" id="newPagename" value="<?=$pagename?>" onblur="validatePagename(this);" onkeyup="validatePagename(this); document.getElementById(\'newPageSubmit\').disabled = this.value ? false : true;"/> ' + infoPageName + '</td></tr>';
+		var infoPrivate = <?=json_encode(makeInfoButton('help-private-page'));?>;
+		html+= '<tr><td></td><td><input type="checkbox" id="newPagePrivate" name="newPagePrivate"/> <?=__('private-page')?> ' + infoPrivate + '</td></tr>';
 		html+= '<tr><td></td><td><input type="button" class="button" value="<?=__('cancel')?>" onclick="document.getElementById(\'popup\').style.visibility=\'hidden\';" />';
 		html+= '<input type="submit" id="newPageSubmit" class="button editButton" value="<?=__('create')?>" <?= $pagename ? '' : 'disabled="true"' ?> onclick="hypha(\'<?=$hyphaContentLanguage?>/\' + document.getElementById(\'newPagename\').value + \'/edit\', \'newPage\', document.getElementById(\'newPagename\').value);" /></td></tr></table>';
 		document.getElementById('popup').innerHTML = html;

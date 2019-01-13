@@ -46,6 +46,7 @@
 			// setup addition widgets when client is logged in
 			if (isUser()) {
 				// show a drop down list of revisions
+				$this->html->writeToElement('versionList', makeInfoButton('help-version-management'));
 				$this->html->writeToElement('versionList', versionSelector($this));
 
 				// if a revision is selected, show a 'revert' commmand button
@@ -53,6 +54,7 @@
 					$_action = makeAction($this->language.'/'.$this->pagename, 'textRevert', '');
 					$_button = makeButton(__('revert'), $_action);
 					$this->html->writeToElement('pageCommands', $_button);
+					$this->html->writeToElement('pageCommands', makeInfoButton('help-version-revert'));
 				}
 				// if the latest revision is selected, show 'edit' and 'translate' command buttons
 				else {
