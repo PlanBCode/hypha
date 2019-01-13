@@ -287,13 +287,15 @@
 		// peer_reviewed_article - mail
 		"art-a-new-article-has-been-submitted-for-review" => "Een nieuw artikel kan beoordeeld worden",
 		"art-the-status-of-an-article-has-been-updated" => "De status van een artikel is geüpdate",
-		"art-a-blocking-comment-has-been-submitted" => "Een breekpunt is toegevoegd",
-		"art-a-blocking-comment-has-been-resolved" => "Een breekpunt is opgelost",
 		"art-please-confirm" => "Graag een bevestiging",
 		"art-please-confirm-you-just-added-a-comment" => "Bevestigt u aub dat u zojuist een opmerking heeft toegevoegd",
 		"art-confirm" => "bevestiging",
 		"art-status-update-subject" => "Status '[[status]]' voor '[[title]]'",
 		"art-status-update-body" => "De status van het artikel '<a href=\"[[link]]\">[[title]]</a>' is veranderd in '[[status]]'.<br />------------------------------<br />Dit is een geautomatiseerde mail. Antwoorden hierop heeft geen zin.",
+		"art-block-submitted-subject" => "Nieuw breekpunt bij '[[title]]'",
+		"art-block-submitted-body" => "[[author]] voegde een breekpunt toe aan '<a href=\"[[link]]\">[[title]]</a>'.<br /><br />[[comment]]<br />------------------------------<br />Dit is een geautomatiseerde mail. Antwoorden hierop heeft geen zin.",
+		"art-block-resolved-subject" => "Breekpunt opgelost bij '[[title]]'",
+		"art-block-resolved-body" => "[[author]] hief een breekpunt op bij '<a href=\"[[link]]\">[[title]]</a>'.<br />------------------------------<br />Dit is een geautomatiseerde mail. Antwoorden hierop heeft geen zin.",
 
 		// peer_reviewed_article - status
 		"art-status-draft" => "schets",

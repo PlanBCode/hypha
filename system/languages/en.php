@@ -292,13 +292,15 @@
 		// peer_reviewed_article - mail
 		"art-a-new-article-has-been-submitted-for-review" => "A new article can be reviewed",
 		"art-the-status-of-an-article-has-been-updated" => "The status of an article has been updated",
-		"art-a-blocking-comment-has-been-submitted" => "A blocking comment has been submitted",
-		"art-a-blocking-comment-has-been-resolved" => "A blocking comment has been resolved",
 		"art-please-confirm" => "Please confirm",
 		"art-please-confirm-you-just-added-a-comment" => "You have just added a comment, please confirm",
 		"art-confirm" => "confirm",
 		"art-status-update-subject" => "Status update article: [[title]]",
 		"art-status-update-body" => "The article with the title:<br /><br /><a href=\"[[link]]\">[[title]]</a><br /><br />changed status. The current status is:<br /><br />[[status]]",
+		"art-block-submitted-subject" => "A blocking comment was added to: [[title]]",
+		"art-block-submitted-body" => "A blocking comment was added by [[author]] to:<br /><br /><a href=\"[[link]]\">[[title]]</a>",
+		"art-block-resolved-subject" => "Blocking comment resolved: [[title]]",
+		"art-block-resolved-body" => "A blocking comment was resolved by [[author]] for:<br /><br /><a href=\"[[link]]\">[[title]]</a>",
 
 		// peer_reviewed_article - status
 		"art-status-draft" => "draft",

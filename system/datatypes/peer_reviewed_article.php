@@ -209,9 +209,20 @@ class peer_reviewed_article extends Page {
 		}
 
 		$title = $this->getTitle();
+		$author = $this->hyphaUser->getAttribute('fullname');
 		$linkToPage = $this->constructFullPath($this->pagename);
-		$subject = __('art-a-blocking-comment-has-been-submitted');
-		$message = '<p>' . $subject . '</p><a href="' . $linkToPage . '">' . $title . '</a>';
+		
+		$comment = $discussion->getDoc()->lastChild->textContent;
+		$subject = __('art-block-submitted-subject', array(
+			"title" => $title
+		));
+		$message = __('art-block-submitted-body', array(
+			"link" => $linkToPage,
+			"title" => $title,
+			"author" => $author,
+			"comment" => $comment
+		));
+		
 		$this->sendMail(getUserEmailList(), $subject, $message);
 	}
 
@@ -222,9 +233,16 @@ class peer_reviewed_article extends Page {
 		}
 
 		$title = $this->getTitle();
+		$author = $this->hyphaUser->getAttribute('fullname');
 		$linkToPage = $this->constructFullPath($this->pagename);
-		$subject = __('art-a-blocking-comment-has-been-resolved');
-		$message = '<p>' . $subject . '</p><a href="' . $linkToPage . '">' . $title . '</a>';
+		$subject = __('art-block-resolved-subject', array(
+			"title" => $title
+		));
+		$message = __('art-block-resolved-body', array(
+			"link" => $linkToPage,
+			"title" => $title,
+			"author" => $author
+		));
 		$this->sendMail(getUserEmailList(), $subject, $message);
 	}
 
