@@ -354,7 +354,7 @@
 		// pagename if the link would lead to an inaccessible
 		// page
 		if(!isUser() && $page->getAttribute('private') == 'on') {
-			$span = $page->createElement('span');
+			$span = $node->document()->createElement('span');
 			$span->html($node->html());
 			$node->replaceWith($span);
 			return;
