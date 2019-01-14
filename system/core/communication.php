@@ -45,7 +45,7 @@
 		}
 		$messageHtml .= '	</head>' . "\r\n";
 		$messageHtml .= '	<body>' . "\r\n";
-		$messageHtml .= $message;
+		$messageHtml .= dewikify_html($message);
 		$messageHtml .= '	</body>' . "\r\n";
 		$messageHtml .= '</html>' . "\r\n";
 
