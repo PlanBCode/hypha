@@ -282,16 +282,22 @@
 		"art-unsupported-status-change" => "deze status verandering wordt niet ondersteund",
 		"art-no-approves-yet" => "er zijn nog geen goedkeuringen ontvangen",
 		"art-successfully-updated" => "succesvol bijgewerkt",
+		"art-comment-received" => "Uw reactie is ontvangen. U krijgt zo een mail toegestuurd. klik op de link in die mail om de plaatsing definitief te maken. ",
 		"art-status-changed-in-between" => "de status is tussentijds aangepast",
 
 		// peer_reviewed_article - mail
 		"art-a-new-article-has-been-submitted-for-review" => "Een nieuw artikel kan beoordeeld worden",
 		"art-the-status-of-an-article-has-been-updated" => "De status van een artikel is geüpdate",
-		"art-a-blocking-comment-has-been-submitted" => "Een breekpunt is toegevoegd",
-		"art-a-blocking-comment-has-been-resolved" => "Een breekpunt is opgelost",
-		"art-please-confirm" => "Graag een bevestiging",
-		"art-please-confirm-you-just-added-a-comment" => "Bevestigt u aub dat u zojuist een opmerking heeft toegevoegd",
-		"art-confirm" => "bevestiging",
+		"art-status-update-subject" => "Status '[[status]]' voor '[[title]]'",
+		"art-status-update-body" => "De status van het artikel '<a href=\"[[link]]\">[[title]]</a>' is veranderd in '[[status]]'.<br />------------------------------<br />Dit is een geautomatiseerde mail. Antwoorden hierop heeft geen zin.",
+		"art-block-submitted-subject" => "Nieuw breekpunt bij '[[title]]'",
+		"art-block-submitted-body" => "[[author]] voegde een breekpunt toe aan '<a href=\"[[link]]\">[[title]]</a>'.<br /><br />[[comment]]<br />------------------------------<br />Dit is een geautomatiseerde mail. Antwoorden hierop heeft geen zin.",
+		"art-block-resolved-subject" => "Breekpunt opgelost bij '[[title]]'",
+		"art-block-resolved-body" => "[[author]] hief een breekpunt op bij '<a href=\"[[link]]\">[[title]]</a>'.<br />------------------------------<br />Dit is een geautomatiseerde mail. Antwoorden hierop heeft geen zin.",
+		"art-confirm-comment-subject" => "Bevestig de plaatsing van uw reactie",
+		"art-confirm-comment-body" => "Als u wilt dat deze reactie geplaatst wordt, dan dient u deze te bevestigen. Deze actie is nodig om spam te voorkomen.<br /><a href=\"[[link]]\">[[link]]</a><br />Op de website van [[sitename]] heeft u (of iemand die uw emailadres gebruikte) net een reactie geplaatst bij het artikel: [[title]].<br /><br /> ------------------------------ <br />Uw reactie was:<br />[[comment]]<br />------------------------------<br />Dit is een geautomatiseerde mail. Antwoorden hierop heeft geen zin.",
+		"art-comment-subject" => "Nieuw commentaar door [[name]] bij '[[title]]'",
+		"art-comment-body" => "[[name]] schreef het volgende commentaar bij '<a href=\"[[link]]\">[[title]]</a>':<br />[[comment]]<br /><br />------------------------------<br />Dit is een geautomatiseerde mail. Antwoorden hierop heeft geen zin.",
 
 		// peer_reviewed_article - status
 		"art-status-draft" => "schets",

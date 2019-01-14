@@ -159,13 +159,29 @@ class peer_reviewed_article extends Page {
 		}
 
 		$title = $this->getTitle();
+		$author = $this->hyphaUser->getAttribute('fullname');
 		$linkToPage = $this->constructFullPath($this->pagename);
 		if (self::STATUS_REVIEW === $statusArray['new']) {
-			$subject = __('art-a-new-article-has-been-submitted-for-review');
-			$message = '<p>' . $subject . '</p><a href="' . $linkToPage . '">' . $title . '</a>';
+			$subject = __('art-review-request-subject', array(
+				"title" => $title,
+				"author" => $author
+			));
+			$message = __('art-review-request-body', array(
+				"link" => $linkToPage,
+				"title" => $title,
+				"author" => $author
+			));
 		} else {
-			$subject = __('art-the-status-of-an-article-has-been-updated');
-			$message = '<p>' . $subject . '</p><a href="' . $linkToPage . '">' . $title . '</a> now has \'' . $statusArray['new'] . '\' as status';
+			$subject = __('art-status-update-subject', array(
+				"status" => $statusArray['new'],
+				"title" => $title
+			));
+			$message = __('art-status-update-body', array(
+				"link" => $linkToPage,
+				"title" => $title,
+				"author" => $author,
+				"status" => $statusArray['new']
+			));
 		}
 		$this->sendMail(getUserEmailList(), $subject, $message);
 	}
@@ -193,9 +209,20 @@ class peer_reviewed_article extends Page {
 		}
 
 		$title = $this->getTitle();
+		$author = $this->hyphaUser->getAttribute('fullname');
 		$linkToPage = $this->constructFullPath($this->pagename);
-		$subject = __('art-a-blocking-comment-has-been-submitted');
-		$message = '<p>' . $subject . '</p><a href="' . $linkToPage . '">' . $title . '</a>';
+		
+		$comment = $discussion->getDoc()->lastChild->textContent;
+		$subject = __('art-block-submitted-subject', array(
+			"title" => $title
+		));
+		$message = __('art-block-submitted-body', array(
+			"link" => $linkToPage,
+			"title" => $title,
+			"author" => $author,
+			"comment" => $comment
+		));
+		
 		$this->sendMail(getUserEmailList(), $subject, $message);
 	}
 
@@ -206,9 +233,16 @@ class peer_reviewed_article extends Page {
 		}
 
 		$title = $this->getTitle();
+		$author = $this->hyphaUser->getAttribute('fullname');
 		$linkToPage = $this->constructFullPath($this->pagename);
-		$subject = __('art-a-blocking-comment-has-been-resolved');
-		$message = '<p>' . $subject . '</p><a href="' . $linkToPage . '">' . $title . '</a>';
+		$subject = __('art-block-resolved-subject', array(
+			"title" => $title
+		));
+		$message = __('art-block-resolved-body', array(
+			"link" => $linkToPage,
+			"title" => $title,
+			"author" => $author
+		));
 		$this->sendMail(getUserEmailList(), $subject, $message);
 	}
 
@@ -216,18 +250,26 @@ class peer_reviewed_article extends Page {
 		$comment = $this->getDocPageById($param['id']);
 		$pending = (bool)$comment->getAttr(self::FIELD_NAME_DISCUSSION_COMMENT_PENDING);
 		if (!$pending) {
+			// send message when comment was made by a user
+			$this->sendNewCommentMessage($comment->getDoc());
 			return;
 		}
 
 		$code = $comment->getAttr(self::FIELD_NAME_DISCUSSION_COMMENT_CONFIRM_CODE);
+		$commentBody = $comment->getDoc()->textContent;
 
+		$title = $this->getTitle();
 		$path = str_replace(['{id}', '{code}'], [$param['id'], $code], self::PATH_DISCUSSION_COMMENT_CONFIRM);
 		$linkToConfirm = $this->constructFullPath($this->pagename . '/' . $path);
 
 		$email = $comment->getAttr(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL);
-		$subject = __('art-please-confirm');
-		$message = __('art-please-confirm-you-just-added-a-comment');
-		$message .= '<p><a href="'.$linkToConfirm.'">'.__('art-confirm').'</a></p>';
+		$subject = __('art-confirm-comment-subject');
+		$message = __('art-confirm-comment-body', array(
+			"sitename" => hypha_getTitle(),
+			"title" => $title,
+			"comment" => $commentBody,
+			"link" => $linkToConfirm
+		));
 		$this->sendMail($email, $subject, $message);
 	}
 
@@ -441,13 +483,37 @@ class peer_reviewed_article extends Page {
 
 		if (!(bool)$comment->getAttribute(self::FIELD_NAME_DISCUSSION_COMMENT_PENDING)) {
 			$this->xml->unlock();
-			notify('success', ucfirst(__('art-successfully-updated')));
+			notify('success', ucfirst(__('art-comment-received')));
 			return ['redirect', $this->constructFullPath($this->pagename)];
 		}
 
 		$comment->setAttribute(self::FIELD_NAME_DISCUSSION_COMMENT_PENDING, false);
 		$this->xml->saveAndUnlock();
+
+		// send message when comment was confirmed by a visitor
+		$this->sendNewCommentMessage($comment);
+
 		return ['redirect', $this->constructFullPath($this->pagename)];
+	}
+
+	protected function sendNewCommentMessage($comment) {
+		// send fresh readers comment to all users
+		$title = $this->getTitle();
+		$linkToPage = $this->constructFullPath($this->pagename);
+		$name = $comment->getAttribute(self::FIELD_NAME_DISCUSSION_COMMENTER_NAME);
+		$commentBody = $comment->getText();
+		
+		$subject = __('art-comment-subject', array(
+			"name" => $name,
+			"title" => $title
+		));
+		$message = __('art-comment-body', array(
+			"name" => $name,
+			"link" => $linkToPage,
+			"title" => $title,
+			"comment" => $commentBody
+		));
+		$this->sendMail(getUserEmailList(), $subject, $message);
 	}
 
 	public function indexAction() {

@@ -287,16 +287,22 @@
 		"art-unsupported-status-change" => "this status change is not supported",
 		"art-no-approves-yet" => "there are no approves yet",
 		"art-successfully-updated" => "successfully updated",
+		"art-comment-received" => "Your comment has been received. You will receive a mail for confirmation. Click on the link in this mail to publish your comment.",
 		"art-status-changed-in-between" => "the status has been changed in between",
 
 		// peer_reviewed_article - mail
 		"art-a-new-article-has-been-submitted-for-review" => "A new article can be reviewed",
 		"art-the-status-of-an-article-has-been-updated" => "The status of an article has been updated",
-		"art-a-blocking-comment-has-been-submitted" => "A blocking comment has been submitted",
-		"art-a-blocking-comment-has-been-resolved" => "A blocking comment has been resolved",
-		"art-please-confirm" => "Please confirm",
-		"art-please-confirm-you-just-added-a-comment" => "You have just added a comment, please confirm",
-		"art-confirm" => "confirm",
+		"art-status-update-subject" => "Status update article: [[title]]",
+		"art-status-update-body" => "The article with the title:<br /><br /><a href=\"[[link]]\">[[title]]</a><br /><br />changed status. The current status is:<br /><br />[[status]]",
+		"art-block-submitted-subject" => "A blocking comment was added to: [[title]]",
+		"art-block-submitted-body" => "A blocking comment was added by [[author]] to:<br /><br /><a href=\"[[link]]\">[[title]]</a>",
+		"art-block-resolved-subject" => "Blocking comment resolved: [[title]]",
+		"art-block-resolved-body" => "A blocking comment was resolved by [[author]] for:<br /><br /><a href=\"[[link]]\">[[title]]</a>",
+		"art-confirm-comment-subject" => "Please confirm post of your comment",
+		"art-confirm-comment-body" => "When you wish this comment to be published, you need to confirm. This action is needed to avoid spam.<br /><a href=\"[[link]]\">[[link]]</a><br />On the website of [[sitename]] you (or someone that used your email address) have submitted a comment at the article: [[title]].<br /><br /> ------------------------------ <br />Your comment was:<br />[[comment]]<br />------------------------------<br />This is an automatised mail. Replying to this mail is useless.",
+		"art-comment-subject" => "New comment by [[name]] to '[[title]]'",
+		"art-comment-body" => "[[name]] wrote this comment to '<a href=\"[[link]]\">[[title]]</a>':<br />[[comment]]<br /><br />------------------------------<br />This is an automatised mail. Replying to this mail is useless.",
 
 		// peer_reviewed_article - status
 		"art-status-draft" => "draft",
