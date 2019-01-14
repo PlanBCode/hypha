@@ -8,8 +8,10 @@ class WymHTMLForm extends HTMLForm {
 	}
 
 	function updateFormField($field, $value) {
+		// Editor tags must always contain valid HTML, so use
+		// setHtml rather than setText
 		if ($field->tagName == 'editor')
-			$field->setText($value);
+			$field->setHtml($value);
 		return parent::updateFormField($field, $value);
 	}
 }
