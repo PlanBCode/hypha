@@ -306,6 +306,21 @@
 		return preg_replace('/_/', ' ', $name);
 	}
 
+	/* Like dewikify, but accepts a HTML string instead of a document */
+	function dewikify_html($html) {
+		$doc = new DomWrap\Document();
+		// Dewikify a separate element instead of the entire
+		// document, since loading html into a document adds
+		// <html><body>.
+		$elem = $doc->createElement('root');
+		$elem->html($html);
+		dewikify($elem);
+
+		// TODO: This should probably not use getInnerHtml,
+		// probably just return the element instead.
+		return getInnerHtml($elem);
+	}
+
 	/*
 		Function: wikify
 		Convert links containing page ids back to working links,
