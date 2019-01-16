@@ -287,6 +287,36 @@ trait ManipulationTrait
     }
 
     /**
+     * @param string|NodeList|\DOMNode $selector
+     *
+     * @return self
+     */
+    public function prependTo($selector): self {
+        if ($selector instanceof \DOMNode || $selector instanceof NodeList) {
+            $nodes = $this->inputAsNodeList($selector);
+        } else {
+            $nodes = $this->document()->find($selector);
+        }
+        $nodes->prepend($this);
+        return $this;
+    }
+
+    /**
+     * @param string|NodeList|\DOMNode $selector
+     *
+     * @return self
+     */
+    public function appendTo($selector): self {
+        if ($selector instanceof \DOMNode || $selector instanceof NodeList) {
+            $nodes = $this->inputAsNodeList($selector);
+        } else {
+            $nodes = $this->document()->find($selector);
+        }
+        $nodes->append($this);
+        return $this;
+    }
+
+    /**
      * @return self
      */
     public function _empty() {
@@ -680,4 +710,15 @@ trait ManipulationTrait
             return $this->setHtml($input);
         }
     }
+
+    /**
+     * @param string|NodeList|\DOMNode $input
+     *
+     * @return NodeList
+     */
+    public function create($input): NodeList {
+        return $this->inputAsNodeList($input);
+    }
+
+
 }
