@@ -45,7 +45,11 @@
 		}
 		$messageHtml .= '	</head>' . "\r\n";
 		$messageHtml .= '	<body>' . "\r\n";
-		$messageHtml .= addBaseUrl(dewikify_html($message));
+		// RFC5322 specifies lines must not be longer than 998
+		// characters, so wrap them (a bit conservativelly).
+		// Wrapping should be safe for HTML content.
+		// https://tools.ietf.org/html/rfc5322#section-2.1.1
+		$messageHtml .= wordwrap(addBaseUrl(dewikify_html($message)), 900, "\r\n");
 		$messageHtml .= '	</body>' . "\r\n";
 		$messageHtml .= '</html>' . "\r\n";
 
