@@ -379,8 +379,7 @@
 			single HTML form field with the value given.
 		*/
 		function updateFormField($field, $value) {
-			$fieldType = $this->getFieldType($field);
-			if ($fieldType == 'checkbox') {
+			if ($field->tagName == 'input' && $field->getAttribute('type') == 'checkbox') {
 				// For multiple checkboxes that have a
 				// name ending in [], PHP will put an
 				// array in $_POST containing the value
@@ -392,34 +391,20 @@
 					$field->setAttribute('checked', 'checked');
 				else
 					$field->removeAttribute('checked');
-			} else if ($fieldType == 'input') {
+			} else if ($field->tagName == 'input') {
 				$field->setAttribute('value', $value);
-			} else if ($fieldType == 'select') {
+			} else if ($field->tagName == 'select') {
 				foreach($field->find('option') as $option) {
 					if ($option->getAttribute('value') == $value)
 						$option->setAttribute('selected', 'selected');
 					else
 						$option->removeAttribute('selected');
 				}
-			} else if ($fieldType == 'textarea') {
+			} else if ($field->tagName == 'textarea') {
 				$field->setText($value);
 			}
 		}
 
-		function getFieldType($field)
-		{
-			switch ($field->tagName) {
-				case 'input':
-					return $field->getAttribute('type') == 'checkbox' ? 'checkbox' : 'input';
-				case 'select':
-				case 'textarea':
-				case 'img':
-				case 'label':
-					return $field->tagName;
-			}
-
-			return null;
-		}
 
 		function updateImagePreview($field, $value) {
 			if ($value) {

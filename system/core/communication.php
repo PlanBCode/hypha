@@ -45,7 +45,11 @@
 		}
 		$messageHtml .= '	</head>' . "\r\n";
 		$messageHtml .= '	<body>' . "\r\n";
-		$messageHtml .= $message;
+		// RFC5322 specifies lines must not be longer than 998
+		// characters, so wrap them (a bit conservativelly).
+		// Wrapping should be safe for HTML content.
+		// https://tools.ietf.org/html/rfc5322#section-2.1.1
+		$messageHtml .= wordwrap(addBaseUrl(dewikify_html($message)), 900, "\r\n");
 		$messageHtml .= '	</body>' . "\r\n";
 		$messageHtml .= '</html>' . "\r\n";
 
@@ -131,7 +135,7 @@ END;
 	*/
 	function writeToDigest($message, $type, $id = false) {
 		global $hyphaXml;
-		hypha_addDigest('<div'.($type=='settings' ? ' style="color:#840;"' : '').'>'.date('j-m-y, H:i ', time()).addBaseUrl($message).($id ? ' - <a href="#'.$id.'">view changes</a>' : '').'</div>'."\n");
+		hypha_addDigest('<div'.($type=='settings' ? ' style="color:#840;"' : '').'>'.date('j-m-y, H:i ', time()).$message.($id ? ' - <a href="#'.$id.'">view changes</a>' : '').'</div>'."\n");
 		if (!hypha_getLastDigestTime()) {
 			$hyphaXml->lockAndReload();
 			hypha_setLastDigestTime(time());
@@ -169,7 +173,7 @@ END;
 				$type = $node->getAttribute('type');
 				$page = new $type($node, 'digest');
 				$message.= '<a name="'.$id.'"></a>';
-				$message.= addBaseUrl($page->digest(hypha_getLastDigestTime()));
+				$message.= $page->digest(hypha_getLastDigestTime());
 			}
 			$hyphaXml->lockAndReload();
 			hypha_setLastDigestTime(time());

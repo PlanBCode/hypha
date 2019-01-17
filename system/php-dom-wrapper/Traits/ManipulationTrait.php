@@ -646,7 +646,7 @@ trait ManipulationTrait
      * @return string
      */
     public function getHtml() {
-        return $this->collection()->first()->children()->reduce(function($carry, $node) {
+        return $this->collection()->first()->contents()->reduce(function($carry, $node) {
             return $carry . $this->document()->saveHTML($node);
         }, '');
     }

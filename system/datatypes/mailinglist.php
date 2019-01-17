@@ -152,7 +152,6 @@ class mailinglist extends Page {
 					$confirmTxt = __('ml-please-confirm-email');
 					$link = '<a href="' . $link . '">' . $confirmTxt . '</a>';
 					$emailWelcomeText = $this->getDoc()->getOrCreate('email-welcome-text');
-					dewikify($emailWelcomeText);
 					$welcomeText = $emailWelcomeText->getHtml();
 					$welcomeText .= '<br><br>' . $link;
 					$subject = hypha_getTitle() . ' - ' . __('ml-confirmation-email-subject');
