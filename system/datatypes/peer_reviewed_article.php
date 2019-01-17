@@ -348,6 +348,15 @@ class peer_reviewed_article extends Page {
 		return $this->getContainerItems(self::FIELD_NAME_APPROVE_CONTAINER, self::FIELD_NAME_APPROVE);
 	}
 
+	private static function getCommentPoster($comment) {
+		$userid = $comment->getAttr(self::FIELD_NAME_USER);
+		if ($userid) {
+			$user = hypha_getUserById($userid);
+			return ($user instanceof HyphaDomElement) ? $user->getAttribute('fullname') : $userid;
+		}
+		return $comment->getAttr(self::FIELD_NAME_DISCUSSION_COMMENTER_NAME);
+	}
+
 	/**
 	 * @return array|null
 	 */
@@ -500,7 +509,7 @@ class peer_reviewed_article extends Page {
 		// send fresh readers comment to all users
 		$title = $this->getTitle();
 		$linkToPage = $this->constructFullPath($this->pagename);
-		$name = $comment->getAttribute(self::FIELD_NAME_DISCUSSION_COMMENTER_NAME);
+		$name = self::getCommentPoster($comment);
 		$commentBody = $comment->getText();
 		
 		$subject = __('art-comment-subject', array(
@@ -649,13 +658,7 @@ class peer_reviewed_article extends Page {
 					}
 					$hasComments = true;
 					$createdAt = date('j-m-y, H:i', ltrim($comment->getAttr(self::FIELD_NAME_CREATED_AT), 't'));
-					if (self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER === $type) {
-						$committerId = $comment->getAttr(self::FIELD_NAME_USER);
-						$committer = hypha_getUserById($committerId);
-						$committerName = $committer instanceof HyphaDomElement ? $committer->getAttribute('fullname') : $committerId;
-					} else {
-						$committerName = $comment->getAttr(self::FIELD_NAME_DISCUSSION_COMMENTER_NAME);
-					}
+					$committerName = self::getCommentPoster($comment);
 					$html = nl2br(htmlspecialchars($comment->getText()));
 					$html .= '<p>' . __('art-by') . ' <strong>' . htmlspecialchars($committerName) . '</strong> ' . __('art-at') . ' ' . htmlspecialchars($createdAt);
 					if (self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER !== $type && isUser()) {
@@ -830,7 +833,6 @@ class peer_reviewed_article extends Page {
 			$comment = $this->createDiscussionComment($discussion, $commentText, $form);
 			$this->saveAndUnlock();
 			$this->resetDocPagesMtx();
-			$this->fireEvent(self::EVENT_PUBLIC_COMMENT, ['id' => $comment->getId()]);
 			$this->fireEvent(self::EVENT_DISCUSSION_STARTED, ['id' => $discussion->getId()]);
 			notify('success', ucfirst(__('art-successfully-updated')));
 			return ['redirect', $this->constructFullPath($this->pagename)];
