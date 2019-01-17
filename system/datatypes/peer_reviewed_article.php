@@ -833,7 +833,8 @@ class peer_reviewed_article extends Page {
 			$comment = $this->createDiscussionComment($discussion, $commentText, $form);
 			$this->saveAndUnlock();
 			$this->resetDocPagesMtx();
-			$this->fireEvent(self::EVENT_PUBLIC_COMMENT, ['id' => $comment->getId()]);
+			if (!$review)
+				$this->fireEvent(self::EVENT_PUBLIC_COMMENT, ['id' => $comment->getId()]);
 			$this->fireEvent(self::EVENT_DISCUSSION_STARTED, ['id' => $discussion->getId()]);
 			notify('success', ucfirst(__('art-successfully-updated')));
 			return ['redirect', $this->constructFullPath($this->pagename)];
@@ -875,7 +876,8 @@ class peer_reviewed_article extends Page {
 			$comment = $this->createDiscussionComment($discussion, $commentText, $form);
 			$this->saveAndUnlock();
 			$this->resetDocPagesMtx();
-			$this->fireEvent(self::EVENT_PUBLIC_COMMENT, ['id' => $comment->getId()]);
+			if (!$review)
+				$this->fireEvent(self::EVENT_PUBLIC_COMMENT, ['id' => $comment->getId()]);
 			notify('success', ucfirst(__('art-successfully-updated')));
 			return ['redirect', $this->constructFullPath($this->pagename)];
 		}
