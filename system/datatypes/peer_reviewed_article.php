@@ -509,7 +509,7 @@ class peer_reviewed_article extends Page {
 		// send fresh readers comment to all users
 		$title = $this->getTitle();
 		$linkToPage = $this->constructFullPath($this->pagename);
-		$name = $comment->getAttribute(self::FIELD_NAME_DISCUSSION_COMMENTER_NAME);
+		$name = self::getCommentPoster($comment);
 		$commentBody = $comment->getText();
 		
 		$subject = __('art-comment-subject', array(
