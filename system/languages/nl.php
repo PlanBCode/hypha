@@ -354,6 +354,9 @@
 		"help-version-revert" => "Hier bevestig je de keuze om de nieuwste versie van de pagina te vervangen voor deze. \nWil je dat niet? Kies dan in de versielijst weer de bovenste pagina.",
 		"help-blocking-comment" => "Je kunt een artikel blokkeren als je vindt dat het niet gepubliceerd zou moeten worden. \nAls je dat doet ben jij de enige die die blokkade weer weg kan nemen, \nbijvoorbeeld als de auteur voldoende wijzigingen heeft gemaakt.",
 		"help-page-name" => "De paginanaam wordt gebruikt in de URL van de pagina en dient ook als titel van en artikel of pagina.",
+		"help-art-excerpt" => "In dit veld kun je een korte samenvatting schrijven van het artikel.",
+		"help-art-method" => "Type hier een korte biografie van jezelf, inclusief mogelijke vooringenomenheden. \n Indien relevant kun je de lezer laten weten hoe een artikel tot stand is gekomen.",
+		"help-art-text" => "Type je artikel hier of plak vanuit een texteditor. \n Als je wilt plakken vanuit Word, Pages of een andere wordprocessor, \n gebruik dan de 'paste from word' knop. \nPlaatjes moeten niet geplakt worden maar \ngeüpload met de 'image' knop.",
 	);
 
 	return $LANG;
