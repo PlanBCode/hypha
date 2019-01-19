@@ -117,7 +117,7 @@ One file contains all:
 In order to maintain some overview within the hypha file structure, all code for a certain functionality is kept within one file, e.g. a class declaration will be in the same file as the implementation of its methods. Also helper functions specific for that class will reside in the same file.
 
 Documentation:
-Documentation is done with a light weight tool called NaturalDocs. More information on its syntax and how to install can be found <here at http://www.naturalsdocs.org>.
+Documentation is done with a light weight tool called NaturalDocs. More information on its syntax and how to install can be found <here at https://www.naturaldocs.org>.
 
 Coding comments are added throughout the code. The documentation is compiled from these comments by invoking the following command from hypha's root directory
 
