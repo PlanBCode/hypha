@@ -339,10 +339,13 @@
 
 		// help_icon_texts
 		"help-private-page" => "een privepagina is alleen zichtbaar voor degenen die zijn ingelogd",
-		"help-version-management" => "hier kun je terug naar een vorige versie van de pagina. Die keuze kun je definitief maken door te klikken op Terugdraaien",
-		"help-version-revert" => "hier bevestig je de keuze om de nieuwste versie van de pagina te vervangen voor deze. Wil je dat niet? Kies dan in de versielijst weer de bovenste pagina",
-		"help-blocking-comment" => "Je kunt een artikel blokkeren als je vindt dat het niet gepublceerd zou moetenworden. Als je dat doet ben jij de enige die die blokkade weer weg kan nemen, bijvoorbeeld als de auteur voldoende wijzigingen heeft gemaakt",
+		"help-version-management" => "hier kun je terug naar een vorige versie van de pagina. \nDie keuze kun je definitief maken door te klikken op Terugdraaien",
+		"help-version-revert" => "hier bevestig je de keuze om de nieuwste versie van de pagina te vervangen voor deze. \nWil je dat niet? Kies dan in de versielijst weer de bovenste pagina",
+		"help-blocking-comment" => "Je kunt een artikel blokkeren als je vindt dat het niet gepublceerd zou moeten worden. \nAls je dat doet ben jij de enige die die blokkade weer weg kan nemen, \nbijvoorbeeld als de auteur voldoende wijzigingen heeft gemaakt",
 		"help-page-name" => "de paginanaam wordt gebruikt in de URL van de pagina en dient ook als titel van en artikel of pagina",
+		"help-art-excerpt" => "in dit veld kun je een korte samenvatting schrijven van het artikel",
+		"help-art-method" => "type hier een korte biografie van jezelf, inclusief mogelijke vooringenomenheden. \n Indien relevant kun je de lezer laten weten hoe een artikel tot stand is gekomen",
+		"help-art-text" => "type je artikel hier of plak vanuit een texteditor. \n Als je wilt plakken vanuit Word, Pages of een andere wordprocessor, \n gebruik dan de 'paste from word' knop. \nPlaatjes moeten niet geplakt worden maar \ngeuploaded met de 'image' knop.",
 	);
 
 	return $LANG;
