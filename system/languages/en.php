@@ -135,9 +135,11 @@
 		"change-project-settings" => "change project settings",
 		"change-account" => "settings for user",
 		"edit-title" => "edit title",
-		"edit-html" => "edit html",
 		"select-theme" => "select theme",
-		"edit-css-of-theme" => "edit css of theme",
+		"edit-css-of-theme" => "edit css of theme \"[[theme]]\"",
+		"view-css-of-theme" => "view css of theme \"[[theme]]\"",
+		"edit-html-of-theme" => "edit html of theme \"[[theme]]\"",
+		"view-html-of-theme" => "view html of theme \"[[theme]]\"",
 		"edit-header" => "edit header",
 		"edit-footer" => "edit footer",
 		"edit-menu" => "edit menu",
@@ -197,6 +199,7 @@
 		"sure-to-delete" => "Are you sure you want to delete this page",
 		"login-to-perform-action" => "you need to be logged on in order to perform this action",
 		"page-successfully-updated" => "Page successfully updated",
+		'cannot-edit-default-theme-explanation' => 'The default theme cannot be edited. At the <a href="[[link]]">theme selection page</a>, the default theme can be copied and activated, that copy can be edited.',
 
 		// textpage
 		"datatype.name.textpage" => 'web page',
