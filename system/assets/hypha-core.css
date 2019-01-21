@@ -1,0 +1,11 @@
+.preview_panel {
+    position:fixed;
+    bottom:0;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 15px;
+}
+.preview_panel div {
+    display: inline-block;
+    margin-right: 15px;
+}

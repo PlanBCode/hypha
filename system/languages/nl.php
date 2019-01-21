@@ -212,6 +212,11 @@
 		'source-theme-name-required' => 'naam van bron thema is verplicht',
 		'source-theme-name-not-found' => 'naam van bron thema is niet gevonden',
 
+		// settings preview theme
+		'preview-theme' => 'preview theme',
+		'apply-preview-theme' => 'activeer preview theme',
+		'cancel-preview-theme' => 'annuleer preview',
+
 		// textpage
 		"datatype.name.textpage" => "webpagina",
 

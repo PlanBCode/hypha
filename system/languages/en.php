@@ -212,6 +212,11 @@
 		'source-theme-name-required' => 'name of source theme is required',
 		'source-theme-name-not-found' => 'name of source theme could not be found',
 
+		// settings preview theme
+		'preview-theme' => 'preview theme',
+		'apply-preview-theme' => 'apply preview theme',
+		'cancel-preview-theme' => 'cancel preview',
+
 		// textpage
 		"datatype.name.textpage" => 'web page',
 

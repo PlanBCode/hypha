@@ -52,7 +52,7 @@
 	}
 
 	Hypha::$data = new StdClass();
-	Hypha::$data->theme = hypha_getTheme();
+	Hypha::$data->theme = hypha_getAffectiveTheme();
 	Hypha::$data->css = new HyphaFile('data/themes/' . Hypha::$data->theme . '/hypha.css');
 	Hypha::$data->html = new HyphaFile('data/themes/' . Hypha::$data->theme . '/hypha.html');
 	Hypha::$data->digest = new HyphaFile('data/digest');
@@ -169,14 +169,34 @@
 	}
 
 	/*
-		Function: hypha_getTheme
-		returns hypha theme attribute
+		Function: hypha_getNormalTheme
+		returns hypha theme attribute set in hyphaXml, or default if not set.
 	*/
-	function hypha_getTheme() {
+	function hypha_getNormalTheme() {
 		global $hyphaXml;
 		$theme = $hyphaXml->documentElement->getAttribute('theme');
 		if ('' === $theme) {
 			$theme = 'default';
+		}
+		return $theme;
+	}
+
+	/*
+		Function: hypha_getPreviewTheme
+		returns preview theme set session, of false is not set.
+	*/
+	function hypha_getPreviewTheme() {
+		return isset($_SESSION['previewTheme']) ? $_SESSION['previewTheme'] : false;
+	}
+
+	/*
+		Function: hypha_getAffectiveTheme
+		returns theme, if preview was set, the preview theme otherwise the normal.
+	*/
+	function hypha_getAffectiveTheme() {
+		$theme = hypha_getPreviewTheme();
+		if (false === $theme) {
+			$theme = hypha_getNormalTheme();
 		}
 		return $theme;
 	}
@@ -578,6 +598,20 @@
 			$classes[] = implode('_', $hyphaRequest->getRelativeUrlPathParts());
 		}
 		$bodyElement->attr('class', implode(' ', array_filter($classes)));
+	}
+
+	function hypha_setPreviewPanel($hyphaPage) {
+		$previewTheme = hypha_getPreviewTheme();
+		if (false !== $previewTheme) {
+			/** @var \DOMWrap\NodeList $bodyElement */
+			$bodyElement = $hyphaPage->html->find('body');
+			$panel = '<div class="preview_panel" style="position:fixed; bottom:0; background-color: rgba(0, 0, 0, 0.8);">';
+			$panel .= '<div class="panel_text">' . __('previewing').': '.$previewTheme . '</div>';
+			$panel .= '<div class="panel_action_button">' . makeButton(__('apply-preview-theme'), makeAction('settings/theme', 'settingApplyPreviewTheme', '')) . '</div>';
+			$panel .= '<div class="panel_cancel_button">' . makeButton(__('cancel-preview-theme'), makeAction('settings/theme', 'settingsCancelPreviewTheme', '')) . '</div>';
+			$panel .= '</div>';
+			$bodyElement->parent()->append($panel);
+		}
 	}
 
 	/*

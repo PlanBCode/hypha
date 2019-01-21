@@ -80,6 +80,7 @@
 	$hyphaHtml = new HTMLDocument(Hypha::$data->html);
 	$hyphaHtml->initForBrowser($hyphaUrl);
 	$pathToTheme = 'data/themes/' . Hypha::$data->theme;
+	$hyphaHtml->linkStyle('system/assets/hypha-core.css');
 	$hyphaHtml->linkStyle($pathToTheme . '/hypha.css');
 	$hyphaHtml->linkScript('//code.jquery.com/jquery-1.7.1.min.js');
 	$hyphaHtml->linkScript('system/assets/help.js');
@@ -156,6 +157,7 @@
 //	if (!$O_O->isUser()) registerPostProcessingFunction('obfuscateEmail');
 
 	if ($hyphaPage) hypha_setBodyClass($hyphaRequest, $hyphaPage);
+	if ($hyphaPage) hypha_setPreviewPanel($hyphaPage);
 
 	// Add the default form. This does not happen earlier, since
 	// appending makes a copy of the form, so now we can be sure

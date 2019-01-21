@@ -23,6 +23,9 @@
 			registerCommandCallback('settingsSaveTheme', Array($this, 'saveTheme'));
 			registerCommandCallback('settingsCopyTheme', Array($this, 'copyTheme'));
 			registerCommandCallback('settingsCopyThemeAndActivate', Array($this, 'copyThemeAndActivate'));
+			registerCommandCallback('settingsPreviewTheme', Array($this, 'previewTheme'));
+			registerCommandCallback('settingsCancelPreviewTheme', Array($this, 'cancelPreviewTheme'));
+			registerCommandCallback('settingApplyPreviewTheme', Array($this, 'applyPreviewTheme'));
 			registerCommandCallback('settingsSaveStyles', Array($this, 'saveStyles'));
 			registerCommandCallback('settingsSaveSiteElements', Array($this, 'saveSiteElements'));
 			registerCommandCallback('settingsSaveMenu', Array($this, 'saveMenu'));
@@ -307,17 +310,19 @@
 
 		function editTheme() {
 			if (isAdmin()) {
+				$this->html->writeToElement('pageCommands', makeButton(__('cancel'), makeAction('settings', '', '')));
+				$this->html->writeToElement('pagename', __('select-theme'));
 				ob_start();
 				echo '<select name="editTheme" id="editTheme">';
 				$themes = $this->getThemes();
+				$normalTheme = hypha_getNormalTheme();
 				foreach ($themes as $theme) {
-					echo '<option' . (Hypha::$data->theme === $theme ? ' selected' : '') . '>' . htmlspecialchars($theme) . '</option>';
+					echo '<option' . ($normalTheme === $theme ? ' selected' : '') . '>' . htmlspecialchars($theme) . '</option>';
 				}
 				echo '</select>';
+				echo makeButton(__('save'), makeAction('settings/theme', 'settingsSaveTheme', ''));
+				echo makeButton(__('preview-theme'), makeAction('settings/theme', 'settingsPreviewTheme', ''));
 				$this->html->writeToElement('main', ob_get_clean());
-				$this->html->writeToElement('pagename', __('select-theme'));
-				$this->html->writeToElement('pageCommands', makeButton(__('cancel'), makeAction('settings', '', '')));
-				$this->html->writeToElement('pageCommands', makeButton(__('save'), makeAction('settings', 'settingsSaveTheme', '')));
 
 				$this->html->writeToElement('main', '<div id="copy-theme"></div>');
 				$this->html->writeToElement('copy-theme', '<h2>'.__('copy-theme').'</h2>');
@@ -328,10 +333,12 @@
 					echo '<div class="theme-option"><input type="radio" id="'.$value.'" name="srcTheme" value="'.$value.'"' . (Hypha::$data->theme === $theme ? ' checked' : '') . '><label for="'.$value.'">'.$theme.'</label></div>' . "\n";
 				}
 				echo '</div>' . "\n";
-				echo '<div><input type="text" name="dstTheme" placeholder="'.__('new-theme-name').'"></div>';
+				echo '<div class="new-theme-name"><input type="text" name="dstTheme" placeholder="'.__('new-theme-name').'"></div>';
 				echo makeButton(__('copy-theme'), makeAction('settings/theme', 'settingsCopyTheme', ''));
 				echo makeButton(__('copy-theme-and-activate'), makeAction('settings/theme', 'settingsCopyThemeAndActivate', ''));
 				$this->html->writeToElement('copy-theme', ob_get_clean());
+
+				$this->html->writeToElement('main', '<div id="preview-theme"></div>');
 			}
 		}
 
@@ -367,6 +374,49 @@
 					$hyphaXml->saveAndUnlock();
 					notify('success', __('copied-theme-successful'));
 				}
+			}
+			return 'reload';
+		}
+
+		function previewTheme($argument) {
+			if (isAdmin()) {
+				// get list of existing themes
+				$themes = $this->getThemes();
+
+				$errors = [];
+				// validate srcTheme
+				if (!isset($_POST['editTheme']) || '' == $_POST['editTheme']) {
+					$errors[] = __('source-theme-name-required');
+				} elseif (!in_array($_POST['editTheme'], $themes)) {
+					$errors[] = __('source-theme-name-not-found');
+				}
+				foreach ($errors as $error) notify('error', $error);
+				if (empty($errors)) {
+					session_start();
+					$_SESSION['previewTheme'] = $_POST['editTheme'];
+					session_write_close();
+					notify('success', __('preview-theme-set-successful'));
+				}
+			}
+			return 'reload';
+		}
+
+		function cancelPreviewTheme($argument) {
+			if (isAdmin() && isset($_SESSION['previewTheme'])) {
+				session_start();
+				unset($_SESSION['previewTheme']);
+				session_write_close();
+			}
+			return 'reload';
+		}
+
+		function applyPreviewTheme($argument) {
+			if (isAdmin() && isset($_SESSION['previewTheme'])) {
+				global $hyphaUrl, $hyphaXml;
+				$hyphaXml->lockAndReload();
+				hypha_setTheme($_SESSION['previewTheme']);
+				$hyphaXml->saveAndUnlock();
+				$this->cancelPreviewTheme($argument);
 			}
 			return 'reload';
 		}
