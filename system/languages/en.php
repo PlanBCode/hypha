@@ -287,7 +287,8 @@
 		"art-unsupported-status-change" => "this status change is not supported",
 		"art-no-approves-yet" => "there are no approves yet",
 		"art-successfully-updated" => "successfully updated",
-		"art-comment-received" => "Your comment has been received. You will receive a mail for confirmation. Click on the link in this mail to publish your comment.",
+		"art-comment-pending" => "Your comment has been received. You will receive a mail for confirmation. Click on the link in this mail to publish your comment.",
+		"art-comment-posted" => "Your comment has been posted.",
 		"art-status-changed-in-between" => "the status has been changed in between",
 
 		// peer_reviewed_article - mail

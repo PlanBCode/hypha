@@ -492,12 +492,14 @@ class peer_reviewed_article extends Page {
 
 		if (!(bool)$comment->getAttribute(self::FIELD_NAME_DISCUSSION_COMMENT_PENDING)) {
 			$this->xml->unlock();
-			notify('success', ucfirst(__('art-comment-received')));
+			notify('success', ucfirst(__('art-comment-posted')));
 			return ['redirect', $this->constructFullPath($this->pagename)];
 		}
 
 		$comment->setAttribute(self::FIELD_NAME_DISCUSSION_COMMENT_PENDING, false);
 		$this->xml->saveAndUnlock();
+
+		notify('success', ucfirst(__('art-comment-posted')));
 
 		// send message when comment was confirmed by a visitor
 		$this->sendNewCommentMessage($comment);
@@ -833,10 +835,18 @@ class peer_reviewed_article extends Page {
 			$comment = $this->createDiscussionComment($discussion, $commentText, $form);
 			$this->saveAndUnlock();
 			$this->resetDocPagesMtx();
+			$pending = (bool)$comment->getAttr(self::FIELD_NAME_DISCUSSION_COMMENT_PENDING);
 			if (!$review)
 				$this->fireEvent(self::EVENT_PUBLIC_COMMENT, ['id' => $comment->getId()]);
 			$this->fireEvent(self::EVENT_DISCUSSION_STARTED, ['id' => $discussion->getId()]);
-			notify('success', ucfirst(__('art-successfully-updated')));
+			// TODO: the event handler sends the
+			// confirmation mail, but we notify the user.
+			// Would be better to have more coupling between
+			// those.
+			if ($pending)
+				notify('success', ucfirst(__('art-comment-pending')));
+			else
+				notify('success', ucfirst(__('art-comment-posted')));
 			return ['redirect', $this->constructFullPath($this->pagename)];
 		}
 		$this->unlock();
@@ -876,9 +886,17 @@ class peer_reviewed_article extends Page {
 			$comment = $this->createDiscussionComment($discussion, $commentText, $form);
 			$this->saveAndUnlock();
 			$this->resetDocPagesMtx();
+			$pending = (bool)$comment->getAttr(self::FIELD_NAME_DISCUSSION_COMMENT_PENDING);
 			if (!$review)
 				$this->fireEvent(self::EVENT_PUBLIC_COMMENT, ['id' => $comment->getId()]);
-			notify('success', ucfirst(__('art-successfully-updated')));
+			// TODO: the event handler sends the
+			// confirmation mail, but we notify the user.
+			// Would be better to have more coupling between
+			// those.
+			if ($pending)
+				notify('success', ucfirst(__('art-comment-pending')));
+			else
+				notify('success', ucfirst(__('art-comment-posted')));
 			return ['redirect', $this->constructFullPath($this->pagename)];
 		}
 		$this->unlock();

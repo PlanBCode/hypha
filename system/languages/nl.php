@@ -282,7 +282,8 @@
 		"art-unsupported-status-change" => "deze status verandering wordt niet ondersteund",
 		"art-no-approves-yet" => "er zijn nog geen goedkeuringen ontvangen",
 		"art-successfully-updated" => "succesvol bijgewerkt",
-		"art-comment-received" => "Uw reactie is ontvangen. U krijgt zo een mail toegestuurd. klik op de link in die mail om de plaatsing definitief te maken. ",
+		"art-comment-pending" => "Uw reactie is ontvangen. U krijgt zo een mail toegestuurd. klik op de link in die mail om de plaatsing definitief te maken.",
+		"art-comment-posted" => "Uw reactie is geplaatst.",
 		"art-status-changed-in-between" => "de status is tussentijds aangepast",
 
 		// peer_reviewed_article - mail
