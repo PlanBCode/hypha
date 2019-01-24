@@ -817,12 +817,12 @@ class peer_reviewed_article extends Page {
 
 		// process form if it was posted
 		if ($formPosted && empty($form->errors)) {
-			$container = $type === 'review' ? self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER : self::FIELD_NAME_DISCUSSION_PUBLIC_CONTAINER;
+			$container = $review ? self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER : self::FIELD_NAME_DISCUSSION_PUBLIC_CONTAINER;
 			$discussions = $this->getDocPageByName($container);
 			$discussion = $discussions->createChild(self::FIELD_NAME_DISCUSSION);
 			$blocking = $form->dataFor(self::FIELD_NAME_DISCUSSION_BLOCKING) !== null;
 			$discussion->setAttr(self::FIELD_NAME_DISCUSSION_BLOCKING, $blocking);
-			if ($type === 'review') {
+			if ($review) {
 				$discussion->setAttr(self::FIELD_NAME_USER, $this->hyphaUser->getAttribute('id'));
 			}
 			if ($blocking) {
