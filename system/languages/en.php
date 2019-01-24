@@ -287,7 +287,8 @@
 		"art-unsupported-status-change" => "this status change is not supported",
 		"art-no-approves-yet" => "there are no approves yet",
 		"art-successfully-updated" => "successfully updated",
-		"art-comment-received" => "Your comment has been received. You will receive a mail for confirmation. Click on the link in this mail to publish your comment.",
+		"art-comment-pending" => "Your comment has been received. You will receive a mail for confirmation. Click on the link in this mail to publish your comment.",
+		"art-comment-posted" => "Your comment has been posted.",
 		"art-status-changed-in-between" => "the status has been changed in between",
 
 		// peer_reviewed_article - mail
@@ -295,6 +296,8 @@
 		"art-the-status-of-an-article-has-been-updated" => "The status of an article has been updated",
 		"art-status-update-subject" => "Status update article: [[title]]",
 		"art-status-update-body" => "The article with the title:<br /><br /><a href=\"[[link]]\">[[title]]</a><br /><br />changed status. The current status is:<br /><br />[[status]]",
+		"art-review-request-subject" => "Article ready for review: [[title]]",
+		"art-review-request-body" => "The article with the title:<br /><br /><a href=\"[[link]]\">[[title]]</a><br /><br />is now ready for review",
 		"art-block-submitted-subject" => "A blocking comment was added to: [[title]]",
 		"art-block-submitted-body" => "A blocking comment was added by [[author]] to:<br /><br /><a href=\"[[link]]\">[[title]]</a>",
 		"art-block-resolved-subject" => "Blocking comment resolved: [[title]]",
