@@ -296,6 +296,8 @@
 		"art-the-status-of-an-article-has-been-updated" => "The status of an article has been updated",
 		"art-status-update-subject" => "Status update article: [[title]]",
 		"art-status-update-body" => "The article with the title:<br /><br /><a href=\"[[link]]\">[[title]]</a><br /><br />changed status. The current status is:<br /><br />[[status]]",
+		"art-review-request-subject" => "Article ready for review: [[title]]",
+		"art-review-request-body" => "The article with the title:<br /><br /><a href=\"[[link]]\">[[title]]</a><br /><br />is now ready for review",
 		"art-block-submitted-subject" => "A blocking comment was added to: [[title]]",
 		"art-block-submitted-body" => "A blocking comment was added by [[author]] to:<br /><br /><a href=\"[[link]]\">[[title]]</a>",
 		"art-block-resolved-subject" => "Blocking comment resolved: [[title]]",

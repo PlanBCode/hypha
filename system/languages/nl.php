@@ -291,6 +291,8 @@
 		"art-the-status-of-an-article-has-been-updated" => "De status van een artikel is geüpdate",
 		"art-status-update-subject" => "Status '[[status]]' voor '[[title]]'",
 		"art-status-update-body" => "De status van het artikel '<a href=\"[[link]]\">[[title]]</a>' is veranderd in '[[status]]'.<br />------------------------------<br />Dit is een geautomatiseerde mail. Antwoorden hierop heeft geen zin.",
+		"art-review-request-subject" => "Artikel klaar voor review: '[[title]]'",
+		"art-review-request-body" => "Het artikel '<a href=\"[[link]]\">[[title]]</a>' is klaar voor review.<br />------------------------------<br />Dit is een geautomatiseerde mail. Antwoorden hierop heeft geen zin.",
 		"art-block-submitted-subject" => "Nieuw breekpunt bij '[[title]]'",
 		"art-block-submitted-body" => "[[author]] voegde een breekpunt toe aan '<a href=\"[[link]]\">[[title]]</a>'.<br /><br />[[comment]]<br />------------------------------<br />Dit is een geautomatiseerde mail. Antwoorden hierop heeft geen zin.",
 		"art-block-resolved-subject" => "Breekpunt opgelost bij '[[title]]'",
