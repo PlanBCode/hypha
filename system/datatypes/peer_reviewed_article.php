@@ -584,16 +584,14 @@ class peer_reviewed_article extends Page {
 			$main->append('<div class="sources"><h2>' . __('art-sources') . '</h2>' . $sources . '</div>');
 		}
 
-		if (isUser()) {
+		if (isUser() && self::STATUS_DRAFT !== $status) {
 			/** @var HyphaDomElement $discussionsContainer */
 			$discussionsContainer = $this->xml->createElement('div');
 			$discussionsContainer->attr('class', 'review-comments-wrapper');
 			$discussionsContainer->append('<h2>' . __('art-review-comments') . '</h2>');
 			$this->updateDiscussionsContainer('review', $discussionsContainer);
 			$main->append($discussionsContainer);
-			if (self::STATUS_DRAFT !== $status) {
-				$main->append($this->getApprovesContainer());
-			}
+			$main->append($this->getApprovesContainer());
 		}
 
 		if (self::STATUS_PUBLISHED === $status) {
