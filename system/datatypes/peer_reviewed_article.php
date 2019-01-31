@@ -1040,10 +1040,13 @@ class peer_reviewed_article extends Page {
 		$authorFieldName = self::FIELD_NAME_AUTHOR;
 		$text = __('art-article');
 		$textFieldName = self::FIELD_NAME_TEXT;
+		$infoArtText = makeInfoButton('help-art-text');
 		$excerpt = __('art-excerpt');
 		$excerptFieldName = self::FIELD_NAME_EXCERPT;
+		$infoArtExcerpt = makeInfoButton('help-art-excerpt');
 		$method = __('art-method');
 		$methodFieldName = self::FIELD_NAME_METHOD;
+		$infoArtMethod = makeInfoButton('help-art-method');
 		$sources = __('art-sources');
 		$sourcesFieldName = self::FIELD_NAME_SOURCES;
 		$html = <<<EOF
@@ -1059,17 +1062,17 @@ class peer_reviewed_article extends Page {
 			</div>
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
 				<div class="input-wrapper field_type_editor field_name_$textFieldName">
-					<strong><label for="$textFieldName"> $text </label></strong><br><editor name="$textFieldName"></editor>
+					<strong><label for="$textFieldName"> $text </label></strong>$infoArtText<br><editor name="$textFieldName"></editor>
 				</div>
 			</div>
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
 				<div class="input-wrapper field_type_editor field_name_$excerptFieldName">
-					<strong><label for="$excerptFieldName"> $excerpt </label></strong><br><editor name="$excerptFieldName"></editor>
+					<strong><label for="$excerptFieldName"> $excerpt </label></strong> $infoArtExcerpt <br><editor name="$excerptFieldName"></editor>
 				</div>
 			</div>
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
 				<div class="input-wrapper field_type_editor field_name_$methodFieldName">
-					<strong><label for="$methodFieldName"> $method </label></strong><br><editor name="$methodFieldName"></editor>
+					<strong><label for="$methodFieldName"> $method </label></strong>$infoArtMethod <br><editor name="$methodFieldName"></editor>
 				</div>
 			</div>
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
@@ -1143,9 +1146,10 @@ EOF;
 		if ($new && self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER === $type && !in_array($this->getStatus(), [self::STATUS_APPROVED, self::STATUS_PUBLISHED])) {
 			$blocking = __('art-blocking');
 			$commentBlockingFieldName = self::FIELD_NAME_DISCUSSION_BLOCKING;
+			$infoBlocking = makeInfoButton('help-blocking-comment');
 			$html .= <<<EOF
 			<div>
-				<strong><label for="$commentBlockingFieldName"> $blocking </label></strong><input type="checkbox" name="$commentBlockingFieldName" id="$commentBlockingFieldName" />
+				<strong><label for="$commentBlockingFieldName"> $blocking </label></strong><input type="checkbox" name="$commentBlockingFieldName" id="$commentBlockingFieldName" /> $infoBlocking
 			</div>
 EOF;
 		}

@@ -352,6 +352,16 @@
 		"art-start-review" => "start review",
 		"art-approve(s)" => "approve(s)",
 		"art-unresolved-block(s)" => "unresolved block(s)",
+
+		// help_icon_texts
+		"help-private-page" => "A private page is only visible to users who are logged in.",
+		"help-version-management" => "Here you can go back to a previous version of this page. You can make this choice final by clicking revert.",
+		"help-version-revert" => "Here you confirm the choice to replace the newest version of the page for this one.\n If that is not what you want, you can choose the top page in the version management list.",
+		"help-blocking-comment" => "You can block an article if you think it should not be published. \nIf you do so you are the only one who can unblock it again, \nfor instance after the writer has made sufficient changes.",
+		"help-page-name" => "The page name will be used in the URL of the page and is also the title of the article or page.",
+		"help-art-excerpt" => "In this field you can type a short excerpt of your article.",
+		"help-art-method" => "Please type a bio of yourself containing relevant experience or possible biasses. \n If relevant, also let the reader know how the article came into existence.",
+		"help-art-text" => "Type your article here or paste from a text editor. \n If you want to paste from Word, Pages or other wordprocessors, \n please use the 'paste from word' button. \nImages should not be pasted but \nuploaded using the 'image' button.",
 	);
 
 	return $LANG;
