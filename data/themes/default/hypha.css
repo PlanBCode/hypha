@@ -694,6 +694,11 @@ th{
  flex-direction: row-reverse;
 }
 
+textarea{
+	font-family: monospace;
+	font-size: initial;
+}
+
 /* Festival */
 .festivalTimetable, .festivalTimetable a {
 	color: white;
