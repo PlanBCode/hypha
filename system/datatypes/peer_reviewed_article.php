@@ -267,7 +267,7 @@ class peer_reviewed_article extends Page {
 		$message = __('art-confirm-comment-body', array(
 			"sitename" => htmlspecialchars(hypha_getTitle()),
 			"title" => htmlspecialchars($title),
-			"comment" => htmlspecialchars($commentBody),
+			"comment" => nl2br(htmlspecialchars($commentBody)),
 			"link" => htmlspecialchars($linkToConfirm)
 		));
 		$this->sendMail($email, $subject, $message);
@@ -522,7 +522,7 @@ class peer_reviewed_article extends Page {
 			"name" => htmlspecialchars($name),
 			"link" => htmlspecialchars($linkToPage),
 			"title" => htmlspecialchars($title),
-			"comment" => htmlspecialchars($commentBody)
+			"comment" => nl2br(htmlspecialchars($commentBody))
 		));
 		$this->sendMail(getUserEmailList(), $subject, $message);
 	}
