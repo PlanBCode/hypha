@@ -315,7 +315,9 @@
 		"art-no-comments-yet" => "nog geen reacties",
 		"art-add-review-comment" => "voeg beoordelingsopmerking toe",
 		"art-add-comment" => "voeg reactie toe",
+		"art-add-sub-comment" => "spreek je uit",
 		"art-comment" => "reageer op het artikel",
+		"art-sub-comment" => "neem deel in het gesprek",
 		"art-comments" => "opmerkingen",
 		"art-discussion" => "discussier mee",
 

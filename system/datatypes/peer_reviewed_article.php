@@ -1134,8 +1134,12 @@ EOF;
 	 * @return string
 	 */
 	private function getCommentFormHtml($type, DocPage $discussion = null) {
-		$comment = __('art-comment');
 		$new = $discussion === null;
+		if ($new) {
+			$comment = __('art-comment');
+		} else {
+			$comment = __('art-sub-comment');
+		}
 		$commentFieldName = self::FIELD_NAME_DISCUSSION_COMMENT . '/' . ($new ? 'new_' . $type : $discussion->getId());
 		$html = <<<EOF
 			<div class="new-comment $type">
@@ -1174,7 +1178,14 @@ EOF;
 		} else {
 			$path = str_replace('{id}', $discussion->getId(), self::PATH_DISCUSSION_COMMENT);
 		}
-		$label = 'review' === $type ? __('art-add-review-comment') : __('art-add-comment');
+
+		if ('review' === $type) {
+			$label = __('art-add-review-comment');
+		} elseif ($new) {
+			$label = __('art-add-comment');
+		} else {
+			$label = __('art-add-sub-comment');
+		}
 		$command = $new ? self::FORM_CMD_DISCUSSION : self::FORM_CMD_COMMENT;
 		$html .= $this->makeActionButton($label, $path, $command);
 		$html .= '</div>';

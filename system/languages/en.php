@@ -320,7 +320,9 @@
 		"art-no-comments-yet" => "no comments yet",
 		"art-add-review-comment" => "add review comment",
 		"art-add-comment" => "add comment",
+		"art-add-sub-comment" => "speak out",
 		"art-comment" => "comment on the article",
+		"art-sub-comment" => "join the conversation",
 		"art-comments" => "comments",
 		"art-discussion" => "join the discussion",
 
