@@ -323,6 +323,8 @@
 		"art-comment" => "comment on the article",
 		"art-comments" => "comments",
 		"art-discussion" => "join the discussion",
+		"art-public-comment-count-singular" => "[[count]] comment",
+		"art-public-comment-count-plural" => "[[count]] comments",
 
 		// peer_reviewed_article - edit
 		"art-cancel" => "cancel",

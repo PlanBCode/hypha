@@ -318,6 +318,8 @@
 		"art-comment" => "reageer op het artikel",
 		"art-comments" => "opmerkingen",
 		"art-discussion" => "discussier mee",
+		"art-public-comment-count-singular" => "[[count]] reactie",
+		"art-public-comment-count-plural" => "[[count]] reacties",
 
 		// peer_reviewed_article - edit
 		"art-cancel" => "afbreken",
