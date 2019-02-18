@@ -273,6 +273,12 @@
 		if (!$result)
 			return;
 
+		if ($result === '404') {
+			http_response_code(404);
+			notify('error', __('no-page'));
+			exit;
+		}
+
 		// Command requests a reload
 		if ($result === 'reload') {
 			$url = preserveNotifications($_SERVER['REQUEST_URI']);

@@ -24,62 +24,62 @@
 		const PATH_REVERT = 'revert';
 		const PATH_DELETE = 'delete';
 
-		const FORM_CMD_EDIT = 'edit';
-		const FORM_CMD_TRANSLATE = 'translate';
-		const FORM_CMD_REVERT = 'revert';
-		const FORM_CMD_DELETE = 'delete';
+		const CMD_EDIT = 'edit';
+		const CMD_TRANSLATE = 'translate';
+		const CMD_REVERT = 'revert';
+		const CMD_DELETE = 'delete';
 
-		public function __construct($pageListNode, $args) {
-			global $hyphaUser, $hyphaContentLanguage;
-			parent::__construct($pageListNode, $args);
-			$this->language = $hyphaContentLanguage;
-			$this->hyphaUser = $hyphaUser;
+		public function __construct($pageListNode, RequestContext $O_O) {
+			parent::__construct($pageListNode, $O_O);
+			$this->language = $O_O->getContentLanguage();
+			$this->hyphaUser = $O_O->getUser();
 			$this->xml = new Xml(get_called_class(), Xml::multiLingualOn, Xml::versionsOn);
-			$this->xml->loadFromFile('data/pages/'.$pageListNode->getAttribute('id'));
+			$this->xml->loadFromFile('data/pages/' . $pageListNode->getAttribute('id'));
 		}
 
-		function build() {
+		public function build(){
+			return $this->process();
+		}
+
+		public function process() {
 			$this->html->writeToElement('pagename', showPagename($this->pagename) . ' ' . asterisk($this->privateFlag));
 
-			// By default a user can preform any action, non users can only visit the index
-			$valid = isUser() || null === $this->getArg(0);
+			$request = $this->O_O->getRequest();
 
-			// Only admins can delete a page
-			if (self::PATH_DELETE === $this->getArg(0) && !isAdmin()) {
-				$valid = false;
-			}
-			if (!$valid) {
-				$msg = isUser() ? 'art-insufficient-rights-to-preform-action' : 'art-login-preform-action';
-				notify('error', __($msg));
-
-				return ['redirect', $this->constructFullPath($this->pagename)];
-			}
-
-			$version = isset($_POST[self::FIELD_NAME_VERSION]) ? $_POST[self::FIELD_NAME_VERSION] : null;
-			unset($_POST[self::FIELD_NAME_VERSION]);
-
-			switch ($this->getArg(0)) {
+			switch ($request->getArgs()[0]) {
+				default:
+					return ['404'];
 				case null:
-					return $this->indexAction();
+					return $this->indexView();
 				case self::PATH_EDIT:
-					return $this->editAction();
-				case self::FORM_CMD_TRANSLATE:
-					return $this->translateAction();
-				case self::FORM_CMD_REVERT:
-					return $this->revertAction($version);
+					if ($request->isPost()) {
+						return $this->editAction();
+					}
+					return $this->editView();
+				case self::PATH_TRANSLATE:
+					if ($request->isPost()) {
+						return $this->translateAction();
+					}
+					return $this->translateView();
+				case self::PATH_REVERT:
+					if ($request->isPost()) {
+						return $this->revertAction();
+					}
 				case self::PATH_DELETE:
-					return $this->deleteAction();
+					if ($request->isPost()) {
+						return $this->deleteAction();
+					}
 			}
 
 			return null;
 		}
 
-		private function indexAction() {
+		private function indexView() {
 			// setup page name and language list for the selected page
 			$this->html->writeToElement('langList', hypha_indexLanguages($this->pageListNode, $this->language));
 
 			// show content, and only allow access to previous revisions for logged in clients
-			$version = isUser() && isset($_POST['version']) ? $_POST['version'] : '';
+			$version = isUser() && $this->O_O->getRequest()->getPostValue(self::FIELD_NAME_VERSION);
 			$this->html->writeToElement('main', $this->getContent($version));
 
 			// setup addition widgets when client is logged in
@@ -88,123 +88,157 @@
 				$this->html->writeToElement('versionList', versionSelector($this));
 
 				// if a revision is selected, show a 'revert' command button
-				if (isset($_POST['version']) && $_POST['version']!='') {
+				if ($version) {
 					$commands = $this->findBySelector('#pageCommands');
-					$commands->append($this->makeActionButton(__(self::PATH_REVERT), self::PATH_REVERT, self::FORM_CMD_REVERT));
+					$commands->append($this->makeActionButton(__('revert'), self::PATH_REVERT, self::CMD_REVERT));
 				}
 				// if the latest revision is selected, show 'edit' and 'translate' command buttons
 				else {
 					$commands = $this->findBySelector('#pageCommands');
-					$commands->append($this->makeActionButton(__(self::PATH_EDIT), self::PATH_EDIT));
-					$commands->append($this->makeActionButton(__(self::PATH_TRANSLATE), self::PATH_TRANSLATE));
+					$commands->append($this->makeActionButton(__('edit'), self::PATH_EDIT));
+					$commands->append($this->makeActionButton(__('translate'), self::PATH_TRANSLATE));
 
 					if (isAdmin()) {
 						$path = $this->language . '/' . $this->pagename . '/' . self::PATH_DELETE;
-						$commands->append(makeButton(__(self::PATH_DELETE), 'if(confirm(\'' . __('sure-to-delete') . '\'))' . makeAction($path, self::FORM_CMD_DELETE, '')));
+						$commands->append(makeButton(__('delete'), 'if(confirm(\'' . __('sure-to-delete') . '\'))' . makeAction($path, self::CMD_DELETE, '')));
 					}
 				}
 			}
+
+			//return redirect('sdfasdf');
 		}
 
-		private function editAction() {
-			// check if form is posted and get form data
-			$formPosted = $this->isPosted(self::FORM_CMD_EDIT);
-			if ($formPosted) {
-				$formData = $_POST;
-			} else {
-				$formData = [
-					self::FIELD_NAME_PAGE_NAME => showPagename($this->pagename),
-					self::FIELD_NAME_PRIVATE => $this->privateFlag,
-					self::FIELD_NAME_CONTENT => $this->getContent(),
-				];
+		private function notifyAndReturnRedirect($msg, $page) {
+			notify('error', $msg);
+
+			return ['redirect', $this->constructFullPath($page)];
+		}
+
+		private function editView() {
+			if (!isUser()) {
+				return ['errors' => ['art-login-preform-action']];
 			}
+			if (!isUser()) {
+				notify('error', __('art-login-preform-action'));
+
+				return ['redirect', $this->constructFullPath($this->pagename)];
+			}
+			if (!isUser()) {
+				return $this->notifyAndReturnRedirect(__('art-login-preform-action'), $this->pagename);
+			}
+			$formData = [
+				self::FIELD_NAME_PAGE_NAME => showPagename($this->pagename),
+				self::FIELD_NAME_PRIVATE => $this->privateFlag,
+				self::FIELD_NAME_CONTENT => $this->getContent(),
+			];
 
 			// create form
 			$form = $this->createEditForm($formData);
-
-			// process form if it was posted
-			if ($formPosted && empty($form->errors)) {
-				$pagename = validatePagename($form->dataFor(self::FIELD_NAME_PAGE_NAME));
-				$private = $form->dataFor(self::FIELD_NAME_PRIVATE, false);
-				$content = wikify_html($form->dataFor(self::FIELD_NAME_CONTENT));
-
-				$this->savePage($content, $pagename, null, $private);
-
-				notify('success', ucfirst(__('page-successfully-updated')));
-				return ['redirect', $this->constructFullPath($pagename)];
-			}
-
-			// update the form dom so that error can be displayed, if there are any
 			$form->updateDom();
+
+			$this->findBySelector('#main')->append($form->elem->children());
+			return null;
+		}
+
+		private function editAction() {
+			if ($this->checkCommand(self::CMD_EDIT)) {
+				// create form
+				$form = $this->createEditForm($this->O_O->getRequest()->getPostData());
+
+				// process form if it was posted
+				if (empty($form->errors)) {
+					$pagename = validatePagename($form->dataFor(self::FIELD_NAME_PAGE_NAME));
+					$private = $form->dataFor(self::FIELD_NAME_PRIVATE, false);
+					$content = wikify_html($form->dataFor(self::FIELD_NAME_CONTENT));
+
+					$this->savePage($content, $pagename, null, $private);
+
+					notify('success', ucfirst(__('page-successfully-updated')));
+					return ['redirect', $this->constructFullPath($pagename)];
+				}
+
+				// update the form dom so that error can be displayed, if there are any
+				$form->updateDom();
+
+				$this->findBySelector('#main')->append($form->elem->children());
+				return null;
+			} else {
+				return ['404'];
+			}
+		}
+
+		private function translateView() {
+			$formData = [
+				self::FIELD_NAME_PAGE_NAME => showPagename($this->pagename),
+				self::FIELD_NAME_CONTENT => $this->getContent(),
+			];
+
+			// create form
+			$form = $this->createTranslationForm($formData);
 
 			$this->findBySelector('#main')->append($form->elem->children());
 			return null;
 		}
 
 		private function translateAction() {
-			// check if form is posted and get form data
-			$formPosted = $this->isPosted(self::FORM_CMD_TRANSLATE);
-			if ($formPosted) {
-				$formData = $_POST;
+			if ($this->checkCommand(self::CMD_TRANSLATE)) {
+				// create form
+				$form = $this->createTranslationForm($this->O_O->getRequest()->getPostData());
+
+				// process form if it was posted
+				if (empty($form->errors)) {
+					$language = $form->dataFor(self::FIELD_NAME_LANGUAGE);
+					$pagename = validatePagename($form->dataFor(self::FIELD_NAME_PAGE_NAME));
+					$content = wikify_html($form->dataFor(self::FIELD_NAME_CONTENT));
+
+					$this->savePage($content, $pagename, $language);
+
+					notify('success', ucfirst(__('page-successfully-updated')));
+					return ['redirect', $this->constructFullPath($pagename, $language)];
+				}
+
+				// update the form dom so that error can be displayed, if there are any
+				$form->updateDom();
+
+				$this->findBySelector('#main')->append($form->elem->children());
+				return null;
 			} else {
-				$formData = [
-					self::FIELD_NAME_PAGE_NAME => showPagename($this->pagename),
-					self::FIELD_NAME_CONTENT => $this->getContent(),
-				];
+				return ['404'];
 			}
-
-			// create form
-			$form = $this->createTranslationForm($formData);
-
-			// process form if it was posted
-			if ($formPosted && empty($form->errors)) {
-				$language = $form->dataFor(self::FIELD_NAME_LANGUAGE);
-				$pagename = validatePagename($form->dataFor(self::FIELD_NAME_PAGE_NAME));
-				$content = wikify_html($form->dataFor(self::FIELD_NAME_CONTENT));
-
-				$this->savePage($content, $pagename, $language);
-
-				notify('success', ucfirst(__('page-successfully-updated')));
-				return ['redirect', $this->constructFullPath($pagename, $language)];
-			}
-
-			// update the form dom so that error can be displayed, if there are any
-			$form->updateDom();
-
-			$this->findBySelector('#main')->append($form->elem->children());
-			return null;
 		}
 
-		private function revertAction($version) {
-			// check if form is posted and get form data
-			$formPosted = $this->isPosted(self::FORM_CMD_REVERT);
-			if (!$formPosted) {
+		private function revertAction() {
+			if ($this->checkCommand(self::CMD_REVERT)) {
+				$version = $this->O_O->getRequest()->getPostValue(self::FIELD_NAME_VERSION);
+
+				$hyphaUser = $this->hyphaUser;
+				$this->xml->lockAndReload();
+				storeWikiContent($this->xml->documentElement, $this->language, $this->getContent($version), $hyphaUser->getAttribute('username'));
+				$this->xml->saveAndUnlock();
+				writeToDigest($hyphaUser->getAttribute('fullname').__('reverted-page').'<a href="'.$this->language.'/'.$this->pagename.'">'.$this->language.'/'.$this->pagename.'</a>', 'page update', $this->pageListNode->getAttribute('id'));
+
+				notify('success', ucfirst(__('page-successfully-updated')));
 				return ['redirect', $this->constructFullPath($this->pagename)];
+			} else {
+				return ['404'];
 			}
-
-			$hyphaUser = $this->hyphaUser;
-			$this->xml->lockAndReload();
-			storeWikiContent($this->xml->documentElement, $this->language, $this->getContent($version), $hyphaUser->getAttribute('username'));
-			$this->xml->saveAndUnlock();
-			writeToDigest($hyphaUser->getAttribute('fullname').__('reverted-page').'<a href="'.$this->language.'/'.$this->pagename.'">'.$this->language.'/'.$this->pagename.'</a>', 'page update', $this->pageListNode->getAttribute('id'));
-
-			notify('success', ucfirst(__('page-successfully-updated')));
-			return ['redirect', $this->constructFullPath($this->pagename)];
 		}
 
 		private function deleteAction() {
-			// check if form is posted and get form data
-			$formPosted = $this->isPosted(self::FORM_CMD_DELETE);
-			if (!$formPosted) {
-				return ['redirect', $this->constructFullPath($this->pagename)];
+			if (!isAdmin()) {
+				return ['errors' => ['art-insufficient-rights-to-preform-action']];
+			}
+			if ($this->checkCommand(self::CMD_DELETE)) {
+				global $hyphaUrl;
+
+				$this->deletePage();
+
+				notify('success', ucfirst(__('page-successfully-deleted')));
+				return ['redirect', $hyphaUrl];
+			} else {
+				return ['404'];
 			}
 
-			global $hyphaUrl;
-
-			$this->deletePage();
-
-			notify('success', ucfirst(__('page-successfully-deleted')));
-			return ['redirect', $hyphaUrl];
 		}
 
 		/**
@@ -233,7 +267,7 @@ EOF;
 			// buttons
 			$commands = $this->findBySelector('#pageCommands');
 			$commands->append($this->makeActionButton(__('cancel')));
-			$commands->append($this->makeActionButton(__('save'), self::PATH_EDIT, self::FORM_CMD_EDIT));
+			$commands->append($this->makeActionButton(__('save'), self::PATH_EDIT, self::CMD_EDIT));
 
 			return $this->createForm($elem, $data);
 		}
@@ -268,7 +302,7 @@ EOF;
 			// buttons
 			$commands = $this->findBySelector('#pageCommands');
 			$commands->append($this->makeActionButton(__('cancel')));
-			$commands->append($this->makeActionButton(__('save'), self::PATH_TRANSLATE, self::FORM_CMD_TRANSLATE));
+			$commands->append($this->makeActionButton(__('save'), self::PATH_TRANSLATE, self::CMD_TRANSLATE));
 
 			return $this->createForm($elem, $data);
 		}
@@ -383,7 +417,7 @@ EOF;
 		 *
 		 * @return bool
 		 */
-		protected function isPosted($command = null) {
-			return 'POST' == $_SERVER['REQUEST_METHOD'] && (null == $command || $command == $_POST['command']);
+		protected function checkCommand($command) {
+			return $command === $this->O_O->getRequest()->getPostValue('command');
 		}
 	}
