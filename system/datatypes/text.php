@@ -24,7 +24,7 @@
 		const PATH_REVERT = 'revert';
 		const PATH_DELETE = 'delete';
 
-		const CMD_EDIT = 'edit';
+		const CMD_SAVE = 'edit';
 		const CMD_TRANSLATE = 'translate';
 		const CMD_REVERT = 'revert';
 		const CMD_DELETE = 'delete';
@@ -41,14 +41,12 @@
 			return $this->process();
 		}
 
-		public function process() {
+		public function process($O_O /* maybe? */, $path_components) {
 			$this->html->writeToElement('pagename', showPagename($this->pagename) . ' ' . asterisk($this->privateFlag));
 
 			$request = $this->O_O->getRequest();
-
+/*
 			switch ($request->getArgs()[0]) {
-				default:
-					return ['404'];
 				case null:
 					return $this->indexView();
 				case self::PATH_EDIT:
@@ -71,7 +69,49 @@
 					}
 			}
 
-			return null;
+			switch ($request->getArgs()[0]) {
+				case null:
+					switch ($request->getCommand()) {
+						case null:
+							return $this->indexView();
+						case self::CMD_REVERT:
+							return $this->revertAction();
+						case self::CMD_DELETE:
+							return $this->deleteAction();
+					}
+					break;
+				case self::PATH_EDIT:
+					switch ($request->getCommand()) {
+						case null:
+							return $this->editView();
+						case self::CMD_SAVE:
+							return $this->editAction();
+					}
+					break;
+				case self::PATH_TRANSLATE:
+					switch ($request->getCommand()) {
+						case null:
+							return $this->translateView();
+						case self::CMD_TRANSLATE:
+							return $this->translateAction();
+					}
+					break;
+			}
+*/
+			// Deze?
+			//switch ([$request->getArgs()[0], $request->getCommand()]) {
+			switch ([$request->getView(), $request->getCommand()]) {
+				case [null,                 null]:                return $this->indexView();
+                                case [null,                 self::CMD_REVERT]:    return $this->revertAction();
+                                case [null,                 self::CMD_DELETE]:    return $this->deleteAction();
+                                case [self::PATH_EDIT,      null]:                return $this->editView();
+                                case [self::PATH_EDIT,      self::CMD_SAVE]:      return $this->editAction();
+                                case [self::PATH_TRANSLATE, null]:                return $this->translateView();
+                                case [self::PATH_TRANSLATE, self::CMD_TRANSLATE]: return $this->translateAction();
+			}
+
+
+			return ['404'];
 		}
 
 		private function indexView() {
@@ -105,7 +145,15 @@
 				}
 			}
 
-			//return redirect('sdfasdf');
+			class FooResponse {
+				function handle() {
+				}
+			}
+			return new FooResponse();
+
+			return new RedirectResponse('aasdfdsf');
+			return redirect('sdfasdf');
+			return ['redirect', 'sdfasdf'];
 		}
 
 		private function notifyAndReturnRedirect($msg, $page) {
@@ -141,7 +189,7 @@
 		}
 
 		private function editAction() {
-			if ($this->checkCommand(self::CMD_EDIT)) {
+			if ($this->checkCommand(self::CMD_SAVE)) {
 				// create form
 				$form = $this->createEditForm($this->O_O->getRequest()->getPostData());
 
@@ -267,7 +315,7 @@ EOF;
 			// buttons
 			$commands = $this->findBySelector('#pageCommands');
 			$commands->append($this->makeActionButton(__('cancel')));
-			$commands->append($this->makeActionButton(__('save'), self::PATH_EDIT, self::CMD_EDIT));
+			$commands->append($this->makeActionButton(__('save'), self::PATH_EDIT, self::CMD_SAVE));
 
 			return $this->createForm($elem, $data);
 		}

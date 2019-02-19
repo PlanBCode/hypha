@@ -292,6 +292,12 @@
 			header('Location: ' . $url);
 			exit;
 		}
+
+		if ($result instanceof RedirectResponse) {
+			$url = preserveNotifications($result->url);
+			header('Location: ' . $url);
+			exit;
+		}
 	}
 
 //	/*
