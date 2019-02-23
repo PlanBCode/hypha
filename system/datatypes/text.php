@@ -9,7 +9,6 @@
 	class textpage extends Page {
 		/** @var Xml */
 		public $xml;
-
 		/** @var DOMElement */
 		private $hyphaUser;
 
@@ -295,18 +294,105 @@
 		 * @return WymHTMLForm
 		 */
 		private function createEditForm(array $data = []) {
-			$title = __('title');
+			$title = htmlspecialchars(__('title'));
 			$titleFieldName = self::FIELD_NAME_PAGE_NAME;
-			$private = __('private-page');
+			$private = htmlspecialchars(__('private-page'));
 			$privateFieldName = self::FIELD_NAME_PRIVATE;
 			$contentFieldName = self::FIELD_NAME_CONTENT;
+
+			$vars = [
+				'title' => __('title'),
+				'titleFieldName' => self::FIELD_NAME_PAGE_NAME,
+				'private' => __('private-page'),
+				'privateFieldName' => self::FIELD_NAME_PRIVATE,
+				'contentFieldName' => self::FIELD_NAME_CONTENT,
+			];
+
 			$html = <<<EOF
-				<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
-	                <strong><label for="$titleFieldName">$title</label></strong> <input type="text" id="$titleFieldName" name="$titleFieldName" onblur="validatePagename(this);" onkeyup="validatePagename(this);" />
-	                <input type="checkbox" id="$privateFieldName" name="$privateFieldName" /><label for="$privateFieldName">$private</label>
+				<div class="section">
+	                <label for="[[titleFieldName]]">[[title]]</label>
+					<input type="text" id="[[titleFieldName]]" name="[[titleFieldName]]" onblur="validatePagename(this);" onkeyup="validatePagename(this);" />
+	                <input type="checkbox" id="[[privateFieldName]]" name="[[privateFieldName]]" />
+					<label for="[[privateFieldName]]">[[private]]</label>
+	            </div>
+	            <editor name="[[contentFieldName]]"></editor>
+EOF;
+			// Interpolate can handle HTML escaping when needed. Strings
+			// can be marked as already escaped / containing html by
+			// turning them into DomDocument
+			// nodes/snippets/documentfragments/something or some other
+			// custom wrapper class.
+			$html = interpolate_vars($html, $vars);
+
+			// To do things like looping for dynamic select values, you
+			// can either do this beforehand in PHP, building up a
+			// list of <option> tags to pass inside $vars, or
+			// afterwards, by appending to the (parsed) DOM version of
+			// $html.
+/*
+			$html = <<<EOF
+				<div class="section">
+	                <label for="$titleFieldName">$title</label>
+					<input type="text" id="$titleFieldName" name="$titleFieldName" onblur="validatePagename(this);" onkeyup="validatePagename(this);" />
+	                <input type="checkbox" id="$privateFieldName" name="$privateFieldName" />
+					<label for="$privateFieldName">$private</label>
 	            </div>
 	            <editor name="$contentFieldName"></editor>
+
 EOF;
+			[
+				self::FIELD_NAME_PAGE_NAME => [
+					'label' => __('title'),
+					'type' => 'text',
+					'attrs' => ['onblur' => "validatePagename(this);", 'onkeyup' => "validatePagename(this);"],
+				],
+				self::FIELD_NAME_PRIVATE => [
+					'label' => __('private-page'),
+					'type' => 'checkbox',
+				],
+				self::FIELD_NAME_CONTENT => [
+					'type' => 'wym_editor',
+				],
+			];
+
+
+			$form->add_label(self::FIELD_NAME_PAGE_NAME, ['content' => __('title')]);
+			$form->add_input(self::FIELD_NAME_PAGE_NAME, [
+				'type' => 'text',
+				'onblur' => "validatePagename(this);",
+				'onkeyup' => "validatePagename(this);",
+			]);
+			$form->add_input(self::FIELD_NAME_PRIVATE, [
+				'type' => 'checkbox',
+			]);
+			$form->add_label(self::FIELD_NAME_PRIVATE, ['content' => __('private_page')]);
+			$form->add_editor(self::FIELD_NAME_CONTENT);
+
+
+			$contentFieldName = self::FIELD_NAME_CONTENT;
+			[
+				'name' => [
+					'name' => self::FIELD_NAME_PAGE_NAME,
+					'label' => __('title'),
+				],
+				self::FIELD_NAME_PRIVATE => [
+					'label' => __('private-page'),
+				],
+				self::FIELD_NAME_CONTENT => [
+				],
+			];
+
+			$html = <<<EOF
+				<div class="section">
+	                <label for="name"/>
+					<input type="text" localname="name" onblur="validatePagename(this);" onkeyup="validatePagename(this);" />
+	                <input type="checkbox" id="private" name="private" />
+					<label for="private"/>
+	            </div>
+	            <editor name="content"/>
+EOF;
+*/
+
 			/** @var HyphaDomElement $form */
 			$form = $this->html->createElement('form');
 			/** @var \DOMWrap\Element $elem */
