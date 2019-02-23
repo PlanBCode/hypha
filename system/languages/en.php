@@ -8,6 +8,7 @@
 		"submit" => "submit",
 		"save" => "save",
 		"edit" => "edit",
+		"delete" => "delete",
 		"translate" => "translate",
 		"revert" => "revert",
 		"login" => "login",

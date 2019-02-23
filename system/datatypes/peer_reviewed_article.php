@@ -533,13 +533,14 @@ class peer_reviewed_article extends Page {
 
 		if (isUser()) {
 			$commands = $this->findBySelector('#pageCommands');
-			$commands->append($this->makeActionButton(__(self::PATH_EDIT), self::PATH_EDIT));
+			$commandsAtEnd = $this->findBySelector('#pageEndCommands');
+			$commands->append($this->makeActionButton(__('edit'), self::PATH_EDIT));
 
 			// the status change from review to approved is done automatically
 			if (self::STATUS_REVIEW === $status) {
 				$userId = $this->hyphaUser->getAttribute('id');
 				if (!$this->hasUserApproved($userId)) {
-					$commands->append($this->makeActionButton(__('art-' . self::PATH_APPROVE), self::PATH_APPROVE));
+					$commandsAtEnd->append($this->makeActionButton(__('art-approve'), self::PATH_APPROVE));
 				}
 			} else {
 				foreach ($this->statusMtx[$status] as $newStatus => $option) {
@@ -549,7 +550,7 @@ class peer_reviewed_article extends Page {
 			}
 			if (isAdmin()) {
 				$path = $this->language . '/' . $this->pagename . '/' . self::PATH_DELETE;
-				$commands->append(makeButton(__(self::PATH_DELETE), 'if(confirm(\'' . __('sure-to-delete') . '\'))' . makeAction($path, self::FORM_CMD_DELETE, '')));
+				$commands->append(makeButton(__('delete'), 'if(confirm(\'' . __('sure-to-delete') . '\'))' . makeAction($path, self::FORM_CMD_DELETE, '')));
 			}
 		}
 
@@ -1088,6 +1089,9 @@ EOF;
 		$commands = $this->findBySelector('#pageCommands');
 		$commands->append($this->makeActionButton(__('art-cancel')));
 		$commands->append($this->makeActionButton(__('art-save'), self::PATH_EDIT, self::FORM_CMD_EDIT));
+		$commandsAtEnd = $this->findBySelector('#pageEndCommands');
+		$commandsAtEnd->append($this->makeActionButton(__('art-cancel')));
+		$commandsAtEnd->append($this->makeActionButton(__('art-save'), self::PATH_EDIT, self::FORM_CMD_EDIT));
 
 		return $this->createForm($elem, $data);
 	}
