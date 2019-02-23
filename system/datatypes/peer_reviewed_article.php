@@ -167,9 +167,9 @@ class peer_reviewed_article extends Page {
 				"author" => $author
 			));
 			$message = __('art-review-request-body', array(
-				"link" => $linkToPage,
-				"title" => $title,
-				"author" => $author
+				"link" => htmlspecialchars($linkToPage),
+				"title" => htmlspecialchars($title),
+				"author" => htmlspecialchars($author)
 			));
 		} else {
 			$subject = __('art-status-update-subject', array(
@@ -177,10 +177,10 @@ class peer_reviewed_article extends Page {
 				"title" => $title
 			));
 			$message = __('art-status-update-body', array(
-				"link" => $linkToPage,
-				"title" => $title,
-				"author" => $author,
-				"status" => $statusArray['new']
+				"link" => htmlspecialchars($linkToPage),
+				"title" => htmlspecialchars($title),
+				"author" => htmlspecialchars($author),
+				"status" => htmlspecialchars($statusArray['new'])
 			));
 		}
 		$this->sendMail(getUserEmailList(), $subject, $message);
@@ -217,10 +217,10 @@ class peer_reviewed_article extends Page {
 			"title" => $title
 		));
 		$message = __('art-block-submitted-body', array(
-			"link" => $linkToPage,
-			"title" => $title,
-			"author" => $author,
-			"comment" => $comment
+			"link" => htmlspecialchars($linkToPage),
+			"title" => htmlspecialchars($title),
+			"author" => htmlspecialchars($author),
+			"comment" => htmlspecialchars($comment)
 		));
 		
 		$this->sendMail(getUserEmailList(), $subject, $message);
@@ -239,9 +239,9 @@ class peer_reviewed_article extends Page {
 			"title" => $title
 		));
 		$message = __('art-block-resolved-body', array(
-			"link" => $linkToPage,
-			"title" => $title,
-			"author" => $author
+			"link" => htmlspecialchars($linkToPage),
+			"title" => htmlspecialchars($title),
+			"author" => htmlspecialchars($author)
 		));
 		$this->sendMail(getUserEmailList(), $subject, $message);
 	}
@@ -265,10 +265,10 @@ class peer_reviewed_article extends Page {
 		$email = $comment->getAttr(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL);
 		$subject = __('art-confirm-comment-subject');
 		$message = __('art-confirm-comment-body', array(
-			"sitename" => hypha_getTitle(),
-			"title" => $title,
-			"comment" => $commentBody,
-			"link" => $linkToConfirm
+			"sitename" => htmlspecialchars(hypha_getTitle()),
+			"title" => htmlspecialchars($title),
+			"comment" => nl2br(htmlspecialchars($commentBody)),
+			"link" => htmlspecialchars($linkToConfirm)
 		));
 		$this->sendMail($email, $subject, $message);
 	}
@@ -519,10 +519,10 @@ class peer_reviewed_article extends Page {
 			"title" => $title
 		));
 		$message = __('art-comment-body', array(
-			"name" => $name,
-			"link" => $linkToPage,
-			"title" => $title,
-			"comment" => $commentBody
+			"name" => htmlspecialchars($name),
+			"link" => htmlspecialchars($linkToPage),
+			"title" => htmlspecialchars($title),
+			"comment" => nl2br(htmlspecialchars($commentBody))
 		));
 		$this->sendMail(getUserEmailList(), $subject, $message);
 	}
