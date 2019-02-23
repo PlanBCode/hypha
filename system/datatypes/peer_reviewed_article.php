@@ -651,18 +651,7 @@ class peer_reviewed_article extends Page {
 			// create discussion container
 			/** @var HyphaDomElement $list */
 			$list = $this->xml->createElement('ul');
-			/** @var HyphaDomElement $reviewCommentContainer */
-			$reviewCommentContainer = $this->xml->createElement('div');
-			$class = 'review-comment-wrapper collapsed';
-			foreach (['blocking' => $blocking, 'resolved' => $resolved, 'closed' => $closed] as $name => $isTrue) {
-				if ($isTrue) {
-					$class .= ' ' . $name;
-				}
-			}
-			$reviewCommentContainer->attr('class', $class);
-			$reviewCommentContainer->append($list);
 
-			$hasComments = false;
 			foreach ($discussion->getChildren() as $comments) {
 				/** @var DocPage[] $comments */
 				if (!is_array($comments)) {
@@ -673,7 +662,6 @@ class peer_reviewed_article extends Page {
 					if (self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER !== $type && (bool)$comment->getAttr(self::FIELD_NAME_DISCUSSION_COMMENT_PENDING)) {
 						continue;
 					}
-					$hasComments = true;
 					$createdAt = date('j-m-y, H:i', ltrim($comment->getAttr(self::FIELD_NAME_CREATED_AT), 't'));
 					$committerName = self::getCommentPoster($comment);
 					$html = nl2br(htmlspecialchars($comment->getText()));
@@ -692,6 +680,23 @@ class peer_reviewed_article extends Page {
 					$firstComment = false;
 				}
 			}
+
+			if (!$list->hasChildNodes()) {
+				// if there are no comments to be displayed, all discussion parts do not need to be displayed.
+				continue;
+			}
+
+			/** @var HyphaDomElement $reviewCommentContainer */
+			$reviewCommentContainer = $this->xml->createElement('div');
+			$class = 'review-comment-wrapper collapsed';
+			foreach (['blocking' => $blocking, 'resolved' => $resolved, 'closed' => $closed] as $name => $isTrue) {
+				if ($isTrue) {
+					$class .= ' ' . $name;
+				}
+			}
+			$reviewCommentContainer->attr('class', $class);
+			$reviewCommentContainer->append($list);
+
 			if (self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER === $type) {
 				$msgId = null;
 				if ($blocking) {
@@ -708,7 +713,7 @@ class peer_reviewed_article extends Page {
 			}
 
 			// display comment form if the discussion is still open
-			if ($hasComments && !$closed) {
+			if (!$closed) {
 				$replyForm = $this->createDiscussionCommentForm($discussion);
 				$list->append($replyForm->elem->children());
 			}
