@@ -428,7 +428,7 @@
 			ob_start();
 ?>
 <h3><?=__('personal-settings')?> `<?=$hyphaUser->getAttribute('username')?>`</h3>
-<table class="section">
+<table class="section personal-settings">
 	<tr>
 		<th><?=__('username')?>:</th>
 		<td><?=$hyphaUser->getAttribute('username')?></td>
@@ -442,17 +442,17 @@
 		<td><?=$hyphaUser->getAttribute('language')?></td>
 	</tr>
 	<tr>
-		<td colspan="4"><input type="button" class="button right" value="<?=__('edit')?>" onclick="hypha('settings/user/<?=$hyphaUser->getAttribute('username')?>', '', '');" /><input type="button" class="button right" value="<?=__('quit')?>" onclick="hypha('settings/quit', '', '');" /></td>
+		<td colspan="4"><input type="button" class="button edit" value="<?=__('edit')?>" onclick="hypha('settings/user/<?=$hyphaUser->getAttribute('username')?>', '', '');" /><input type="button" class="button quit" value="<?=__('quit')?>" onclick="hypha('settings/quit', '', '');" /></td>
 	</tr>
 </table>
 <h3><?=__('member-list')?></h3>
-<table class="section">
+<table class="section user-list">
 	<tr>
 		<th></th>
 		<th><?=__('username')?></th>
 		<th><?=__('fullname')?></th>
 		<th><?=__('email')?></th>
-		<td><input type="button" class="button" value="<?=__('invite')?>" onclick="hypha('settings/invite', '', '');" /></td>
+		<td><input type="button" class="button invite" value="<?=__('invite')?>" onclick="hypha('settings/invite', '', '');" /></td>
 	</tr>
 <?php
 			$numAdmins = 0;
@@ -482,19 +482,19 @@
 					echo '<td>';
 					if ($user->getAttribute('rights')!='exmember') {
 						if ($user->getAttribute('username'))
-							echo makeButton(__('edit'), makeAction('settings/user/'.$user->getAttribute('username'), '', ''));
+							echo makeButton(__('edit'), makeAction('settings/user/'.$user->getAttribute('username'), '', ''), '', 'edit');
 
-						if ($user->getAttribute('rights')=='none') echo makeButton(__('restore'), makeAction('settings', 'settingsRestore', $user->getAttribute('id')));
-						else echo makeButton(__('remove'), makeAction('settings', 'settingsRemove', $user->getAttribute('id')));
+						if ($user->getAttribute('rights')=='none') echo makeButton(__('restore'), makeAction('settings', 'settingsRestore', $user->getAttribute('id')), '', 'restore');
+						else echo makeButton(__('remove'), makeAction('settings', 'settingsRemove', $user->getAttribute('id')), '', 'remove');
 
-						if ($user->getAttribute('rights')=='invitee') echo makeButton(__('remind'), makeAction('settings', 'settingsRemind', $user->getAttribute('id')));
+						if ($user->getAttribute('rights')=='invitee') echo makeButton(__('remind'), makeAction('settings', 'settingsRemind', $user->getAttribute('id')), '', 'remind');
 						elseif ($user->getAttribute('rights') !== 'none') {
-							if ($user->getAttribute('rights') !== 'admin') echo makeButton(__('admin'), makeAction('settings', 'settingsAdmin', $user->getAttribute('id')));
-							elseif ($numAdmins>1) echo makeButton(__('unadmin'), makeAction('settings', 'settingsUnadmin', $user->getAttribute('id')));
+							if ($user->getAttribute('rights') !== 'admin') echo makeButton(__('admin'), makeAction('settings', 'settingsAdmin', $user->getAttribute('id')), '', 'admin');
+							elseif ($numAdmins>1) echo makeButton(__('unadmin'), makeAction('settings', 'settingsUnadmin', $user->getAttribute('id')), '', 'unadmin');
 						}
 					}
 					else {
-						echo makeButton(__('reincarnate'), makeAction('settings', 'settingsReincarnate', $user->getAttribute('id')));
+						echo makeButton(__('reincarnate'), makeAction('settings', 'settingsReincarnate', $user->getAttribute('id')), '', 'reincarnate');
 					}
 					echo '</td>';
 				}
