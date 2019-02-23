@@ -563,6 +563,22 @@ class peer_reviewed_article extends Page {
 		/** @var HyphaDomElement $main */
 		$main = $this->findBySelector('#main');
 
+		$discussions = $this->getDocPageByName(self::FIELD_NAME_DISCUSSION_PUBLIC_CONTAINER);
+
+		/** @var NodeList $approveCollection */
+		$commentCollection = $discussions->getDoc()->findXPath('.//' . self::FIELD_NAME_DISCUSSION_COMMENT . '[not(@pending="1")]');
+
+		$commentCount = $commentCollection->count();
+		if ($commentCount > 0) {
+			if ($commentCount == 1) {
+				$commentCountText = __('art-public-comment-count-singular', ['count' => $commentCount]);
+			} else {
+				$commentCountText = __('art-public-comment-count-plural', ['count' => $commentCount]);
+			}
+
+			$this->findBySelector('#pagename')->before('<div class="number_of_comments">'.$commentCountText.'</div>');
+		}
+
 		if ($author) {
 			$main->append('<div class="author">' . __('art-by') . ' ' . htmlspecialchars($author) . '</div>');
 		}
