@@ -133,7 +133,10 @@
 ?>
 <table class="section">
 	<tr>
-		<th><?=__('message')?>:</th>
+		<td colspan="2"><?=nl2br(__('quit-explain-message'));?></td>
+	</tr>
+	<tr>
+		<th><?=__('message');?>:</th>
 		<td><textarea name="quitGoodbye" cols="36" rows="4"><?=__('goodbye-message')?></textarea></td>
 	</tr>
 </table>
