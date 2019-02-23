@@ -540,7 +540,6 @@ class peer_reviewed_article extends Page {
 			if (self::STATUS_REVIEW === $status) {
 				$userId = $this->hyphaUser->getAttribute('id');
 				if (!$this->hasUserApproved($userId)) {
-					$commands->append($this->makeActionButton(__('art-approve'), self::PATH_APPROVE));
 					$commandsAtEnd->append($this->makeActionButton(__('art-approve'), self::PATH_APPROVE));
 				}
 			} else {
