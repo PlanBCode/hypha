@@ -257,6 +257,7 @@
 		"ml-successfully-unsubscribed" => "you have successfully unsubscribed",
 		"ml-successfully-created" => "successfully created",
 		"ml-successfully-updated" => "successfully updated",
+		"ml-comment-please-confirm" => "Thank you for your comment. Please confirm your identity by clicking the confirmation links that we have sent you by email.",
 		"ml-successfully-sent" => "successfully sent",
 		"ml-confirmation-mail-sent" => "You will soon receive an email with a link. Please confirm your subscription. If you do not get the email, it may have landed in your spam folder.",
 
