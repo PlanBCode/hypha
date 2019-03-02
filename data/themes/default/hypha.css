@@ -22,7 +22,6 @@
  --menulinkhoverback: #aaa;
  --menulinkactiveback: #ccc;
  --sidebarbackgroundcolor: #ddddff;
- 
 }
 
 /* dosis-regular - latin */
@@ -841,4 +840,8 @@ body.type_peer_reviewed_article .input-wrapper.field_type_editor:not(.field_name
 }
 .hyphaInfoButton:before {
     content: 'i';
+}
+
+#nr-of-comments p{
+	margin: 0;
 }
