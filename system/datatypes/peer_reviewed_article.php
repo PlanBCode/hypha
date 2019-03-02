@@ -576,7 +576,7 @@ class peer_reviewed_article extends Page {
 				$commentCountText = __('art-public-comment-count-plural', ['count' => $commentCount]);
 			}
 
-			$this->findBySelector('#pagename')->before('<div class="number_of_comments">'.$commentCountText.'</div>');
+			$this->findBySelector('#nr-of-comments')->append($commentCountText);
 		}
 
 		if ($author) {
