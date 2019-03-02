@@ -353,6 +353,7 @@
 
 		// help_icon_texts
 		"help-private-page" => "Een privepagina is alleen zichtbaar voor degenen die zijn ingelogd.",
+		"help-page-type" => "Kies eerst het juiste paginatype.\nEen festival pagina geeft je de gereedschappen om een festival te organiseren en de line-up te laten zien aan het publiek.\nEen mailinglijst is een lijst voor emailadressen en een gereedschap om nieuwsbrieven te schrijven en versturen.\nEen artikel met review is een pagina die prive blijft totdat hij is goedgekeurd door 3 anderen,\ndan wordt hij publiek en is er een mogelijkheid voor lezers om te reageren.\nEen webpagina is een gewone webpagina.",
 		"help-version-management" => "Hier kun je terug naar een vorige versie van de pagina. \nDie keuze kun je definitief maken door te klikken op Terugdraaien.",
 		"help-version-revert" => "Hier bevestig je de keuze om de nieuwste versie van de pagina te vervangen voor deze. \nWil je dat niet? Kies dan in de versielijst weer de bovenste pagina.",
 		"help-blocking-comment" => "Je kunt een artikel blokkeren als je vindt dat het niet gepubliceerd zou moeten worden. \nAls je dat doet ben jij de enige die die blokkade weer weg kan nemen, \nbijvoorbeeld als de auteur voldoende wijzigingen heeft gemaakt.",
