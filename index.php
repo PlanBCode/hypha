@@ -126,7 +126,7 @@
 		If a command was issued from the client side (using a $_POST variable 'command') the eventhandler is called to take the appropriate action. When necessary (e.g. when the page query implicated an update of the database, or the user state was changed) this step is reiterated until no more events have to be processed.
 	*/
 
-	if ($hyphaPage) processCommandResult($hyphaPage->build());
+	if ($hyphaPage) processCommandResult($hyphaPage->process($O_O->getRequest()));
 
 	registerPostProcessingFunction('dewikify');
 

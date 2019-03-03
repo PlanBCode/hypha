@@ -36,89 +36,28 @@
 			$this->xml->loadFromFile('data/pages/' . $pageListNode->getAttribute('id'));
 		}
 
-		public function build(){
-			return $this->process();
-		}
-
-		public function process($O_O /* maybe? */, $path_components) {
+		public function process(HyphaRequest $request) {
 			$this->html->writeToElement('pagename', showPagename($this->pagename) . ' ' . asterisk($this->privateFlag));
 
-			$request = $this->O_O->getRequest();
-/*
-			switch ($request->getArgs()[0]) {
-				case null:
-					return $this->indexView();
-				case self::PATH_EDIT:
-					if ($request->isPost()) {
-						return $this->editAction();
-					}
-					return $this->editView();
-				case self::PATH_TRANSLATE:
-					if ($request->isPost()) {
-						return $this->translateAction();
-					}
-					return $this->translateView();
-				case self::PATH_REVERT:
-					if ($request->isPost()) {
-						return $this->revertAction();
-					}
-				case self::PATH_DELETE:
-					if ($request->isPost()) {
-						return $this->deleteAction();
-					}
-			}
-
-			switch ($request->getArgs()[0]) {
-				case null:
-					switch ($request->getCommand()) {
-						case null:
-							return $this->indexView();
-						case self::CMD_REVERT:
-							return $this->revertAction();
-						case self::CMD_DELETE:
-							return $this->deleteAction();
-					}
-					break;
-				case self::PATH_EDIT:
-					switch ($request->getCommand()) {
-						case null:
-							return $this->editView();
-						case self::CMD_SAVE:
-							return $this->editAction();
-					}
-					break;
-				case self::PATH_TRANSLATE:
-					switch ($request->getCommand()) {
-						case null:
-							return $this->translateView();
-						case self::CMD_TRANSLATE:
-							return $this->translateAction();
-					}
-					break;
-			}
-*/
-			// Deze?
-			//switch ([$request->getArgs()[0], $request->getCommand()]) {
 			switch ([$request->getView(), $request->getCommand()]) {
-				case [null,                 null]:                return $this->indexView();
-                                case [null,                 self::CMD_REVERT]:    return $this->revertAction();
-                                case [null,                 self::CMD_DELETE]:    return $this->deleteAction();
-                                case [self::PATH_EDIT,      null]:                return $this->editView();
-                                case [self::PATH_EDIT,      self::CMD_SAVE]:      return $this->editAction();
-                                case [self::PATH_TRANSLATE, null]:                return $this->translateView();
-                                case [self::PATH_TRANSLATE, self::CMD_TRANSLATE]: return $this->translateAction();
+				case [null,                 null]:                return $this->indexView($request);
+				case [null,                 self::CMD_REVERT]:    return $this->revertAction($request);
+				case [null,                 self::CMD_DELETE]:    return $this->deleteAction($request);
+				case [self::PATH_EDIT,      null]:                return $this->editView($request);
+				case [self::PATH_EDIT,      self::CMD_SAVE]:      return $this->editAction($request);
+				case [self::PATH_TRANSLATE, null]:                return $this->translateView($request);
+				case [self::PATH_TRANSLATE, self::CMD_TRANSLATE]: return $this->translateAction($request);
 			}
-
 
 			return ['404'];
 		}
 
-		private function indexView() {
+		private function indexView(HyphaRequest $request) {
 			// setup page name and language list for the selected page
 			$this->html->writeToElement('langList', hypha_indexLanguages($this->pageListNode, $this->language));
 
 			// show content, and only allow access to previous revisions for logged in clients
-			$version = isUser() && $this->O_O->getRequest()->getPostValue(self::FIELD_NAME_VERSION);
+			$version = isUser() && $request->getPostValue(self::FIELD_NAME_VERSION);
 			$this->html->writeToElement('main', $this->getContent($version));
 
 			// setup addition widgets when client is logged in
@@ -161,7 +100,7 @@
 			return ['redirect', $this->constructFullPath($page)];
 		}
 
-		private function editView() {
+		private function editView(HyphaRequest $request) {
 			if (!isUser()) {
 				return ['errors' => ['art-login-preform-action']];
 			}
@@ -187,10 +126,10 @@
 			return null;
 		}
 
-		private function editAction() {
+		private function editAction(HyphaRequest $request) {
 			if ($this->checkCommand(self::CMD_SAVE)) {
 				// create form
-				$form = $this->createEditForm($this->O_O->getRequest()->getPostData());
+				$form = $this->createEditForm($request->getPostData());
 
 				// process form if it was posted
 				if (empty($form->errors)) {
@@ -214,7 +153,7 @@
 			}
 		}
 
-		private function translateView() {
+		private function translateView(HyphaRequest $request) {
 			$formData = [
 				self::FIELD_NAME_PAGE_NAME => showPagename($this->pagename),
 				self::FIELD_NAME_CONTENT => $this->getContent(),
@@ -227,10 +166,10 @@
 			return null;
 		}
 
-		private function translateAction() {
+		private function translateAction(HyphaRequest $request) {
 			if ($this->checkCommand(self::CMD_TRANSLATE)) {
 				// create form
-				$form = $this->createTranslationForm($this->O_O->getRequest()->getPostData());
+				$form = $this->createTranslationForm($request->getPostData());
 
 				// process form if it was posted
 				if (empty($form->errors)) {
@@ -254,9 +193,9 @@
 			}
 		}
 
-		private function revertAction() {
+		private function revertAction(HyphaRequest $request) {
 			if ($this->checkCommand(self::CMD_REVERT)) {
-				$version = $this->O_O->getRequest()->getPostValue(self::FIELD_NAME_VERSION);
+				$version = $request->getPostValue(self::FIELD_NAME_VERSION);
 
 				$hyphaUser = $this->hyphaUser;
 				$this->xml->lockAndReload();
@@ -271,7 +210,7 @@
 			}
 		}
 
-		private function deleteAction() {
+		private function deleteAction(HyphaRequest $request) {
 			if (!isAdmin()) {
 				return ['errors' => ['art-insufficient-rights-to-preform-action']];
 			}
