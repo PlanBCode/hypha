@@ -1200,6 +1200,7 @@ EOF;
 		$label = 'review' === $type ? __('art-add-review-comment') : __('art-add-comment');
 		$command = $new ? self::FORM_CMD_DISCUSSION : self::FORM_CMD_COMMENT;
 		$html .= $this->makeActionButton($label, $path, $command);
+		if (!isUser()) $html .=  __('art-comment-unanonymous');
 		$html .= '</div>';
 
 		return $html;
