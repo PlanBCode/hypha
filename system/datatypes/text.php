@@ -47,6 +47,7 @@
 				case [self::PATH_EDIT,      self::CMD_SAVE]:      return $this->editAction($request);
 				case [self::PATH_TRANSLATE, null]:                return $this->translateView($request);
 				case [self::PATH_TRANSLATE, self::CMD_TRANSLATE]: return $this->translateAction($request);
+				case [self::PATH_TRANSLATE, self::CMD_AJAX_FOO]:  return $this->someAjaxAction();
 			}
 
 			return ['404'];
@@ -121,8 +122,28 @@
 			// create form
 			$form = $this->createEditForm($formData);
 			$form->updateDom();
-
+/*
 			$this->findBySelector('#main')->append($form->elem->children());
+			$commands = $this->findBySelector('#pageCommands');
+			$commands->append($form->makeSubmitButton(__('save'), self::PATH_EDIT, self::CMD_SAVE));
+			$commands->append($this->makeActionButton(__('cancel'), self::PATH_EDIT));
+*/
+			$main = $this->findBySelector('#main');
+			$main->addForm($form);
+
+			$commands = $this->findBySelector('#pageCommands');
+			$commands->addButton($form, __('save'), self::PATH_EDIT, self::CMD_SAVE);
+			// TODO: Maybe Form::DEFAULT_FORM, $this->html()->getDefaultForm(), or something else.
+			$commands->addButton($this->getDefaultForm(), __('cancel'), self::PATH_EDIT);
+			$commands->append($form->createButton());
+			$commands->addButton(__('cancel'), self::PATH_EDIT);
+/*
+			$commands->addFormButton(['form' => $form, 'title' => __('save'), 'path' => self::PATH_EDIT, 'command' => self::CMD_SAVE]);
+
+			$commands->addButton()->setForm($form)->setTitle(__('save'))->setPath(self::PATH_EDIT)->setCommand(self::CMD_SAVE);
+
+			$commands->addButton((new Button(__('save'))->setForm($form)->setPath(self::PATH_EDIT)->setCommand(self::CMD_SAVE));
+*/
 			return null;
 		}
 
@@ -247,14 +268,18 @@
 				'contentFieldName' => self::FIELD_NAME_CONTENT,
 			];
 
+			// TODO: We can use an interpolated string
+			// constant in other places too to generate HTML
+			// in e.g. views, when appropriate (but it is
+			// not mandatory).
 			$html = <<<EOF
 				<div class="section">
-	                <label for="[[titleFieldName]]">[[title]]</label>
+					<label for="[[titleFieldName]]">[[title]]</label>
 					<input type="text" id="[[titleFieldName]]" name="[[titleFieldName]]" onblur="validatePagename(this);" onkeyup="validatePagename(this);" />
-	                <input type="checkbox" id="[[privateFieldName]]" name="[[privateFieldName]]" />
+					<input type="checkbox" id="[[privateFieldName]]" name="[[privateFieldName]]" />
 					<label for="[[privateFieldName]]">[[private]]</label>
-	            </div>
-	            <editor name="[[contentFieldName]]"></editor>
+				</div>
+				<editor name="[[contentFieldName]]"></editor>
 EOF;
 			// Interpolate can handle HTML escaping when needed. Strings
 			// can be marked as already escaped / containing html by
@@ -337,11 +362,11 @@ EOF;
 			/** @var \DOMWrap\Element $elem */
 			$elem = $form->html($html);
 
-			// buttons
-			$commands = $this->findBySelector('#pageCommands');
-			$commands->append($this->makeActionButton(__('cancel')));
-			$commands->append($this->makeActionButton(__('save'), self::PATH_EDIT, self::CMD_SAVE));
-
+			// TODO: This should make sure to also generate
+			// a hidden command field inside the form tag,
+			// and the form tag generated should be
+			// preserved (originally, only the form's
+			// children were put into the output HTML).
 			return $this->createForm($elem, $data);
 		}
 
