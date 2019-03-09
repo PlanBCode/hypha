@@ -292,6 +292,39 @@ a.nopagelink {
     border-top: 1px dotted grey;
 }
 
+#tagList .prefix{
+    margin-left: 10px;
+    margin-bottom: 5px;
+    font-size: 80%;
+}
+
+.selectedTags {
+    display: flex;
+}
+
+.selectedTags .delete-tag {
+    color: #8f0000;
+    cursor: pointer;
+}
+
+.remainingTags {
+    padding: 0;
+    font-size: 80%;
+}
+
+div[class^='tagSel']{
+    padding: 5px 10px;
+    margin-bottom: 5px;
+    background: var(--secondarycolor);
+    background: lightyellow;
+    margin-right: 10px;
+    color: white;
+    color: grey;
+    font-weight: bold;
+    font-size: 80%;
+    border-radius: 6px;
+}
+
 /* ---- Footer ---- */
 #footerContainer {
  padding-bottom: 2em;
