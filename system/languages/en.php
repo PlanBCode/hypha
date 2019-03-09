@@ -326,9 +326,9 @@
 		"art-add-review-comment" => "add review comment",
 		"art-add-comment" => "add comment",
 		"art-comment-unanonymous" => " (make yourself known using your full name)",
-		"art-comment" => "comment on the article",
+		"art-comment-on-article" => "comment on the article",
 		"art-comments" => "comments",
-		"art-discussion" => "join the discussion",
+		"art-comment-on-comment" => "join this discussion",
 		"art-public-comment-count-singular" => "[[count]] comment",
 		"art-public-comment-count-plural" => "[[count]] comments",
 
