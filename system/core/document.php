@@ -33,6 +33,9 @@
 		extension of the DOMDocument class
 	*/
 
+	/**
+	 * @method \DOMWrap\NodeList|HyphaHtmlDomElement find($selector, $prefix = 'descendant::')
+	 */
 	class HTMLDocument extends DOMWrap\Document {
 		const XML_HTML_UNKNOWN_TAG = 801;
 
@@ -76,6 +79,7 @@
 				$base->setAttribute('href', $base_url);
 				$this->find('head')->prepend($base);
 			}
+			$this->registerNodeClass('DOMElement', 'HyphaHtmlDomElement');
 		}
 
 		/*

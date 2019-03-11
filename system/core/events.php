@@ -13,8 +13,9 @@
 		Passing information from client to server is done through form posts. All HTML is put inside a form element with two hidden input elements, 'command' and 'argument'.
 
 		(start code)
+			// TODO [LRM]: update
 			<body>
-				<form id="hyphaForm" method="post" action="">
+				<form name="hyphaForm" method="post" action="">
 					<input id="command" name="command" type="hidden" />
 					<input id="argument" name="argument" type="hidden" />
 					<-- all body HTML goes here -->
@@ -34,24 +35,13 @@
 		$html - an instance of <HTMLDocument>
 	*/
 	registerPostProcessingFunction('addEventHandler');
-	function addEventHandler($html) {
-
-		// place all body content in a form
-		$body = $html->getElementsByTagName('body')->Item(0);
-		ob_start();
-?>
-	<form name="hyphaForm" method="post" action="" accept-charset="utf-8" enctype="multipart/form-data">
-		<input id="command" name="command" type="hidden">
-		<input id="argument" name="argument" type="hidden">
-		<input id="csrfToken" name="csrfToken" type="hidden" value="<?=getCsrfToken()?>">
-		<?=getInnerHtml($body)?>
-	</form>
-<?php
-		setInnerHtml($body, ob_get_clean());
+	function addEventHandler(HTMLDocument $html) {
+		// set form at the top of the body
+		$html->find('body')->prepend(hypha_getDefaultForm());
 
 		// add a javascript function to process client commands and ajax calls
 		ob_start();
-?>
+		?>
 <script>
 	/*
 		Variable: baseUrl

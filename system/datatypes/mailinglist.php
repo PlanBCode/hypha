@@ -62,7 +62,7 @@ class mailinglist extends Page {
 		return $this->xml->documentElement;
 	}
 
-	public function build() {
+	public function process(HyphaRequest $request) {
 		$this->html->writeToElement('pagename', showPagename($this->pagename).' '.asterisk($this->privateFlag));
 
 		$firstArgument = $this->getArg(0);

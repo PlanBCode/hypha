@@ -753,3 +753,32 @@
 	function hypha_indexFiles() {
 		return 'file index is not yet implemented';
 	}
+
+	function hypha_getDefaultForm() {
+		$html = <<<EOF
+<form name="hyphaForm" method="post" action="" accept-charset="utf-8" enctype="multipart/form-data">
+	<input id="command" name="command" type="hidden">
+	<input id="argument" name="argument" type="hidden">
+	<input id="csrfToken" name="csrfToken" type="hidden" value="[[csrf]]">
+</form>
+EOF;
+		$vars = [
+			'csrf' => getCsrfToken(),
+		];
+
+		$html = hypha_substitute($html, $vars);
+		return $html;
+	}
+
+	function hypha_substitute($string, array $vars) {
+		foreach ($vars as $key => $val) $string = str_replace('[[' . $key . ']]', $val, $string);
+		return $string;
+	}
+
+	function hypha_createForm($formHtml, array $values = []) {
+		$formDoc = (new \DOMWrap\Document())->append($formHtml);
+		$form = new WymHTMLForm($formDoc);
+		$form->setData($values);
+		$form->updateDom();
+		return $form;
+	}

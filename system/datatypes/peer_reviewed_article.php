@@ -211,7 +211,7 @@ class peer_reviewed_article extends Page {
 		$title = $this->getTitle();
 		$author = $this->hyphaUser->getAttribute('fullname');
 		$linkToPage = $this->constructFullPath($this->pagename);
-		
+
 		$comment = $discussion->getDoc()->lastChild->textContent;
 		$subject = __('art-block-submitted-subject', array(
 			"title" => $title
@@ -222,7 +222,7 @@ class peer_reviewed_article extends Page {
 			"author" => htmlspecialchars($author),
 			"comment" => htmlspecialchars($comment)
 		));
-		
+
 		$this->sendMail(getUserEmailList(), $subject, $message);
 	}
 
@@ -360,12 +360,12 @@ class peer_reviewed_article extends Page {
 	/**
 	 * @return array|null
 	 */
-	public function build() {
+	public function process(HyphaRequest $request) {
 		$this->initialSetup();
 		$this->html->writeToElement('pagename', $this->getTitle() . ' ' . asterisk($this->privateFlag));
 
 		$this->beforeProcessRequest();
-		return $this->processRequest();
+		return $this->processRequest($request);
 	}
 
 	protected function initialSetup() {
@@ -410,7 +410,7 @@ class peer_reviewed_article extends Page {
 		}
 	}
 
-	protected function processRequest() {
+	protected function processRequest(HyphaRequest $request) {
 		// By default a user can preform any action
 		$valid = isUser();
 		if (!isUser()) {
@@ -513,7 +513,7 @@ class peer_reviewed_article extends Page {
 		$linkToPage = $this->constructFullPath($this->pagename);
 		$name = self::getCommentPoster($comment);
 		$commentBody = $comment->getText();
-		
+
 		$subject = __('art-comment-subject', array(
 			"name" => $name,
 			"title" => $title

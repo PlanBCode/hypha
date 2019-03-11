@@ -47,7 +47,6 @@
 				case [self::PATH_EDIT,      self::CMD_SAVE]:      return $this->editAction($request);
 				case [self::PATH_TRANSLATE, null]:                return $this->translateView($request);
 				case [self::PATH_TRANSLATE, self::CMD_TRANSLATE]: return $this->translateAction($request);
-				case [self::PATH_TRANSLATE, self::CMD_AJAX_FOO]:  return $this->someAjaxAction();
 			}
 
 			return ['404'];
@@ -83,16 +82,6 @@
 					}
 				}
 			}
-
-			class FooResponse {
-				function handle() {
-				}
-			}
-			return new FooResponse();
-
-			return new RedirectResponse('aasdfdsf');
-			return redirect('sdfasdf');
-			return ['redirect', 'sdfasdf'];
 		}
 
 		private function notifyAndReturnRedirect($msg, $page) {
@@ -101,49 +90,62 @@
 			return ['redirect', $this->constructFullPath($page)];
 		}
 
+		/**
+		 * @param array $values
+		 *
+		 * @return WymHTMLForm
+		 */
+		private function createEditForm(array $values = []) {
+			$html = <<<EOF
+				<form name="form3">
+					<div class="section">
+						<label for="[[titleFieldName]]">[[title]]</label>
+						<input type="text" id="[[titleFieldName]]" name="[[titleFieldName]]" onblur="validatePagename(this);" onkeyup="validatePagename(this);" />
+						<input type="checkbox" id="[[privateFieldName]]" name="[[privateFieldName]]" />
+						<label for="[[privateFieldName]]">[[private]]</label>
+					</div>
+					<editor name="[[contentFieldName]]"/>
+				</form>
+EOF;
+			$vars = [
+				'title' => __('title'),
+				'titleFieldName' => self::FIELD_NAME_PAGE_NAME,
+				'private' => __('private-page'),
+				'privateFieldName' => self::FIELD_NAME_PRIVATE,
+				'contentFieldName' => self::FIELD_NAME_CONTENT,
+			];
+
+			$html = hypha_substitute($html, $vars);
+
+			return hypha_createForm($html, $values);
+		}
+
 		private function editView(HyphaRequest $request) {
-			if (!isUser()) {
-				return ['errors' => ['art-login-preform-action']];
-			}
 			if (!isUser()) {
 				notify('error', __('art-login-preform-action'));
 
 				return ['redirect', $this->constructFullPath($this->pagename)];
 			}
-			if (!isUser()) {
-				return $this->notifyAndReturnRedirect(__('art-login-preform-action'), $this->pagename);
-			}
+
+			// create form
 			$formData = [
 				self::FIELD_NAME_PAGE_NAME => showPagename($this->pagename),
 				self::FIELD_NAME_PRIVATE => $this->privateFlag,
 				self::FIELD_NAME_CONTENT => $this->getContent(),
 			];
-
-			// create form
 			$form = $this->createEditForm($formData);
-			$form->updateDom();
-/*
-			$this->findBySelector('#main')->append($form->elem->children());
-			$commands = $this->findBySelector('#pageCommands');
-			$commands->append($form->makeSubmitButton(__('save'), self::PATH_EDIT, self::CMD_SAVE));
-			$commands->append($this->makeActionButton(__('cancel'), self::PATH_EDIT));
-*/
-			$main = $this->findBySelector('#main');
+
+			$main = $this->html->find('#main');
 			$main->addForm($form);
+			$request->getRelativePagePath();
+//			$form = hypha_getDefaultForm($this->html);
+			// TODO [LRM]: remove exit!
+//			exit('<pre>' . print_r($form->html(), true) . '</pre>' . "\n");
 
-			$commands = $this->findBySelector('#pageCommands');
-			$commands->addButton($form, __('save'), self::PATH_EDIT, self::CMD_SAVE);
-			// TODO: Maybe Form::DEFAULT_FORM, $this->html()->getDefaultForm(), or something else.
-			$commands->addButton($this->getDefaultForm(), __('cancel'), self::PATH_EDIT);
-			$commands->append($form->createButton());
-			$commands->addButton(__('cancel'), self::PATH_EDIT);
-/*
-			$commands->addFormButton(['form' => $form, 'title' => __('save'), 'path' => self::PATH_EDIT, 'command' => self::CMD_SAVE]);
+			$commands = $this->html->find('#pageCommands');
+			$commands->addButton($form->elem->html(), __('save'), $request->getRelativePagePath() . '/' . self::PATH_EDIT, self::CMD_SAVE);
+			$commands->addButton(hypha_getDefaultForm(), __('cancel'), $request->getRelativePagePath());
 
-			$commands->addButton()->setForm($form)->setTitle(__('save'))->setPath(self::PATH_EDIT)->setCommand(self::CMD_SAVE);
-
-			$commands->addButton((new Button(__('save'))->setForm($form)->setPath(self::PATH_EDIT)->setCommand(self::CMD_SAVE));
-*/
 			return null;
 		}
 
@@ -245,129 +247,6 @@
 			} else {
 				return ['404'];
 			}
-
-		}
-
-		/**
-		 * @param array $data
-		 *
-		 * @return WymHTMLForm
-		 */
-		private function createEditForm(array $data = []) {
-			$title = htmlspecialchars(__('title'));
-			$titleFieldName = self::FIELD_NAME_PAGE_NAME;
-			$private = htmlspecialchars(__('private-page'));
-			$privateFieldName = self::FIELD_NAME_PRIVATE;
-			$contentFieldName = self::FIELD_NAME_CONTENT;
-
-			$vars = [
-				'title' => __('title'),
-				'titleFieldName' => self::FIELD_NAME_PAGE_NAME,
-				'private' => __('private-page'),
-				'privateFieldName' => self::FIELD_NAME_PRIVATE,
-				'contentFieldName' => self::FIELD_NAME_CONTENT,
-			];
-
-			// TODO: We can use an interpolated string
-			// constant in other places too to generate HTML
-			// in e.g. views, when appropriate (but it is
-			// not mandatory).
-			$html = <<<EOF
-				<div class="section">
-					<label for="[[titleFieldName]]">[[title]]</label>
-					<input type="text" id="[[titleFieldName]]" name="[[titleFieldName]]" onblur="validatePagename(this);" onkeyup="validatePagename(this);" />
-					<input type="checkbox" id="[[privateFieldName]]" name="[[privateFieldName]]" />
-					<label for="[[privateFieldName]]">[[private]]</label>
-				</div>
-				<editor name="[[contentFieldName]]"></editor>
-EOF;
-			// Interpolate can handle HTML escaping when needed. Strings
-			// can be marked as already escaped / containing html by
-			// turning them into DomDocument
-			// nodes/snippets/documentfragments/something or some other
-			// custom wrapper class.
-			$html = interpolate_vars($html, $vars);
-
-			// To do things like looping for dynamic select values, you
-			// can either do this beforehand in PHP, building up a
-			// list of <option> tags to pass inside $vars, or
-			// afterwards, by appending to the (parsed) DOM version of
-			// $html.
-/*
-			$html = <<<EOF
-				<div class="section">
-	                <label for="$titleFieldName">$title</label>
-					<input type="text" id="$titleFieldName" name="$titleFieldName" onblur="validatePagename(this);" onkeyup="validatePagename(this);" />
-	                <input type="checkbox" id="$privateFieldName" name="$privateFieldName" />
-					<label for="$privateFieldName">$private</label>
-	            </div>
-	            <editor name="$contentFieldName"></editor>
-
-EOF;
-			[
-				self::FIELD_NAME_PAGE_NAME => [
-					'label' => __('title'),
-					'type' => 'text',
-					'attrs' => ['onblur' => "validatePagename(this);", 'onkeyup' => "validatePagename(this);"],
-				],
-				self::FIELD_NAME_PRIVATE => [
-					'label' => __('private-page'),
-					'type' => 'checkbox',
-				],
-				self::FIELD_NAME_CONTENT => [
-					'type' => 'wym_editor',
-				],
-			];
-
-
-			$form->add_label(self::FIELD_NAME_PAGE_NAME, ['content' => __('title')]);
-			$form->add_input(self::FIELD_NAME_PAGE_NAME, [
-				'type' => 'text',
-				'onblur' => "validatePagename(this);",
-				'onkeyup' => "validatePagename(this);",
-			]);
-			$form->add_input(self::FIELD_NAME_PRIVATE, [
-				'type' => 'checkbox',
-			]);
-			$form->add_label(self::FIELD_NAME_PRIVATE, ['content' => __('private_page')]);
-			$form->add_editor(self::FIELD_NAME_CONTENT);
-
-
-			$contentFieldName = self::FIELD_NAME_CONTENT;
-			[
-				'name' => [
-					'name' => self::FIELD_NAME_PAGE_NAME,
-					'label' => __('title'),
-				],
-				self::FIELD_NAME_PRIVATE => [
-					'label' => __('private-page'),
-				],
-				self::FIELD_NAME_CONTENT => [
-				],
-			];
-
-			$html = <<<EOF
-				<div class="section">
-	                <label for="name"/>
-					<input type="text" localname="name" onblur="validatePagename(this);" onkeyup="validatePagename(this);" />
-	                <input type="checkbox" id="private" name="private" />
-					<label for="private"/>
-	            </div>
-	            <editor name="content"/>
-EOF;
-*/
-
-			/** @var HyphaDomElement $form */
-			$form = $this->html->createElement('form');
-			/** @var \DOMWrap\Element $elem */
-			$elem = $form->html($html);
-
-			// TODO: This should make sure to also generate
-			// a hidden command field inside the form tag,
-			// and the form tag generated should be
-			// preserved (originally, only the form's
-			// children were put into the output HTML).
-			return $this->createForm($elem, $data);
 		}
 
 		/**

@@ -143,6 +143,10 @@
 		Extension of the DOMWrap\Element class (which again
 		extends the PHP DOMElement class). This adds a few extra helper methods.
 	*/
+
+	/**
+	 * @method HTMLDocument document()
+	 */
 	class HyphaDomElement extends DOMWrap\Element {
 
 		/*
@@ -200,6 +204,23 @@
 		 */
 		function get($tag) {
 			return $this->find($tag, 'child::')->first();
+		}
+	}
+
+	/*
+		Class: HyphaHtmlDomElement
+
+		Extension of HyphaDomElement. This adds a few extra helper methods.
+	*/
+	class HyphaHtmlDomElement extends HyphaDomElement {
+		function addForm(WymHTMLForm $form) {
+			$this->append($form->elem->html());
+		}
+		function addButton($form, $label, $path = null, $command = null, $argument = null) {
+			$_action = makeAction($path, ($command ? $command : ''), ($argument ? $argument : ''));
+			$button = makeButton(__($label), $_action);
+
+			$this->append($button);
 		}
 	}
 
