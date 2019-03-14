@@ -155,6 +155,14 @@
 				// initiate the "site_links" plugin
 				wym.site_links();
 
+				// Set id so CSS rules apply equally inside the editor as well as outside it
+				$(wym._iframe).contents().find("body").attr('id', 'main');
+
+				// Insert the main css file into the iframe, so it mimics the final result
+				// TODO: Unhardcode
+				var hypha_css = <?= json_encode('data/themes/' . Hypha::$data->theme . '/hypha.css'); ?>;
+				$(wym._iframe).contents().find("head").append($("<link/>", { rel: "stylesheet", href: hypha_css, type: "text/css" }));
+
 				// call the update function when the form is submitted
 				let $form = $(wym.element).closest('form');
 				$form.submit(function(e) {
