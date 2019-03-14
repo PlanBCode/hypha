@@ -139,8 +139,13 @@
 		}
 
 		public function getScheme() {
-			return $_SERVER['REQUEST_SCHEME'];
-		}
+                        // Apache 2.4+ has REQUEST_SCHEME
+                        if (array_key_exists('REQUEST_SCHEME', $_SERVER))
+                                return $_SERVER['REQUEST_SCHEME'];
+                        if (array_key_exists('HTTPS', $_SERVER) && $_SERVER['HTTPS'] == 'on')
+                                return 'https';
+                        return 'http';
+                }
 
 		public function getHost() {
 			return $_SERVER['HTTP_HOST'];
