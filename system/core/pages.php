@@ -348,14 +348,21 @@
 		global $hyphaContentLanguage;
 		global $hyphaPage;
 
-		$uri = $node->getAttribute('href');
-
-		$path = explode('/', $uri, 2);
-		$parts = explode(':', $path[0], 2);
-		if (count($parts) != 2 || $parts[0] != 'hypha')
+		$href = $node->getAttribute('href');
+		// This matches a url of the form hypha:123abc/subpath#anchor
+		// and splits that into the page id (123abc), followed
+		// by an optional subpath and/or anchor. The page id
+		// will be replaced by the real url, the rest will be
+		// kept as-is.
+		//
+		// Note that pipes are used to enclose the regex rather
+		// than slashes, so we can use slashes without escaping
+		// them.
+		if (!preg_match('|^hypha:([^/#]+)(.*)$|', $href, $matches))
 			return;
+		list($all, $id, $extra) = $matches;
 
-		$page = hypha_getPageById($parts[1]);
+		$page = hypha_getPageById($id);
 		if (!$page)
 			return;
 
@@ -394,8 +401,7 @@
 
 		// Generate and set the url
 		$url = $language->getAttribute('id').'/'.urlencode($language->getAttribute('name'));
-		if (count($path) > 1)
-			$url .= '/' . $path[1];
+		$url .= $extra;
 		$node->setAttribute('href', $url);
 	}
 
@@ -438,12 +444,19 @@
 	function wikify_link($node) {
 		global $hyphaXml, $isoLangList;
 
-		$path = explode('/', $node->getAttribute('href'), 3);
-		if (count($path) < 2)
+		$href = $node->getAttribute('href');
+		// This parses a query string of the form en/pagename/subpath#anchor
+		// and splits that into the language and pagename,
+		// followed by an optional subpath and/or anchor. The
+		// language and pagename will be replaced by the page
+		// id, the rest will be kept as-is.
+		//
+		// Note that pipes are used to enclose the regex rather
+		// than slashes, so we can use slashes without escaping
+		// them.
+		if (!preg_match('|^([^/#]+)/([^/#]+)(.*)$|', $href, $matches))
 			return;
-
-		$language = $path[0];
-		$pagename = $path[1];
+		list($all, $language, $pagename, $extra) = $matches;
 
 		// Prevent mangling urls to other files, such as images or downloads
 		if (!array_key_exists($language, $isoLangList))
@@ -478,9 +491,7 @@
 		if ($node->getAttribute('title') == __('page-in-other-language'))
 			$node->removeAttribute('title');
 
-		$uri = 'hypha:' . $page->getAttribute('id');
-		if (count($path) > 2)
-			$uri .= '/' . $path[2];
+		$uri = 'hypha:' . $page->getAttribute('id') . $extra;
 		$node->setAttribute('href', $uri);
 
 		// Clear out the page name in the link text, but keep
