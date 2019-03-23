@@ -201,6 +201,26 @@
 		}
 
 		/*
+			Function: setId
+
+			Sets the value of the property that is used
+			as the id attribute for this element.
+		*/
+		function setId($id) {
+			return $this->setAttribute($this->getIdAttribute(), $id);
+		}
+
+		/*
+			Function: hasId
+
+			Checks if the property that is used as the id
+			attribute for this element is present.
+		*/
+		function hasId() {
+			return $this->hasAttribute($this->getIdAttribute());
+		}
+
+		/*
 		        Function: getOrCreate
 
 			Gets the child with the the given tag name
