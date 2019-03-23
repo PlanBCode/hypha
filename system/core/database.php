@@ -144,6 +144,37 @@
 		extends the PHP DOMElement class). This adds a few extra helper methods.
 	*/
 	class HyphaDomElement extends DOMWrap\Element {
+		private function getIdAttribute() {
+			// DomDocument allows marking attributes as id
+			// attributes, so getElementById can use them.
+			// By default, the xml:id attribute is marked as
+			// such (even though the docs imply that there
+			// is no default).
+			//
+			// This marking can be done using
+			// setIdAttribute, but that must then be called
+			// on *all* elements individually (and there
+			// does not seem to be a good point to hook this
+			// in, since constructors and methods like
+			// DomDocument::createElement are not actually
+			// called when parsing XML/HTML).
+			//
+			// The alternative is to use and validate using
+			// a DTD that marks attributes as id, which then
+			// applies to the entire document. This happens
+			// automatically when using loadHTML, making
+			// getElementById working for HTML documents as
+			// expcted.
+			//
+			// Since there is no way to query the used id
+			// attribute(s), but we want to be able to
+			// manipulate them in a generic way here, we
+			// instead look at the dtd
+			$doctype = $this->ownerDocument->doctype;
+			if ($doctype && $doctype->name == 'html')
+				return 'id';
+			return 'xml:id';
+		}
 
 		/*
 		        Function: generateId
@@ -156,16 +187,17 @@
 			do {
 				$id = 'id' . uniqid();
 			} while ($this->document()->getElementById($id));
-			$this->setAttribute('xml:id', $id);
+			$this->setAttribute($this->getIdAttribute(), $id);
 		}
 
 		/*
 			Function: getId
 
-			Returns the xml:id property of this element.
+			Returns the value of the property that is used
+			as the id attribute for this element.
 		*/
 		function getId() {
-			return $this->getAttribute('xml:id');
+			return $this->getAttribute($this->getIdAttribute());
 		}
 
 		/*
