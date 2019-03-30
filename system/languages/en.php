@@ -321,6 +321,7 @@
 		"art-no-comments-yet" => "no comments yet",
 		"art-add-review-comment" => "add review comment",
 		"art-add-comment" => "add comment",
+		"art-comment-unanonymous" => " (make yourself known using your full name)",
 		"art-comment" => "comment on the article",
 		"art-comments" => "comments",
 		"art-discussion" => "join the discussion",
