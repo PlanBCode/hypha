@@ -219,7 +219,7 @@ class mailinglist extends Page {
 		if (isUser()) {
 			$header->addCell();
 		}
-		$header->addCell()->setHtml(isUser() ? $this->makeActionButton('add', 'create') : '');
+		$header->addCell()->setHtml(isUser() ? $this->makeActionButton('add-mailing', 'create') : '');
 		$header->addCell();
 		foreach ($mailings as $mailing) {
 			$status = $mailing->getAttribute('status');

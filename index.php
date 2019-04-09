@@ -14,7 +14,7 @@
 		Group: Stage 1 - Security
 		Basic security is obtained in a number of ways.
 		- *htaccess* All http requests (pages, images, ajax calls, whatever...) to the folder where hypha resides or one of its subfolder are directed to this script (index.php) by a RewriteRule in .htaccess. One exception is made for calls to hypha.php, our maintenance script. In this way we can shield off direct access to data files.
-		- *session* When the main script is run it first initializes the session data through session_start(); This is a standard php command to administer data associated with a certain client, e.g. if a user is logged in. When no action is noticed from the client side within a ceratin time the data is dropped. In the above example the user will be considered logged out. For hypha, the login state is stored in the variable $_SESSION['hyphaLogin']
+		- *session* When the main script is run it first initializes the session data through session_start(); This is a standard php command to administer data associated with a certain client, e.g. if a user is logged in. When no action is noticed from the client side within a certain time the data is dropped. In the above example the user will be considered logged out. For hypha, the login state is stored in the variable $_SESSION['hyphaLogin']
 		- *errors* Switch off php error reporting to the client.
 		- *sanity check* Check if the version of php is compatible with our script.
 		- *code scan* Client data sent through $_GET or $_POST variables are scanned for malicious code injection before continuing to the main script.
