@@ -842,3 +842,8 @@ body.type_peer_reviewed_article .input-wrapper.field_type_editor:not(.field_name
 .hyphaInfoButton:before {
     content: 'i';
 }
+
+.new-comment textarea{
+	width: 100%;
+	height: 100px;
+}
