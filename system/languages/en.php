@@ -358,6 +358,7 @@
 
 		// help_icon_texts
 		"help-private-page" => "A private page is only visible to users who are logged in.",
+		"help-page-type" => "Choose your page type first.\nA festival page will give you the tools to organise a festival and show the line-up to the visitor.\nA mailinglist creates a list for emailaddresses and a tool to send mailings.\nA peer reviewed article creates a page that remains private until 3 people have approved it,\nthen it becomes public with a comments possibility.\nA web page creates a regular web page.",
 		"help-version-management" => "Here you can go back to a previous version of this page. You can make this choice final by clicking revert.",
 		"help-version-revert" => "Here you confirm the choice to replace the newest version of the page for this one.\n If that is not what you want, you can choose the top page in the version management list.",
 		"help-blocking-comment" => "You can block an article if you think it should not be published. \nIf you do so you are the only one who can unblock it again, \nfor instance after the writer has made sufficient changes.",
