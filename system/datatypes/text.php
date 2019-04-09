@@ -397,4 +397,52 @@ EOF;
 		protected function checkCommand($command) {
 			return $command === $this->O_O->getRequest()->getPostValue('command');
 		}
+		
+		
+		// SERVICE METHODS
+		// discussion: output html and call through url endpoint declared in matrix
+		// or return php variables to be processed elsewhere?
+		
+		public function summary() {
+			$node = getWikiContentNode($this->xml->documentElement, $this->language, '');
+			truncateHtmlNode($node, 500);
+			$node->formatOutput = true;
+			echo $node->saveHTML();
+		}
+		
+		// A *very* simple search function, simply returning the number of occurances of a substring in a text
+		// To be replaced with something better, like http://phpir.com/simple-search-the-vector-space-model
+		// Or perhaps some library like https://github.com/teamtnt/tntsearch
+		public function search($pattern) {
+			$fulltext = getWikiContent($this->xml->documentElement, $this->language, '');
+			echo substr_count(strtolower(strip_tags($fulltext)), strtolower($pattern));
+		}
+		
+		public function indexDataRow() {
+			echo '<tr><td>'.showPagename($this->pagename).'</td></tr>';
+		}
+		
+		public function indexHeaderRow() {
+			echo '<tr><td>'.__('index-pagename').'</td></tr>';
+		}
+		
+		// offload to dom-wrapper?
+		function truncateHtmlNode($node, $length) {
+			$remove = false;
+			$content = '';
+			$delete = array();
+
+			foreach($node->childNodes as $child) {
+				if ($remove) {
+					$delete[] = $child;
+				} else {
+					$content.= $child->nodeValue;
+					if (!$remove && strlen($content) >= $length) $remove = true;
+				}
+			}
+
+			foreach ($delete as $child) {
+				$child->parentNode->removeChild($child);
+			}
+		}
 	}
