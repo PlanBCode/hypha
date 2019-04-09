@@ -1182,9 +1182,10 @@ EOF;
 			$nameFieldName = self::FIELD_NAME_DISCUSSION_COMMENTER_NAME;
 			$email = __('art-email');
 			$emailFieldName = self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL;
+			$unAnonymous =  __('art-comment-unanonymous');
 			$html .= <<<EOF
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
-				<strong><label for="$nameFieldName"> $name </label></strong> <input type="text" id="$nameFieldName" name="$nameFieldName" />
+				<strong><label for="$nameFieldName"> $name </label></strong><div class="label_suffix">$unAnonymous</div> <input type="text" id="$nameFieldName" name="$nameFieldName" />
 			</div>
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
 				<strong><label for="$emailFieldName"> $email </label></strong> <input type="text" id="$emailFieldName" name="$emailFieldName" />

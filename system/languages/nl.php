@@ -319,6 +319,7 @@
 		"art-no-comments-yet" => "nog geen reacties",
 		"art-add-review-comment" => "voeg beoordelingsopmerking toe",
 		"art-add-comment" => "voeg reactie toe",
+		"art-comment-unanonymous" => " (maak u bekend met uw volledige naam)",
 		"art-comment" => "reageer op het artikel",
 		"art-comments" => "opmerkingen",
 		"art-discussion" => "discussier mee",

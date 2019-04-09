@@ -570,6 +570,15 @@ input {
 .new-comment label {
  display: block;
 }
+.new-comment label[for="commenter_name"] {
+ display: inline;
+}
+.new-comment .label_suffix {
+ display: inline;
+}
+.new-comment input[name="commenter_name"] {
+ display: block;
+}
 
 .review-comment-wrapper {
  background: #FFFFE0;
