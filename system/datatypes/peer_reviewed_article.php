@@ -1158,12 +1158,16 @@ EOF;
 	 */
 	private function getCommentFormHtml($type, DocPage $discussion = null) {
 		$comment = __('art-comment');
+		// Only show this infobox to visitors, since it does not
+		// really apply to logged in users (that do not have to
+		// enter their name).
+		$infoCommentRules = isUser() ? '' : makeInfoButton('help-comment-rules');
 		$new = $discussion === null;
 		$commentFieldName = self::FIELD_NAME_DISCUSSION_COMMENT . '/' . ($new ? 'new_' . $type : $discussion->getId());
 		$html = <<<EOF
 			<div class="new-comment $type">
 			<div>
-				<strong><label for="$commentFieldName"> $comment </label></strong><textarea name="$commentFieldName" id="$commentFieldName" cols="36" rows="4"></textarea>
+				<strong><label for="$commentFieldName"> $comment $infoCommentRules</label></strong><br/><textarea name="$commentFieldName" id="$commentFieldName" cols="36" rows="4"></textarea>
 			</div>
 EOF;
 		if ($new && self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER === $type && !in_array($this->getStatus(), [self::STATUS_APPROVED, self::STATUS_PUBLISHED])) {
