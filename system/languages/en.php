@@ -383,6 +383,11 @@
 		"art-date-format-date" => "F j, Y", // see for format: https://www.php.net/manual/en/function.date.php
 		"art-date-format-time" => '\a\t g\:ia', // see for format: https://www.php.net/manual/en/function.date.php
 
+		// sharing links
+		"share-email-subject" => "See '[[title]]' at [[domain]]",
+		"share-email-body" => "I came across '[[title]]' at [[domain]]: [[url]]",
+		"share-twitter" => "See '[[title]]' at [[domain]]: ", // Twitter appends URL
+
 		// help_icon_texts
 		"help-private-page" => "A private page is only visible to users who are logged in.",
 		"help-page-type" => "Choose your page type first.\nA festival page will give you the tools to organise a festival and show the line-up to the visitor.\nA mailinglist creates a list for emailaddresses and a tool to send mailings.\nA peer reviewed article creates a page that remains private until 3 people have approved it,\nthen it becomes public with a comments possibility.\nA web page creates a regular web page.",

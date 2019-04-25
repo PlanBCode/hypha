@@ -249,6 +249,21 @@ class peer_reviewed_article extends Page {
 			$this->html->find('#pagename')->before('<div class="number_of_comments">'.$commentCountText.'</div>');
 		}
 
+		// Sharing links
+		$shareDiv = $this->html->create('<div class="share-links">')->appendTo($main);
+		$linkToPage = $this->constructFullPath($this->pagename);
+		$themeImgPath = 'data/themes/' . Hypha::$data->theme . '/images';
+
+		// Email
+		$subject = __('share-email-subject', array("domain" => hypha_getTitle(), "title" => $this->getTitle()));
+		$body = __('share-email-body', array("domain" => hypha_getTitle(), "title" => $this->getTitle(), "url" => $linkToPage));
+		$shareDiv->append('<a href="mailto:?subject='.rawurlencode($subject).'&body='.rawurlencode($body).'"><img src="'.htmlspecialchars($themeImgPath.'/shareEmail.png').'"/></a>');
+		// Twitter
+		$text = __('share-twitter', array("domain" => hypha_getTitle(), "title" => $this->getTitle(), "url" => $linkToPage));
+		$shareDiv->append('<a href="https://twitter.com/intent/tweet?text='.rawurlencode($text).'&url='.rawurlencode($linkToPage).'" target="_blank"><img src="'.htmlspecialchars($themeImgPath.'/shareTwitter.png').'"/></a>');
+		// Facebook
+		$shareDiv->append('<a href="https://www.facebook.com/sharer/sharer.php?u='.rawurlencode($linkToPage).'" target="_blank"><img src="'.htmlspecialchars($themeImgPath.'/shareFacebook.png').'"/></a>');
+
 		if ($author) {
 			$main->append('<div class="author">' . __('art-by') . ' ' . htmlspecialchars($author) . '</div>');
 		}
