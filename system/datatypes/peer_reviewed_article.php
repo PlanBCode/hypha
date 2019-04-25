@@ -1157,12 +1157,12 @@ EOF;
 	 * @return string
 	 */
 	private function getCommentFormHtml($type, DocPage $discussion = null) {
-		$comment = __('art-comment');
 		// Only show this infobox to visitors, since it does not
 		// really apply to logged in users (that do not have to
 		// enter their name).
 		$infoCommentRules = isUser() ? '' : makeInfoButton('help-comment-rules');
 		$new = $discussion === null;
+		$comment = $new ? __('art-comment-on-article') : __('art-comment-on-comment');
 		$commentFieldName = self::FIELD_NAME_DISCUSSION_COMMENT . '/' . ($new ? 'new_' . $type : $discussion->getId());
 		$html = <<<EOF
 			<div class="new-comment $type">
