@@ -137,7 +137,7 @@
 	</tr>
 	<tr>
 		<th><?=__('message');?>:</th>
-		<td><textarea name="quitGoodbye" cols="36" rows="4"><?=__('goodbye-message')?></textarea></td>
+		<td><textarea name="quitGoodbye" cols="36" rows="4"></textarea></td>
 	</tr>
 </table>
 <?php

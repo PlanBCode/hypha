@@ -145,7 +145,6 @@
 		"invite-message" => "Hi, I would like to invite you to join our group",
 		"quit-project" => "quit this project",
 		"sure-to-quit" => "are you sure you want to quit this project?",
-		"goodbye-message" => "Screw you guys, I`m going home",
 		"register" => "please fill out these fields to register",
 		"unknown-registration" => "unknown registration request",
 		"personal-settings" => "personal settings for user",

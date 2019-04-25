@@ -145,7 +145,6 @@
 		"invite-message" => "Hoi, ik nodig je uit om deel te nemen aan deze groep",
 		"quit-project" => "stop met dit project",
 		"sure-to-quit" => "weet je zeker dat je wilt stoppen met dit project?",
-		"goodbye-message" => "Screw you guys, I`m going home",
 		"register" => "vul deze velden in om je te registreren",
 		"unknown-registration" => "onbekend registratieverzoek",
 		"personal-settings" => "persoonlijke instellingen voor gebruiker",
