@@ -1167,7 +1167,7 @@ EOF;
 		$html = <<<EOF
 			<div class="new-comment $type">
 			<div>
-				<strong><label for="$commentFieldName"> $comment $infoCommentRules</label></strong><br/><textarea name="$commentFieldName" id="$commentFieldName" cols="36" rows="4"></textarea>
+				<strong><label for="$commentFieldName"> $comment $infoCommentRules</label></strong><textarea name="$commentFieldName" id="$commentFieldName" cols="36" rows="4"></textarea>
 			</div>
 EOF;
 		if ($new && self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER === $type && !in_array($this->getStatus(), [self::STATUS_APPROVED, self::STATUS_PUBLISHED])) {
