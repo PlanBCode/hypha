@@ -53,12 +53,6 @@
 ?>
 <script>
 	/*
-		Variable: baseUrl
-		Javascript variable containing the base url from the document location object.
-	*/
-	var postProcessingList = new Array();
-
-	/*
 		Function: hypha
 		Javascript function to load another page or view.
 
@@ -72,7 +66,6 @@
 		document.getElementById('command').value = cmd;
 		document.getElementById('argument').value = arg;
 		document.forms['hyphaForm'].action = url;
-		for(i=0; i<postProcessingList.length; i++) postProcessingList[i]();
 		if (cmd||arg) $(document.forms['hyphaForm']).submit();
 		else window.location = url;
 	}
