@@ -77,7 +77,8 @@
 		Website data is loaded, see chapter about <Base> functions. The HTMLDocument $hyphaHtml is loaded with the website default layout.
 	*/
 
-	$hyphaHtml = new HTMLDocument(Hypha::$data->html, $hyphaUrl);
+	$hyphaHtml = new HTMLDocument(Hypha::$data->html);
+	$hyphaHtml->initForBrowser($hyphaUrl);
 	$pathToTheme = 'data/themes/' . Hypha::$data->theme;
 	$hyphaHtml->linkStyle($pathToTheme . '/hypha.css');
 	$hyphaHtml->linkScript('//code.jquery.com/jquery-1.7.1.min.js');

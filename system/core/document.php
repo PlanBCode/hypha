@@ -41,9 +41,9 @@
 			creates an empty HTML file
 
 			Parameters:
-			$filename - optional parameter of HTML template file (HyphaFile instance).
+			$file - optional parameter of HTML template file (HyphaFile instance).
 		*/
-		public function __construct($file = false, $base_url = false) {
+		public function __construct($file = false) {
 			parent::__construct('1.0', 'UTF-8');
 			$this->preserveWhiteSpace = false;
 			$this->formatOutput = true;
@@ -61,20 +61,24 @@
 				}
 			}
 			libxml_use_internal_errors($previousSetting);
+		}
+
+		public function initForBrowser($base_url = null) {
 			$this->documentElement->setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
+			$head = $this->find('head');
 			$metaMime = $this->createElement('meta', '');
 			$metaMime->setAttribute('http-equiv', "Content-Type");
 			$metaMime->setAttribute('content', "text/html; charset=utf-8");
-			$this->getElementsByTagName('head')->Item(0)->appendChild($metaMime);
+			$head->appendChild($metaMime);
 			$metaViewport = $this->createElement('meta', '');
 			$metaViewport->setAttribute('name', "viewport");
 			$metaViewport->setAttribute('content', "width=device-width, initial-scale=1");
-			$this->getElementsByTagName('head')->Item(0)->appendChild($metaViewport);
+			$head->appendChild($metaViewport);
 
-			if ($base_url) {
-				$base = $this->createElement('base', '');
+			if (null !== $base_url) {
+				$base = $this->createElement('base');
 				$base->setAttribute('href', $base_url);
-				$this->find('head')->prepend($base);
+				$head->prepend($base);
 			}
 		}
 
