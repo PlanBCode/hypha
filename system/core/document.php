@@ -61,6 +61,7 @@
 				}
 			}
 			libxml_use_internal_errors($previousSetting);
+			$this->registerNodeClass('DOMDocument', 'HTMLDocument');
 		}
 
 		public function initForBrowser($base_url = null) {
