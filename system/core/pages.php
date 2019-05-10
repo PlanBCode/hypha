@@ -12,11 +12,13 @@
 		abstract class for handling a certain kind of data
 	*/
 	abstract class Page {
-		public $pageListNode, $html, $language, $pagename, $args, $privateFlag;
-		function __construct($node, $args) {
+		public $pageListNode, $html, $language, $pagename, $O_O, $args, $privateFlag;
+		function __construct($node, RequestContext $O_O) {
 			global $hyphaHtml;
 			$this->html = $hyphaHtml;
-			$this->args = $args;
+			$this->O_O = $O_O;
+			// TODO: Remove args (and let subclasses talk to the request instead)
+			$this->args = $O_O->getRequest()->getArgs();
 			if ($node)
 				$this->replacePageListNode($node);
 		}
@@ -140,7 +142,7 @@
 			$isPrivate = $_node && in_array($_node->getAttribute('private'), ['true', '1', 'on']);
 			if ($_node && (!$isPrivate || isUser())) {
 				$_type = $_node->getAttribute('type');
-				$hyphaPage = new $_type($_node, $args);
+				$hyphaPage = new $_type($_node, $O_O);
 
 				// write stats
 				if (!isUser())
@@ -197,7 +199,7 @@
 				exit;
 			case HyphaRequest::HYPHA_SYSTEM_PAGE_SETTINGS:
 				if (isUser() || $args[0]=='register') {
-					$hyphaPage = new settingspage($args);
+					$hyphaPage = new settingspage($O_O);
 				}
 				else {
 					header('Location: '.$hyphaUrl.hypha_getDefaultLanguage().'/'.hypha_getDefaultPage());

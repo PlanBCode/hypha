@@ -118,11 +118,11 @@ class peer_reviewed_article extends Page {
 
 	/**
 	 * @param DOMElement $pageListNode
-	 * @param array $args
+	 * @param RequestContext $O_O
 	 */
-	public function __construct(DOMElement $pageListNode, $args) {
+	public function __construct(DomElement $pageListNode, RequestContext $O_O) {
 		global $hyphaUser, $hyphaContentLanguage;
-		parent::__construct($pageListNode, $args);
+		parent::__construct($pageListNode, $O_O);
 
 		$this->xml = new Xml(get_called_class(), Xml::multiLingualOff, Xml::versionsOff);
 		$this->xml->loadFromFile('data/pages/' . $pageListNode->getAttribute('id'));

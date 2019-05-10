@@ -10,8 +10,8 @@
 	Class: festivalpage
 */
 	class festivalpage extends Page {
-		function __construct($pageListNode, $args) {
-			parent::__construct($pageListNode, $args);
+		public function __construct($pageListNode, RequestContext $O_O) {
+			parent::__construct($pageListNode, $O_O);
 			$this->xml = new Xml('festival', Xml::multiLingualOn, Xml::versionsOff);
 			$this->xml->loadFromFile('data/pages/'.$pageListNode->getAttribute('id'));
 

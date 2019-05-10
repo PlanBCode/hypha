@@ -153,7 +153,7 @@ END;
 			$hasDiff -
 	*/
 	function flushDigest() {
-		global $hyphaPagelist, $hyphaXml;
+		global $hyphaPagelist, $hyphaXml, $O_O;
 		$digest = hypha_getAndClearDigest();
 		if ($digest) {
 			$t = time() - hypha_getLastDigestTime();
@@ -171,7 +171,7 @@ END;
 			foreach ($idList as $id) {
 				$node = hypha_getPageById($id);
 				$type = $node->getAttribute('type');
-				$page = new $type($node, 'digest');
+				$page = new $type($node, $O_O);
 				$message.= '<a name="'.$id.'"></a>';
 				$message.= $page->digest(hypha_getLastDigestTime());
 			}
