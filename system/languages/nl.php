@@ -322,7 +322,7 @@
 		"art-comment-unanonymous" => " (maak u bekend met uw volledige naam)",
 		"art-comment-on-article" => "reageer op het artikel",
 		"art-comments" => "opmerkingen",
-		"art-comment-on-comment" => "discussier mee",
+		"art-comment-on-comment" => "discussieer mee",
 		"art-public-comment-count-singular" => "[[count]] reactie",
 		"art-public-comment-count-plural" => "[[count]] reacties",
 
