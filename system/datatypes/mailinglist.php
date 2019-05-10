@@ -47,10 +47,10 @@ class mailinglist extends Page {
 
 	/**
 	 * @param DOMElement $pageListNode
-	 * @param array $args
+	 * @param RequestContext $O_O
 	 */
-	public function __construct(DOMElement $pageListNode, $args) {
-		parent::__construct($pageListNode, $args);
+	public function __construct(DOMElement $pageListNode, RequestContext $O_O) {
+		parent::__construct($pageListNode, $O_O);
 		$this->xml = new Xml('mailinglist', Xml::multiLingualOn, Xml::versionsOff);
 		$this->xml->loadFromFile('data/pages/' . $pageListNode->getAttribute('id'));
 	}

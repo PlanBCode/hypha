@@ -7,8 +7,8 @@
 	<Page>
 */
 	class settingspage extends Page {
-		function __construct($args) {
-			parent::__construct('', $args);
+		function __construct(RequestContext $O_O) {
+			parent::__construct('', $O_O);
 			registerCommandCallback('settingsInvite', Array($this, 'invite'));
 			registerCommandCallback('settingsRemind', Array($this, 'remindNewUser'));
 			registerCommandCallback('settingsRegister', Array($this, 'register'));
