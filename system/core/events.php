@@ -43,7 +43,6 @@
 	<form name="hyphaForm" method="post" action="" accept-charset="utf-8" enctype="multipart/form-data">
 		<input id="command" name="command" type="hidden">
 		<input id="argument" name="argument" type="hidden">
-		<input id="csrfToken" name="csrfToken" type="hidden" value="<?=getCsrfToken()?>">
 		<?=getInnerHtml($body)?>
 	</form>
 <?php
@@ -249,6 +248,20 @@
 	*/
 	function regenerateCsrfToken() {
 		$_SESSION['hyphaCsrfToken'] = bin2hex(openssl_random_pseudo_bytes(8));
+	}
+
+	// Automatically insert the CSRF token into all forms in the
+	// generated document
+	registerPostProcessingFunction('injectCsrf');
+	function injectCsrf(HTMLDocument $html) {
+		$forms = $html->find('form');
+		foreach ($forms as $form) {
+			// if form does not have a csrf field, inject csrf field.
+			if ($form->find('input[name=csrfToken]')->count() === 0) {
+				$form->append($input = $html->create('<input name="csrfToken" type="hidden"'));
+				$input->setAttr('value', getCsrfToken());
+			}
+		}
 	}
 
 	// execute posted commands
