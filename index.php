@@ -80,7 +80,7 @@
 	$hyphaHtml = new HTMLDocument(Hypha::$data->html, $hyphaUrl);
 	$pathToTheme = 'data/themes/' . Hypha::$data->theme;
 	$hyphaHtml->linkStyle($pathToTheme . '/hypha.css');
-	$hyphaHtml->linkScript('http://code.jquery.com/jquery-1.7.1.min.js');
+	$hyphaHtml->linkScript('//code.jquery.com/jquery-1.7.1.min.js');
 	$hyphaHtml->linkScript('system/help/help.js');
 	$hyphaHtml->setTitle(hypha_getTitle());
 	$hyphaHtml->writeToElement('header', hypha_getHeader());

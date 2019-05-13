@@ -255,7 +255,7 @@
 			$header = $xml->createElement('header', $_POST['setupTitle']);
 			$hypha->appendChild($header);
 			$footer = $xml->createElement('footer', '');
-			setNodeHtml($footer, '<a href="http://creativecommons.org/licenses/by-sa/3.0/"><img alt="Creative Commons License" style="border-width: 0pt; float: right; margin-left: 5px;" src="http://i.creativecommons.org/l/by-sa/3.0/88x31.png" /></a> This work is licensed under a <a href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>. Website powered by <a href="http://www.hypha.net">hypha</a>.');
+			setNodeHtml($footer, '<a href="http://creativecommons.org/licenses/by-sa/3.0/"><img alt="Creative Commons License" style="border-width: 0pt; float: right; margin-left: 5px;" src="https://i.creativecommons.org/l/by-sa/3.0/88x31.png" /></a> This work is licensed under a <a href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>. Website powered by <a href="http://www.hypha.net">hypha</a>.');
 			$hypha->appendChild($footer);
 			$menu = $xml->createElement('menu', '');
 			setNodeHtml($menu, '<a href="hypha:'.$id.'"/>');
