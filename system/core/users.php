@@ -40,11 +40,11 @@
 	*/
 	registerCommandCallback('logout', 'logout');
 	function logout() {
-		global $hyphaQuery;
+		global $O_O;
 
-		$arg = explode('/', $hyphaQuery);
-		$language = $arg[0];
-		$pagename = $arg[1];
+		$arg = $O_O->getRequest()->getRelativeUrlPathParts();
+		$language = $O_O->getContentLanguage();
+		$pagename = $arg[0];
 		$page = hypha_getPage($language, $pagename);
 		// if current query is a regular page which is not private we can safely log out, but have to switch to default view
 		if ($page && $page->getAttribute('private')!=='on') {
@@ -60,7 +60,7 @@
 		session_start();
 		unset($_SESSION['hyphaLogin']);
 		session_write_close();
-		return 'reload';
+		return ['redirect', $O_O->getRequest()->getRootUrl() . $hyphaQuery];
 	}
 
 	/*
@@ -119,7 +119,8 @@
 		add javascript needed for the login procedure to function
 	*/
 	function addLoginRoutine($html) {
-		global $hyphaQuery;
+		global $O_O;
+		$currentUrlPath = $O_O->getRequest()->getRelativeUrlPath(false);
 		ob_start();
 		/*
 			Function: login
@@ -133,7 +134,7 @@
 		html = '<table class="section">';
 		html+= '<tr><th><?=__('login-username')?>:</th><td><input name="loginUsername" id="loginUsername" type="text" size="10" /></td></tr>';
 		html+= '<tr><th><?=__('login-password')?>:</th><td><input name="loginPassword" type="password" size="10" /></td></tr>';
-		html+= '<tr><td></td><td><input type="submit" name="login" value="<?=__('login')?>" onclick="hypha(\'<?=$hyphaQuery?>\', \'login\', \'\');" /><input type="button" name="cancel" value="<?=__('cancel')?>" onclick="document.getElementById(\'popup\').style.visibility=\'hidden\';" /></td></tr>';
+		html+= '<tr><td></td><td><input type="submit" name="login" value="<?=__('login')?>" onclick="hypha(\'<?=$currentUrlPath?>\', \'login\', \'\');" /><input type="button" name="cancel" value="<?=__('cancel')?>" onclick="document.getElementById(\'popup\').style.visibility=\'hidden\';" /></td></tr>';
 		html+= '<tr><td id="loginForgotPassword" colspan="2"><?=__('forgot-password')?><a href="javascript:reregister();"><?=__('reregister')?></a></td></tr>';
 		html+= '</table>';
 		document.getElementById('popup').innerHTML = html;
@@ -145,7 +146,7 @@
 	function reregister() {
 		html = '<table class="section">';
 		html+= '<tr><th><?=__('name-or-email')?></th><td><input name="searchLogin" id="searchLogin" type="text" size="10" /></td></tr>';
-		html+= '<tr><td></td><td><input type="submit" name="submit" value="<?=__('submit')?>" onclick="hypha(\'<?=$hyphaQuery?>\', \'reregister\', document.getElementById(\'searchLogin\').value);" /><input type="button" name="cancel" value="<?=__('cancel')?>" onclick="showLogin();" /></td></tr>';
+		html+= '<tr><td></td><td><input type="submit" name="submit" value="<?=__('submit')?>" onclick="hypha(\'<?=$currentUrlPath?>\', \'reregister\', document.getElementById(\'searchLogin\').value);" /><input type="button" name="cancel" value="<?=__('cancel')?>" onclick="showLogin();" /></td></tr>';
 		html+= '</table>';
 		document.getElementById('popup').innerHTML = html;
 		document.getElementById('popup').style.left = document.getElementById('hyphaCommands').offsetLeft + 'px';
