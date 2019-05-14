@@ -265,12 +265,16 @@
 			Wraps an existing form
 
 			Parameters:
-			$form - A DOMWrap\Element that contains the form
-			        fields.
+			@param string|NodeList|\DOMNode|\Closure $form
+			$form - The form, either as a single DomElement,
+				a list (or any traversable) of
+				DomElements, or a string containing
+				HTML. Accepts anything that can be passed
+				to domwrap's append method.
 		*/
 		function __construct($form, $data = []) {
 			$this->root = (new HTMLDocument())->createElement('root');
-			$this->root->append($form->children());
+			$this->root->append($form);
 
 			$this->data = $data;
 			$this->errors = [];

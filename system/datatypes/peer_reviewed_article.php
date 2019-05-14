@@ -1104,11 +1104,6 @@ class peer_reviewed_article extends Page {
 				</div>
 			</div>
 EOF;
-		/** @var HyphaDomElement $form */
-		$form = $this->html->createElement('form');
-		/** @var \DOMWrap\Element $elem */
-		$elem = $form->html($html);
-
 		// buttons
 		$commands = $this->findBySelector('#pageCommands');
 		$commands->append($this->makeActionButton(__('art-cancel')));
@@ -1117,7 +1112,7 @@ EOF;
 		$commandsAtEnd->append($this->makeActionButton(__('art-cancel')));
 		$commandsAtEnd->append($this->makeActionButton(__('art-save'), self::PATH_EDIT, self::FORM_CMD_EDIT));
 
-		return $this->createForm($elem, $data);
+		return $this->createForm($html, $data);
 	}
 
 	/**
@@ -1128,12 +1123,8 @@ EOF;
 	 */
 	private function createDiscussionForm($type, array $data = []) {
 		$html = $this->getCommentFormHtml($type);
-		/** @var HyphaDomElement $form */
-		$form = $this->html->createElement('form');
-		/** @var \DOMWrap\Element $elem */
-		$elem = $form->html($html);
 
-		return $this->createForm($elem, $data);
+		return $this->createForm($html, $data);
 	}
 
 	/**
@@ -1145,12 +1136,8 @@ EOF;
 	private function createDiscussionCommentForm(DocPage $discussion, array $data = []) {
 		$type = $discussion->getParent()->getName();
 		$html = $this->getCommentFormHtml($type, $discussion);
-		/** @var HyphaDomElement $form */
-		$form = $this->html->createElement('form');
-		/** @var \DOMWrap\Element $elem */
-		$elem = $form->html($html);
 
-		return $this->createForm($elem, $data);
+		return $this->createForm($html, $data);
 	}
 
 	/**
@@ -1241,13 +1228,13 @@ EOF;
 
 	/**
 	 * @todo [LRM]: move so it can be used throughout Hypha
-	 * @param DOMElement $elem
+	 * @param string|NodeList|\DOMNode|\Closure $contents
 	 * @param array $data
 	 *
 	 * @return WymHTMLForm
 	 */
-	protected function createForm(DOMElement $elem, array $data = []) {
-		$form = new WymHTMLForm($elem);
+	protected function createForm($contents, array $data = []) {
+		$form = new WymHTMLForm($contents);
 		$form->setData($data);
 
 		return $form;
