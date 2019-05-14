@@ -265,13 +265,13 @@
 			$form - A DOMWrap\Element that contains the form
 			        fields.
 		*/
-		function __construct($form, $data = array()) {
+		function __construct($form, $data = []) {
 			$this->elem = $form;
 			$this->data = $data;
-			$this->errors = array();
-			$this->fields = array();
-			$this->labels = array();
-			$this->image_previews = array();
+			$this->errors = [];
+			$this->fields = [];
+			$this->labels = [];
+			$this->image_previews = [];
 
 			$this->scanForm($form);
 		}
