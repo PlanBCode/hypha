@@ -10,7 +10,7 @@
 		global $O_O;
 		$hyphaDictionary = $O_O->getDictionary();
 		$msg = array_key_exists($msgid, $hyphaDictionary) ? $hyphaDictionary[$msgid] : $msgid;
-		if ($args) foreach($args as $key => $val) $msg = str_replace('[['.$key.']]', $val, $msg);
+		if ($args) $msg = hypha_substitute($msg, $args);
 		return $msg;
 	}
 

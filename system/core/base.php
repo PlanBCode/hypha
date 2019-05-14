@@ -753,3 +753,8 @@
 	function hypha_indexFiles() {
 		return 'file index is not yet implemented';
 	}
+
+	function hypha_substitute($string, array $vars) {
+		foreach ($vars as $key => $val) $string = str_replace('[[' . $key . ']]', $val, $string);
+		return $string;
+	}
