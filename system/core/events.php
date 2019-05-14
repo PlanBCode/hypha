@@ -87,7 +87,22 @@
 		}
 		$arg.val(arg);
 
-               $form.submit();
+		// When there is a field with name "submit",
+		// $form.submit (and $form[0].submit) will be a
+		// reference to that field rather than a function we can
+		// call to submit the field. To work around that, we
+		// call the submit function from the prototype manually,
+		// but that only submits the form, without running any
+		// event handlers. So we first run the event handles
+		// manually by calling trigger. To prevent trigger from
+		// also submitting the form (and throwing an error if
+		// there is a field named submit), we pass it an Event
+		// object with preventDefault set, since then trigger
+		// knows not to submit the form.
+		var evt = new jQuery.Event("submit");
+		evt.preventDefault();
+		$form.trigger(evt);
+		$form[0].__proto__.submit.call($form[0]);
 	}
 
 	/*
