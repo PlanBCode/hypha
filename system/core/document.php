@@ -241,11 +241,14 @@
 	*/
 	class HTMLForm implements IteratorAggregate {
 		/**
-		 * The DOM form being wrapped
+		 * A dummy root element that contains the form (which
+		 * can be just a single tag wrapping the entire form,
+		 * but also multiple elements). The root itself is
+                * ignored, only its children are relevant.
 		 *
 		 * @var \DOMWrap\Element
 		 */
-		public $elem;
+		public $root;
 		/** The data associated with this form */
 		public $data;
 		/** Any collected errors from validation */
@@ -266,14 +269,16 @@
 			        fields.
 		*/
 		function __construct($form, $data = []) {
-			$this->elem = $form;
+			$this->root = (new HTMLDocument())->createElement('root');
+			$this->root->append($form->children());
+
 			$this->data = $data;
 			$this->errors = [];
 			$this->fields = [];
 			$this->labels = [];
 			$this->image_previews = [];
 
-			$this->scanForm($form);
+			$this->scanForm($this->root);
 		}
 
 		// This is called when the for is iterated over (e.g.
@@ -306,9 +311,9 @@
 			Look through the DOM to find form fields and
 			their labels
 		 */
-		function scanForm($form)
+		function scanForm($root)
 		{
-			foreach($form->find(implode(', ', $this->getFormFieldTypes())) as $elem) {
+			foreach($root->find(implode(', ', $this->getFormFieldTypes())) as $elem) {
 				if ($elem->tagName == 'label') {
 					$name = self::getNameAttr($elem, 'for');
 					if ($name)
@@ -379,10 +384,10 @@
 
 			// Show any errors
 			if ($this->errors) {
-				$list = $this->elem->find('ul.form-errors')->first();
+				$list = $this->root->find('ul.form-errors')->first();
 				if (!$list) {
-					$list = $this->elem->ownerDocument->createElement('ul')->addClass('form-errors');
-					$this->elem->prepend($list);
+					$list = $this->root->document()->createElement('ul')->addClass('form-errors');
+					$this->root->prepend($list);
 				}
 
 				foreach ($this->errors as $name => $error) {
