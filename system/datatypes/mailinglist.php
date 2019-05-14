@@ -189,7 +189,7 @@ class mailinglist extends Page {
 		// display form
 		$viewAddresses = isUser() ? '<span style="float: right;">' . $this->makeActionButton(__('ml-view-addresses'), 'addresses') . '</span>' : '';
 		$this->html->writeToElement('main', '<div><h3>' . __('subscribe') . $viewAddresses . '</h3></div>');
-		$this->findBySelector('#main')->append($form->elem->children());
+		$this->findBySelector('#main')->append($form);
 
 		// display archive (anonymous users only get to see sent items)
 		$this->displayArchive();
@@ -314,7 +314,7 @@ class mailinglist extends Page {
 		// update the form dom so that error can be displayed, if there are any
 		$form->updateDom();
 
-		$this->findBySelector('#main')->append($form->elem->children());
+		$this->findBySelector('#main')->append($form);
 
 		return null;
 	}
@@ -507,7 +507,7 @@ class mailinglist extends Page {
 		}
 
 		// display form
-		$this->findBySelector('#main')->append($form->elem->children());
+		$this->findBySelector('#main')->append($form);
 
 		return null;
 	}

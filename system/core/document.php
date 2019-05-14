@@ -239,7 +239,7 @@
 		Wrapper around a DomElement that contains form fields,
 		to allow manipulating the form more easily.
 	*/
-	class HTMLForm {
+	class HTMLForm implements IteratorAggregate {
 		/**
 		 * The DOM form being wrapped
 		 *
@@ -274,6 +274,21 @@
 			$this->image_previews = [];
 
 			$this->scanForm($form);
+		}
+
+		// This is called when the for is iterated over (e.g.
+		// foreach ($elem in $form)). This returns the
+		// children() NodeList (which is also an iterator) so
+		// all content of the form will be iterated over.
+		// This allows a form to be directly appended to a
+		// DomElement (e.g. $div->append($form)) as if it was a
+		// DomElement itself. (e.g. $div->append($form)) as if
+		// it was a DomElement itself. (e.g.
+		// $div->append($form)) as if it was a DomElement
+		// itself. (e.g. $div->append($form)) as if it was a
+		// DomElement itself.
+		public function getIterator() {
+			return $this->root->children();
 		}
 
 		/*
