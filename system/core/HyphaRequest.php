@@ -227,4 +227,29 @@
 		public function getArgs() {
 			return $this->args;
 		}
+
+		/**
+		 * @return bool
+		 */
+		public function isPost() {
+			return 'POST' == $_SERVER['REQUEST_METHOD'];
+		}
+
+		/**
+		 * @return array
+		 */
+		public function getPostData() {
+			return $_POST;
+		}
+
+		/**
+		 * @param string $key
+		 * @param null|mixed $default
+		 *
+		 * @return null|mixed
+		 */
+		public function getPostValue($key, $default = null) {
+			$postData = $this->getPostData();
+			return array_key_exists($key, $postData) ? $postData[$key] : $default;
+		}
 	}
