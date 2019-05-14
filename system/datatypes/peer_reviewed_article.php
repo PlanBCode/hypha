@@ -360,7 +360,7 @@ class peer_reviewed_article extends Page {
 	/**
 	 * @return array|null
 	 */
-	public function build() {
+	public function process(HyphaRequest $request) {
 		$this->initialSetup();
 		$this->html->writeToElement('pagename', $this->getTitle() . ' ' . asterisk($this->privateFlag));
 

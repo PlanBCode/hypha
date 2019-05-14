@@ -61,7 +61,7 @@
 			return null;
 		}
 
-		abstract function build();
+		abstract function process(HyphaRequest $request);
 	}
 
 	/*
