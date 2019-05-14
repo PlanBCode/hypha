@@ -400,33 +400,66 @@ EOF;
 		
 		
 		// SERVICE METHODS
-		// discussion: output html and call through url endpoint declared in matrix
-		// or return php variables to be processed elsewhere?
-		
+
 		public function summary() {
-			$node = getWikiContentNode($this->xml->documentElement, $this->language, '');
-			truncateHtmlNode($node, 500);
-			$node->formatOutput = true;
-			echo $node->saveHTML();
+			$result = new DOMDocument('1.0', 'UTF-8');
+			$result->loadXML('<root></root>');
+
+			$content = getWikiContentNode($this->xml->documentElement, $this->language, '');
+			$clone = $result->importNode($content, true);
+			truncateHtmlNode($clone, 500);
+			$result->documentElement->appendChild($clone);
+			return $result;
 		}
-		
-		// A *very* simple search function, simply returning the number of occurances of a substring in a text
-		// To be replaced with something better, like http://phpir.com/simple-search-the-vector-space-model
-		// Or perhaps some library like https://github.com/teamtnt/tntsearch
-		public function search($pattern) {
-			$fulltext = getWikiContent($this->xml->documentElement, $this->language, '');
-			echo substr_count(strtolower(strip_tags($fulltext)), strtolower($pattern));
+
+		public function searchRelevance($pattern) {
+			$content = getWikiContent($this->xml->documentElement, $this->language, '');
+			$searchResult = searchPatternInText($pattern, $content);
+			return $searchResult["relevance"];
+		}
+
+		public function searchSummary($pattern, $result) {
+			$content = getWikiContent($this->xml->documentElement, $this->language, '');
+			$searchResult = searchPatternInText($pattern, $content);
+			
+			$summary = new DOMDocument('1.0', 'UTF-8');
+			$summary->loadXML('<root></root>');
+			foreach($searchResult["hitlist"] as $pos) {
+				$snippet = truncateHtmlNode($fulltext, 80, $pos-40);
+				$div = $summary->createElement('div');
+				$div->appendChild($summary->importNode($snippet, true));
+				$summary->documentElement->appendChild($div);
+			}
+			return $summary;
+		}
+
+		public static function indexHeaderRow() {
+			return [
+				"pagename" => [
+					"heading" => __('index-pagename')
+					"type" => "string",
+				],
+				"author" => [
+					"heading" => __('index-author')
+					"type" => "string",
+				],
+				"lastrevision" => [
+					"heading" => __('index-timestamp')
+					"type" => "timestamp",
+				],
+			]
 		}
 		
 		public function indexDataRow() {
-			echo '<tr><td>'.showPagename($this->pagename).'</td></tr>';
+			return [
+				"pagename" => showPagename($this->pagename),
+				"author" => $this->xml->getAttribute('author'),
+				"lastrevision" => date('j-m-y, H:i', ltrim($this->xml->getAttribute('xml:id'), 't'))
+			];
 		}
 		
-		public function indexHeaderRow() {
-			echo '<tr><td>'.__('index-pagename').'</td></tr>';
-		}
-		
-		// offload to dom-wrapper?
+		// TODO: make recursive and offload to dom-wrapper
+		// TODO: inmplement 3rd argument for a negative offset
 		function truncateHtmlNode($node, $length) {
 			$remove = false;
 			$content = '';
