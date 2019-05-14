@@ -41,8 +41,6 @@
 		ob_start();
 ?>
 	<form name="hyphaForm" method="post" action="" accept-charset="utf-8" enctype="multipart/form-data">
-		<input id="command" name="command" type="hidden">
-		<input id="argument" name="argument" type="hidden">
 		<?=getInnerHtml($body)?>
 	</form>
 <?php
@@ -62,12 +60,34 @@
 		arg - argument to pass to the cmd function
 	*/
 	function hypha(url, cmd, arg) {
+		// update url
 		url = url.replace(/\s\//g, '/').replace(/\s$/g, '').replace(/\s/g, '_');
-		document.getElementById('command').value = cmd;
-		document.getElementById('argument').value = arg;
-		document.forms['hyphaForm'].action = url;
-		if (cmd||arg) $(document.forms['hyphaForm']).submit();
-		else window.location = url;
+
+		// if no cmd or arg is given, redirect to url
+		if (!cmd && !arg) { window.location = url; return; }
+
+		var $form = $(document.forms['hyphaForm']);
+		$form.attr('action', url);
+
+		// Add a command and argument hidden field if needed
+		// (but do not bother if it would be empty). Always set
+		// the fields (even to the empty value) if they exist,
+		// though.
+		var $cmd = $form.find('input[name="command"]');
+		if (cmd && $cmd.length < 1) {
+			$cmd = $('<input type="hidden" name="command" />');
+			$form.append($cmd);
+		}
+		$cmd.val(cmd);
+
+		var $arg = $form.find('input[name="argument"]');
+		if (arg && $arg.length < 1) {
+			$arg = $('<input type="hidden" name="argument" />');
+			$form.append($arg);
+		}
+		$arg.val(arg);
+
+               $form.submit();
 	}
 
 	/*
@@ -266,7 +286,7 @@
 				return;
 			}
 
-			$result = processCommand($_POST['command'], $_POST['argument']);
+			$result = processCommand($_POST['command'], isset($_POST['argument']) ? $_POST_['argument'] : null);
 			if ($result !== false) {
 				// Command was handled
 				unset($_POST['command']);
