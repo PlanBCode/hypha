@@ -141,7 +141,7 @@
 		foreach ($hyphaPageTypes as $className) {
 			$dataTypeMtx[$className] = call_user_func($className . '::getDatatypeName');
 		}
-		addNewPageRoutine($hyphaHtml, explode('/', $hyphaQuery), $dataTypeMtx);
+		addNewPageRoutine($hyphaHtml, $hyphaRequest->getRelativeUrlPathParts(false), $dataTypeMtx);
 		$_cmds[] = makeLink(__('new-page'), 'newPage();');
 		$_cmds[] = makeLink(__('settings'), makeAction('settings', '', ''));
 		$_cmds[] = makeLink(__('logout'), makeAction($hyphaRequest->getRelativeUrlPath(false),'logout',''));
