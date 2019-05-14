@@ -310,7 +310,7 @@ EOF;
 		 */
 		function showSignup($form = null) {
 			if (!$form)
-				$form = new HTMLForm($this->getConfigElement('signup-form')->cloneNode(true));
+				$form = new HTMLForm($this->getConfigElement('signup-form'));
 
 			$this->html->find('#pagename')->text(__('festival-signup-for') . $this->getConfig('festival-title'));
 			$main = $this->html->find('#main');
@@ -328,7 +328,7 @@ EOF;
 		 */
 		function handleSignup($arg) {
 			global $hyphaUrl, $hyphaContentLanguage, $hyphaPage;
-			$form = new HTMLForm($this->getConfigElement('signup-form')->cloneNode(true));
+			$form = new HTMLForm($this->getConfigElement('signup-form'));
 			$form->setData($_POST);
 			$form->validateRequiredField('name');
 			$form->validateRequiredField('email');
@@ -527,7 +527,7 @@ EOF;
 			$editing = ($obj->tagName == 'contribution');
 
 			if (!$form) {
-				$form = new HTMLForm($this->getConfigElement('contribution-form')->cloneNode(true));
+				$form = new HTMLForm($this->getConfigElement('contribution-form'));
 				if ($editing) {
 					$form->setData($obj);
 					$form->updateDom();
@@ -558,7 +558,7 @@ EOF;
 				return;
 			$errors = array();
 
-			$form = new HTMLForm($this->getConfigElement('contribution-form')->cloneNode(true));
+			$form = new HTMLForm($this->getConfigElement('contribution-form'));
 			$form->setData($_POST);
 			$form->validateRequiredField('name');
 			$form->validateRequiredField('title');
