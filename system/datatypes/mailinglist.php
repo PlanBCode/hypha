@@ -610,7 +610,7 @@ EOF;
 		$field = $elem->find('#' . $emailFieldName);
 		$field->parent()->append($this->makeActionButton(__('subscribe'), null, self::FORM_CMD_LIST_SUBSCRIBE));
 
-		return $this->createForm($elem, $data);
+		return $this->createForm($elem->children(), $data);
 	}
 
 	/**
@@ -646,17 +646,12 @@ EOF;
 			</div>
 EOF;
 		
-		/** @var HyphaDomElement $form */
-		$form = $this->html->createElement('form');
-		/** @var \DOMWrap\Element $elem */
-		$elem = $form->html($html);
-
 		// buttons
 		$commands = $this->findBySelector('#pageCommands');
 		$commands->append($this->makeActionButton(__('cancel')));
 		$commands->append($this->makeActionButton(__('save'), 'edit', self::FORM_CMD_LIST_EDIT));
 
-		return $this->createForm($elem, $data);
+		return $this->createForm($html, $data);
 	}
 
 	/**
@@ -679,10 +674,6 @@ EOF;
 				<strong><label for="$messageFieldName"> $message </label></strong><editor id="$messageFieldName" name="$messageFieldName"></editor>
 			</div>
 EOF;
-		/** @var HyphaDomElement $form */
-		$form = $this->html->createElement('form');
-		/** @var \DOMWrap\Element $elem */
-		$elem = $form->html($html);
 
 		// buttons
 		$commands = $this->findBySelector('#pageCommands');
@@ -695,7 +686,7 @@ EOF;
 			$commands->append($this->makeActionButton(__('save'), 'create', self::FORM_CMD_MAILING_SAVE));
 		}
 
-		return $this->createForm($elem, $data);
+		return $this->createForm($html, $data);
 	}
 
 	/**
@@ -886,13 +877,13 @@ EOF;
 
 	/**
 	 * @todo [LRM]: move so it can be used throughout Hypha
-	 * @param DOMElement $elem
+	 * @param string|NodeList|\DOMNode|\Closure $contents
 	 * @param array $data
 	 *
 	 * @return WymHTMLForm
 	 */
-	private function createForm(DOMElement $elem, array $data = []) {
-		$form = new WymHTMLForm($elem);
+	private function createForm($contents, array $data = []) {
+		$form = new WymHTMLForm($contents);
 		$form->setData($data);
 
 		return $form;

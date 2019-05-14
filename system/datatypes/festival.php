@@ -243,8 +243,7 @@ $html = <<<'EOF'
 	<tr><td><label for="festival-title">Festival title</label> *</td><td><input id="festival-title" name="festival-title"/></td></tr>
 </table>
 EOF;
-			$elem = $this->html->createElement('form')->html($html);
-			return new HTMLForm($elem);
+			return new HTMLForm($html);
 		}
 
 		function showSettings($form = null) {
@@ -310,7 +309,7 @@ EOF;
 		 */
 		function showSignup($form = null) {
 			if (!$form)
-				$form = new HTMLForm($this->getConfigElement('signup-form'));
+				$form = new HTMLForm($this->getConfigElement('signup-form')->children());
 
 			$this->html->find('#pagename')->text(__('festival-signup-for') . $this->getConfig('festival-title'));
 			$main = $this->html->find('#main');
@@ -328,7 +327,7 @@ EOF;
 		 */
 		function handleSignup($arg) {
 			global $hyphaUrl, $hyphaContentLanguage, $hyphaPage;
-			$form = new HTMLForm($this->getConfigElement('signup-form'));
+			$form = new HTMLForm($this->getConfigElement('signup-form')->children());
 			$form->setData($_POST);
 			$form->validateRequiredField('name');
 			$form->validateRequiredField('email');
@@ -527,7 +526,7 @@ EOF;
 			$editing = ($obj->tagName == 'contribution');
 
 			if (!$form) {
-				$form = new HTMLForm($this->getConfigElement('contribution-form'));
+				$form = new HTMLForm($this->getConfigElement('contribution-form')->children());
 				if ($editing) {
 					$form->setData($obj);
 					$form->updateDom();
@@ -558,7 +557,7 @@ EOF;
 				return;
 			$errors = array();
 
-			$form = new HTMLForm($this->getConfigElement('contribution-form'));
+			$form = new HTMLForm($this->getConfigElement('contribution-form')->children());
 			$form->setData($_POST);
 			$form->validateRequiredField('name');
 			$form->validateRequiredField('title');
