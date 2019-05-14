@@ -26,7 +26,7 @@
 			registerCommandCallback('settingsSaveMenu', Array($this, 'saveMenu'));
 		}
 
-		function build() {
+		function process(HyphaRequest $request) {
 //			global $isoLangList, $html;
 //			if ($view=='register') $html->pagename =  'registration';
 //			elseif ($this->hypha->login) $html->pagename = 'settings';
