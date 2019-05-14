@@ -9,9 +9,6 @@
 		Variable: $hyphaUrl
 		location of index.php, e.g. 'www.dom.ain/wiki'. This variable is set in 'index.php'
 
-		Variable: $hyphaQuery
-		page request, e.g. 'en/home/edit' or 'settings/username'. This variable is set in 'index.php'
-
 		Variable: $hyphaXml
 		<Xml> object with hypha system data from the file 'data/hypha.xml'. This variable is set in 'index.php' by invoking <loadHypha>.
 

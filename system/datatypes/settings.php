@@ -287,7 +287,7 @@
 		}
 
 		function saveMarkup($argument) {
-			global $hyphaUrl, $hyphaQuery;
+			global $hyphaUrl;
 			if (isAdmin()) {
 				hypha_setHtml($_POST['editHtml']);
 			}
@@ -336,7 +336,6 @@
 
 		function saveStyles($argument) {
 			$hyphaUrl;
-			$hyphaQuery;
 			if (isAdmin()) {
 				hypha_setCss($_POST['editCss']);
 			}
