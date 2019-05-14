@@ -828,14 +828,16 @@ class peer_reviewed_article extends Page {
 		$this->lockAndReload();
 		$review = self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER === $type;
 
+		$dataFieldSuffix = '/new_' . $type;
+
 		// create form
 		$form = $this->createDiscussionForm($type, $formData);
 		if (!$review && !isUser()) {
-			$form->validateRequiredField(self::FIELD_NAME_DISCUSSION_COMMENTER_NAME);
-			$form->validateRequiredField(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL);
-			$form->validateEmailField(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL);
+			$form->validateRequiredField(self::FIELD_NAME_DISCUSSION_COMMENTER_NAME . $dataFieldSuffix);
+			$form->validateRequiredField(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL . $dataFieldSuffix);
+			$form->validateEmailField(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL . $dataFieldSuffix);
 		}
-		$form->validateRequiredField(self::FIELD_NAME_DISCUSSION_COMMENT . '/new_' . $type);
+		$form->validateRequiredField(self::FIELD_NAME_DISCUSSION_COMMENT . $dataFieldSuffix);
 
 		// process form if it was posted
 		if ($formPosted && empty($form->errors)) {
@@ -851,8 +853,7 @@ class peer_reviewed_article extends Page {
 				$discussion->setAttr(self::FIELD_NAME_DISCUSSION_BLOCK_RESOLVED, false);
 			}
 			$discussion->setAttr(self::FIELD_NAME_DISCUSSION_CLOSED, false);
-			$commentText = $form->dataFor(self::FIELD_NAME_DISCUSSION_COMMENT . '/new_' . $type);
-			$comment = $this->createDiscussionComment($discussion, $commentText, $form);
+			$comment = $this->createDiscussionComment($discussion, $form, $dataFieldSuffix);
 			$this->saveAndUnlock();
 			$this->resetDocPagesMtx();
 			$pending = (bool)$comment->getAttr(self::FIELD_NAME_DISCUSSION_COMMENT_PENDING);
@@ -891,19 +892,20 @@ class peer_reviewed_article extends Page {
 		$discussion = $this->getDocPageById($discussionId);
 		$review = $discussion->getParent()->getName() === self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER;
 
+		$dataFieldSuffix = '/' . $discussionId;
+
 		// create form
 		$form = $this->createDiscussionCommentForm($discussion, $formData);
 		if (!$review && !isUser()) {
-			$form->validateRequiredField(self::FIELD_NAME_DISCUSSION_COMMENTER_NAME);
-			$form->validateRequiredField(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL);
-			$form->validateEmailField(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL);
+			$form->validateRequiredField(self::FIELD_NAME_DISCUSSION_COMMENTER_NAME . $dataFieldSuffix);
+			$form->validateRequiredField(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL . $dataFieldSuffix);
+			$form->validateEmailField(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL . $dataFieldSuffix);
 		}
-		$form->validateRequiredField(self::FIELD_NAME_DISCUSSION_COMMENT . '/' . $discussionId);
+		$form->validateRequiredField(self::FIELD_NAME_DISCUSSION_COMMENT . $dataFieldSuffix);
 
 		// process form if it was posted
 		if ($formPosted && empty($form->errors)) {
-			$commentText = $form->dataFor(self::FIELD_NAME_DISCUSSION_COMMENT . '/' . $discussionId);
-			$comment = $this->createDiscussionComment($discussion, $commentText, $form);
+			$comment = $this->createDiscussionComment($discussion, $form, $dataFieldSuffix);
 			$this->saveAndUnlock();
 			$this->resetDocPagesMtx();
 			$pending = (bool)$comment->getAttr(self::FIELD_NAME_DISCUSSION_COMMENT_PENDING);
@@ -1019,11 +1021,12 @@ class peer_reviewed_article extends Page {
 
 	/**
 	 * @param DocPage $discussion
-	 * @param string $text
 	 * @param WymHTMLForm $form
+	 * @param string $dataFieldSuffix
 	 * @return DocPage
 	 */
-	private function createDiscussionComment(DocPage $discussion, $text, WymHTMLForm $form) {
+	private function createDiscussionComment(DocPage $discussion, WymHTMLForm $form, $dataFieldSuffix) {
+		$text = $form->dataFor(self::FIELD_NAME_DISCUSSION_COMMENT . $dataFieldSuffix);
 		$comment = $discussion->createChild(self::FIELD_NAME_DISCUSSION_COMMENT);
 		$comment->setText($text);
 		if (isUser()) {
@@ -1036,8 +1039,8 @@ class peer_reviewed_article extends Page {
 				$userEmail = $this->hyphaUser->getAttribute('email');
 				$userName = $this->hyphaUser->getAttribute('fullname');
 			} else {
-				$userEmail = $form->dataFor(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL);
-				$userName = $form->dataFor(self::FIELD_NAME_DISCUSSION_COMMENTER_NAME);
+				$userEmail = $form->dataFor(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL . $dataFieldSuffix);
+				$userName = $form->dataFor(self::FIELD_NAME_DISCUSSION_COMMENTER_NAME . $dataFieldSuffix);
 				$comment->setAttr(self::FIELD_NAME_DISCUSSION_COMMENT_PENDING, true);
 				$comment->setAttr(self::FIELD_NAME_DISCUSSION_COMMENT_CONFIRM_CODE, $this->constructCode());
 			}
@@ -1162,8 +1165,10 @@ EOF;
 		// enter their name).
 		$infoCommentRules = isUser() ? '' : makeInfoButton('help-comment-rules');
 		$new = $discussion === null;
+
+		$dataFieldSuffix = '/' . ($new ? 'new_' . $type : $discussion->getId());
 		$comment = $new ? __('art-comment-on-article') : __('art-comment-on-comment');
-		$commentFieldName = self::FIELD_NAME_DISCUSSION_COMMENT . '/' . ($new ? 'new_' . $type : $discussion->getId());
+		$commentFieldName = self::FIELD_NAME_DISCUSSION_COMMENT . $dataFieldSuffix;
 		$html = <<<EOF
 			<div class="new-comment $type">
 			<div>
@@ -1172,7 +1177,7 @@ EOF;
 EOF;
 		if ($new && self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER === $type && !in_array($this->getStatus(), [self::STATUS_APPROVED, self::STATUS_PUBLISHED])) {
 			$blocking = __('art-blocking');
-			$commentBlockingFieldName = self::FIELD_NAME_DISCUSSION_BLOCKING;
+			$commentBlockingFieldName = self::FIELD_NAME_DISCUSSION_BLOCKING . $dataFieldSuffix;
 			$infoBlocking = makeInfoButton('help-blocking-comment');
 			$html .= <<<EOF
 			<div>
@@ -1183,9 +1188,9 @@ EOF;
 
 		if (!isUser()) {
 			$name = __('art-name');
-			$nameFieldName = self::FIELD_NAME_DISCUSSION_COMMENTER_NAME;
+			$nameFieldName = self::FIELD_NAME_DISCUSSION_COMMENTER_NAME . $dataFieldSuffix;
 			$email = __('art-email');
-			$emailFieldName = self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL;
+			$emailFieldName = self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL . $dataFieldSuffix;
 			$unAnonymous =  __('art-comment-unanonymous');
 			$html .= <<<EOF
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
