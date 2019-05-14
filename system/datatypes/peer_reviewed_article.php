@@ -715,7 +715,7 @@ class peer_reviewed_article extends Page {
 			// display comment form if the discussion is still open
 			if (!$closed) {
 				$replyForm = $this->createDiscussionCommentForm($discussion);
-				$list->append($replyForm->elem->children());
+				$list->append($replyForm);
 			}
 
 			$reviewCommentContainersSorted[(int)$closed][(int)!$blocking][] = $reviewCommentContainer;
@@ -730,7 +730,7 @@ class peer_reviewed_article extends Page {
 		}
 
 		$commentForm = $this->createDiscussionForm($type);
-		$discussionsContainer->append($commentForm->elem->children());
+		$discussionsContainer->append($commentForm);
 	}
 
 	private function getApprovesContainer() {
@@ -801,7 +801,7 @@ class peer_reviewed_article extends Page {
 		// update the form dom so that error can be displayed, if there are any
 		$form->updateDom();
 
-		$this->findBySelector('#main')->append($form->elem->children());
+		$this->findBySelector('#main')->append($form);
 		return null;
 	}
 
@@ -874,7 +874,7 @@ class peer_reviewed_article extends Page {
 		// update the form dom so that error can be displayed, if there are any
 		$form->updateDom();
 
-		$this->findBySelector('#main')->append($form->elem->children());
+		$this->findBySelector('#main')->append($form);
 		return null;
 	}
 
@@ -924,7 +924,7 @@ class peer_reviewed_article extends Page {
 		// update the form dom so that error can be displayed, if there are any
 		$form->updateDom();
 
-		$this->findBySelector('#main')->append($form->elem->children());
+		$this->findBySelector('#main')->append($form);
 		return null;
 	}
 

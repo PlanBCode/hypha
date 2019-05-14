@@ -258,7 +258,7 @@ EOF;
 			}
 
 			$form->updateDom();
-			$this->html->find('#main')->append($form->elem->children());
+			$this->html->find('#main')->append($form);
 
 			// show 'cancel' button
 			$action = makeAction($this->language.'/'.$this->pagename, '', '');
@@ -310,11 +310,11 @@ EOF;
 		 */
 		function showSignup($form = null) {
 			if (!$form)
-				$form = $this->getConfigElement('signup-form');
+				$form = new HTMLForm($this->getConfigElement('signup-form')->cloneNode(true));
 
 			$this->html->find('#pagename')->text(__('festival-signup-for') . $this->getConfig('festival-title'));
 			$main = $this->html->find('#main');
-			$main->append($form->children());
+			$main->append($form);
 
 			$action = makeAction($this->language.'/'.$this->pagename, 'signup', '');
 			$button = makeButton(__('signup'), $action);
@@ -343,7 +343,7 @@ EOF;
 				// Reshow the form with submitted values
 				// and errors
 				$form->updateDom();
-				return $this->showSignup($form->elem);
+				return $this->showSignup($form);
 			}
 
 			$this->xml->lockAndReload();
@@ -536,7 +536,7 @@ EOF;
 
 			$this->html->find('#pagename')->text(__('festival-contribute-to') . $this->getConfig('festival-title'));
 			$main = $this->html->find('#main');
-			$main->append($form->elem->children());
+			$main->append($form);
 
 			$action = makeAction($this->language.'/'.$this->pagename.'/'.join('/',$this->args), 'contribute', '');
 			if ($editing)
