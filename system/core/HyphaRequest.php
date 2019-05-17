@@ -163,6 +163,15 @@
 		}
 
 		/**
+		 * Returns the initial relative URL path of the page, no view / arguments.
+		 *
+		 * @return string
+		 */
+		public function getRelativePageUrlPath() {
+			return implode('/', array_filter([$this->getLanguage(), $this->getPageName()]));
+		}
+
+		/**
 		 * Returns the relative URL path parts, with or without the language.
 		 *
 		 * @param bool $excludeLanguage
