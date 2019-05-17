@@ -160,7 +160,7 @@
 	// Add the default form. This does not happen earlier, since
 	// appending makes a copy of the form, so now we can be sure
 	// that all changes (if any) to the form are taken into account.
-	$hyphaHtml->find('body')->children()->wrapAll($hyphaHtml->getDefaultForm());
+	$hyphaHtml->find('body')->append($hyphaHtml->getDefaultForm());
 
 	// poor man's cron job
 	if (time() - hypha_getLastDigestTime() >= hypha_getDigestInterval()) flushDigest();

@@ -300,6 +300,8 @@
 			$this->root = (new HTMLDocument())->createElement('root');
 			$this->root->append($form);
 
+			$this->ensureFormTag();
+
 			$this->data = $data;
 			$this->errors = [];
 			$this->fields = [];
@@ -322,6 +324,22 @@
 		// DomElement itself.
 		public function getIterator() {
 			return $this->root->children();
+		}
+
+		/**
+		 * Check whether a form tag is present, and add a
+		 * default one if not.
+		 */
+		protected function ensureFormTag() {
+			$formTag = $this->root->find('form')->first();
+			// check if form contains exactly one form element
+			if (!$formTag) {
+				$this->root->children()->wrapAll('<form method="post" action="" accept-charset="utf-8" enctype="multipart/form-data"></form>');
+				$formTag = $this->root->find('form')->first();
+			}
+
+			if (!$formTag->hasId())
+				$formTag->generateId();
 		}
 
 		public function getId() {
