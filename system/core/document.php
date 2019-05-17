@@ -324,6 +324,10 @@
 			return $this->root->children();
 		}
 
+		public function getId() {
+			return $this->root->find('form')->first()->getId();
+		}
+
 		/*
 			Function: getFormField
 
