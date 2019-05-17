@@ -62,6 +62,7 @@
 			}
 			libxml_use_internal_errors($previousSetting);
 			$this->registerNodeClass('DOMDocument', 'HTMLDocument');
+			$this->registerNodeClass('DOMElement', 'HyphaDomElement');
 		}
 
 		public function initForBrowser($base_url = null) {
