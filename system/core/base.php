@@ -758,3 +758,9 @@
 		foreach ($vars as $key => $val) $string = str_replace('[[' . $key . ']]', $val, $string);
 		return $string;
 	}
+
+	function hypha_createForm($formHtml, array $values = []) {
+		$form = new WymHTMLForm($formHtml, $values);
+		$form->updateDom();
+		return $form;
+	}

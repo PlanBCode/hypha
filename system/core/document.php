@@ -5,6 +5,7 @@
 		This chapter describes how the HTML document is built
 	*/
 
+	require_once __DIR__ . '/database.php';
 	require_once dirname(__FILE__).'/../php-dom-wrapper/All.php';
 
 	/*
@@ -33,6 +34,9 @@
 		extension of the DOMDocument class
 	*/
 
+	/**
+	 * @method \DOMWrap\NodeList|HyphaHtmlDomElement find($selector, $prefix = 'descendant::')
+	 */
 	class HTMLDocument extends DOMWrap\Document {
 		const XML_HTML_UNKNOWN_TAG = 801;
 
@@ -65,7 +69,7 @@
 			}
 			libxml_use_internal_errors($previousSetting);
 			$this->registerNodeClass('DOMDocument', 'HTMLDocument');
-			$this->registerNodeClass('DOMElement', 'HyphaDomElement');
+			$this->registerNodeClass('DOMElement', 'HyphaHtmlDomElement');
 		}
 
 		public function initForBrowser($base_url = null) {
@@ -258,6 +262,22 @@
 	}
 
 	/*
+		Class: HyphaHtmlDomElement
+
+		Extension of HyphaDomElement. This adds a few extra helper methods.
+	*/
+	class HyphaHtmlDomElement extends HyphaDomElement {
+		function addForm(HTMLForm $form) {
+			$this->append($form->elems);
+		}
+		function addButton(HTMLForm $form, $label, $path = null, $command = null, $argument = null, $class = null) {
+			$_action = makeAction($path, ($command ? $command : ''), ($argument ? $argument : ''), $form);
+			$button = makeButton(__($label), $_action, '', $class);
+			$this->append($button);
+		}
+	}
+
+	/*
 		Class: HTMLForm
 
 		Wrapper around a DomElement that contains form fields,
@@ -300,7 +320,8 @@
 			$this->root = (new HTMLDocument())->createElement('root');
 			$this->root->append($form);
 
-			$this->ensureFormTag();
+			//$this->ensureFormTag();
+			//$this->ensureCommandAndArgument();
 
 			$this->data = $data;
 			$this->errors = [];
@@ -340,6 +361,25 @@
 
 			if (!$formTag->hasId())
 				$formTag->generateId();
+		}
+
+		/**
+		 * Check whether a "command" and "arguments" input
+		 * fields are present, and add default ones if not.
+		 *
+		 * Can only be called when a form tag is present (so
+		 * typically after ensureFormTag).
+		 */
+		protected function ensureCommandAndArgument() {
+			$formTag = $this->root->find('form')->first();
+			$command = $formTag->find('input[name=command]')->first();
+			if ($command === null) {
+				$formTag->append('<input type="hidden" name="command">');
+			}
+			$argument = $formTag->find('input[name=argument]')->first();
+			if ($argument === null) {
+				$formTag->append('<input type="hidden" name="argument">');
+			}
 		}
 
 		public function getId() {

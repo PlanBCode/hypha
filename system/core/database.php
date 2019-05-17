@@ -143,6 +143,10 @@
 		Extension of the DOMWrap\Element class (which again
 		extends the PHP DOMElement class). This adds a few extra helper methods.
 	*/
+
+	/**
+	 * @method HTMLDocument document()
+	 */
 	class HyphaDomElement extends DOMWrap\Element {
 		private function getIdAttribute() {
 			// DomDocument allows marking attributes as id

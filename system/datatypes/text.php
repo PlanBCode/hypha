@@ -28,6 +28,10 @@
 
 		public function __construct($pageListNode, RequestContext $O_O) {
 			parent::__construct($pageListNode, $O_O);
+			// TODO: Does this make sense? Page already
+			// sets $this->language based on the actual
+			// language rendered rather than requested
+			//$this->language = $O_O->getContentLanguage();
 			$this->xml = new Xml(get_called_class(), Xml::multiLingualOn, Xml::versionsOn);
 			$this->xml->loadFromFile('data/pages/' . $pageListNode->getAttribute('id'));
 		}
@@ -131,6 +135,8 @@ EOF;
 			$pagePath = $request->getRelativePageUrlPath();
 
 			$commands = $this->html->find('#pageCommands');
+			//$commands->addButton($form, __('save'), $pagePath     . '/' . self::PATH_EDIT, self::CMD_SAVE);
+			//$commands->addButton($this->html->getDefaultForm(), __('cancel'), $pagePath);
 			$commands->append($this->makeActionButton(__('save'), self::PATH_EDIT, self::CMD_SAVE));
 			$commands->append($this->makeActionButton(__('cancel'), ''));
 			return null;
@@ -318,6 +324,16 @@ EOF;
 			$_action = makeAction($path, ($command ? $command : ''), ($argument ? $argument : ''));
 
 			return makeButton(__($label), $_action);
+		}
+
+		/**
+		 * @todo Do we need this?
+		 * @param string $selector
+		 *
+		 * @return \DOMWrap\NodeList
+		 */
+		protected function findBySelector($selector) {
+			return $this->html->find($selector);
 		}
 
 		/**

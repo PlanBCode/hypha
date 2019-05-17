@@ -13,8 +13,9 @@
 		Passing information from client to server is done through form posts. All HTML is put inside a form element with two hidden input elements, 'command' and 'argument'.
 
 		(start code)
+			// TODO [LRM]: update
 			<body>
-				<form id="hyphaForm" method="post" action="">
+				<form name="hyphaForm" method="post" action="">
 					<input id="command" name="command" type="hidden" />
 					<input id="argument" name="argument" type="hidden" />
 					<-- all body HTML goes here -->
@@ -34,10 +35,10 @@
 		$html - an instance of <HTMLDocument>
 	*/
 	registerPostProcessingFunction('addEventHandler');
-	function addEventHandler($html) {
+	function addEventHandler(HTMLDocument $html) {
 		// add a javascript function to process client commands and ajax calls
 		ob_start();
-?>
+		?>
 <script>
 	/*
 		Function: hypha
@@ -325,6 +326,12 @@
 		// Command requests a redirect
 		if (count($result) == 2 && $result[0] == 'redirect') {
 			$url = preserveNotifications($result[1]);
+			header('Location: ' . $url);
+			exit;
+		}
+
+		if ($result instanceof RedirectResponse) {
+			$url = preserveNotifications($result->url);
 			header('Location: ' . $url);
 			exit;
 		}

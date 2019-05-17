@@ -14,6 +14,7 @@
 		Function: login
 		logs in user, setting SESSION variable hyphaLogin. Returns 'reload' on success.
 	*/
+	// TODO: How to handle these non-page-bound commands?
 	registerCommandCallback('login', 'login');
 	function login() {
 		$user = hypha_getUserByName($_POST['loginUsername']);

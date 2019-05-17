@@ -365,7 +365,7 @@ class peer_reviewed_article extends Page {
 		$this->html->writeToElement('pagename', $this->getTitle() . ' ' . asterisk($this->privateFlag));
 
 		$this->beforeProcessRequest();
-		return $this->processRequest();
+		return $this->processRequest($request);
 	}
 
 	protected function initialSetup() {
@@ -410,7 +410,7 @@ class peer_reviewed_article extends Page {
 		}
 	}
 
-	protected function processRequest() {
+	protected function processRequest(HyphaRequest $request) {
 		// By default a user can preform any action
 		$valid = isUser();
 		if (!isUser()) {
