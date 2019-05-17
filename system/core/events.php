@@ -35,17 +35,8 @@
 	*/
 	registerPostProcessingFunction('addEventHandler');
 	function addEventHandler($html) {
-
-		// place all body content in a form
-		$body = $html->getElementsByTagName('body')->Item(0);
-		ob_start();
-?>
-	<form name="hyphaForm" method="post" action="" accept-charset="utf-8" enctype="multipart/form-data">
-		<?=getInnerHtml($body)?>
-	</form>
-<?php
-		setInnerHtml($body, ob_get_clean());
-
+		$defaultForm = new HTMLForm('<form id="hyphaForm" method="post" action="" accept-charset="utf-8" enctype="multipart/form-data" />');
+		$html->find('body')->children()->wrapAll($defaultForm);
 		// add a javascript function to process client commands and ajax calls
 		ob_start();
 ?>
