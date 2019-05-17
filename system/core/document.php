@@ -333,7 +333,7 @@
 
 			Form fields to look through
 		 */
-		function getFormFieldTypes() {
+		protected function getFormFieldTypes() {
 			return ['input', 'select', 'textarea', 'label', 'img'];
 		}
 
@@ -343,7 +343,7 @@
 			Look through the DOM to find form fields and
 			their labels
 		 */
-		function scanForm($root)
+		protected function scanForm($root)
 		{
 			foreach($root->find(implode(', ', $this->getFormFieldTypes())) as $elem) {
 				if ($elem->tagName == 'label') {
@@ -369,7 +369,7 @@
 			element, and process it as a form field name by
 			stripping any [] suffix.
 		*/
-		static function getNameAttr($elem, $attr) {
+		protected static function getNameAttr($elem, $attr) {
 			$name = $elem->getAttribute($attr);
 			// If a field name ends in [], PHP will construct an array
 			// when the form is submitted, whose name does not include
@@ -385,7 +385,7 @@
 			Set the data to be used by validation and
 			updateDom().
 		*/
-		function setData($data) {
+		public function setData($data) {
 			$this->data = $data;
 		}
 
@@ -400,7 +400,7 @@
 			validation to an ul.form-errors list (creating
 			it if needed).
 		 */
-		function updateDom() {
+		public function updateDom() {
 			// Put new values in the form
 			foreach($this->fields as $name => $elems) {
 				$value = $this->dataFor($name);
@@ -436,7 +436,7 @@
 			Update the value of the given DOM node that contains a
 			single HTML form field with the value given.
 		*/
-		function updateFormField($field, $value) {
+		protected function updateFormField($field, $value) {
 			if ($field->tagName == 'input' && $field->getAttribute('type') == 'checkbox') {
 				// For multiple checkboxes that have a
 				// name ending in [], PHP will put an
@@ -464,7 +464,7 @@
 		}
 
 
-		function updateImagePreview($field, $value) {
+		protected function updateImagePreview($field, $value) {
 			if ($value) {
 				$image = new HyphaImage($value);
 
@@ -479,13 +479,13 @@
 			}
 		}
 
-		function labelFor($name) {
+		public function labelFor($name) {
 			if (array_key_exists($name, $this->labels))
 				return $this->labels[$name];
 			return $name;
 		}
 
-		function dataFor($name, $default = null) {
+		public function dataFor($name, $default = null) {
 			if (is_array($this->data)) {
 				if (array_key_exists($name, $this->data))
 					return $this->data[$name];
