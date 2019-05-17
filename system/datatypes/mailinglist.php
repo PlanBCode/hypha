@@ -581,7 +581,7 @@ class mailinglist extends Page {
 
 			$path = $this->language . '/' . $this->pagename . '/' . $mailingId;
 			$commands->append(makeButton(__('send'), 'if(confirm(\'' . __('ml-sure-to-send', array("count" => $num)) . '\'))' . makeAction($path, self::FORM_CMD_MAILING_SEND, '')));
-			$commands->append(makeButton(__('ml-test-send'), 'hypha(\''.$path.'\', \''.self::FORM_CMD_MAILING_TEST_SEND.'\', prompt(\'' . __('email') . '\'));'));
+			$commands->append(makeButton(__('ml-test-send'), 'hypha(\''.$path.'\', \''.self::FORM_CMD_MAILING_TEST_SEND.'\', prompt(\'' . __('email') . '\'), $(this).closest(\'form\'));'));
 		}
 
 		return null;

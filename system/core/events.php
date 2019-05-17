@@ -47,15 +47,16 @@
 		url - the hypha-formatted page identifier, e.g. 'en/hompage/defaultview'. When left empty the current paged is reloaded.
 		cmd - php function to execute, e.g. 'save'
 		arg - argument to pass to the cmd function
+		form - the form tag to use for posting (if cmd or arg are given)
 	*/
-	function hypha(url, cmd, arg) {
+	function hypha(url, cmd, arg, form) {
 		// update url
 		url = url.replace(/\s\//g, '/').replace(/\s$/g, '').replace(/\s/g, '_');
 
 		// if no cmd or arg is given, redirect to url
 		if (!cmd && !arg) { window.location = url; return; }
 
-		var $form = $(document.forms['hyphaForm']);
+		var $form = $(form);
 		$form.attr('action', url);
 
 		// Add a command and argument hidden field if needed
@@ -200,8 +201,12 @@
 		return false;
 	}
 
-	function makeAction($langPageView, $command, $argument) {
-		return 'hypha(\''.$langPageView.'\', \''.$command.'\', \''.$argument.'\');';
+	function makeAction($langPageView, $command, $argument, HTMLForm $form = null) {
+		if (null === $form) {
+			global $hyphaHtml;
+			$form = $hyphaHtml->getDefaultForm();
+		}
+		return 'hypha(\''.$langPageView.'\', \''.$command.'\', \''.$argument.'\', document.getElementById(\''.$form->getId().'\'));';
 	}
 
 	/*
