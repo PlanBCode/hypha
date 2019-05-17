@@ -29,7 +29,7 @@
 	session_start();
 	session_write_close();
 
-	$DEBUG = false;
+	$DEBUG = file_exists('DEBUG');
 	ini_set('display_errors', $DEBUG ? true : false);
 
 	if (strnatcmp(phpversion(),'5.4') < 0) die('Error: you are running php version '.substr(phpversion(),0,strpos(phpversion(), '-')).'; Hypha works only with php version 5.4 and higher');
