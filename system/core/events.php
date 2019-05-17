@@ -308,6 +308,13 @@
 		if (!$result)
 			return;
 
+		if ($result === '404') {
+			http_response_code(404);
+			// TODO: Show a nicer error message
+			echo("Page not found");
+			exit;
+		}
+
 		// Command requests a reload
 		if ($result === 'reload') {
 			$url = preserveNotifications($_SERVER['REQUEST_URI']);
