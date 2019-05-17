@@ -183,6 +183,14 @@
 			return $relativeUrlPathParts;
 		}
 
+		public function getView() {
+			return count($this->args) >= 1 ? $this->args[0] : null;
+		}
+
+		public function getCommand() {
+			return $this->getPostValue('command');
+		}
+
 		/**
 		 * Return the language if it could be found
 		 *
