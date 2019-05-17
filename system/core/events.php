@@ -35,8 +35,6 @@
 	*/
 	registerPostProcessingFunction('addEventHandler');
 	function addEventHandler($html) {
-		$defaultForm = new HTMLForm('<form id="hyphaForm" method="post" action="" accept-charset="utf-8" enctype="multipart/form-data" />');
-		$html->find('body')->children()->wrapAll($defaultForm);
 		// add a javascript function to process client commands and ajax calls
 		ob_start();
 ?>

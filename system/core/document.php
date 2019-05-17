@@ -36,6 +36,9 @@
 	class HTMLDocument extends DOMWrap\Document {
 		const XML_HTML_UNKNOWN_TAG = 801;
 
+		/** @var null|HTMLForm */
+		private $defaultForm;
+
 		/*
 			Function: __construct
 			creates an empty HTML file
@@ -82,6 +85,27 @@
 				$base->setAttribute('href', $base_url);
 				$head->prepend($base);
 			}
+		}
+
+		/*
+			Function: setDefaultForm
+			Set the default form to be retrieved later by
+			getDefaultForm(). Does not append the form to
+			the body.
+
+			Parameters:
+			$defaultForm - HTMLForm
+		*/
+		public function setDefaultForm(HTMLForm $defaultForm) {
+			$this->defaultForm = $defaultForm;
+		}
+
+		/*
+			Function: getDefaultForm
+			Returns the default form
+		*/
+		public function getDefaultForm() {
+			return $this->defaultForm;
 		}
 
 		/*
