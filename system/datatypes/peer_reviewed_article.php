@@ -211,7 +211,7 @@ class peer_reviewed_article extends Page {
 		$title = $this->getTitle();
 		$author = $this->hyphaUser->getAttribute('fullname');
 		$linkToPage = $this->constructFullPath($this->pagename);
-		
+
 		$comment = $discussion->getDoc()->lastChild->textContent;
 		$subject = __('art-block-submitted-subject', array(
 			"title" => $title
@@ -222,7 +222,7 @@ class peer_reviewed_article extends Page {
 			"author" => htmlspecialchars($author),
 			"comment" => htmlspecialchars($comment)
 		));
-		
+
 		$this->sendMail(getUserEmailList(), $subject, $message);
 	}
 
@@ -513,7 +513,7 @@ class peer_reviewed_article extends Page {
 		$linkToPage = $this->constructFullPath($this->pagename);
 		$name = self::getCommentPoster($comment);
 		$commentBody = $comment->getText();
-		
+
 		$subject = __('art-comment-subject', array(
 			"name" => $name,
 			"title" => $title
