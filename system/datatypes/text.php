@@ -110,8 +110,7 @@ EOF;
 
 		private function editView(HyphaRequest $request) {
 			if (!isUser()) {
-				// TODO: Generalize the name of this string
-				notify('error', __('art-login-preform-action'));
+				notify('error', __('login-to-perform-action'));
 
 				return ['redirect', $this->constructFullPath($this->pagename)];
 			}
@@ -210,7 +209,7 @@ EOF;
 
 		private function deleteAction(HyphaRequest $request) {
 			if (!isAdmin()) {
-				return ['errors' => ['art-insufficient-rights-to-preform-action']];
+				return ['errors' => ['art-insufficient-rights-to-perform-action']];
 			}
 			global $hyphaUrl;
 

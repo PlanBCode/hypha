@@ -195,6 +195,7 @@
 		"missing-arguments" => "argumenten ontbreken",
 		"archive" => "archief",
 		"sure-to-delete" => "Weet je zeker dat je deze pagina wilt verwijderen",
+		"login-to-perform-action" => "je moet ingelogd zijn om deze actie te kunnen uitvoeren",
 
 		// textpage
 		"datatype.name.textpage" => "webpagina",
@@ -281,7 +282,6 @@
 		"datatype.name.peer_reviewed_article" => "artikel met review",
 
 		// peer_reviewed_article - action
-		"art-login-preform-action" => "je moet ingelogd zijn om deze actie te kunnen uitvoeren",
 		"art-insufficient-rights-to-set-as-closed" => "je hebt niet genoeg rechten om dit te sluiten",
 		"art-unsupported-status-change" => "deze status verandering wordt niet ondersteund",
 		"art-no-approves-yet" => "er zijn nog geen goedkeuringen ontvangen",

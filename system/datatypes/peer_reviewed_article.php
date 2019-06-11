@@ -411,10 +411,10 @@ class peer_reviewed_article extends Page {
 	}
 
 	protected function processRequest() {
-		// By default a user can preform any action
+		// By default a user can perform any action
 		$valid = isUser();
 		if (!isUser()) {
-			// Non users are limited to preform certain actions
+			// Non users are limited to perform certain actions
 			$valid = null === $this->getArg(0);
 			if (self::PATH_DISCUSSION === $this->getArg(0) && self::FIELD_NAME_DISCUSSION_PUBLIC_CONTAINER === $this->getArg(1)) {
 				$valid = true;
@@ -431,7 +431,7 @@ class peer_reviewed_article extends Page {
 			$valid = false;
 		}
 		if (!$valid) {
-			$msg = isUser() ? 'art-insufficient-rights-to-preform-action' : 'art-login-preform-action';
+			$msg = isUser() ? 'art-insufficient-rights-to-perform-action' : 'login-to-perform-action';
 			notify('error', __($msg));
 
 			return ['redirect', $this->constructFullPath($this->pagename)];

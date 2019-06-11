@@ -195,6 +195,7 @@
 		"missing-arguments" => "missing arguments",
 		"archive" => "archive",
 		"sure-to-delete" => "Are you sure you want to delete this page",
+		"login-to-perform-action" => "you need to be logged on in order to perform this action",
 
 		// textpage
 		"datatype.name.textpage" => 'web page',
@@ -287,7 +288,6 @@
 		"datatype.name.peer_reviewed_article" => "peer reviewed article",
 
 		// peer_reviewed_article - action
-		"art-login-preform-action" => "you need to be logged on in order to preform this action",
 		"art-insufficient-rights-to-set-as-closed" => "you have insufficient rights to close",
 		"art-unsupported-status-change" => "this status change is not supported",
 		"art-no-approves-yet" => "there are no approves yet",
