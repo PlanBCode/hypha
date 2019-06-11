@@ -196,6 +196,7 @@
 		"archive" => "archive",
 		"sure-to-delete" => "Are you sure you want to delete this page",
 		"login-to-perform-action" => "you need to be logged on in order to perform this action",
+		"page-successfully-updated" => "Page successfully updated",
 
 		// textpage
 		"datatype.name.textpage" => 'web page',

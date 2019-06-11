@@ -196,6 +196,7 @@
 		"archive" => "archief",
 		"sure-to-delete" => "Weet je zeker dat je deze pagina wilt verwijderen",
 		"login-to-perform-action" => "je moet ingelogd zijn om deze actie te kunnen uitvoeren",
+		"page-successfully-updated" => "Pagina succesvol bijgewerkt",
 
 		// textpage
 		"datatype.name.textpage" => "webpagina",
