@@ -295,7 +295,7 @@
 				return;
 			}
 
-			$result = processCommand($_POST['command'], isset($_POST['argument']) ? $_POST_['argument'] : null);
+			$result = processCommand($_POST['command'], isset($_POST['argument']) ? $_POST['argument'] : null);
 			if ($result !== false) {
 				// Command was handled
 				unset($_POST['command']);
