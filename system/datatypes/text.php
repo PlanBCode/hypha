@@ -136,6 +136,12 @@ EOF;
 		}
 
 		private function editAction(HyphaRequest $request) {
+			if (!isUser()) {
+				notify('error', __('login-to-preform-action'));
+
+				return ['redirect', $this->constructFullPath($this->pagename)];
+			}
+
 			// create form
 			$form = $this->createEditForm($request->getPostData());
 
@@ -159,6 +165,12 @@ EOF;
 		}
 
 		private function translateView(HyphaRequest $request) {
+			if (!isUser()) {
+				notify('error', __('login-to-preform-action'));
+
+				return ['redirect', $this->constructFullPath($this->pagename)];
+			}
+
 			$formData = [
 				self::FIELD_NAME_PAGE_NAME => showPagename($this->pagename),
 				self::FIELD_NAME_CONTENT => $this->getContent(),
@@ -173,6 +185,12 @@ EOF;
 		}
 
 		private function translateAction(HyphaRequest $request) {
+			if (!isUser()) {
+				notify('error', __('login-to-preform-action'));
+
+				return ['redirect', $this->constructFullPath($this->pagename)];
+			}
+
 			// create form
 			$form = $this->createTranslationForm($request->getPostData());
 
@@ -195,6 +213,12 @@ EOF;
 		}
 
 		private function revertAction(HyphaRequest $request) {
+			if (!isUser()) {
+				notify('error', __('login-to-preform-action'));
+
+				return ['redirect', $this->constructFullPath($this->pagename)];
+			}
+
 			$version = $request->getPostValue(self::FIELD_NAME_VERSION);
 
 			$hyphaUser = $this->O_O->getUser();
