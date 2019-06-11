@@ -125,9 +125,7 @@ EOF;
 			// Update the form to include the data
 			$form->updateDom();
 
-			$main = $this->html->find('#main');
-			$main->append($form);
-			$pagePath = $request->getRelativePageUrlPath();
+			$this->html->find('#main')->append($form);
 
 			$commands = $this->html->find('#pageCommands');
 			$commands->append($this->makeActionButton(__('save'), self::PATH_EDIT, self::CMD_SAVE));
@@ -235,12 +233,11 @@ EOF;
 			if (!isAdmin()) {
 				return ['errors' => ['art-insufficient-rights-to-perform-action']];
 			}
-			global $hyphaUrl;
 
 			$this->deletePage();
 
 			notify('success', ucfirst(__('page-successfully-deleted')));
-			return ['redirect', $hyphaUrl];
+			return ['redirect', $request->getRootUrl()];
 		}
 
 		/**
