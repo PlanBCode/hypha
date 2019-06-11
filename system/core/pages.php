@@ -92,7 +92,7 @@
 	}
 	function newPage() {
 		
-		html = '<table class="section"><tr><th colspan="2"><?=__('create-new-page').'<br/>'.__('instruction-new-page')?></td><tr>';
+		html = '<table class="section"><tr><th colspan="2"><?=__('create-new-page').'<br/>'.__('instruction-new-page')?></td></tr>';
 		var infoPageType = <?=json_encode(makeInfoButton('help-page-type'));?>;
 		// TODO [LRM]: find better way to set default new page type.
 		html+= '<tr><th><?=__('type')?></th><td><select id="newPageType" name="newPageType">' + '<?php foreach($types as $type => $datatypeName) echo '<option value="'.$type.'"'.($type=='textpage' ? 'selected="selected"' : '').'>'.$datatypeName.'</option>'; ?>' + '</select> ' + infoPageType + '</td></tr>';
