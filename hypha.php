@@ -85,7 +85,7 @@
 		if ($handle = opendir($dir)) {
 			while (false !== ($file = readdir($handle))) {
 				if ($file != "." && $file != "..") {
-					if (isAllowedFile($dir.'/'.$file)) $index[ltrim($dir.'/'.$file, "./")] = filemtime($dir.'/'.$file);
+					if (isAllowedFile($dir.'/'.$file)) $index[preg_replace("/^\.\//i","",$dir.'/'.$file)] = filemtime($dir.'/'.$file);
 					elseif (is_dir($dir.'/'.$file)) $index = array_merge($index, index($dir.'/'.$file));
 				}
 			}
@@ -293,10 +293,8 @@
 			if (!is_writable('.')) $errorMessage.= 'php has no write access to the hypa installation directory on the server<br/>';
 
 			// extract list of languages
-			$iso639 = data('system/core/language.php');
-			$p1 = strpos($iso639, "json_decode('");
-			$p2 = strpos($iso639, "', true);", $p1);
-			$iso639 = json_decode(preg_replace('/\\\\\'/', '\'', substr($iso639, $p1+13, $p2-$p1-13)));
+			$iso639 = data('system/languages/languages.json');
+			$iso639 = json_decode(preg_replace('/\\\\\'/', '\'', $iso639));
 			foreach($iso639 as $code => $langName) $languageOptionList.= '<option value="'.$code.'"'.( $code=='en' ? ' selected' : '').'>'.$code.': '.$langName.'</option>';
 
 			// build html
@@ -382,7 +380,7 @@
 					<th style="text-align:right; white-space:nowrap;">languages to include:</th><td>
 <?php
 		foreach ($localIndex as $file => $timestamp) {
-			if (substr($file, 0, 17) == 'system/languages/') {
+			if (substr($file, 0, 17) == 'system/languages/'  && substr($file, -4) == '.php') {
 				$name = substr($file, 17, -4);
 				echo '<input type="checkbox" name="build_'.substr($file,0,-4).'"'.($name == 'en' ? ' checked="checked"' : '').' /> '.$name.'<br/>'."\n";
 			}
@@ -420,7 +418,9 @@
 		switch ($name) {
 			//START_OF_DATA
 			case 'index': return '';
-			case 'system/core/language.php': return "json_decode('{\"en\": \"English\"}', true);";
+			case 'system/core/language.php':
+        require_once('system/core/language.php');
+        return $isoLangList;
 			//END_OF_DATA
 		}
 		if ($zip) return gzdecode(base64_decode($zip));
