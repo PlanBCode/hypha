@@ -33,7 +33,7 @@
 			document.addEventListener('DOMContentLoaded', function showBrowserNotSupportedPopup() {
 				var el = document.getElementById('popup');
 				if (el !== null) {
-					html = '<table class="section"><tr><th colspan="2"><?=__('browser')?> <?=__('not-supported')?></td><tr>';
+					html = '<table class="section"><tr><th colspan="2"><?=__('browser')?> <?=__('not-supported')?></td></tr>';
 					html+= '<tr><th><?=__('browser')?></th><td>' + bowser.name + '</td></tr>';
 					html+= '<tr><th><?=__('version')?></th><td>' + bowser.version + '</td></tr>';
 					html+= '<tr><td colspan="2"><?=__('not-supported')?></td></tr>';
