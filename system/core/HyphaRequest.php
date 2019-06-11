@@ -130,12 +130,8 @@
 			$scheme = $this->getScheme();
 			$https = 'https' === $scheme;
 			$host = $this->getHost();
-			$port = (int)$this->getPort();
 
-			$hasAltPort = (!$https && $port !== 80) || ($https && $port !== 443);
-			$altPort = $hasAltPort ? ':' . $port : '';
-
-			return sprintf('%s://%s%s%s', $scheme, $host, $altPort, $this->rootUrlPath);
+			return sprintf('%s://%s%s', $scheme, $host, $this->rootUrlPath);
 		}
 
 		public function getScheme() {
