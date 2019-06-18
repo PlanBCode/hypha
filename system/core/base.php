@@ -101,6 +101,32 @@
 		$hyphaXml->requireLock();
 		$hyphaXml->documentElement->setAttribute('defaultLanguage', $string);
 	}
+	
+	/*
+	 Function: hypha_getDefaultNewPageType
+	 returns hypha defaultNewPageType attribute
+	 */
+	function hypha_getDefaultNewPageType() {
+		global $hyphaXml;
+		if($hyphaXml->documentElement->hasAttribute('defaultNewPageType')){
+			return $hyphaXml->documentElement->getAttribute('defaultNewPageType');
+		}else{
+			return 'text';
+		}
+	}
+	
+	/*
+	 Function: hypha_setDefaultNewPageType
+	 sets hypha defaultNewPageType attribute
+	 
+	 Parameters:
+	 $string - new defaultNewPageType value
+	 */
+	function hypha_setDefaultNewPageType($string) {
+		global $hyphaXml;
+		$hyphaXml->requireLock();
+		$hyphaXml->documentElement->setAttribute('defaultNewPageType', $string);
+	}
 
 	/*
 		Function: hypha_getUsedContentLanguages returns

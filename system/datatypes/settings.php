@@ -223,7 +223,28 @@
 			notify('error', __('error-registration'));
 			return 'reload';
 		}
-
+	
+		/*
+		 Function: typesOptionList
+		 Returns an html option list with data types
+		 
+		 Parameters:
+		 $select - which option should be preselected
+		 $omit - which data types should be omitted
+		 */
+		function typesOptionList($select, $omit) {
+			$html = '';
+			foreach (scandir('system/datatypes') as $file) {
+				if ('.' === $file) continue;
+				if ('..' === $file) continue;
+				$name = substr($file,0,-4);
+				if($name!=$omit){
+					$html.= '<option value='.$name.($name==$select ? ' selected' : '').'>'.$name.'</option>';
+				}
+			}
+			return addslashes($html);
+		}
+	
 		function editHyphaSettings() {
 			if (isAdmin()) {
 				$seconds = hypha_getDigestInterval();
@@ -254,6 +275,10 @@
 		<th><?=__('digest-interval')?>:</th>
 		<td><input name="settingsIntervalDays" id="settingsIntervalDays" type="text" size="3" value="<?=$days?>" /><?=__('D')?> <input name="settingsIntervalHours" id="settingsIntervalHours" type="text" size="2" value="<?=$hours?>" /><?=__('H')?> <input name="settingsIntervalMinutes" id="settingsIntervalMinutes" type="text" size="2" value="<?=$minutes?>" /><?=__('m')?></td>
 	</tr>
+	<tr>
+		<th><?=__('default-new-page-type')?>:</th>
+<td><select name="settingsDefaultNewPageType" id="settingsDefaultNewPageType"><?=self::typesOptionList(hypha_getDefaultNewPageType(), 'settings')?></select></td>
+	</tr>
 </table>
 <?php
 			$this->html->writeToElement('main', ob_get_clean());
@@ -265,6 +290,7 @@
 			if (isAdmin()) {
 				$hyphaXml->lockAndReload();
 				hypha_setDefaultLanguage($_POST['settingsDefaultLanguage']);
+				hypha_setDefaultNewPageType($_POST['settingsDefaultNewPageType']);
 				hypha_setDefaultPage($_POST['settingsDefaultPage']);
 				hypha_setEmail($_POST['settingsSystemEmail']);
 				$digestInterval = 86400 * $_POST['settingsIntervalDays'] + 3600 * $_POST['settingsIntervalHours'] + 60 * $_POST['settingsIntervalMinutes'];

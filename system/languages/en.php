@@ -51,6 +51,7 @@
 		"default-page" => "default page",
 		"default-language" => "default language",
 		"digest-interval" => "digest interval",
+		"default-new-page-type" => "default new page type",
 		"file" => "file",
 		"image" => "image",
 		"url" => "url",
