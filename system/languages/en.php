@@ -195,6 +195,7 @@
 		"invalid-code" => "invalid code",
 		"unable-to-edit" => "unable to edit",
 		"missing-arguments" => "missing arguments",
+		"invalid-argument" => "invalid argument",
 		"archive" => "archive",
 		"sure-to-delete" => "Are you sure you want to delete this page",
 		"login-to-perform-action" => "you need to be logged on in order to perform this action",
@@ -374,7 +375,6 @@
 		"art-author" => "author",
 		"art-excerpt" => "excerpt",
 		"art-article" => "article",
-		"art-missing-arguments" => "missing arguments",
 		"art-invalid-code" => "invalid code",
 
 		"art-start-review" => "start review",

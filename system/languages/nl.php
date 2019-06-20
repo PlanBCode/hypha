@@ -195,6 +195,7 @@
 		"invalid-code" => "ongeldige code",
 		"unable-to-edit" => "kan niet worden bewerkt",
 		"missing-arguments" => "argumenten ontbreken",
+		"invalid-argument" => "foutief argument",
 		"archive" => "archief",
 		"sure-to-delete" => "Weet je zeker dat je deze pagina wilt verwijderen",
 		"login-to-perform-action" => "je moet ingelogd zijn om deze actie te kunnen uitvoeren",
@@ -368,7 +369,6 @@
 		"art-author" => "auteur",
 		"art-excerpt" => "uittreksel",
 		"art-article" => "artikel",
-		"art-missing-arguments" => "missende argumenten",
 		"art-invalid-code" => "ongeldige code",
 
 		"art-start-review" => "start beoordeling",
