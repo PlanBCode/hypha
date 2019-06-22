@@ -7,3 +7,5 @@
 /data/hypha.stats
 /mockup/node_modules
 DEBUG
+/data/themes/*/
+!/data/themes/default/
