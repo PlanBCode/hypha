@@ -67,7 +67,7 @@
 	if (startsWith($hyphaQuery, 'data/themes/')) serveFile($hyphaQuery, 'data/themes');
 	if (startsWith($hyphaQuery, 'system/wymeditor')) serveFile($hyphaQuery, 'system/wymeditor');
 	if (startsWith($hyphaQuery, 'system/bowser')) serveFile($hyphaQuery, 'system/bowser');
-	if (startsWith($hyphaQuery, 'system/help')) serveFile($hyphaQuery, 'system/help');
+	if (startsWith($hyphaQuery, 'system/assets')) serveFile($hyphaQuery, 'system/assets');
 
 	// jump to installation procedure when hypha.xml is missing
 	if (!is_file('data/hypha.xml')) header('Location: ' . $hyphaUrl . 'hypha.php');
@@ -80,9 +80,10 @@
 	$hyphaHtml = new HTMLDocument(Hypha::$data->html);
 	$hyphaHtml->initForBrowser($hyphaUrl);
 	$pathToTheme = 'data/themes/' . Hypha::$data->theme;
+	$hyphaHtml->linkStyle('system/assets/hypha-core.css');
 	$hyphaHtml->linkStyle($pathToTheme . '/hypha.css');
 	$hyphaHtml->linkScript('//code.jquery.com/jquery-1.7.1.min.js');
-	$hyphaHtml->linkScript('system/help/help.js');
+	$hyphaHtml->linkScript('system/assets/help.js');
 	$hyphaHtml->setTitle(hypha_getTitle());
 	$hyphaHtml->writeToElement('header', hypha_getHeader());
 	$hyphaHtml->writeToElement('footer', hypha_getFooter());
@@ -156,6 +157,7 @@
 //	if (!$O_O->isUser()) registerPostProcessingFunction('obfuscateEmail');
 
 	if ($hyphaPage) hypha_setBodyClass($hyphaRequest, $hyphaPage);
+	if ($hyphaPage) hypha_setPreviewPanel($hyphaPage);
 
 	// Add the default form. This does not happen earlier, since
 	// appending makes a copy of the form, so now we can be sure
