@@ -231,7 +231,7 @@ EOF;
 
 		private function deleteAction(HyphaRequest $request) {
 			if (!isAdmin()) {
-				return ['errors' => ['art-insufficient-rights-to-perform-action']];
+				return ['errors' => [__('insufficient-rights-to-perform-action')]];
 			}
 
 			$this->deletePage();

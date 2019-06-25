@@ -328,6 +328,13 @@
 			header('Location: ' . $url);
 			exit;
 		}
+
+		if (is_array($result) && array_key_exists('errors', $result)) {
+			foreach ($result['errors'] as $error) {
+				notify('error', $error);
+			}
+			return;
+		}
 	}
 
 //	/*

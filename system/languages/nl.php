@@ -198,6 +198,7 @@
 		"archive" => "archief",
 		"sure-to-delete" => "Weet je zeker dat je deze pagina wilt verwijderen",
 		"login-to-perform-action" => "je moet ingelogd zijn om deze actie te kunnen uitvoeren",
+		"insufficient-rights-to-perform-action" => "je bent niet bevoegd om deze actie te kunnen uitvoeren",
 		"page-successfully-updated" => "Pagina succesvol bijgewerkt",
 		'cannot-edit-default-theme-explanation' => 'Het standaard thema kan niet bewerkt worden. Op de <a href="[[link]]">thema keuzepagina</a>, is het mogelijk het standaard thema the kopiëren en activeren, de kopie kan wel bewerkt worden.',
 

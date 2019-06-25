@@ -198,6 +198,7 @@
 		"archive" => "archive",
 		"sure-to-delete" => "Are you sure you want to delete this page",
 		"login-to-perform-action" => "you need to be logged on in order to perform this action",
+		"insufficient-rights-to-perform-action" => "you have insufficient rights to perform this action",
 		"page-successfully-updated" => "Page successfully updated",
 		'cannot-edit-default-theme-explanation' => 'The default theme cannot be edited. At the <a href="[[link]]">theme selection page</a>, the default theme can be copied and activated, that copy can be edited.',
 
