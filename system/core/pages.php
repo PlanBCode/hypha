@@ -87,7 +87,7 @@
 <script>
 	function validatePagename(obj) {
 		var pos = obj.selectionStart;
-		var val = obj.value.replace(/\s+/g, ' ').replace(/^\s|[^\d\w\s\.-]/gi, '');
+		var val = obj.value.replace(/\s+/g, ' ').replace(/^\s|[^\d\w\s\-]/gi, '');
 		if (val.length < pos) pos = val.length;
 		obj.value = val;
 		obj.setSelectionRange(pos, pos);
@@ -302,7 +302,9 @@
 		name - pagename
 	*/
 	function validatePagename($name) {
-		return preg_replace('/\s/', '_', preg_replace('/^\s|\s$|[^\d\w\s\.-_]/i', '', preg_replace('/\s+/', ' ', $name)));
+		$name = preg_replace('/\s+/', ' ', $name); // Collapse multiple spaces
+		$name = preg_replace('/^\s|\s$|[^\s\d\w\-_]/i', '', $name); //remove spaces from start and remove everythin g but alphanumeric _ - and space
+		return preg_replace('/\s/', '_', $name); // replace spaces with underscores
 	}
 
 	/*
