@@ -144,22 +144,22 @@ EOF;
 			$form = $this->createEditForm($request->getPostData());
 
 			// process form if it was posted
-			if (empty($form->errors)) {
-				$pagename = validatePagename($form->dataFor(self::FIELD_NAME_PAGE_NAME));
-				$private = $form->dataFor(self::FIELD_NAME_PRIVATE, false);
-				$content = wikify_html($form->dataFor(self::FIELD_NAME_CONTENT));
+			if (!empty($form->errors)) {
+				// update the form dom so that error can be displayed, if there are any
+				$form->updateDom();
 
-				$this->savePage($content, $pagename, null, $private);
-
-				notify('success', ucfirst(__('page-successfully-updated')));
-				return ['redirect', $this->constructFullPath($pagename)];
+				$this->html->find('#main')->append($form);
+				return null;
 			}
 
-			// update the form dom so that error can be displayed, if there are any
-			$form->updateDom();
+			$pagename = validatePagename($form->dataFor(self::FIELD_NAME_PAGE_NAME));
+			$private = $form->dataFor(self::FIELD_NAME_PRIVATE, false);
+			$content = wikify_html($form->dataFor(self::FIELD_NAME_CONTENT));
 
-			$this->html->find('#main')->append($form);
-			return null;
+			$this->savePage($content, $pagename, null, $private);
+
+			notify('success', ucfirst(__('page-successfully-updated')));
+			return ['redirect', $this->constructFullPath($pagename)];
 		}
 
 		private function translateView(HyphaRequest $request) {
@@ -193,21 +193,22 @@ EOF;
 			$form = $this->createTranslationForm($request->getPostData());
 
 			// process form if it was posted
-			if (empty($form->errors)) {
-				$language = $form->dataFor(self::FIELD_NAME_LANGUAGE);
-				$pagename = validatePagename($form->dataFor(self::FIELD_NAME_PAGE_NAME));
-				$content = wikify_html($form->dataFor(self::FIELD_NAME_CONTENT));
+			if (!empty($form->errors)) {
+				// update the form dom so that error can be displayed, if there are any
+				$form->updateDom();
 
-				$this->savePage($content, $pagename, $language);
-
-				notify('success', ucfirst(__('page-successfully-updated')));
-				return ['redirect', $this->constructFullPath($pagename, $language)];
+				$this->html->find('#main')->append($form);
+				return null;
 			}
 
-			// update the form dom so that error can be displayed, if there are any
-			$form->updateDom();
+			$language = $form->dataFor(self::FIELD_NAME_LANGUAGE);
+			$pagename = validatePagename($form->dataFor(self::FIELD_NAME_PAGE_NAME));
+			$content = wikify_html($form->dataFor(self::FIELD_NAME_CONTENT));
 
-			$this->html->find('#main')->append($form);
+			$this->savePage($content, $pagename, $language);
+
+			notify('success', ucfirst(__('page-successfully-updated')));
+			return ['redirect', $this->constructFullPath($pagename, $language)];
 		}
 
 		private function revertAction(HyphaRequest $request) {
