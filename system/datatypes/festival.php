@@ -30,7 +30,7 @@
 			if (isUser() && !in_array($this->getArg(0), ['edit'])) {
 				$commands = $this->html->find('#pageCommands');
 
-				$action = makeAction($this->language . '/' . $this->pagename . '/edit', '', '');
+				$action = makeAction($this->language . '/' . $this->pagename . '/settings', '', '');
 				$button = makeButton(__('settings'), $action);
 				$commands->append($button);
 
@@ -70,7 +70,7 @@
 				case 'translate':
 					return $this->translate();
 			*/
-				case 'edit':
+				case 'settings':
 					return $this->showSettings();
 				case 'participants':
 					return $this->showParticipants();
