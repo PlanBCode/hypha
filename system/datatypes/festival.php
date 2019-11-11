@@ -89,11 +89,13 @@
 					return $this->handlePaymentHook();
 				case 'contribute':
 					return $this->showContribute();
-				default:
 				case 'lineup':
+				case '':
 					return $this->showLineup();
 				case 'timetable':
 					return $this->showTimetable();
+				default:
+                                        return '404';
 			}
 		}
 
