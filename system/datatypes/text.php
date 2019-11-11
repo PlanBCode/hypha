@@ -336,7 +336,7 @@ EOF;
 			$path = $this->language . '/' . $this->pagename . ($path ? '/' . $path : '');
 			$_action = makeAction($path, ($command ? $command : ''), ($argument ? $argument : ''));
 
-			return makeButton(__($label), $_action);
+			return makeButton($label, $_action);
 		}
 
 		/**
