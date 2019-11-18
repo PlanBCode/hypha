@@ -122,7 +122,12 @@ EOF;
 				self::FIELD_NAME_CONTENT => $this->getContent(),
 			];
 			$form = $this->createEditForm($formData);
-			// Update the form to include the data
+
+			return $this->editViewRender($request, $form);
+		}
+
+		private function editViewRender(HyphaRequest $request, HTMLForm $form) {
+			// update the form dom so that error can be displayed, if there are any
 			$form->updateDom();
 
 			$this->html->find('#main')->append($form);
@@ -130,6 +135,7 @@ EOF;
 			$commands = $this->html->find('#pageCommands');
 			$commands->append($this->makeActionButton(__('save'), self::PATH_EDIT, self::CMD_SAVE));
 			$commands->append($this->makeActionButton(__('cancel'), ''));
+
 			return null;
 		}
 
@@ -145,11 +151,7 @@ EOF;
 
 			// process form if it was posted
 			if (!empty($form->errors)) {
-				// update the form dom so that error can be displayed, if there are any
-				$form->updateDom();
-
-				$this->html->find('#main')->append($form);
-				return null;
+				return $this->editViewRender($request, $form);
 			}
 
 			$pagename = validatePagename($form->dataFor(self::FIELD_NAME_PAGE_NAME));
@@ -159,6 +161,7 @@ EOF;
 			$this->savePage($content, $pagename, null, $private);
 
 			notify('success', ucfirst(__('page-successfully-updated')));
+
 			return ['redirect', $this->constructFullPath($pagename)];
 		}
 
