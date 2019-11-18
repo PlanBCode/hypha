@@ -130,7 +130,9 @@ EOF;
 			// update the form dom so that error can be displayed, if there are any
 			$form->updateDom();
 
-			$this->html->find('#main')->append($form);
+			/** @var HyphaDomElement $main */
+			$main = $this->html->find('#main');
+			$main->append($form);
 
 			$commands = $this->html->find('#pageCommands');
 			$commands->append($this->makeActionButton(__('save'), self::PATH_EDIT, self::CMD_SAVE));

@@ -291,6 +291,7 @@
 		"ml-confirmation-email-subject" => "Please confirm your subscription",
 		"ml-unsubscribe" => "unsubscribe",
 		"ml-if-unreadable-use-link" => "if this email is unreadable, please use the link",
+		"ml-test-mail-subject-prefix" => "newsletter test, please check!",
 
 		// mailing list - status
 		"ml-mailing-status-draft" => "draft",

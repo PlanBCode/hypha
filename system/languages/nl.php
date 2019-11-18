@@ -285,6 +285,7 @@
 		"ml-confirmation-email-subject" => "Bevestig uw aanmelding",
 		"ml-unsubscribe" => "afmelden",
 		"ml-if-unreadable-use-link" => "klik op deze link als deze email onleesbaar is",
+		"ml-test-mail-subject-prefix" => "testnieuwsbrief, graag controleren!",
 
 		// mailing list - status
 		"ml-mailing-status-draft" => "in opmaak",
