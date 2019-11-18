@@ -242,6 +242,18 @@
 		}
 
 		/**
+		 * Returns a request argument
+		 *
+		 * @param string $key
+		 * @param null|mixed $default
+		 *
+		 * @return null|mixed
+		 */
+		public function getArg($key, $default = null) {
+			return array_key_exists($key, $this->args) ? $this->args[$key] : $default;
+		}
+
+		/**
 		 * @return bool
 		 */
 		public function isPost() {
