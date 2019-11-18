@@ -88,19 +88,19 @@
 		private function createEditForm(array $values = []) {
 			$html = <<<EOF
 				<div class="section">
-					<label for="[[titleFieldName]]">[[title]]</label>
-					<input type="text" id="[[titleFieldName]]" name="[[titleFieldName]]" onblur="validatePagename(this);" onkeyup="validatePagename(this);" />
-					<input type="checkbox" id="[[privateFieldName]]" name="[[privateFieldName]]" />
-					<label for="[[privateFieldName]]">[[private]]</label>
+					<label for="[[field-name-title]]">[[title]]</label>
+					<input type="text" id="[[field-name-title]]" name="[[field-name-title]]" onblur="validatePagename(this);" onkeyup="validatePagename(this);" />
+					<input type="checkbox" id="[[field-name-private]]" name="[[field-name-private]]" />
+					<label for="[[field-name-private]]">[[private]]</label>
 				</div>
-				<editor name="[[contentFieldName]]"/>
+				<editor name="[[field-name-content]]"/>
 EOF;
 			$vars = [
 				'title' => __('title'),
-				'titleFieldName' => self::FIELD_NAME_PAGE_NAME,
+				'field-name-title' => self::FIELD_NAME_PAGE_NAME,
 				'private' => __('private-page'),
-				'privateFieldName' => self::FIELD_NAME_PRIVATE,
-				'contentFieldName' => self::FIELD_NAME_CONTENT,
+				'field-name-private' => self::FIELD_NAME_PRIVATE,
+				'field-name-content' => self::FIELD_NAME_CONTENT,
 			];
 
 			$html = hypha_substitute($html, $vars);
@@ -272,26 +272,26 @@ EOF;
 		 */
 		private function createTranslationForm(array $values = []) {
 			$selectedLanguage = isset($data[self::FIELD_NAME_LANGUAGE]) ? $data[self::FIELD_NAME_LANGUAGE] : null;
-			$languageOptionList = languageOptionList($selectedLanguage, $this->language);
+			$optionListLanguage = languageOptionList($selectedLanguage, $this->language);
 			$html = <<<EOF
 				<div class="section">
-					<label for="[[languageFieldName]]">[[language]]</label>
-					<select id="[[languageFieldName]]" name="[[languageFieldName]]">[[languageOptionList]]</select>
+					<label for="[[field-name-language]]">[[language]]</label>
+					<select id="[[field-name-language]]" name="[[field-name-language]]">[[languageOptionList]]</select>
 				</div>
 				<div class="section">
-					<label for="[[titleFieldName]]">[[title]]</label>
-					<input type="text" id="[[titleFieldName]]" name="[[titleFieldName]]" onblur="validatePagename(this);" onkeyup="validatePagename(this);" />
+					<label for="[[field-name-title]]">[[title]]</label>
+					<input type="text" id="[[field-name-title]]" name="[[field-name-title]]" onblur="validatePagename(this);" onkeyup="validatePagename(this);" />
 				</div>
-				<editor name="[[contentFieldName]]"></editor>
+				<editor name="[[field-name-content]]"></editor>
 EOF;
 
 			$vars = [
 				'title' => __('title'),
-				'titleFieldName' => self::FIELD_NAME_PAGE_NAME,
+				'field-name-title' => self::FIELD_NAME_PAGE_NAME,
 				'language' => __('language'),
-				'languageFieldName' => self::FIELD_NAME_LANGUAGE,
-				'languageOptionList' => $languageOptionList,
-				'contentFieldName' => self::FIELD_NAME_CONTENT,
+				'field-name-language' => self::FIELD_NAME_LANGUAGE,
+				'option-list-language' => $optionListLanguage,
+				'field-name-content' => self::FIELD_NAME_CONTENT,
 			];
 
 			$html = hypha_substitute($html, $vars);
