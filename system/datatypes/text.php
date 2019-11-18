@@ -149,6 +149,9 @@ EOF;
 			// create form
 			$form = $this->createEditForm($request->getPostData());
 
+			// validate
+			$form->validateRequiredField(self::FIELD_NAME_PAGE_NAME);
+
 			// process form if it was posted
 			if (!empty($form->errors)) {
 				return $this->editViewRender($request, $form);
@@ -198,6 +201,11 @@ EOF;
 
 			// create form
 			$form = $this->createTranslationForm($request->getPostData());
+
+			// validate
+			$form->validateRequiredField(self::FIELD_NAME_PAGE_NAME);
+			// TODO: validate that the language is a valid one
+			$form->validateRequiredField(self::FIELD_NAME_LANGUAGE);
 
 			// process form if it was posted
 			if (!empty($form->errors)) {
