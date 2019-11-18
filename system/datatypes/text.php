@@ -186,9 +186,20 @@ EOF;
 
 			// create form
 			$form = $this->createTranslationForm($formData);
+
+			return $this->translateViewRender($request, $form);
+		}
+
+		private function translateViewRender(HyphaRequest $request, HTMLForm $form) {
 			$form->updateDom();
 
 			$this->html->find('#main')->append($form);
+
+			// buttons
+			$commands = $this->html->find('#pageCommands');
+			$commands->append($this->makeActionButton(__('cancel')));
+			$commands->append($this->makeActionButton(__('save'), self::PATH_TRANSLATE, self::CMD_TRANSLATE));
+
 			return null;
 		}
 
@@ -208,13 +219,8 @@ EOF;
 			$form->validateRequiredField(self::FIELD_NAME_LANGUAGE);
 
 			// process form if it was posted
-			if (!empty($form->errors)) {
-				// update the form dom so that error can be displayed, if there are any
-				$form->updateDom();
-
-				$this->html->find('#main')->append($form);
-				return null;
-			}
+			if (!empty($form->errors))
+				return $this->translateViewRender($request, $form);
 
 			$language = $form->dataFor(self::FIELD_NAME_LANGUAGE);
 			$pagename = validatePagename($form->dataFor(self::FIELD_NAME_PAGE_NAME));
@@ -224,9 +230,7 @@ EOF;
 
 			if ($error) {
 				notify('error', $error);
-				$form->updateDom();
-				$this->html->find('#main')->append($form);
-				return null;
+				return $this->translateViewRender($request, $form);
 			}
 			notify('success', ucfirst(__('page-successfully-updated')));
 
@@ -266,34 +270,33 @@ EOF;
 		 *
 		 * @return WymHTMLForm
 		 */
-		private function createTranslationForm(array $data = []) {
-			$language = __('language');
-			$languageFieldName = self::FIELD_NAME_LANGUAGE;
+		private function createTranslationForm(array $values = []) {
 			$selectedLanguage = isset($data[self::FIELD_NAME_LANGUAGE]) ? $data[self::FIELD_NAME_LANGUAGE] : null;
 			$languageOptionList = languageOptionList($selectedLanguage, $this->language);
-			$title = __('title');
-			$titleFieldName = self::FIELD_NAME_PAGE_NAME;
-			$contentFieldName = self::FIELD_NAME_CONTENT;
 			$html = <<<EOF
-				<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
-					<strong><label for="$languageFieldName">$language</label></strong> <select id="$languageFieldName" name="$languageFieldName">$languageOptionList</select>
+				<div class="section">
+					<label for="[[languageFieldName]]">[[language]]</label>
+					<select id="[[languageFieldName]]" name="[[languageFieldName]]">[[languageOptionList]]</select>
 				</div>
-				<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
-					<strong><label for="$titleFieldName">$title</label></strong> <input type="text" id="$titleFieldName" name="$titleFieldName" onblur="validatePagename(this);" onkeyup="validatePagename(this);" />
+				<div class="section">
+					<label for="[[titleFieldName]]">[[title]]</label>
+					<input type="text" id="[[titleFieldName]]" name="[[titleFieldName]]" onblur="validatePagename(this);" onkeyup="validatePagename(this);" />
 				</div>
-				<editor name="$contentFieldName"></editor>
+				<editor name="[[contentFieldName]]"></editor>
 EOF;
-			/** @var HyphaDomElement $form */
-			$form = $this->html->createElement('form');
-			/** @var \DOMWrap\Element $elem */
-			$elem = $form->html($html);
 
-			// buttons
-			$commands = $this->html->find('#pageCommands');
-			$commands->append($this->makeActionButton(__('cancel')));
-			$commands->append($this->makeActionButton(__('save'), self::PATH_TRANSLATE, self::CMD_TRANSLATE));
+			$vars = [
+				'title' => __('title'),
+				'titleFieldName' => self::FIELD_NAME_PAGE_NAME,
+				'language' => __('language'),
+				'languageFieldName' => self::FIELD_NAME_LANGUAGE,
+				'languageOptionList' => $languageOptionList,
+				'contentFieldName' => self::FIELD_NAME_CONTENT,
+			];
 
-			return new WymHTMLForm($elem, $data);
+			$html = hypha_substitute($html, $vars);
+
+			return new WymHTMLForm($html, $values);
 		}
 
 		private function savePage($content, $pagename = null, $language = null, $privateFlag = null) {
