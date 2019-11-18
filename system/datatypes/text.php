@@ -158,8 +158,12 @@ EOF;
 			$private = $form->dataFor(self::FIELD_NAME_PRIVATE, false);
 			$content = wikify_html($form->dataFor(self::FIELD_NAME_CONTENT));
 
-			$this->savePage($content, $pagename, null, $private);
+			$error = $this->savePage($content, $pagename, null, $private);
 
+			if ($error !== false) {
+				notify('error', $error);
+				return $this->editViewRender($request, $form);
+			}
 			notify('success', ucfirst(__('page-successfully-updated')));
 
 			return ['redirect', $this->constructFullPath($pagename)];
@@ -208,9 +212,16 @@ EOF;
 			$pagename = validatePagename($form->dataFor(self::FIELD_NAME_PAGE_NAME));
 			$content = wikify_html($form->dataFor(self::FIELD_NAME_CONTENT));
 
-			$this->savePage($content, $pagename, $language);
+			$error = $this->savePage($content, $pagename, $language);
 
+			if ($error) {
+				notify('error', $error);
+				$form->updateDom();
+				$this->html->find('#main')->append($form);
+				return null;
+			}
 			notify('success', ucfirst(__('page-successfully-updated')));
+
 			return ['redirect', $this->constructFullPath($pagename, $language)];
 		}
 
@@ -286,6 +297,7 @@ EOF;
 					$updateHyphaXml = true;
 				}
 			}
+			$error = false;
 			if ($updateHyphaXml) {
 				global $hyphaXml;
 				$hyphaXml->lockAndReload();
@@ -293,13 +305,16 @@ EOF;
 				// have changed, so find it in the newly loaded
 				// XML. This seems a bit dodgy, though...
 				$this->replacePageListNode(hypha_getPage($this->language, $this->pagename));
-				hypha_setPage($this->pageListNode, $language, $pagename, $privateFlag);
+				$error = hypha_setPage($this->pageListNode, $language, $pagename, $privateFlag);
 				$hyphaXml->saveAndUnlock();
 			}
 
-			$this->xml->lockAndReload();
-			storeWikiContent($this->xml->documentElement, $language, $content, $this->O_O->getUser()->getAttribute('username'));
-			$this->xml->saveAndUnlock();
+			if ($error === false) {
+				$this->xml->lockAndReload();
+				storeWikiContent($this->xml->documentElement, $language, $content, $this->O_O->getUser()->getAttribute('username'));
+				$this->xml->saveAndUnlock();
+			}
+			return $error;
 		}
 
 		public function digest($timestamp) {
