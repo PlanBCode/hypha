@@ -297,7 +297,6 @@ EOF;
 				$hyphaXml->saveAndUnlock();
 			}
 
-			// unfortunately wymeditor can't handle relative urls so we'll add the baseUrl before editing and remove it afterwards
 			$this->xml->lockAndReload();
 			storeWikiContent($this->xml->documentElement, $language, $content, $this->O_O->getUser()->getAttribute('username'));
 			$this->xml->saveAndUnlock();
