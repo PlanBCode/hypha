@@ -553,7 +553,7 @@
 		$langFound = false;
 		foreach($page->getElementsByTagName('language') as $lang) if ($lang->getAttribute('id')==$language) {
 			if ($name && ($name!=$lang->getAttribute('name'))) {
-				$try = hypha_getPage($page->getAttribute('language'), $name);
+				$try = hypha_getPage($language, $name);
 				if (!$try || $try===$page) $lang->setAttribute('name', $name);
 				else return __('page-name-conflict');
 			}
