@@ -235,8 +235,9 @@
 		"datatype.name.festivalpage" => "festival page",
 
 		// festival - digest
-		"festival-edited-contribution" => " edited contribution: ",
-		"festival-added-contribution" => " added contribution: ",
+		"festival-edited-contribution" => "[[name]] edited contribution: [[contribution]]",
+		"festival-added-contribution" => "[[name]] added contribution: [[contribution]]",
+		"festival-digest-edit-contribution" => "Edit contribution",
 		"festival-signed-up-for" => " signed up for ",
 		"festival-failed-to-pay-for" => " failed to pay for ",
 		"festival-payed-for" => " paid for ",

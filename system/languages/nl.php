@@ -235,8 +235,9 @@
 		"datatype.name.festivalpage" => "festival pagina",
 
 		// festival - digest
-		"festival-edited-contribution" => " heeft festivalbijdrage aangepast: ",
-		"festival-added-contribution" => " heeft een festivalbijdrage toegevoegd: ",
+		"festival-edited-contribution" => "[[name]] heeft festivalbijdrage aangepast: [[contribution]]",
+		"festival-added-contribution" => "[[name]] heeft een festivalbijdrage toegevoegd: [[contribution]]",
+		"festival-digest-edit-contribution" => "Bijdrage wijzigen",
 		"festival-signed-up-for" => " heeft zich ingeschreven voor ",
 		"festival-failed-to-pay-for" => " kon niet betalen voor ",
 		"festival-payed-for" => " heeft betaald voor ",

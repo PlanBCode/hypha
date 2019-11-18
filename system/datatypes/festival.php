@@ -629,14 +629,16 @@ EOF;
 				$email = false;
 			}
 
-			$digest = $name;
+			$vars = [
+				'name' => $name,
+				'contribution'=> $contribution->getAttribute('title') . ' - ' . $contribution->getAttribute('name'),
+			];
 			if ($editing)
-				$digest .= __('festival-edited-contribution');
+				$digest = __('festival-edited-contribution', $vars);
 			else
-				$digest .= __('festival-added-contribution');
+				$digest = __('festival-added-contribution', $vars);
 
-			$digest .= $contribution->getAttribute('title') . ' - ' . $contribution->getAttribute('name');
-			$digest .= ' (<a href="' . $edit_url . '">Edit contribution</a>)';
+			$digest .= ' (<a href="' . $edit_url . '">' . __('festival-digest-edit-contribution') . '</a>)';
 			writeToDigest($digest, 'festival-contribution');
 
 			if (!$editing && $email) {
