@@ -128,7 +128,6 @@
 
 		public function getRootUrl() {
 			$scheme = $this->getScheme();
-			$https = 'https' === $scheme;
 			$host = $this->getHost();
 
 			return sprintf('%s://%s%s', $scheme, $host, $this->rootUrlPath);
