@@ -317,6 +317,7 @@
 
 		// Command requests a reload
 		if ($result === 'reload') {
+			preserveDumps();
 			$url = preserveNotifications($_SERVER['REQUEST_URI']);
 			header('Location: ' . $url);
 			exit;
@@ -324,6 +325,7 @@
 
 		// Command requests a redirect
 		if (count($result) == 2 && $result[0] == 'redirect') {
+			preserveDumps();
 			$url = preserveNotifications($result[1]);
 			header('Location: ' . $url);
 			exit;
@@ -521,4 +523,71 @@
 	function notify($type, $message) {
 		global $hyphaNotificationList;
 		if ($message) $hyphaNotificationList[] = '<div class="'.$type.'">'.$message.'</div>';
+	}
+
+	/*
+		Function: preserveDumps
+
+		Store pending dumps in the session, so they can be loaded
+		in the next request.
+	*/
+	function preserveDumps() {
+		global $hyphaDumpList;
+		if (count($hyphaDumpList)) {
+			session_start();
+			$_SESSION['dumps'] = $hyphaDumpList;
+			session_write_close();
+			$hyphaDumpList = [];
+		}
+	}
+
+	/*
+		Function: addDumps
+		Dumps the entries in the $hyphaDumpList to the <HTMLDocument>
+		Parameters:
+		$html - an instance of <HTMLDocument>
+	*/
+	registerPostProcessingFunction('addDumps');
+	$GLOBALS['hyphaDumpList'] = [];
+	function addDumps($html) {
+		global $hyphaDumpList;
+
+		session_start();
+		if (isset($_SESSION['dumps'])) {
+			$hyphaDumpList = array_merge($_SESSION['dumps'], $hyphaDumpList);
+
+			unset($_SESSION['dumps']);
+		}
+		session_write_close();
+
+		if (count($hyphaDumpList)) {
+			foreach ($hyphaDumpList as $vars) {
+				foreach ($vars as &$value) $value = json_encode($value);
+				call_user_func_array([$html, 'writeScript'], ['console.log(' . implode(', ', $vars) . ');']);
+			}
+		}
+	}
+
+	/*
+		Function: dump
+
+		Dumps the given variables to the html console
+
+		Adds the given variables to the $hyphaDumpList which will be
+		post processed so the given variables will be logged in the console.
+		Parameters:
+		@param array $vars - variables to dump
+	*/
+	function dump(...$vars) {
+		global $O_O;
+		global $hyphaDumpList;
+
+		// add caller as first variable
+		$caller = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0];
+		$file = str_replace($O_O->getRootPath(), '', $caller['file']);
+		$line = $caller['line'];
+		array_unshift($vars, $file . ':' . $line);
+
+		// adds the variables to the $hyphaDumpList for later processing
+		$hyphaDumpList[] = $vars;
 	}
