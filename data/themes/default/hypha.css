@@ -22,7 +22,7 @@
  --menulinkhoverback: #aaa;
  --menulinkactiveback: #ccc;
  --sidebarbackgroundcolor: #ddddff;
- 
+
 }
 
 /* dosis-regular - latin */
@@ -412,11 +412,11 @@ code {
  color: #825500;
 }
  /* ---- Images ---- */
- 
+
 img {
  border: 0px;
 }
- 
+
 #main img {
  margin: 1.1em 0 0.7em;
  max-width: 100%;
@@ -605,6 +605,33 @@ input {
 }
 
 .review-comment-wrapper li p {
+ margin: 0;
+}
+.public-comment-wrapper {
+ background: #FFFFE0;
+ border-bottom: 3px solid var(--bordercolor);
+ padding-left: 15px;
+ padding-right: 15px;
+ margin-bottom: 30px;
+}
+
+.public-comment-wrapper ul {
+ padding: 0;
+}
+
+.public-comment-wrapper li {
+ list-style: none;
+ padding-top: 10px;
+ padding-bottom: 10px;
+ padding-left: 30px;
+ border-bottom: 1px solid var(--bordercolor);
+}
+
+.public-comment-wrapper li.first-comment {
+ padding-left: 0;
+}
+
+.public-comment-wrapper li p {
  margin: 0;
 }
 

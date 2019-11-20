@@ -128,20 +128,19 @@
 
 		public function getRootUrl() {
 			$scheme = $this->getScheme();
-			$https = 'https' === $scheme;
 			$host = $this->getHost();
 
 			return sprintf('%s://%s%s', $scheme, $host, $this->rootUrlPath);
 		}
 
 		public function getScheme() {
-                        // Apache 2.4+ has REQUEST_SCHEME
-                        if (array_key_exists('REQUEST_SCHEME', $_SERVER))
-                                return $_SERVER['REQUEST_SCHEME'];
-                        if (array_key_exists('HTTPS', $_SERVER) && $_SERVER['HTTPS'] == 'on')
-                                return 'https';
-                        return 'http';
-                }
+			// Apache 2.4+ has REQUEST_SCHEME
+			if (array_key_exists('REQUEST_SCHEME', $_SERVER))
+				return $_SERVER['REQUEST_SCHEME'];
+			if (array_key_exists('HTTPS', $_SERVER) && $_SERVER['HTTPS'] == 'on')
+				return 'https';
+			return 'http';
+		}
 
 		public function getHost() {
 			return $_SERVER['HTTP_HOST'];
@@ -239,6 +238,18 @@
 		 */
 		public function getArgs() {
 			return $this->args;
+		}
+
+		/**
+		 * Returns a request argument
+		 *
+		 * @param string $key
+		 * @param null|mixed $default
+		 *
+		 * @return null|mixed
+		 */
+		public function getArg($key, $default = null) {
+			return array_key_exists($key, $this->args) ? $this->args[$key] : $default;
 		}
 
 		/**

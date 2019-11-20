@@ -124,3 +124,24 @@
 		$onclick = 'toggleInfoPopup(event, '.json_encode($tag).', ' . json_encode($O_O->getInterfaceLanguage()) . ', this)';
 		return '<span onclick="' . htmlspecialchars($onclick) . '" class="hyphaInfoButton"></span>';
 	}
+
+	/*
+		Function: xpath_encode
+		Encodes an XPath string literal from the given string
+		value (taking care of encoding any quotes inside the
+		value). Returns an xpath expression that is already
+		enclosed in quotes.
+
+		This should be used whenever including a string variable in an xpath expression. E.g.
+
+		$node->findXPath('//button[name='.xpath_encode($name).']');
+
+		The name is picked in symmetry with e.g. json_encode.
+
+		Parameters:
+		$value - the string value to encode
+	*/
+	function xpath_encode($value) {
+		// Let the CssSelector library (within php-dom-wrapper) do the hard work
+		return Symfony\Component\CssSelector\XPath\Translator::getXpathLiteral($value);
+	}
