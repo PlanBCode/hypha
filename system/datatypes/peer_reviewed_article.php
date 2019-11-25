@@ -76,9 +76,9 @@ class peer_reviewed_article extends Page {
 
 	private $statusMtx = [
 		self::STATUS_NEWLY_CREATED => [],
-		self::STATUS_DRAFT => [self::STATUS_REVIEW => 'art-start-review'],
-		self::STATUS_REVIEW => [self::STATUS_APPROVED => 'art-approve'],
-		self::STATUS_APPROVED => [self::STATUS_PUBLISHED => 'art-publish'],
+		self::STATUS_DRAFT => [self::STATUS_REVIEW => ['label' => 'art-start-review', 'cmd' => self::CMD_STATUS_CHANGE_REVIEW]],
+		self::STATUS_REVIEW => [self::STATUS_APPROVED => ['label' => 'art-approve', 'cmd' => self::CMD_STATUS_CHANGE_APPROVED]],
+		self::STATUS_APPROVED => [self::STATUS_PUBLISHED => ['label' => 'art-publish', 'cmd' => self::CMD_STATUS_CHANGE_PUBLISHED]],
 		self::STATUS_PUBLISHED => [/*self::STATUS_RETRACTED => 'retract'*/], // retracted is not supported yet
 		self::STATUS_RETRACTED => [/*self::STATUS_DRAFT => 'to_draft'*/], // "to draft" is not supported yet
 	];
@@ -208,11 +208,7 @@ class peer_reviewed_article extends Page {
 				}
 			} else {
 				foreach ($this->statusMtx[$status] as $newStatus => $option) {
-					$statusChangeConstant = strtoupper('self::CMD_STATUS_CHANGE_' . $newStatus);
-					$cmd = defined($statusChangeConstant) ? get_defined_constants($statusChangeConstant) : null;
-					if ($cmd) {
-						$commands->append($this->makeActionButton(__($option), null, $cmd));
-					}
+					$commands->append($this->makeActionButton(__($option['label']), null, $option['cmd']));
 				}
 			}
 			if (isAdmin()) {
