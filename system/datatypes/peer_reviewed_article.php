@@ -249,11 +249,11 @@ class peer_reviewed_article extends Page {
 			$main->append('<div class="author">' . __('art-by') . ' ' . htmlspecialchars($author) . '</div>');
 		}
 
-		$article = $content->find(self::FIELD_NAME_TEXT)->children();
+		$text = $content->find(self::FIELD_NAME_TEXT)->children();
 		/** @var HyphaDomElement $div */
 		$div = $this->html->createElement('div');
 		$div->setAttribute('class', 'article');
-		$div->append($article);
+		$div->append($text);
 		$main->append($div);
 
 		/** @var NodeList $method */
