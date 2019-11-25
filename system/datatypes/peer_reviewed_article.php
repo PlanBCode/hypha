@@ -171,12 +171,13 @@ class peer_reviewed_article extends Page {
 			$hyphaXml->saveAndUnlock();
 		}
 
-		// set initial status, create timestamp and title
+		// set initial status, author, timestamps and title
 		/** @var HyphaDomElement $article */
 		$article = $this->xml->find(self::FIELD_NAME_ARTICLE);
 		$article->setAttr(self::FIELD_NAME_STATUS, self::STATUS_DRAFT);
 		$article->setAttr(self::FIELD_NAME_AUTHOR, $this->O_O->getUser()->getAttribute('fullname'));
 		$article->setAttr(self::FIELD_NAME_CREATED_AT, 't' . time());
+		$article->setAttr(self::FIELD_NAME_UPDATED_AT, 't' . time());
 		/** @var HyphaDomElement $title */
 		$title = $this->xml->find(self::FIELD_NAME_TITLE);
 		$title->setText(showPagename($this->pagename));
@@ -395,6 +396,7 @@ class peer_reviewed_article extends Page {
 
 		$author = $form->dataFor(self::FIELD_NAME_AUTHOR);
 		$this->xml->find(self::FIELD_NAME_ARTICLE)->setAttr(self::FIELD_NAME_AUTHOR, $author);
+		$this->xml->find(self::FIELD_NAME_ARTICLE)->setAttr(self::FIELD_NAME_UPDATED_AT, 't' . time());
 		$this->xml->find(self::FIELD_NAME_TITLE)->setText($form->dataFor(self::FIELD_NAME_TITLE));
 		$this->xml->find(self::FIELD_NAME_TEXT)->setHtml($form->dataFor(self::FIELD_NAME_TEXT));
 		$this->xml->find(self::FIELD_NAME_EXCERPT)->setHtml($form->dataFor(self::FIELD_NAME_EXCERPT));
