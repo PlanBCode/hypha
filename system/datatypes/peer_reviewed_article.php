@@ -20,6 +20,7 @@ class peer_reviewed_article extends Page {
 	const FIELD_NAME_USER = 'user';
 	const FIELD_NAME_CREATED_AT = 'created_at';
 	const FIELD_NAME_UPDATED_AT = 'updated_at';
+	const FIELD_NAME_PUBLISHED_AT = 'published_at';
 
 	const FIELD_NAME_DISCUSSION_CONTAINER = 'discussions';
 	const FIELD_NAME_DISCUSSION_REVIEW_CONTAINER = 'review';
@@ -178,6 +179,7 @@ class peer_reviewed_article extends Page {
 		$article->setAttr(self::FIELD_NAME_AUTHOR, $this->O_O->getUser()->getAttribute('fullname'));
 		$article->setAttr(self::FIELD_NAME_CREATED_AT, 't' . time());
 		$article->setAttr(self::FIELD_NAME_UPDATED_AT, 't' . time());
+		$article->setAttr(self::FIELD_NAME_PUBLISHED_AT, '');
 		/** @var HyphaDomElement $title */
 		$title = $this->xml->find(self::FIELD_NAME_TITLE);
 		$title->setText(showPagename($this->pagename));
@@ -740,6 +742,9 @@ class peer_reviewed_article extends Page {
 		/** @var HyphaDomElement $article */
 		$article = $this->xml->find(self::FIELD_NAME_ARTICLE);
 		$article->setAttr(self::FIELD_NAME_STATUS, $newStatus);
+		if ($newStatus === self::STATUS_PUBLISHED) {
+			$article->setAttr(self::FIELD_NAME_PUBLISHED_AT, 't' . time());
+		}
 		$this->xml->saveAndUnlock();
 
 		// remove private flag
