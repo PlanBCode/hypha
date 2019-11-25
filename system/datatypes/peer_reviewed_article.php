@@ -172,11 +172,11 @@ class peer_reviewed_article extends Page {
 		}
 
 		// set initial status, create timestamp and title
-		/** @var HyphaDomElement $context */
-		$context = $this->xml->find(self::FIELD_NAME_CONTEXT);
-		$context->setAttr(self::FIELD_NAME_STATUS, self::STATUS_DRAFT);
-		$context->setAttr(self::FIELD_NAME_AUTHOR, $this->O_O->getUser()->getAttribute('fullname'));
-		$context->setAttr(self::FIELD_NAME_CREATED_AT, 't' . time());
+		/** @var HyphaDomElement $article */
+		$article = $this->xml->find(self::FIELD_NAME_ARTICLE);
+		$article->setAttr(self::FIELD_NAME_STATUS, self::STATUS_DRAFT);
+		$article->setAttr(self::FIELD_NAME_AUTHOR, $this->O_O->getUser()->getAttribute('fullname'));
+		$article->setAttr(self::FIELD_NAME_CREATED_AT, 't' . time());
 		/** @var HyphaDomElement $title */
 		$title = $this->xml->find(self::FIELD_NAME_TITLE);
 		$title->setText(showPagename($this->pagename));
@@ -218,12 +218,12 @@ class peer_reviewed_article extends Page {
 		}
 
 		// display page name and text
-		/** @var HyphaDomElement $context */
-		$context = $this->xml->find(self::FIELD_NAME_CONTEXT);
+		/** @var HyphaDomElement $article */
+		$article = $this->xml->find(self::FIELD_NAME_ARTICLE);
 		/** @var HyphaDomElement $content */
 		$content = $this->xml->find(self::FIELD_NAME_CONTENT);
 
-		$author = $context->getAttr(self::FIELD_NAME_AUTHOR);
+		$author = $article->getAttr(self::FIELD_NAME_AUTHOR);
 
 		/** @var HyphaDomElement $main */
 		$main = $this->html->find('#main');
@@ -257,7 +257,7 @@ class peer_reviewed_article extends Page {
 		$main->append($div);
 
 		/** @var NodeList $method */
-		$method = $context->find(self::FIELD_NAME_METHOD)->children();
+		$method = $this->xml->find(self::FIELD_NAME_METHOD)->children();
 		if ($method->count()) {
 			/** @var HyphaDomElement $methodContainer */
 			$methodContainer = $this->html->createElement('div');
@@ -332,7 +332,7 @@ class peer_reviewed_article extends Page {
 		// create form
 		$formData = [
 			self::FIELD_NAME_TITLE => html_entity_decode(strip_tags($this->xml->find(self::FIELD_NAME_TITLE)->text())),
-			self::FIELD_NAME_AUTHOR => $this->xml->find(self::FIELD_NAME_CONTEXT)->getAttr(self::FIELD_NAME_AUTHOR),
+			self::FIELD_NAME_AUTHOR => $this->xml->find(self::FIELD_NAME_ARTICLE)->getAttr(self::FIELD_NAME_AUTHOR),
 			self::FIELD_NAME_TEXT => $this->xml->find(self::FIELD_NAME_TEXT)->children(),
 			self::FIELD_NAME_EXCERPT => $this->xml->find(self::FIELD_NAME_EXCERPT)->children(),
 			self::FIELD_NAME_METHOD => $this->xml->find(self::FIELD_NAME_METHOD)->children(),
@@ -394,7 +394,7 @@ class peer_reviewed_article extends Page {
 		$this->xml->lockAndReload();
 
 		$author = $form->dataFor(self::FIELD_NAME_AUTHOR);
-		$this->xml->find(self::FIELD_NAME_CONTEXT)->setAttr(self::FIELD_NAME_AUTHOR, $author);
+		$this->xml->find(self::FIELD_NAME_ARTICLE)->setAttr(self::FIELD_NAME_AUTHOR, $author);
 		$this->xml->find(self::FIELD_NAME_TITLE)->setText($form->dataFor(self::FIELD_NAME_TITLE));
 		$this->xml->find(self::FIELD_NAME_TEXT)->setHtml($form->dataFor(self::FIELD_NAME_TEXT));
 		$this->xml->find(self::FIELD_NAME_EXCERPT)->setHtml($form->dataFor(self::FIELD_NAME_EXCERPT));
@@ -735,9 +735,9 @@ class peer_reviewed_article extends Page {
 		}
 
 		$this->xml->lockAndReload();
-		/** @var HyphaDomElement $context */
-		$context = $this->xml->find(self::FIELD_NAME_CONTEXT);
-		$context->setAttr(self::FIELD_NAME_STATUS, $newStatus);
+		/** @var HyphaDomElement $article */
+		$article = $this->xml->find(self::FIELD_NAME_ARTICLE);
+		$article->setAttr(self::FIELD_NAME_STATUS, $newStatus);
 		$this->xml->saveAndUnlock();
 
 		// remove private flag
@@ -1286,9 +1286,9 @@ EOF;
 	 * @return string
 	 */
 	private function getStatus() {
-		/** @var HyphaDomElement $doc */
-		$doc = $this->xml->find(self::FIELD_NAME_CONTEXT);
-		$status = $doc->getAttr(self::FIELD_NAME_STATUS);
+		/** @var HyphaDomElement $article */
+		$article = $this->xml->find(self::FIELD_NAME_ARTICLE);
+		$status = $article->getAttr(self::FIELD_NAME_STATUS);
 		if ('' == $status) {
 			$status = self::STATUS_NEWLY_CREATED;
 		}
