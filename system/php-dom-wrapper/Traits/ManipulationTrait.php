@@ -291,7 +291,7 @@ trait ManipulationTrait
      *
      * @return self
      */
-    public function prependTo($selector): self {
+    public function prependTo($selector) {
         if ($selector instanceof \DOMNode || $selector instanceof NodeList) {
             $nodes = $this->inputAsNodeList($selector);
         } else {
@@ -306,7 +306,7 @@ trait ManipulationTrait
      *
      * @return self
      */
-    public function appendTo($selector): self {
+    public function appendTo($selector) {
         if ($selector instanceof \DOMNode || $selector instanceof NodeList) {
             $nodes = $this->inputAsNodeList($selector);
         } else {
@@ -716,7 +716,7 @@ trait ManipulationTrait
      *
      * @return NodeList
      */
-    public function create($input): NodeList {
+    public function create($input) {
         return $this->inputAsNodeList($input);
     }
 
