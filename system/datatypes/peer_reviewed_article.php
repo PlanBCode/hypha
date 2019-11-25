@@ -227,6 +227,7 @@ class peer_reviewed_article extends Page {
 		$content = $this->xml->find(self::FIELD_NAME_CONTENT);
 
 		$author = $article->getAttr(self::FIELD_NAME_AUTHOR);
+		$publishedTimestamp = ltrim($article->getAttr(self::FIELD_NAME_PUBLISHED_AT), 't');
 
 		/** @var HyphaDomElement $main */
 		$main = $this->html->find('#main');
@@ -250,6 +251,22 @@ class peer_reviewed_article extends Page {
 
 		if ($author) {
 			$main->append('<div class="author">' . __('art-by') . ' ' . htmlspecialchars($author) . '</div>');
+		}
+		if ($publishedTimestamp) {
+			/** @var HyphaDomElement $publish */
+			$publish = $this->html->createElement('div');
+			$publish->setAttribute('class', 'published_at');
+			/** @var HyphaDomElement $publishDate */
+			$publishDate = $this->html->createElement('span');
+			$publishDate->setAttribute('class', 'date');
+			$publishDate->text(date(__('art-date-format-date'), $publishedTimestamp));
+			$publish->append($publishDate);
+			/** @var HyphaDomElement $publishTime */
+			$publishTime = $this->html->createElement('span');
+			$publishTime->setAttribute('class', 'time');
+			$publishTime->text(date(__('art-date-format-time'), $publishedTimestamp));
+			$publish->append($publishTime);
+			$main->append($publish);
 		}
 
 		$text = $content->find(self::FIELD_NAME_TEXT)->children();
