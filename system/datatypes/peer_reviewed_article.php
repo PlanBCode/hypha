@@ -208,7 +208,8 @@ class peer_reviewed_article extends Page {
 				}
 			} else {
 				foreach ($this->statusMtx[$status] as $newStatus => $option) {
-					$cmd = defined(self::CMD_STATUS_CHANGE . '_' . $newStatus) ? get_defined_constants(self::CMD_STATUS_CHANGE . '_' . $newStatus) : null;
+					$statusChangeConstant = strtoupper('self::CMD_STATUS_CHANGE_' . $newStatus);
+					$cmd = defined($statusChangeConstant) ? get_defined_constants($statusChangeConstant) : null;
 					if ($cmd) {
 						$commands->append($this->makeActionButton(__($option), null, $cmd));
 					}
