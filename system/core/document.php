@@ -315,10 +315,6 @@
 		// all content of the form will be iterated over.
 		// This allows a form to be directly appended to a
 		// DomElement (e.g. $div->append($form)) as if it was a
-		// DomElement itself. (e.g. $div->append($form)) as if
-		// it was a DomElement itself. (e.g.
-		// $div->append($form)) as if it was a DomElement
-		// itself. (e.g. $div->append($form)) as if it was a
 		// DomElement itself.
 		public function getIterator() {
 			return $this->root->children();
