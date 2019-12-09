@@ -100,6 +100,7 @@
 		html+= '<tr><th><?=__('type')?></th><td><select id="newPageType" name="newPageType">' + '<?php foreach($types as $type => $datatypeName) echo '<option value="'.$type.'"'.($type=='textpage' ? 'selected="selected"' : '').'>'.$datatypeName.'</option>'; ?>' + '</select> ' + infoPageType + '</td></tr>';
 		var infoPageName = <?=json_encode(makeInfoButton('help-page-name'));?>;
 		html+= '<tr><th><?=__('pagename')?></th><td><input type="text" id="newPagename" value="<?=$pagename?>" onblur="validatePagename(this);" onkeyup="validatePagename(this); document.getElementById(\'newPageSubmit\').disabled = this.value ? false : true;"/> ' + infoPageName + '</td></tr>';
+		html+= '<tr><th><?=__('language')?></th><td><select id="newPageLanguage" name="newPageLanguage"><?=languageOptionList('', '')?></select></td></tr>';
 		var infoPrivate = <?=json_encode(makeInfoButton('help-private-page'));?>;
 		html+= '<tr><td></td><td><input type="checkbox" id="newPagePrivate" name="newPagePrivate"/> <?=__('private-page')?> ' + infoPrivate + '</td></tr>';
 		html+= '<tr><td></td><td><input type="button" class="button" value="<?=__('cancel')?>" onclick="document.getElementById(\'popup\').style.visibility=\'hidden\';" />';
@@ -276,18 +277,18 @@
 	registerCommandCallback('newPage', 'newPage');
 	function newPage($newName) {
 		global $hyphaXml, $hyphaUrl, $hyphaContentLanguage;
-
+		$language = array_key_exists('newPageLanguage', $_POST) ? $_POST['newPageLanguage'] : $hyphaContentLanguage;
 
 		$newName = validatePagename($newName);
 		if (isUser()) {
 			$hyphaXml->lockAndReload();
-			$error = hypha_addPage($_POST['newPageType'], $hyphaContentLanguage, $newName, isset($_POST['newPagePrivate']));
+			$error = hypha_addPage($_POST['newPageType'], $language, $newName, isset($_POST['newPagePrivate']));
 			$hyphaXml->saveAndUnlock();
 			if ($error) {
 				notify('error', $error);
 				return 'reload';
 			} else {
-				return ['redirect', $hyphaUrl . $hyphaContentLanguage . '/' . $newName . '/edit'];
+				return ['redirect', $hyphaUrl . $language . '/' . $newName . '/edit'];
 			}
 		}
 	}
