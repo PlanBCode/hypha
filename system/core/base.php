@@ -103,6 +103,21 @@
 	}
 
 	/*
+		Function: hypha_getUsedContentLanguages returns
+		list of language codes for languages that are used in
+		any of the pages.
+	*/
+	function hypha_getUsedContentLanguages() {
+		$langList = array();
+		foreach(hypha_getPageList() as $_page) {
+			foreach($_page->getElementsByTagName('language') as $_lang)
+				if (!in_array($_lang->getAttribute('id'), $langList))
+					$langList[] = $_lang->getAttribute('id');
+		}
+		return $langList;
+	}
+
+	/*
 		Function: hypha_getDefaultPage
 		returns hypha defaultPage attribute
 	*/
@@ -711,10 +726,7 @@
 		$language - page language
 	*/
 	function hypha_indexLanguages($page, $language) {
-		$langList = array();
-		foreach(hypha_getPageList() as $_page) foreach($_page->getElementsByTagName('language') as $_lang) {
-			if (!in_array($_lang->getAttribute('id'), $langList)) $langList[] = $_lang->getAttribute('id');
-		}
+		$langList = hypha_getUsedContentLanguages();
 		if (count($langList)) asort($langList);
 
 		$pageLangList = array();
