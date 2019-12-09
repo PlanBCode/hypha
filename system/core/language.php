@@ -24,8 +24,15 @@
 	*/
 	function languageOptionList($select, $omit) {
 		global $isoLangList;
-		$html = '';
-		foreach($isoLangList as $code => $langName) if ($code!=$omit) $html.= '<option value='.$code.($code==$select ? ' selected' : '').'>'.$code.': '.$langName.'</option>';
+		$langList = hypha_getUsedContentLanguages();
+
+		$inUse = '';
+		foreach ($langList as $code) if ($code!=$omit) $inUse.= '<option value='.$code.($code==$select ? ' selected' : '').'>'.$code.': '.$isoLangList[$code].'</option>';
+		$html = '<optgroup label="in use">' . $inUse . '</optgroup>';
+
+		$new = '';
+		foreach($isoLangList as $code => $langName) if (!in_array($code, $langList) && $code!=$omit ) $new.= '<option value='.$code.($code==$select ? ' selected' : '').'>'.$code.': '.$langName.'</option>';
+		$html .= '<optgroup label="add new">' . $new . '</optgroup>';
 		return $html;
 	}
 
