@@ -108,6 +108,10 @@
 					<td><input type="text" id="newPagename" value="[[pagename-value]]" onblur="validatePagename(this);" onkeyup="validatePagename(this); document.getElementById('newPageSubmit').disabled = this.value ? false : true;"/>[[help-page-name]]</td>
 				</tr>
 				<tr>
+					<th>[[language]]</th>
+					<td><select id="newPageLanguage" name="newPageLanguage">[[language-options]]</select></td>
+				</tr>
+				<tr>
 					<td></td>
 					<td><input type="checkbox" id="newPagePrivate" name="newPagePrivate"/>[[private-page]][[help-private]]</td>
 				</tr>
@@ -135,10 +139,12 @@ EOF;
 			'private-page' => __('private-page'),
 			'cancel' => __('cancel'),
 			'create' => __('create'),
+			'language' => __('language'),
 			'help-page-type' => makeInfoButton('help-page-type'),
 			'help-page-name' => makeInfoButton('help-page-name'),
 			'help-private' => makeInfoButton('help-private-page'),
 			'pagetype-options' => $pagetype_options->getHtml(),
+			'language-options' => languageOptionList('', ''),
 			'pagename-value' => $pagename,
 			'submit-disabled' => $pagename ? 'disabled="disabled"' : '',
 			'content-language-js' => htmlspecialchars(json_encode($hyphaContentLanguage)),
@@ -319,18 +325,18 @@ EOF;
 	registerCommandCallback('newPage', 'newPage');
 	function newPage($newName) {
 		global $hyphaXml, $hyphaUrl, $hyphaContentLanguage;
-
+		$language = array_key_exists('newPageLanguage', $_POST) ? $_POST['newPageLanguage'] : $hyphaContentLanguage;
 
 		$newName = validatePagename($newName);
 		if (isUser()) {
 			$hyphaXml->lockAndReload();
-			$error = hypha_addPage($_POST['newPageType'], $hyphaContentLanguage, $newName, isset($_POST['newPagePrivate']));
+			$error = hypha_addPage($_POST['newPageType'], $language, $newName, isset($_POST['newPagePrivate']));
 			$hyphaXml->saveAndUnlock();
 			if ($error) {
 				notify('error', $error);
 				return 'reload';
 			} else {
-				return ['redirect', $hyphaUrl . $hyphaContentLanguage . '/' . $newName . '/edit'];
+				return ['redirect', $hyphaUrl . $language . '/' . $newName . '/edit'];
 			}
 		}
 	}
