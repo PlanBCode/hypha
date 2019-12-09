@@ -324,20 +324,23 @@ EOF;
 	*/
 	registerCommandCallback('newPage', 'newPage');
 	function newPage($newName) {
-		global $hyphaXml, $hyphaUrl, $hyphaContentLanguage;
-		$language = array_key_exists('newPageLanguage', $_POST) ? $_POST['newPageLanguage'] : $hyphaContentLanguage;
+		global $O_O, $hyphaXml;
+
+		$private = $O_O->getRequest()->getPostValue('newPagePrivate') !== null;
+		$type = $O_O->getRequest()->getPostValue('newPageType');
+		$language = $O_O->getRequest()->getPostValue('newPageLanguage', $O_O->getContentLanguage());
 
 		$newName = validatePagename($newName);
 		if (isUser()) {
 			$hyphaXml->lockAndReload();
-			$error = hypha_addPage($_POST['newPageType'], $language, $newName, isset($_POST['newPagePrivate']));
+			$error = hypha_addPage($type, $language, $newName, $private);
 			$hyphaXml->saveAndUnlock();
 			if ($error) {
 				notify('error', $error);
 				return 'reload';
-			} else {
-				return ['redirect', $hyphaUrl . $language . '/' . $newName . '/edit'];
 			}
+
+			return ['redirect', $O_O->getRequest()->getRootUrl() . $language . '/' . $newName . '/edit'];
 		}
 	}
 
