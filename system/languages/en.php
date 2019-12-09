@@ -380,6 +380,8 @@
 		"art-start-review" => "start review",
 		"art-approve(s)" => "approve(s)",
 		"art-unresolved-block(s)" => "unresolved block(s)",
+		"art-date-format-date" => "F j, Y", // see for format: https://www.php.net/manual/en/function.date.php
+		"art-date-format-time" => '\a\t g\:ia', // see for format: https://www.php.net/manual/en/function.date.php
 
 		// help_icon_texts
 		"help-private-page" => "A private page is only visible to users who are logged in.",

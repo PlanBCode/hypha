@@ -580,6 +580,10 @@ input {
  display: block;
 }
 
+.type_peer_reviewed_article .published_at .time:before {
+ content: '\00a0';
+}
+
 .review-comment-wrapper {
  background: #FFFFE0;
  border-bottom: 3px solid var(--bordercolor);
