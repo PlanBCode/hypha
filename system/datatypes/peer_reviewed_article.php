@@ -272,12 +272,12 @@ class peer_reviewed_article extends Page {
 			/** @var HyphaDomElement $publishDate */
 			$publishDate = $this->html->createElement('span');
 			$publishDate->setAttribute('class', 'date');
-			$publishDate->text(date(__('art-date-format-date'), $publishedTimestamp));
+			$publishDate->text(strftime(__('art-date-format-date'), $publishedTimestamp));
 			$publish->append($publishDate);
 			/** @var HyphaDomElement $publishTime */
 			$publishTime = $this->html->createElement('span');
 			$publishTime->setAttribute('class', 'time');
-			$publishTime->text(date(__('art-date-format-time'), $publishedTimestamp));
+			$publishTime->text(strftime(__('art-date-format-time'), $publishedTimestamp));
 			$publish->append($publishTime);
 			$main->append($publish);
 		}
