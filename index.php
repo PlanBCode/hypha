@@ -108,6 +108,10 @@
 	 * @deprecated Use O_O instead
 	 */
 	$hyphaLanguage = $O_O->getInterfaceLanguage();
+	$dict = Language::getDictionaryByLanguage($hyphaLanguage);
+	if (array_key_exists('_locale', $dict)) {
+		setlocale(LC_TIME, $dict['_locale']);
+	}
 
 	/**
 	 * Set content language as global variable.

@@ -1,5 +1,6 @@
 <?php
 	$LANG = array (
+		"_locale" => "en_UK",
 		"language-id" => "English",
 		"languages" => "languages",
 		"language" => "language",
