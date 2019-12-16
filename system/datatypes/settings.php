@@ -52,9 +52,9 @@
 		}
 
 		function editAccount($username) {
-			global $uiLangList;
-			global $isoLangList;
 			global $hyphaUser;
+			$uiLangList = Language::getInterfaceLanguageList();
+			$isoLangList = Language::getIsoList();
 			if (isAdmin() || $hyphaUser->getAttribute('username') == $username) {
 				$account = hypha_getUserByName($username);
 				$this->html->writeToElement('pagename', __('change-account').' `'.$username.'`');
@@ -174,8 +174,8 @@
 		}
 
 		function editRegistration($key) {
-			global $uiLangList;
-			global $isoLangList;
+			$uiLangList = Language::getInterfaceLanguageList();
+			$isoLangList = Language::getIsoList();
 			foreach(hypha_getUserList() as $user) if ($user->hasAttribute('key') && $user->getAttribute('key')==$key) {
 				$this->html->writeToElement('pagename', __('register'));
 				$this->html->writeToElement('pageCommands', makeButton(__('submit'), makeAction('settings/register', 'settingsRegister', $key)));
@@ -260,7 +260,7 @@
 <table class="section">
 	<tr>
 		<th><?=__('default-language')?>:</th>
-		<td><select name="settingsDefaultLanguage" id="settingsDefaultLanguage"><?=languageOptionList(hypha_getDefaultLanguage(), null)?></select></td>
+		<td><select name="settingsDefaultLanguage" id="settingsDefaultLanguage"><?=Language::getLanguageOptionList(hypha_getDefaultLanguage(), null)?></select></td>
 	</tr>
 	<tr>
 		<th><?=__('default-page')?>:</th>

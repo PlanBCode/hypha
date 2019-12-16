@@ -144,7 +144,7 @@ EOF;
 			'help-page-name' => makeInfoButton('help-page-name'),
 			'help-private' => makeInfoButton('help-private-page'),
 			'pagetype-options' => $pagetype_options->getHtml(),
-			'language-options' => languageOptionList('', ''),
+			'language-options' => Language::getLanguageOptionList($hyphaContentLanguage, ''),
 			'pagename-value' => $pagename,
 			'submit-disabled' => $pagename ? 'disabled="disabled"' : '',
 			'content-language-js' => htmlspecialchars(json_encode($hyphaContentLanguage)),
@@ -172,7 +172,8 @@ EOF;
 		<buildhtml>
 	*/
 	function loadPage(RequestContext $O_O) {
-		global $isoLangList, $hyphaHtml, $hyphaPage, $hyphaUrl;
+		global $hyphaHtml, $hyphaPage, $hyphaUrl;
+		$isoLangList = Language::getIsoList();
 
 		$request = $O_O->getRequest();
 		$args = $request->getArgs();
@@ -400,9 +401,10 @@ EOF;
 	}
 
 	function dewikify_link($node) {
-		global $hyphaXml, $isoLangList;
+		global $hyphaXml;
 		global $hyphaContentLanguage;
 		global $hyphaPage;
+		$isoLangList = Language::getIsoList();
 
 		$href = $node->getAttribute('href');
 		// This matches a url of the form hypha:123abc/subpath#anchor
@@ -498,7 +500,8 @@ EOF;
 	}
 
 	function wikify_link($node) {
-		global $hyphaXml, $isoLangList;
+		global $hyphaXml;
+		$isoLangList = Language::getIsoList();
 
 		$href = $node->getAttribute('href');
 		// This parses a query string of the form en/pagename/subpath#anchor
@@ -629,7 +632,7 @@ EOF;
 	function hypha_searchHelp(RequestContext $O_O, $subject, $lang = 'en') {
 		$options = [$lang, $O_O->getInterfaceLanguage(), $O_O->getContentLanguage()];
 		foreach ($options as $lang) {
-			$dict = $O_O->getDictionaryByLanguage($lang);
+			$dict = Language::getDictionaryByLanguage($lang);
 			if (null !== $dict && array_key_exists($subject, $dict)) {
 				return nl2br($dict[$subject]);
 			}

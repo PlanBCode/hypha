@@ -12,11 +12,11 @@ class HyphaRequestTest {
 		'testText' => [],
 	];
 
-	public function test(array $isoLangList) {
+	public function test() {
 		$data = $this->getData();
 		foreach ($data as $item) {
 			$relativeUrlPath = $item['relativeUrlPath'];
-			$request = new HyphaRequest($isoLangList, null, $relativeUrlPath);
+			$request = new HyphaRequest(null, $relativeUrlPath);
 			$this->assertSame($request->getRelativeUrlPath(false), $relativeUrlPath, $relativeUrlPath, 'relativeUrlPath');
 			$this->assertSame($request->isSystemPage(), $item['system'], $relativeUrlPath, 'isSystem');
 			$this->assertSame($request->getLanguage(), $item['lang'], $relativeUrlPath, 'getLanguage');
@@ -212,6 +212,6 @@ class HyphaRequestTest {
 }
 
 ob_start();
-$test = (new HyphaRequestTest())->test($isoLangList);
+$test = (new HyphaRequestTest())->test();
 ob_end_clean();
 echo $test->summary();

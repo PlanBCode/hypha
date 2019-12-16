@@ -43,12 +43,11 @@
 		private $args = [];
 
 		/**
-		 * @param array $isoLangList Associative array containing connecting iso639 language codes with their native name (and english translation)
 		 * @param null|string $rootUrlPath If it is not given it will be determined.
 		 * @param null|string $relativeUrlPath If it is not given it will be determined.
 		 */
-		public function __construct(array $isoLangList, $rootUrlPath = null, $relativeUrlPath = null) {
-			$this->isoLangList = $isoLangList;
+		public function __construct($rootUrlPath = null, $relativeUrlPath = null) {
+			$this->isoLangList = Language::getIsoList();
 
 			/**
 			 * in case of hypha instance in the root
