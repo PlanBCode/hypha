@@ -107,6 +107,10 @@
 	 * @deprecated Use O_O instead
 	 */
 	$hyphaLanguage = $O_O->getInterfaceLanguage();
+	$locale = __('_locale');
+	if ($locale !== '_locale') {
+		setlocale(LC_TIME, $locale);
+	}
 
 	/**
 	 * Set content language as global variable.
