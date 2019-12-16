@@ -95,7 +95,7 @@
 	*/
 
 	// Build request context
-	$O_O = new RequestContext($hyphaRequest, hypha_getDefaultLanguage());
+	$O_O = new RequestContext($hyphaRequest);
 
 	/**
 	 * Set user as global variable.
