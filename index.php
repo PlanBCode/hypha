@@ -49,7 +49,7 @@
 	$hyphaRequest = new HyphaRequest();
 
 	// Build request context
-	$O_O = new RequestContext($hyphaRequest, hypha_getDefaultLanguage());
+	$O_O = new RequestContext($hyphaRequest);
 
 	// called for its side effects of loading the datatypes
 	hypha_getDataTypes();
