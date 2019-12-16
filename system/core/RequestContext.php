@@ -13,9 +13,6 @@
 		/** @var array */
 		private $dictionary;
 
-		/** @var array */
-		private $dictionaries = [];
-
 		/**
 		 * @param HyphaRequest $hyphaRequest
 		 * @param string $defaultLanguage
@@ -65,43 +62,12 @@
 		/**
 		 * @return array
 		 */
-		protected function getDictionaryLanguageOptions() {
-			return [
-				$this->getInterfaceLanguage(),
-				$this->getContentLanguage(),
-				$this->defaultLanguage,
-				'en',
-			];
-		}
-
-		/**
-		 * @return array
-		 */
 		public function getDictionary() {
 			if (null === $this->dictionary) {
-				$this->dictionary = [];
-				foreach ($this->getDictionaryLanguageOptions() as $lang) {
-					$dict = $this->getDictionaryByLanguage($lang);
-					if (null !== $dict) {
-						$this->dictionary = $dict;
-						break;
-					}
-				}
+				$this->dictionary = Language::getDictionaryByLanguage($this->getInterfaceLanguage());
 			}
 
 			return $this->dictionary;
-		}
-
-		/**
-		 * @param string $lang
-		 * @return null|array
-		 */
-		public function getDictionaryByLanguage($lang) {
-			if (!array_key_exists($lang, $this->dictionaries)) {
-				$file = $this->getRootPath() . '/system/languages/' . $lang . '.php';
-				$this->dictionaries[$lang] = file_exists($file) ? include($file) : null;
-			}
-			return $this->dictionaries[$lang];
 		}
 
 		/**

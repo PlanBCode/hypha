@@ -93,14 +93,14 @@
 		obj.setSelectionRange(pos, pos);
 	}
 	function newPage() {
-		
+
 		html = '<table class="section"><tr><th colspan="2"><?=__('create-new-page').'<br/>'.__('instruction-new-page')?></td></tr>';
 		var infoPageType = <?=json_encode(makeInfoButton('help-page-type'));?>;
 		// TODO [LRM]: find better way to set default new page type.
 		html+= '<tr><th><?=__('type')?></th><td><select id="newPageType" name="newPageType">' + '<?php foreach($types as $type => $datatypeName) echo '<option value="'.$type.'"'.($type=='textpage' ? 'selected="selected"' : '').'>'.$datatypeName.'</option>'; ?>' + '</select> ' + infoPageType + '</td></tr>';
 		var infoPageName = <?=json_encode(makeInfoButton('help-page-name'));?>;
 		html+= '<tr><th><?=__('pagename')?></th><td><input type="text" id="newPagename" value="<?=$pagename?>" onblur="validatePagename(this);" onkeyup="validatePagename(this); document.getElementById(\'newPageSubmit\').disabled = this.value ? false : true;"/> ' + infoPageName + '</td></tr>';
-		html+= '<tr><th><?=__('language')?></th><td><select id="newPageLanguage" name="newPageLanguage"><?=languageOptionList('', '')?></select></td></tr>';
+		html+= '<tr><th><?=__('language')?></th><td><select id="newPageLanguage" name="newPageLanguage"><?=Language::getLanguageOptionList('', '')?></select></td></tr>';
 		var infoPrivate = <?=json_encode(makeInfoButton('help-private-page'));?>;
 		html+= '<tr><td></td><td><input type="checkbox" id="newPagePrivate" name="newPagePrivate"/> <?=__('private-page')?> ' + infoPrivate + '</td></tr>';
 		html+= '<tr><td></td><td><input type="button" class="button" value="<?=__('cancel')?>" onclick="document.getElementById(\'popup\').style.visibility=\'hidden\';" />';
@@ -127,7 +127,8 @@
 		<buildhtml>
 	*/
 	function loadPage(RequestContext $O_O) {
-		global $isoLangList, $hyphaHtml, $hyphaPage, $hyphaUrl;
+		global $hyphaHtml, $hyphaPage, $hyphaUrl;
+		$isoLangList = Language::getIsoList();
 
 		$request = $O_O->getRequest();
 		$args = $request->getArgs();
@@ -352,9 +353,10 @@
 	}
 
 	function dewikify_link($node) {
-		global $hyphaXml, $isoLangList;
+		global $hyphaXml;
 		global $hyphaContentLanguage;
 		global $hyphaPage;
+		$isoLangList = Language::getIsoList();
 
 		$href = $node->getAttribute('href');
 		// This matches a url of the form hypha:123abc/subpath#anchor
@@ -450,7 +452,8 @@
 	}
 
 	function wikify_link($node) {
-		global $hyphaXml, $isoLangList;
+		global $hyphaXml;
+		$isoLangList = Language::getIsoList();
 
 		$href = $node->getAttribute('href');
 		// This parses a query string of the form en/pagename/subpath#anchor
@@ -581,7 +584,7 @@
 	function hypha_searchHelp(RequestContext $O_O, $subject, $lang = 'en') {
 		$options = [$lang, $O_O->getInterfaceLanguage(), $O_O->getContentLanguage()];
 		foreach ($options as $lang) {
-			$dict = $O_O->getDictionaryByLanguage($lang);
+			$dict = Language::getDictionaryByLanguage($lang);
 			if (null !== $dict && array_key_exists($subject, $dict)) {
 				return nl2br($dict[$subject]);
 			}

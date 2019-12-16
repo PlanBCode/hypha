@@ -50,8 +50,6 @@
 	$hyphaPageTypes = [];
 	foreach (array_slice(get_declared_classes(), $pageTypeIndex) as $class) if (in_array('Page', class_parents($class)) && (new \ReflectionClass($class))->isInstantiable()) $hyphaPageTypes[] = $class;
 
-	foreach (scandir("system/languages/") as $_file) if (substr($_file, -4) == '.php') $uiLangList[] = basename($_file, '.php');
-
 	/*
 		Group: Stage 3 - Get query and handle direct file requests
 		Here we extract our page query from the php $_SERVER data. Page requests should be formatted in a directory like structure, e.g. http://www.dom.ain/en/home/edit, the first level usually being a language id, the second level begin a page id, and the third level being an optional view.
@@ -59,7 +57,7 @@
 	*/
 
 	// Build request
-	$hyphaRequest = new HyphaRequest($isoLangList);
+	$hyphaRequest = new HyphaRequest();
 	$hyphaQuery = $hyphaRequest->getRelativeUrlPath();
 	$hyphaUrl = $hyphaRequest->getRootUrl();
 

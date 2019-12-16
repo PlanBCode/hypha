@@ -272,7 +272,7 @@ EOF;
 		 */
 		private function createTranslationForm(array $values = []) {
 			$selectedLanguage = isset($data[self::FIELD_NAME_LANGUAGE]) ? $data[self::FIELD_NAME_LANGUAGE] : null;
-			$optionListLanguage = languageOptionList($selectedLanguage, $this->language);
+			$optionListLanguage = Language::getLanguageOptionList($selectedLanguage, $this->language);
 			$html = <<<EOF
 				<div class="section">
 					<label for="[[field-name-language]]">[[language]]</label>
