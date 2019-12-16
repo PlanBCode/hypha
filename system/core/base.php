@@ -103,6 +103,34 @@
 	}
 
 	/*
+		Function: hypha_getDefaultInterfaceLanguage
+		returns hypha defaultInterfaceLanguage attribute
+	*/
+	function hypha_getDefaultInterfaceLanguage() {
+		global $hyphaXml;
+		$defaultInterfaceLanguage = $hyphaXml->documentElement->getAttribute('defaultInterfaceLanguage');
+		if ($defaultInterfaceLanguage != '') {
+			return $defaultInterfaceLanguage;
+		}
+
+		$uiLangList = Language::getInterfaceLanguageList();
+		return reset($uiLangList);
+	}
+
+	/*
+		Function: hypha_setDefaultInterfaceLanguage
+		sets hypha defaultInterfaceLanguage attribute
+
+		Parameters:
+		$string - new defaultInterfaceLanguage value
+	*/
+	function hypha_setDefaultInterfaceLanguage($string) {
+		global $hyphaXml;
+		$hyphaXml->requireLock();
+		$hyphaXml->documentElement->setAttribute('defaultInterfaceLanguage', $string);
+	}
+
+	/*
 		Function: hypha_getUsedContentLanguages returns
 		list of language codes for languages that are used in
 		any of the pages.

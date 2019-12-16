@@ -50,6 +50,7 @@
 		"system-email" => "systeememail",
 		"default-page" => "standaard pagina",
 		"default-language" => "standaard taal",
+		"default-interface-language" => "standaard interface taal",
 		"digest-interval" => "notificatie-interval",
 		"file" => "bestand",
 		"image" => "afbeelding",

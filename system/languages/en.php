@@ -50,6 +50,7 @@
 		"system-email" => "system email",
 		"default-page" => "default page",
 		"default-language" => "default language",
+		"default-interface-language" => "default interface language",
 		"digest-interval" => "digest interval",
 		"file" => "file",
 		"image" => "image",

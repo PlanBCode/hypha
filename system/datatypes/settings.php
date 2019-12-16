@@ -242,6 +242,10 @@
 		<th><?=__('default-language')?>:</th>
 		<td><select name="settingsDefaultLanguage" id="settingsDefaultLanguage"><?=Language::getLanguageOptionList(hypha_getDefaultLanguage(), null)?></select></td>
 	</tr>
+    <tr>
+        <th><?=__('default-interface-language')?>:</th>
+        <td><select name="settingsDefaultInterfaceLanguage" id="settingsDefaultInterfaceLanguage"><?=Language::getInterfaceLanguageOptionList(hypha_getDefaultInterfaceLanguage(), null)?></select></td>
+    </tr>
 	<tr>
 		<th><?=__('default-page')?>:</th>
 		<td><input name="settingsDefaultPage" id="settingsDefaultPage" type="text" size="20" value="<?=showPagename(hypha_getDefaultPage())?>" onblur="validatePagename(this);" onkeyup="validatePagename(this);"/></td>
@@ -265,6 +269,7 @@
 			if (isAdmin()) {
 				$hyphaXml->lockAndReload();
 				hypha_setDefaultLanguage($_POST['settingsDefaultLanguage']);
+				hypha_setDefaultInterfaceLanguage($_POST['settingsDefaultInterfaceLanguage']);
 				hypha_setDefaultPage($_POST['settingsDefaultPage']);
 				hypha_setEmail($_POST['settingsSystemEmail']);
 				$digestInterval = 86400 * $_POST['settingsIntervalDays'] + 3600 * $_POST['settingsIntervalHours'] + 60 * $_POST['settingsIntervalMinutes'];
