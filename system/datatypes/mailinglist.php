@@ -33,6 +33,7 @@ class mailinglist extends Page {
 	const FIELD_NAME_STATUS = 'status';
 	const FIELD_NAME_CONFIRM_CODE = 'confirm-code';
 	const FIELD_NAME_UNSUBSCRIBE_CODE = 'unsubscribe-code';
+	const FIELD_NAME_REMINDED = 'reminded';
 
 	const PATH_EDIT = 'edit';
 	const PATH_MAILS = 'mails';
@@ -42,10 +43,17 @@ class mailinglist extends Page {
 	const PATH_MAILS_EDIT_ID = 'mails_edit/[[id]]';
 
 	const PATH_ADDRESSES = 'addresses';
+	const PATH_REMIND = 'remind';
+	const PATH_REMIND_EMAIL = 'remind?email=[[email]]';
+	const PATH_DELETE_ADDRESS = 'delete';
+	const PATH_DELETE_ADDRESS_EMAIL = 'delete?email=[[email]]';
+
 	const PATH_CONFIRM = 'confirm';
 	const PATH_CONFIRM_CODE = 'confirm?code=[[code]]';
 	const PATH_UNSUBSCRIBE = 'unsubscribe';
 	const PATH_UNSUBSCRIBE_CODE = 'unsubscribe?address=[[address]]&code=[[code]]';
+	const PATH_UNSUBSCRIBE_BY_ADMIN = 'unsubscribe_by_admin';
+	const PATH_UNSUBSCRIBE_BY_ADMIN_EMAIL = 'unsubscribe_by_admin?email=[[email]]';
 
 	const CMD_DELETE = 'delete';
 	const CMD_SUBSCRIBE = 'subscribe';
@@ -94,21 +102,24 @@ class mailinglist extends Page {
 		$this->ensureStructure();
 
 		switch ([$request->getView(), $request->getCommand()]) {
-			case [null,                      null]:                return $this->defaultView($request);
-			case [null,                      self::CMD_DELETE]:    return $this->deleteAction($request);
-			case [null,                      self::CMD_SUBSCRIBE]: return $this->subscribeAction($request);
-			case [self::PATH_EDIT,           null]:                return $this->editView($request);
-			case [self::PATH_EDIT,           self::CMD_SAVE]:      return $this->editAction($request);
-			case [self::PATH_ADDRESSES,      null]:                return $this->addressesView($request);
-			case [self::PATH_CONFIRM,        null]:                return $this->confirmEmailAction($request);
-			case [self::PATH_UNSUBSCRIBE,    null]:                return $this->unsubscribeAction($request);
-			case [self::PATH_MAILS_NEW,      null]:                return $this->mailingNewView($request);
-			case [self::PATH_MAILS_NEW,      self::CMD_SAVE]:      return $this->mailingNewAction($request);
-			case [self::PATH_MAILS,          null]:                return $this->mailingView($request);
-			case [self::PATH_MAILS,          self::CMD_SEND]:      return $this->mailingSendAction($request);
-			case [self::PATH_MAILS,          self::CMD_SEND_TEST]: return $this->mailingSendTestAction($request);
-			case [self::PATH_MAILS_EDIT,     null]:                return $this->mailingEditView($request);
-			case [self::PATH_MAILS_EDIT,     self::CMD_SAVE]:      return $this->mailingEditAction($request);
+			case [null,                            null]:                return $this->defaultView($request);
+			case [null,                            self::CMD_DELETE]:    return $this->deleteAction($request);
+			case [null,                            self::CMD_SUBSCRIBE]: return $this->subscribeAction($request);
+			case [self::PATH_EDIT,                 null]:                return $this->editView($request);
+			case [self::PATH_EDIT,                 self::CMD_SAVE]:      return $this->editAction($request);
+			case [self::PATH_ADDRESSES,            null]:                return $this->addressesView($request);
+			case [self::PATH_REMIND,               null]:                return $this->remindAction($request);
+			case [self::PATH_DELETE_ADDRESS,       null]:                return $this->deleteAddressAction($request);
+			case [self::PATH_CONFIRM,              null]:                return $this->confirmEmailAction($request);
+			case [self::PATH_UNSUBSCRIBE,          null]:                return $this->unsubscribeAction($request);
+			case [self::PATH_UNSUBSCRIBE_BY_ADMIN, null]:                return $this->unsubscribeByAdminAction($request);
+			case [self::PATH_MAILS_NEW,            null]:                return $this->mailingNewView($request);
+			case [self::PATH_MAILS_NEW,            self::CMD_SAVE]:      return $this->mailingNewAction($request);
+			case [self::PATH_MAILS,                null]:                return $this->mailingView($request);
+			case [self::PATH_MAILS,                self::CMD_SEND]:      return $this->mailingSendAction($request);
+			case [self::PATH_MAILS,                self::CMD_SEND_TEST]: return $this->mailingSendTestAction($request);
+			case [self::PATH_MAILS_EDIT,           null]:                return $this->mailingEditView($request);
+			case [self::PATH_MAILS_EDIT,           self::CMD_SAVE]:      return $this->mailingEditAction($request);
 		}
 
 		return '404';
@@ -340,6 +351,7 @@ class mailinglist extends Page {
 			$address->setAttribute(self::FIELD_NAME_EMAIL, $email);
 			$address->setAttribute(self::FIELD_NAME_STATUS, self::ADDRESS_STATUS_PENDING);
 			$address->setAttribute(self::FIELD_NAME_CONFIRM_CODE, $code);
+			$address->setAttribute(self::FIELD_NAME_REMINDED, false);
 			/** @var HyphaDomElement $addressesContainer */
 			$addressesContainer = $this->getDoc()->get(self::FIELD_NAME_ADDRESSES_CONTAINER);
 			$addressesContainer->append($address);
@@ -412,22 +424,68 @@ class mailinglist extends Page {
 			return null;
 		}
 
+		try {
+			$xpath = './/' . self::FIELD_NAME_ADDRESS . '[@' . self::FIELD_NAME_UNSUBSCRIBE_CODE . '=' . xpath_encode($code) . ']';
+			$this->unsubscribe($xpath);
+		} catch (\Exception $e) {
+			$msg = $e->getCode() === 404 ? __('invalid-code') : $e->getMessage();
+			notify('error', $msg);
+			return null;
+		}
+
+		notify('success', ucfirst(__('ml-successfully-unsubscribed')));
+
+		return ['redirect', $this->path()];
+	}
+
+	/**
+	 * Unsubscribe a confirmed address. Can only be executed by admins.
+	 *
+	 * @param HyphaRequest $request
+	 * @return array|null
+	 */
+	private function unsubscribeByAdminAction(HyphaRequest $request) {
+		if (!isAdmin()) {
+			notify('error', __(isUser() ? 'admin-rights-needed-to-perform-action' : 'login-to-perform-action'));
+			return ['redirect', $this->path()];
+		}
+
+		$email = isset($_GET['email']) ? $_GET['email'] : null;
+		if (null == $email) {
+			notify('error', __('missing-arguments'));
+			return null;
+		}
+
+		try {
+			$xpath = './/' . self::FIELD_NAME_ADDRESS . '[@' . self::FIELD_NAME_EMAIL . '=' . xpath_encode($email) . ']';
+			$this->unsubscribe($xpath);
+		} catch (\Exception $e) {
+			notify('error', $e->getMessage());
+			return null;
+		}
+
+		notify('success', ucfirst(__('ml-successfully-unsubscribed-by-admin', ['email' => $email])));
+
+		return ['redirect', $this->path(self::PATH_ADDRESSES)];
+	}
+
+	/**
+	 * @param string $xpath
+	 * @throws Exception
+	 */
+	private function unsubscribe($xpath) {
 		$this->xml->lockAndReload();
 
-		$xpath = './/' . self::FIELD_NAME_ADDRESS . '[@' . self::FIELD_NAME_UNSUBSCRIBE_CODE . '=' . xpath_encode($code) . ']';
 		$address = $this->findAddresses($xpath)->first();
-
 		if (!$address instanceof HyphaDomElement) {
 			$this->xml->unlock();
-			notify('error', __('invalid-code'));
-			return null;
+			throw new \Exception(__('not-found'), 404);
 		}
 
 		if ($address->getAttribute(self::FIELD_NAME_STATUS) === self::ADDRESS_STATUS_PENDING) {
 			// weird case, should never happen, let's handle it anyway
 			$this->xml->unlock();
-			notify('error', __('ml-mail-has-invalid-status'));
-			return null;
+			throw new \Exception(__('ml-mail-has-invalid-status'), 409);
 		}
 
 		if ($address->getAttribute(self::FIELD_NAME_STATUS) != self::ADDRESS_STATUS_UNSUBSCRIBED) {
@@ -436,10 +494,99 @@ class mailinglist extends Page {
 		} else {
 			$this->xml->unlock();
 		}
+	}
 
-		notify('success', ucfirst(__('ml-successfully-unsubscribed')));
+	/**
+	 * Resend a confirmation email message to a pending address. Can only be executed by admins.
+	 *
+	 * @param HyphaRequest $request
+	 * @return null|array
+	 */
+	private function remindAction(HyphaRequest $request) {
+		if (!isAdmin()) {
+			notify('error', __(isUser() ? 'admin-rights-needed-to-perform-action' : 'login-to-perform-action'));
+			return ['redirect', $this->path()];
+		}
 
-		return ['redirect', $this->path()];
+		$email = isset($_GET['email']) ? $_GET['email'] : null;
+		if (null == $email) {
+			notify('error', __('missing-arguments'));
+			return null;
+		}
+
+		$this->xml->lockAndReload();
+
+		$xpath = './/' . self::FIELD_NAME_ADDRESS . '[@' . self::FIELD_NAME_EMAIL . '=' . xpath_encode($email) . ' and @' . self::FIELD_NAME_STATUS . '!="' . self::ADDRESS_STATUS_UNSUBSCRIBED . '"]';
+		$address = $this->findAddresses($xpath)->first();
+
+		if (!$address instanceof HyphaDomElement) {
+			$this->xml->unlock();
+			notify('error', __('not-found'));
+			return null;
+		}
+
+		if ($address->getAttribute(self::FIELD_NAME_STATUS) !== self::ADDRESS_STATUS_PENDING) {
+			$this->xml->unlock();
+			notify('error', __('ml-no-reminder-address-no-longer-pending'));
+			return null;
+		}
+
+		if ($address->getAttribute(self::FIELD_NAME_REMINDED) != true) {
+			$code = $address->getAttribute(self::FIELD_NAME_CONFIRM_CODE);
+			$address->setAttribute(self::FIELD_NAME_REMINDED, true);
+			$this->xml->saveAndUnlock();
+
+			$this->sendConfirmationMail($code, $email);
+			notify('success', ucfirst(__('ml-reminder-sent')));
+		} else {
+			notify('success', ucfirst(__('ml-reminder-already-sent')));
+		}
+
+		return ['redirect', $this->path(self::PATH_ADDRESSES)];
+	}
+
+	/**
+	 * Deleted a pending address. Can only be executed by admins.
+	 *
+	 * @param HyphaRequest $request
+	 * @return null|array
+	 */
+	private function deleteAddressAction(HyphaRequest $request) {
+		if (!isAdmin()) {
+			notify('error', __(isUser() ? 'admin-rights-needed-to-perform-action' : 'login-to-perform-action'));
+			return ['redirect', $this->path()];
+		}
+
+		$email = isset($_GET['email']) ? $_GET['email'] : null;
+		if (null == $email) {
+			notify('error', __('missing-arguments'));
+			return null;
+		}
+
+		$this->xml->lockAndReload();
+
+		$xpath = './/' . self::FIELD_NAME_ADDRESS . '[@' . self::FIELD_NAME_EMAIL . '=' . xpath_encode($email) . ' and @' . self::FIELD_NAME_STATUS . '!="' . self::ADDRESS_STATUS_UNSUBSCRIBED . '"]';
+		$address = $this->findAddresses($xpath)->first();
+
+		if (!$address instanceof HyphaDomElement) {
+			$this->xml->unlock();
+			notify('error', __('not-found'));
+			return null;
+		}
+
+		if ($address->getAttribute(self::FIELD_NAME_STATUS) !== self::ADDRESS_STATUS_PENDING) {
+			$this->xml->unlock();
+			notify('error', __('ml-cannot-delete-address-no-longer-pending'));
+			return null;
+		}
+
+		/** @var HyphaDomElement $addressesContainer */
+		$addressesContainer = $this->getDoc()->get(self::FIELD_NAME_ADDRESSES_CONTAINER);
+		$addressesContainer->removeChild($address);
+		$this->xml->saveAndUnlock();
+
+		notify('success', ucfirst(__('ml-address-deleted')));
+		return ['redirect', $this->path(self::PATH_ADDRESSES)];
 	}
 
 	/**
@@ -458,16 +605,36 @@ class mailinglist extends Page {
 		$main = $this->html->find('#main');
 		$main->appendChild($table);
 		$table->addClass('section');
-		$table->addHeaderRow()->addCells(['', __('addresses'), __('status')]);
+		$table->addHeaderRow()->addCells(['', __('addresses'), __('status'), __('action')]);
 		$xpath = './/' . self::FIELD_NAME_ADDRESS . '[@' . self::FIELD_NAME_STATUS . '="' . self::ADDRESS_STATUS_CONFIRMED . '" or @' . self::FIELD_NAME_STATUS . '="' . self::ADDRESS_STATUS_PENDING . '"]';
 		$addresses = $this->findAddresses($xpath);
 		/** @var HyphaDomElement $address */
 		foreach ($addresses as $address) {
 			$status = $address->getAttribute(self::FIELD_NAME_STATUS);
 			$statusText = __('ml-address-status-' . $status);
-			$table->addRow()->addCells(['', $address->getAttribute(self::FIELD_NAME_EMAIL), $statusText]);
+			$actions = [];
+			$email = $address->getAttribute(self::FIELD_NAME_EMAIL);
+			if (isAdmin()) {
+				if ($status === self::ADDRESS_STATUS_PENDING) {
+					if ($address->getAttribute(self::FIELD_NAME_REMINDED) != true) {
+						$remindPath = $this->substituteSpecial(self::PATH_REMIND_EMAIL, ['email' => $email]);
+						$actions[] = $this->makeActionButton(__('ml-send-reminder'), $remindPath);
+					} else {
+						$statusText .= ', ' . __('ml-reminded');
+					}
+					$deletePath = $this->substituteSpecial(self::PATH_DELETE_ADDRESS_EMAIL, ['email' => $email]);
+					$actions[] = $this->makeActionButton(__('delete'), $deletePath);
+				}
+				if ($status === self::ADDRESS_STATUS_CONFIRMED) {
+					$unsubscribePath = $this->substituteSpecial(self::PATH_UNSUBSCRIBE_BY_ADMIN_EMAIL, ['email' => $email]);
+					$actions[] = $this->makeActionButton(__('unsubscribe'), $unsubscribePath);
+				}
+			}
+			$row = $table->addRow();
+			$row->addCells(['', $email, $statusText]);
+			$row->addCell()->setHtml(implode(' ', $actions));
 		}
-		$table->addRow()->addCells([__('total'), count($addresses), '']);
+		$table->addRow()->addCells([__('total'), count($addresses), '', '']);
 
 		// add buttons
 		/** @var HyphaDomElement $commands */
