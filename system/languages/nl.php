@@ -377,6 +377,11 @@
 		"art-date-format-date" => "j F Y", // see for format: https://www.php.net/manual/en/function.date.php
 		"art-date-format-time" => '\o\m G\:i\u', // see for format: https://www.php.net/manual/en/function.date.php
 
+		// sharing links
+		"share-email-subject" => "Zie '[[title]]' op [[domain]]",
+		"share-email-body" => "Ik kwam '[[title]]' tegen op [[domain]]: [[url]]",
+		"share-twitter" => "Zie [[title]] op [[domain]]: ", // Twitter appends URL
+
 		// help_icon_texts
 		"help-private-page" => "Een privepagina is alleen zichtbaar voor degenen die zijn ingelogd.",
 		"help-page-type" => "Kies eerst het juiste paginatype.\nEen festival pagina geeft je de gereedschappen om een festival te organiseren en de line-up te laten zien aan het publiek.\nEen mailinglijst is een lijst voor emailadressen en een gereedschap om nieuwsbrieven te schrijven en versturen.\nEen artikel met review is een pagina die prive blijft totdat hij is goedgekeurd door 3 anderen,\ndan wordt hij publiek en is er een mogelijkheid voor lezers om te reageren.\nEen webpagina is een gewone webpagina.",

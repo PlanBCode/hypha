@@ -887,3 +887,27 @@ body.type_peer_reviewed_article .input-wrapper.field_type_editor:not(.field_name
 	width: 100%;
 	height: 100px;
 }
+
+.share-links{
+    width: 116px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.share-links div{
+    width: 32px;
+    height: 32px;
+    display: block;
+}
+
+.share-links .email-link{
+    background-image: url(images/shareEmail.png);
+}
+
+.share-links .twitter-link{
+    background-image: url(images/shareTwitter.png);
+}
+
+.share-links .facebook-link{
+    background-image: url(images/shareFacebook.png);
+}
