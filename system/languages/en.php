@@ -156,6 +156,7 @@
 		"styles" => "styles",
 		"site-elements" => "site elements",
 		"admin-rights-needed" => "admin rights needed to edit these",
+		"admin-rights-needed-to-perform-action" => "admin rights needed to perform action",
 		"website-layout" => "website layout",
 		"member-list" => "project member list",
 		"subject-to-change" => "Warning, line-up is subject to changes! Check this website regularly",
@@ -291,6 +292,7 @@
 		"ml-confirmation-email-subject" => "Please confirm your subscription",
 		"ml-unsubscribe" => "unsubscribe",
 		"ml-if-unreadable-use-link" => "if this email is unreadable, please use the link",
+		"ml-test-mail-subject-prefix" => "newsletter test, please check!",
 
 		// mailing list - status
 		"ml-mailing-status-draft" => "draft",

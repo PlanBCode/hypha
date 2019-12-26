@@ -156,6 +156,7 @@
 		"styles" => "stijlen",
 		"site-elements" => "site elementen",
 		"admin-rights-needed" => "admin rechten nodig om dit te bewerken",
+		"admin-rights-needed-to-perform-action" => "admin rechten nodig om deze actie te kunnen uitvoeren",
 		"website-layout" => "website layout",
 		"member-list" => "projectledenlijst",
 		"subject-to-change" => "Let op! er kunnen nog wijzigingen plaatsvinden. Raadpleeg deze website op de dag van optreden.",
@@ -285,6 +286,7 @@
 		"ml-confirmation-email-subject" => "Bevestig uw aanmelding",
 		"ml-unsubscribe" => "afmelden",
 		"ml-if-unreadable-use-link" => "klik op deze link als deze email onleesbaar is",
+		"ml-test-mail-subject-prefix" => "testnieuwsbrief, graag controleren!",
 
 		// mailing list - status
 		"ml-mailing-status-draft" => "in opmaak",
