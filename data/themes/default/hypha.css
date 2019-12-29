@@ -328,6 +328,27 @@ a.nopagelink {
  margin: 5px;
 }
 
+button, .button{
+ min-height: 40px;
+ margin-right: 10px;
+ padding-right: 20px;
+ padding-left: 20px;
+ font-weight: bold;
+ font-size: 16px;
+ background: #999;
+ color: #FFFFFF;
+ border: none;
+ border-radius: 5px;
+}
+
+button:hover, .button:hover{
+ background: #ddd;
+ color: #000000;
+}
+
+button: last-of-type{
+ margin-right: 0;
+}
 
 .click {
  cursor: pointer;
@@ -645,28 +666,6 @@ nav.main{
 
 nav.tabs{
  z-index: 1;
-}
-
-button, .button{
- min-height: 40px;
- margin-right: 10px;
- padding-right: 20px;
- padding-left: 20px;
- font-weight: bold;
- font-size: 16px;
- background: #999;
- color: #FFFFFF;
- border: none;
- border-radius: 5px;
-}
-
-button:hover, .button:hover{
- background: #ddd;
- color: #000000;
-}
-
-button: last-of-type{
- margin-right: 0;
 }
 
 nav{
