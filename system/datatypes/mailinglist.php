@@ -1,49 +1,73 @@
 <?php
+
 /*
-        Module: mailinglist
-
-
-
-	Mailinglist features.
+ * Module: mailing list
+ *
+ * Mailing list features.
  */
-require_once __DIR__ . '/../core/WymHTMLForm.php';
 
 use DOMWrap\NodeList;
 
 /*
-	Class: mailinglist
-*/
+ * Class: mailinglist
+ */
 
 class mailinglist extends Page {
+	/** @var Xml */
+	private $xml;
 
+	const FIELD_NAME_ADDRESSES_CONTAINER = 'addresses';
+	const FIELD_NAME_MAILINGS_CONTAINER = 'mailings';
+	const FIELD_NAME_MAILING = 'mailing';
 	const FIELD_NAME_EMAIL = 'email';
 	const FIELD_NAME_DESCRIPTION = 'description';
 	const FIELD_NAME_EMAIL_WELCOME_TEXT = 'email_welcome_text';
 	const FIELD_NAME_PRIVATE = 'private';
 	const FIELD_NAME_PAGE_NAME = 'page_name';
 	const FIELD_NAME_SUBJECT = 'subject';
+	const FIELD_NAME_DATE = 'date';
 	const FIELD_NAME_SENDER_EMAIL = 'sender_email';
 	const FIELD_NAME_SENDER_NAME = 'sender_name';
 	const FIELD_NAME_MESSAGE = 'message';
-	const FIELD_NAME_ID = 'id';
+	const FIELD_NAME_ADDRESS = 'address';
+	const FIELD_NAME_STATUS = 'status';
+	const FIELD_NAME_CONFIRM_CODE = 'confirm-code';
+	const FIELD_NAME_UNSUBSCRIBE_CODE = 'unsubscribe-code';
+	const FIELD_NAME_REMINDED = 'reminded';
 
-	const FORM_CMD_LIST_SUBSCRIBE = 'subscribe';
-	const FORM_CMD_LIST_EDIT = 'edit';
-	const FORM_CMD_LIST_DELETE = 'delete';
-	const FORM_CMD_MAILING_SAVE = 'save';
-	const FORM_CMD_MAILING_SEND = 'send';
-	const FORM_CMD_MAILING_TEST_SEND = 'test_send';
+	const PATH_EDIT = 'edit';
+	const PATH_MAILS = 'mails';
+	const PATH_MAILS_NEW = 'mails_new';
+	const PATH_MAILS_VIEW_ID = 'mails/[[id]]';
+	const PATH_MAILS_EDIT = 'mails_edit';
+	const PATH_MAILS_EDIT_ID = 'mails_edit/[[id]]';
+
+	const PATH_ADDRESSES = 'addresses';
+	const PATH_REMIND = 'remind';
+	const PATH_REMIND_EMAIL = 'remind?email=[[email]]';
+	const PATH_DELETE_ADDRESS = 'delete';
+	const PATH_DELETE_ADDRESS_EMAIL = 'delete?email=[[email]]';
+
+	const PATH_CONFIRM = 'confirm';
+	const PATH_CONFIRM_CODE = 'confirm?code=[[code]]';
+	const PATH_UNSUBSCRIBE = 'unsubscribe';
+	const PATH_UNSUBSCRIBE_CODE = 'unsubscribe?address=[[address]]&code=[[code]]';
+	const PATH_UNSUBSCRIBE_BY_ADMIN = 'unsubscribe_by_admin';
+	const PATH_UNSUBSCRIBE_BY_ADMIN_EMAIL = 'unsubscribe_by_admin?email=[[email]]';
+
+	const CMD_DELETE = 'delete';
+	const CMD_SUBSCRIBE = 'subscribe';
+	const CMD_SAVE = 'save';
+	const CMD_SEND = 'send';
+	const CMD_SEND_TEST = 'test_send';
 
 	const MAILING_STATUS_DRAFT = 'draft';
-	const MAILING_STATUS_SENT = 'sent';
 	const MAILING_STATUS_SENDING = 'sending';
+	const MAILING_STATUS_SENT = 'sent';
 
 	const ADDRESS_STATUS_PENDING = 'pending';
 	const ADDRESS_STATUS_CONFIRMED = 'confirmed';
 	const ADDRESS_STATUS_UNSUBSCRIBED = 'unsubscribed';
-
-	/** @var Xml */
-	private $xml;
 
 	/**
 	 * @param DOMElement $pageListNode
@@ -62,714 +86,884 @@ class mailinglist extends Page {
 		return $this->xml->documentElement;
 	}
 
+	/**
+	 * @param HyphaRequest $request
+	 * @return array|string|null
+	 *
+	 * @throws Exception
+	 */
 	public function process(HyphaRequest $request) {
 		$this->html->writeToElement('pagename', showPagename($this->pagename).' '.asterisk($this->privateFlag));
 
-		$firstArgument = $this->getArg(0);
-		if ('edit' != $firstArgument && !$this->hasSender()) {
+		if ('edit' != $request->getView() && !$this->hasSender()) {
 			notify('warning', __('ml-no-sender'));
 		}
 
-		switch ($firstArgument) {
-			case null:
-				return $this->indexAction();
-			case 'edit':
-				return $this->editAction();
-			case 'delete':
-				return $this->deleteAction();
-			case 'confirm':
-				return $this->confirmAction();
-			case 'unsubscribe':
-				return $this->unsubscribeAction();
-			case 'addresses':
-				return $this->addressesAction();
-			case 'create':
-				return $this->createMailingAction();
-			default:
-				switch ($this->getArg(1)) {
-					case 'edit':
-						return $this->editMailingAction($firstArgument);
-					default:
-						return $this->showMailingAction($firstArgument);
-				}
+		$this->ensureStructure();
+
+		switch ([$request->getView(), $request->getCommand()]) {
+			case [null,                            null]:                return $this->defaultView($request);
+			case [null,                            self::CMD_DELETE]:    return $this->deleteAction($request);
+			case [null,                            self::CMD_SUBSCRIBE]: return $this->subscribeAction($request);
+			case [self::PATH_EDIT,                 null]:                return $this->editView($request);
+			case [self::PATH_EDIT,                 self::CMD_SAVE]:      return $this->editAction($request);
+			case [self::PATH_ADDRESSES,            null]:                return $this->addressesView($request);
+			case [self::PATH_REMIND,               null]:                return $this->remindAction($request);
+			case [self::PATH_DELETE_ADDRESS,       null]:                return $this->deleteAddressAction($request);
+			case [self::PATH_CONFIRM,              null]:                return $this->confirmEmailAction($request);
+			case [self::PATH_UNSUBSCRIBE,          null]:                return $this->unsubscribeAction($request);
+			case [self::PATH_UNSUBSCRIBE_BY_ADMIN, null]:                return $this->unsubscribeByAdminAction($request);
+			case [self::PATH_MAILS_NEW,            null]:                return $this->mailingNewView($request);
+			case [self::PATH_MAILS_NEW,            self::CMD_SAVE]:      return $this->mailingNewAction($request);
+			case [self::PATH_MAILS,                null]:                return $this->mailingView($request);
+			case [self::PATH_MAILS,                self::CMD_SEND]:      return $this->mailingSendAction($request);
+			case [self::PATH_MAILS,                self::CMD_SEND_TEST]: return $this->mailingSendTestAction($request);
+			case [self::PATH_MAILS_EDIT,           null]:                return $this->mailingEditView($request);
+			case [self::PATH_MAILS_EDIT,           self::CMD_SAVE]:      return $this->mailingEditAction($request);
 		}
+
+		return '404';
 	}
 
-	public function indexAction() {
-		// check if form is posted and get form data
-		$formData = [];
-		$formPosted = $this->isPosted(self::FORM_CMD_LIST_SUBSCRIBE);
-		if ($formPosted) {
-			$formData = $_POST;
-		}
-
-		// create form
-		$form = $this->createSubscribeForm($formData);
-
-		// process form if it was posted
-		if ($formPosted) {
-			$form->validateRequiredField(self::FIELD_NAME_EMAIL);
-			$form->validateEmailField(self::FIELD_NAME_EMAIL);
-			if (empty($form->errors)) {
-				// check if email is already in the list, no need to have it twice.
-				$this->xml->lockAndReload();
-				$email = strtolower($form->dataFor(self::FIELD_NAME_EMAIL));
-				/** @var HyphaDomElement $addresses */
-				$addresses = $this->getDoc()->getOrCreate('addresses');
-				/** @var NodeList $addressCollection */
-				$addressCollection = $addresses->children()->findXPath('//address[@email="' . $email . '"]');
-				$address = $addressCollection->first();
-
-				if (!$address instanceof HyphaDomElement) {
-					$addAddress = true;
-					$sendEmail = true;
-					$code = $this->constructCode();
-				} else {
-					// if the email is there just send another email if it is still pending
-					$sendEmail = $address->getAttribute('status') == self::ADDRESS_STATUS_PENDING;
-					$addAddress = false;
-					$code = $address->getAttribute('code');
-				}
-
-				if ($addAddress) {
-					/** @var HyphaDomElement $address */
-					// add email with status pending
-					$address = $this->xml->createElement('address');
-					$address->setAttribute('email', $email);
-					$address->setAttribute('status', self::ADDRESS_STATUS_PENDING);
-					$address->setAttribute('confirm-code', $code);
-					/** @var HyphaDomElement $addresses */
-					$addresses = $this->getDoc()->getOrCreate('addresses');
-					$addresses->append($address);
-					$this->xml->saveAndUnlock();
-				} else {
-					$this->xml->unlock();
-				}
-
-				if ($sendEmail) {
-					// send email so that action can be confirmed
-					$link = $this->constructFullPath(sprintf('%s/confirm?code=%s', urlencode($this->pagename), urlencode($code)));
-					$confirmTxt = __('ml-please-confirm-email');
-					$link = '<a href="' . $link . '">' . $confirmTxt . '</a>';
-					$emailWelcomeText = $this->getDoc()->getOrCreate('email-welcome-text');
-					$welcomeText = $emailWelcomeText->getHtml();
-					$welcomeText .= '<br><br>' . $link;
-					$subject = hypha_getTitle() . ' - ' . __('ml-confirmation-email-subject');
-					$this->send($subject, $welcomeText, [$email]);
-
-					notify('success', ucfirst(__('ml-confirmation-mail-sent')));
-				} else {
-					notify('success', ucfirst(__('ml-successfully-subscribed')));
-				}
-
-				// all is success refresh page with success notification
-				return 'reload';
+	/**
+	 * Checks if the status is new and if so builds the structure and sets the status to draft.
+	 */
+	private function ensureStructure() {
+		$dataStructure = [
+			self::FIELD_NAME_DESCRIPTION => [],
+			self::FIELD_NAME_ADDRESSES_CONTAINER => [],
+			self::FIELD_NAME_MAILINGS_CONTAINER => [],
+			self::FIELD_NAME_EMAIL_WELCOME_TEXT => [],
+		];
+		$this->xml->lockAndReload();
+		$build = function (HyphaDomElement $doc, array $structure) use (&$build) {
+			foreach ($structure as $name => $children) {
+				$doc->append($build($doc->getOrCreate($name), $children));
 			}
-		}
+			return $doc;
+		};
+		$build($this->getDoc(), $dataStructure);
 
-		// update the form dom so that error can be displayed, if there are any
-		$form->updateDom();
+		// set initial status, create timestamp and title
+		$this->getDoc()->setAttribute(self::FIELD_NAME_SENDER_NAME, '');
+		$this->getDoc()->setAttribute(self::FIELD_NAME_SENDER_EMAIL, '');
+		$this->xml->saveAndUnlock();
+	}
 
+	/**
+	 * @param HyphaRequest $request
+	 * @return string|null
+	 */
+	private function defaultView(HyphaRequest $request) {
+		// create form
+		$form = $this->createSubscribeForm();
+
+		return $this->defaultViewRender($request, $form);
+	}
+
+	private function defaultViewRender(HyphaRequest $request, WymHTMLForm $form) {
 		// add edit button for registered users
 		if (isUser()) {
-			$commands = $this->findBySelector('#pageCommands');
-			$commands->append($this->makeActionButton(__('edit'), 'edit'));
+			/** @var HyphaDomElement $commands */
+			$commands = $this->html->find('#pageCommands');
+			$commands->append($this->makeActionButton(__('edit'), self::PATH_EDIT));
 			if (isAdmin()) {
-				$path = $this->language . '/' . $this->pagename . '/delete';
-				$commands->append(makeButton(__('delete'), 'if(confirm(\'' . __('sure-to-delete') . '\'))' . makeAction($path, self::FORM_CMD_LIST_DELETE, '')));
+				$path = $this->language . '/' . $this->pagename;
+				$commands->append(makeButton(__('delete'), 'if(confirm(\'' . __('sure-to-delete') . '\'))' . makeAction($path, self::CMD_DELETE, '')));
 			}
 		}
+
+		/** @var NodeList $main */
+		$main = $this->html->find('#main');
 
 		// display page name and description
-		/** @var HyphaDomElement $description */
-		$description = $this->getDoc()->getOrCreate('description');
-		$html = $description->getHtml();
-		$this->html->writeToElement('main', $html);
+		$description = $this->getDoc()->get(self::FIELD_NAME_DESCRIPTION)->getHtml();
+		$main->append($description);
 
 		// display form
-		$viewAddresses = isUser() ? '<span style="float: right;">' . $this->makeActionButton(__('ml-view-addresses'), 'addresses') . '</span>' : '';
-		$this->html->writeToElement('main', '<div><h3>' . __('subscribe') . $viewAddresses . '</h3></div>');
-		$this->findBySelector('#main')->append($form);
+		$viewAddresses = isUser() ? '<span style="float: right;">' . $this->makeActionButton(__('ml-view-addresses'), self::PATH_ADDRESSES) . '</span>' : '';
+		$main->append('<div><h3>' . htmlspecialchars(__('subscribe')) . $viewAddresses . '</h3></div>');
 
-		// display archive (anonymous users only get to see sent items)
-		$this->displayArchive();
-
-		return null;
-	}
-
-	private function displayArchive() {
-		if (isUser()) {
-			/** @var HyphaDomElement $mailingsContainer */
-			$mailingsContainer = $this->getDoc()->getOrCreate('mailings');
-			$mailings = $mailingsContainer->children();
-		} else {
-			$mailings = $this->getDoc()->findXPath('//mailing[@status="' . self::MAILING_STATUS_SENT . '"]');
-		}
-
-		/** @var HyphaDomElement $main */
-		$main = $this->findBySelector('#main');
-		$main->append('<div><h3>' . __('archive') . '</h3></div>');
-		$table = new HTMLTable();
-		$main->appendChild($table);
-		$header = $table->addHeaderRow();
-		$table->addClass('section');
-		$header->addCell();
-		$header->addCell(__('subject'));
-		$header->addCell(__('status'));
-		if (isUser()) {
-			$header->addCell();
-		}
-		$header->addCell()->setHtml(isUser() ? $this->makeActionButton('add-mailing', 'create') : '');
-		$header->addCell();
-		foreach ($mailings as $mailing) {
-			$status = $mailing->getAttribute('status');
-			$row = $table->addRow();
-			$row->addCell()->setHtml('<span style="color:#b90;">∗</span>');
-			$row->addCell($mailing->getAttribute('subject'));
-			$row->addCell(__('ml-mailing-status-' . $status));
-			$date = $mailing->getAttribute('date');
-			if ($date) {
-				$date = new \DateTime($date);
-				$date = $date->format(__('ml-date-format'));
-			} else {
-				$date = '';
-			}
-			$row->addCell($date);
-			$buttons = $this->makeActionButton(__('view'), $mailing->getId());
-			if (self::MAILING_STATUS_DRAFT == $status) {
-				$buttons .= $this->makeActionButton(__('edit'), $mailing->getId() . '/edit');
-			}
-			$row->addCell()->setHtml($buttons);
-		}
-	}
-
-	private function editAction() {
-		// throw error if edit is requested without client logged in
-		if (!isUser()) {
-			notify('error', __('login-to-edit'));
-
-			return null;
-		}
-
-		// check if form is posted and get form data
-		$formPosted = $this->isPosted(self::FORM_CMD_LIST_EDIT);
-		if ($formPosted) {
-			$formData = $_POST;
-		} else {
-			$senderData = $this->getSenderData();
-			$formData = [
-				self::FIELD_NAME_PAGE_NAME => showPagename($this->pagename),
-				self::FIELD_NAME_PRIVATE => $this->privateFlag,
-				self::FIELD_NAME_SENDER_EMAIL => $senderData['email'],
-				self::FIELD_NAME_SENDER_NAME => $senderData['name'],
-				self::FIELD_NAME_DESCRIPTION => $this->getDoc()->getOrCreate('description'),
-				self::FIELD_NAME_EMAIL_WELCOME_TEXT => $this->getDoc()->getOrCreate('email-welcome-text'),
-			];
-		}
-
-		// create form
-		$form = $this->createEditForm($formData);
-
-		// process form if it was posted
-		if ($formPosted) {
-			$form->validateRequiredField(self::FIELD_NAME_SENDER_EMAIL);
-			$form->validateRequiredField(self::FIELD_NAME_SENDER_NAME);
-			$form->validateEmailField(self::FIELD_NAME_SENDER_EMAIL);
-			if (empty($form->errors)) {
-				global $hyphaXml;
-
-				$pagename = validatePagename($form->dataFor(self::FIELD_NAME_PAGE_NAME));
-				$private = $form->dataFor(self::FIELD_NAME_PRIVATE, false);
-				$senderEmail = $form->dataFor(self::FIELD_NAME_SENDER_EMAIL);
-				$senderName = $form->dataFor(self::FIELD_NAME_SENDER_NAME);
-
-				$hyphaXml->lockAndReload();
-				// After reloading, our page list node might
-				// have changed, so find it in the newly loaded
-				// XML. This seems a bit dodgy, though...
-				$this->replacePageListNode(hypha_getPage($this->language, $this->pagename));
-				// check if pagename and/or privateFlag have changed
-				if ($pagename != $this->pagename || $private != $this->privateFlag) {
-					hypha_setPage($this->pageListNode, $this->language, $pagename, $private);
-					$hyphaXml->saveAndUnlock();
-				} else {
-					$hyphaXml->unlock();
-				}
-
-				$this->xml->lockAndReload();
-				$this->getDoc()->setAttribute('sender-email', $senderEmail);
-				$this->getDoc()->setAttribute('sender-name', $senderName);
-				/** @var HyphaDomElement $description */
-				$description = $this->getDoc()->getOrCreate('description');
-				$description->setHtml(wikify_html($form->dataFor(self::FIELD_NAME_DESCRIPTION)));
-				$emailWelcomeText = $this->getDoc()->getOrCreate('email-welcome-text');
-				$emailWelcomeText->setHtml(wikify_html($form->dataFor(self::FIELD_NAME_EMAIL_WELCOME_TEXT)));
-				$this->xml->saveAndUnlock();
-
-				notify('success', ucfirst(__('ml-successfully-updated')));
-				return ['redirect', $this->constructFullPath($pagename)];
-			}
-		}
-
-		// update the form dom so that error can be displayed, if there are any
+		// update the form dom so that values and errors can be displayed
 		$form->updateDom();
 
-		$this->findBySelector('#main')->append($form);
+		/** @var NodeList $main */
+		$main = $this->html->find('#main');
+		$main->append($form);
+
+		$formContainer = $main->children()->end();
+		$formContainer->append($this->makeActionButton(__('subscribe'), null, self::CMD_SUBSCRIBE));
+
+		// display archive (non-users only get to see sent items)
+		$main->append('<div><h3>' . htmlspecialchars(__('archive')) . '</h3></div>');
+		$this->appendMailingsList($main);
 
 		return null;
 	}
 
-	public function deleteAction() {
-		// check if form is posted and get form data
-		$formPosted = $this->isPosted(self::FORM_CMD_LIST_DELETE);
-		if (!$formPosted) {
+	/**
+	 * Deletes the mailing list.
+	 *
+	 * @param HyphaRequest $request
+	 * @return array
+	 */
+	private function deleteAction(HyphaRequest $request) {
+		if (!isAdmin()) {
+			notify('error', __(isUser() ? 'admin-rights-needed-to-perform-action' : 'login-to-perform-action'));
 			return null;
 		}
-
-		global $hyphaUrl;
 
 		$this->deletePage();
 
 		notify('success', ucfirst(__('page-successfully-deleted')));
-		return ['redirect', $hyphaUrl];
+		return ['redirect', $request->getRootUrl()];
 	}
 
-	private function confirmAction() {
-		$code = isset($_GET['code']) ? $_GET['code'] : null;
-		if (null == $code) {
-			notify('error', __('missing-arguments'));
+	/**
+	 * Displays the form to edit the mailing list data.
+	 *
+	 * @param HyphaRequest $request
+	 * @return array|null
+	 */
+	private function editView(HyphaRequest $request) {
+		if (!isUser()) {
+			notify('error', __('login-to-perform-action'));
 
-			return null;
+			return ['redirect', $this->path()];
 		}
+
+		// create form
+		$senderData = $this->getSenderData();
+		$formData = [
+			self::FIELD_NAME_PAGE_NAME => showPagename($this->pagename),
+			self::FIELD_NAME_PRIVATE => $this->privateFlag,
+			self::FIELD_NAME_SENDER_EMAIL => $senderData['email'],
+			self::FIELD_NAME_SENDER_NAME => $senderData['name'],
+			self::FIELD_NAME_DESCRIPTION => $this->getDoc()->get(self::FIELD_NAME_DESCRIPTION)->getHtml(),
+			self::FIELD_NAME_EMAIL_WELCOME_TEXT => $this->getDoc()->get(self::FIELD_NAME_EMAIL_WELCOME_TEXT)->getHtml(),
+		];
+
+		$form = $this->createEditForm($formData);
+
+		return $this->editViewRender($request, $form);
+	}
+
+	private function editViewRender(HyphaRequest $request, HTMLForm $form) {
+		// update the form dom so that values and errors can be displayed
+		$form->updateDom();
+
+		/** @var HyphaDomElement $main */
+		$main = $this->html->find('#main');
+		$main->append($form);
+
+		/** @var HyphaDomElement $commands */
+		$commands = $this->html->find('#pageCommands');
+		$commands->append($this->makeActionButton(__('save'), self::PATH_EDIT, self::CMD_SAVE));
+		$commands->append($this->makeActionButton(__('cancel'), ''));
+
+		return null;
+	}
+
+	/**
+	 * Updates the mailing list with the posted data.
+	 *
+	 * @param HyphaRequest $request
+	 * @return array|null
+	 */
+	private function editAction(HyphaRequest $request) {
+		if (!isUser()) {
+			notify('error', __('login-to-perform-action'));
+
+			return ['redirect', $this->path()];
+		}
+
+		// create form
+		$form = $this->createEditForm($request->getPostData());
+
+		// validate form
+		$form->validateRequiredField(self::FIELD_NAME_SENDER_EMAIL);
+		$form->validateRequiredField(self::FIELD_NAME_SENDER_NAME);
+		$form->validateEmailField(self::FIELD_NAME_SENDER_EMAIL);
+
+		// return form if there are errors
+		if (!empty($form->errors)) {
+			return $this->editViewRender($request, $form);
+		}
+
+		$pagename = validatePagename($form->dataFor(self::FIELD_NAME_PAGE_NAME));
+		$private = $form->dataFor(self::FIELD_NAME_PRIVATE, false);
+
+		$this->savePage($pagename, null, $private);
 
 		$this->xml->lockAndReload();
+		$senderEmail = $form->dataFor(self::FIELD_NAME_SENDER_EMAIL);
+		$senderName = $form->dataFor(self::FIELD_NAME_SENDER_NAME);
+		$this->getDoc()->setAttribute('sender-email', $senderEmail);
+		$this->getDoc()->setAttribute('sender-name', $senderName);
+		$this->getDoc()->get(self::FIELD_NAME_DESCRIPTION)->setHtml($form->dataFor(self::FIELD_NAME_DESCRIPTION), true);
+		$this->getDoc()->get(self::FIELD_NAME_EMAIL_WELCOME_TEXT)->setHtml($form->dataFor(self::FIELD_NAME_EMAIL_WELCOME_TEXT), true);
 
-		/** @var NodeList $addressCollection */
-		$addressCollection = $this->getDoc()->findXPath('//address[@confirm-code="' . $code . '"]');
-		$address = $addressCollection->first();
-		if (!$address instanceof HyphaDomElement) {
-			$this->xml->unlock();
-			notify('error', __('invalid-code'));
-
-			return null;
-		}
-
-		if ($address->getAttribute('status') == self::ADDRESS_STATUS_CONFIRMED) {
-			$this->xml->unlock();
-			notify('success', ucfirst(__('ml-successfully-subscribed')));
-			return ['redirect', $this->constructFullPath($this->pagename)];
-		}
-
-		$address->setAttribute('status', self::ADDRESS_STATUS_CONFIRMED);
-		$address->setAttribute('unsubscribe-code', $this->constructCode());
-		/** @var HyphaDomElement $addresses */
-		$addresses = $this->getDoc()->getOrCreate('addresses');
-		$addresses->append($address);
 		$this->xml->saveAndUnlock();
 
-		notify('success', ucfirst(__('ml-successfully-subscribed')));
-		return ['redirect', $this->constructFullPath($this->pagename)];
+		notify('success', ucfirst(__('ml-successfully-updated')));
+
+		return ['redirect', $this->constructFullPath($pagename)];
 	}
 
-	private function unsubscribeAction() {
-		$code = isset($_GET['code']) ? $_GET['code'] : null;
-		if (null == $code) {
-			notify('error', __('missing-arguments'));
+	/**
+	 * @param HyphaRequest $request
+	 * @return string|null
+	 */
+	private function subscribeAction(HyphaRequest $request) {
+		// create form
+		$form = $this->createSubscribeForm($request->getPostData());
 
-			return null;
+		// validate form
+		$form->validateRequiredField(self::FIELD_NAME_EMAIL);
+		$form->validateEmailField(self::FIELD_NAME_EMAIL);
+
+		// process form if there are no errors
+		if (!empty($form->errors)) {
+			return $this->defaultViewRender($request, $form);
 		}
 
+		// check if email is already in the list, no need to have it twice.
 		$this->xml->lockAndReload();
-		/** @var NodeList $addressCollection */
-		$addressCollection = $this->getDoc()->findXPath('//address[@unsubscribe-code="' . $code . '"]');
-		$address = $addressCollection->first();
-		if (!$address instanceof HyphaDomElement) {
-			$this->xml->unlock();
-			notify('error', __('invalid-code'));
+		$email = strtolower($form->dataFor(self::FIELD_NAME_EMAIL));
 
-			return null;
+		$xpath = './/' . self::FIELD_NAME_ADDRESS . '[@' . self::FIELD_NAME_EMAIL . '=' . xpath_encode($email) . ' and @' . self::FIELD_NAME_STATUS . '!="' . self::ADDRESS_STATUS_UNSUBSCRIBED . '"]';
+		$address = $this->findAddresses($xpath)->first();
+
+		$addAddress = !$address instanceof HyphaDomElement;
+		if ($addAddress) {
+			$sendEmail = true;
+			$code = $this->constructCode();
+		} else {
+			// if the email is there just send another email if it is still pending
+			$sendEmail = $address->getAttribute(self::FIELD_NAME_STATUS) == self::ADDRESS_STATUS_PENDING;
+			$code = $address->getAttribute(self::FIELD_NAME_CONFIRM_CODE);
 		}
 
-		if ($address->getAttribute('status') == self::ADDRESS_STATUS_PENDING) {
-			// weird case, should never happen, let's handle it anyway
-			$this->xml->unlock();
-			notify('error', __('ml-mail-has-invalid-status'));
-
-			return null;
-		}
-
-		if ($address->getAttribute('status') != self::ADDRESS_STATUS_UNSUBSCRIBED) {
-			$address->setAttribute('status', self::ADDRESS_STATUS_UNSUBSCRIBED);
-			$address->removeAttribute('email');
+		if ($addAddress) {
+			// add email with status pending
+			/** @var HyphaDomElement $address */
+			$address = $this->xml->createElement(self::FIELD_NAME_ADDRESS);
+			$address->setAttribute(self::FIELD_NAME_EMAIL, $email);
+			$address->setAttribute(self::FIELD_NAME_STATUS, self::ADDRESS_STATUS_PENDING);
+			$address->setAttribute(self::FIELD_NAME_CONFIRM_CODE, $code);
+			$address->setAttribute(self::FIELD_NAME_REMINDED, false);
+			/** @var HyphaDomElement $addressesContainer */
+			$addressesContainer = $this->getDoc()->get(self::FIELD_NAME_ADDRESSES_CONTAINER);
+			$addressesContainer->append($address);
 			$this->xml->saveAndUnlock();
 		} else {
 			$this->xml->unlock();
 		}
 
+		if ($sendEmail) {
+			$this->sendConfirmationMail($code, $email);
+			notify('success', ucfirst(__('ml-confirmation-mail-sent')));
+		} else {
+			notify('success', ucfirst(__('ml-successfully-subscribed')));
+		}
+
+		// all is success refresh page with success notification
+		return 'reload';
+	}
+
+	/**
+	 * Send email so that pending subscribed can confirm email address.
+	 *
+	 * @param string $code
+	 * @param string $email
+	 * @return void
+	 */
+	private function sendConfirmationMail($code, $email) {
+		$confirmUrl = $this->path(self::PATH_CONFIRM_CODE, ['code' => $code]);
+		$confirmLink = '<a href="' . htmlspecialchars($confirmUrl) . '">' . __('ml-please-confirm-email') . '</a>';
+		$welcomeText = $this->getDoc()->get(self::FIELD_NAME_EMAIL_WELCOME_TEXT)->getHtml();
+		$welcomeText .= '<br><br>' . $confirmLink;
+		$subject = hypha_getTitle() . ' - ' . __('ml-confirmation-email-subject');
+		return $this->sendMail($subject, $welcomeText, [$email]);
+	}
+
+	private function confirmEmailAction(HyphaRequest $request) {
+		$code = isset($_GET['code']) ? $_GET['code'] : null;
+		if (null == $code) {
+			notify('error', __('missing-arguments'));
+			return null;
+		}
+
+		$this->xml->lockAndReload();
+
+		$xpath = './/' . self::FIELD_NAME_ADDRESS . '[@' . self::FIELD_NAME_CONFIRM_CODE . '=' . xpath_encode($code) . ' and @' . self::FIELD_NAME_STATUS . '!="' . self::ADDRESS_STATUS_UNSUBSCRIBED . '"]';
+		$address = $this->findAddresses($xpath)->first();
+
+		if (!$address instanceof HyphaDomElement) {
+			$this->xml->unlock();
+			notify('error', __('invalid-code'));
+			return null;
+		}
+
+		if ($address->getAttribute(self::FIELD_NAME_STATUS) !== self::ADDRESS_STATUS_CONFIRMED) {
+			$address->setAttribute(self::FIELD_NAME_STATUS, self::ADDRESS_STATUS_CONFIRMED);
+			$address->setAttribute(self::FIELD_NAME_UNSUBSCRIBE_CODE, $this->constructCode());
+			$this->xml->saveAndUnlock();
+		} else {
+			$this->xml->unlock();
+		}
+
+		notify('success', ucfirst(__('ml-successfully-subscribed')));
+		return ['redirect', $this->path()];
+	}
+
+	private function unsubscribeAction(HyphaRequest $request) {
+		$code = isset($_GET['code']) ? $_GET['code'] : null;
+		if (null == $code) {
+			notify('error', __('missing-arguments'));
+			return null;
+		}
+
+		try {
+			$xpath = './/' . self::FIELD_NAME_ADDRESS . '[@' . self::FIELD_NAME_UNSUBSCRIBE_CODE . '=' . xpath_encode($code) . ']';
+			$this->unsubscribe($xpath);
+		} catch (\Exception $e) {
+			$msg = $e->getCode() === 404 ? __('invalid-code') : $e->getMessage();
+			notify('error', $msg);
+			return null;
+		}
+
 		notify('success', ucfirst(__('ml-successfully-unsubscribed')));
-		return ['redirect', $this->constructFullPath($this->pagename)];
+
+		return ['redirect', $this->path()];
+	}
+
+	/**
+	 * Unsubscribe a confirmed address. Can only be executed by admins.
+	 *
+	 * @param HyphaRequest $request
+	 * @return array|null
+	 */
+	private function unsubscribeByAdminAction(HyphaRequest $request) {
+		if (!isAdmin()) {
+			notify('error', __(isUser() ? 'admin-rights-needed-to-perform-action' : 'login-to-perform-action'));
+			return ['redirect', $this->path()];
+		}
+
+		$email = isset($_GET['email']) ? $_GET['email'] : null;
+		if (null == $email) {
+			notify('error', __('missing-arguments'));
+			return null;
+		}
+
+		try {
+			$xpath = './/' . self::FIELD_NAME_ADDRESS . '[@' . self::FIELD_NAME_EMAIL . '=' . xpath_encode($email) . ']';
+			$this->unsubscribe($xpath);
+		} catch (\Exception $e) {
+			notify('error', $e->getMessage());
+			return null;
+		}
+
+		notify('success', ucfirst(__('ml-successfully-unsubscribed-by-admin', ['email' => $email])));
+
+		return ['redirect', $this->path(self::PATH_ADDRESSES)];
+	}
+
+	/**
+	 * @param string $xpath
+	 * @throws Exception
+	 */
+	private function unsubscribe($xpath) {
+		$this->xml->lockAndReload();
+
+		$address = $this->findAddresses($xpath)->first();
+		if (!$address instanceof HyphaDomElement) {
+			$this->xml->unlock();
+			throw new \Exception(__('not-found'), 404);
+		}
+
+		if ($address->getAttribute(self::FIELD_NAME_STATUS) === self::ADDRESS_STATUS_PENDING) {
+			// weird case, should never happen, let's handle it anyway
+			$this->xml->unlock();
+			throw new \Exception(__('ml-mail-has-invalid-status'), 409);
+		}
+
+		if ($address->getAttribute(self::FIELD_NAME_STATUS) != self::ADDRESS_STATUS_UNSUBSCRIBED) {
+			$address->setAttribute(self::FIELD_NAME_STATUS, self::ADDRESS_STATUS_UNSUBSCRIBED);
+			$this->xml->saveAndUnlock();
+		} else {
+			$this->xml->unlock();
+		}
+	}
+
+	/**
+	 * Resend a confirmation email message to a pending address. Can only be executed by admins.
+	 *
+	 * @param HyphaRequest $request
+	 * @return null|array
+	 */
+	private function remindAction(HyphaRequest $request) {
+		if (!isAdmin()) {
+			notify('error', __(isUser() ? 'admin-rights-needed-to-perform-action' : 'login-to-perform-action'));
+			return ['redirect', $this->path()];
+		}
+
+		$email = isset($_GET['email']) ? $_GET['email'] : null;
+		if (null == $email) {
+			notify('error', __('missing-arguments'));
+			return null;
+		}
+
+		$this->xml->lockAndReload();
+
+		$xpath = './/' . self::FIELD_NAME_ADDRESS . '[@' . self::FIELD_NAME_EMAIL . '=' . xpath_encode($email) . ' and @' . self::FIELD_NAME_STATUS . '!="' . self::ADDRESS_STATUS_UNSUBSCRIBED . '"]';
+		$address = $this->findAddresses($xpath)->first();
+
+		if (!$address instanceof HyphaDomElement) {
+			$this->xml->unlock();
+			notify('error', __('not-found'));
+			return null;
+		}
+
+		if ($address->getAttribute(self::FIELD_NAME_STATUS) !== self::ADDRESS_STATUS_PENDING) {
+			$this->xml->unlock();
+			notify('error', __('ml-no-reminder-address-no-longer-pending'));
+			return null;
+		}
+
+		if ($address->getAttribute(self::FIELD_NAME_REMINDED) != true) {
+			$code = $address->getAttribute(self::FIELD_NAME_CONFIRM_CODE);
+			$address->setAttribute(self::FIELD_NAME_REMINDED, true);
+			$this->xml->saveAndUnlock();
+
+			$this->sendConfirmationMail($code, $email);
+			notify('success', ucfirst(__('ml-reminder-sent')));
+		} else {
+			notify('success', ucfirst(__('ml-reminder-already-sent')));
+		}
+
+		return ['redirect', $this->path(self::PATH_ADDRESSES)];
+	}
+
+	/**
+	 * Deleted a pending address. Can only be executed by admins.
+	 *
+	 * @param HyphaRequest $request
+	 * @return null|array
+	 */
+	private function deleteAddressAction(HyphaRequest $request) {
+		if (!isAdmin()) {
+			notify('error', __(isUser() ? 'admin-rights-needed-to-perform-action' : 'login-to-perform-action'));
+			return ['redirect', $this->path()];
+		}
+
+		$email = isset($_GET['email']) ? $_GET['email'] : null;
+		if (null == $email) {
+			notify('error', __('missing-arguments'));
+			return null;
+		}
+
+		$this->xml->lockAndReload();
+
+		$xpath = './/' . self::FIELD_NAME_ADDRESS . '[@' . self::FIELD_NAME_EMAIL . '=' . xpath_encode($email) . ' and @' . self::FIELD_NAME_STATUS . '!="' . self::ADDRESS_STATUS_UNSUBSCRIBED . '"]';
+		$address = $this->findAddresses($xpath)->first();
+
+		if (!$address instanceof HyphaDomElement) {
+			$this->xml->unlock();
+			notify('error', __('not-found'));
+			return null;
+		}
+
+		if ($address->getAttribute(self::FIELD_NAME_STATUS) !== self::ADDRESS_STATUS_PENDING) {
+			$this->xml->unlock();
+			notify('error', __('ml-cannot-delete-address-no-longer-pending'));
+			return null;
+		}
+
+		/** @var HyphaDomElement $addressesContainer */
+		$addressesContainer = $this->getDoc()->get(self::FIELD_NAME_ADDRESSES_CONTAINER);
+		$addressesContainer->removeChild($address);
+		$this->xml->saveAndUnlock();
+
+		notify('success', ucfirst(__('ml-address-deleted')));
+		return ['redirect', $this->path(self::PATH_ADDRESSES)];
 	}
 
 	/**
 	 * Builds a table with addresses.
-	 */
-	private function addressesAction() {
-		$table = new HTMLTable();
-		/** @var HyphaDomElement $main */
-		$main = $this->findBySelector('#main');
-		$main->appendChild($table);
-		$table->addClass('section');
-		$table->addHeaderRow()->addCells(['', __('addresses'), __('status')]);
-		/** @var HyphaDomElement[] $addresses */
-		$addresses = $this->getDoc()->findXPath('//address[@status="' . self::ADDRESS_STATUS_CONFIRMED . '" or @status="' . self::ADDRESS_STATUS_PENDING . '"]');
-		foreach ($addresses as $child) {
-			$status = $child->getAttribute('status');
-			$table->addRow()->addCells(['', $child->getAttribute('email'), __('ml-address-status-' . $status)]);
-		}
-		$table->addRow()->addCells([__('total'), count($addresses), '']);
-
-		// buttons
-		$commands = $this->findBySelector('#pageCommands');
-		$commands->append($this->makeActionButton(__('back'), ''));
-	}
-
-	private function createMailingAction() {
-		return $this->editMailingAction();
-	}
-
-	/**
-	 * @param null|string $mailingId
-	 *
+	 * @param HyphaRequest $request
 	 * @return array|null
 	 */
-	private function editMailingAction($mailingId = null) {
-		// throw error if edit is requested without client logged in
+	private function addressesView(HyphaRequest $request) {
 		if (!isUser()) {
-			notify('error', __('login-to-edit'));
-
-			return null;
+			notify('error', __('login-to-perform-action'));
+			return ['redirect', $this->path()];
 		}
 
-		$saveMailing = $this->isPosted(self::FORM_CMD_MAILING_SAVE);
-		if ($this->isPosted() && !$saveMailing) {
-			notify('error', __('ml-invalid-command'));
-
-			return null;
-		}
-		$isPosted = $saveMailing;
-
-		if (isset($_POST[self::FIELD_NAME_ID])) {
-			if (null == $mailingId) {
-				$mailingId = $_POST[self::FIELD_NAME_ID];
-			} elseif ($_POST[self::FIELD_NAME_ID] != $mailingId) {
-				notify('error', __('ml-inconsistent-parameters'));
-
-				return null;
+		$table = new HTMLTable();
+		/** @var HyphaDomElement $main */
+		$main = $this->html->find('#main');
+		$main->appendChild($table);
+		$table->addClass('section');
+		$table->addHeaderRow()->addCells(['', __('addresses'), __('status'), __('action')]);
+		$xpath = './/' . self::FIELD_NAME_ADDRESS . '[@' . self::FIELD_NAME_STATUS . '="' . self::ADDRESS_STATUS_CONFIRMED . '" or @' . self::FIELD_NAME_STATUS . '="' . self::ADDRESS_STATUS_PENDING . '"]';
+		$addresses = $this->findAddresses($xpath);
+		/** @var HyphaDomElement $address */
+		foreach ($addresses as $address) {
+			$status = $address->getAttribute(self::FIELD_NAME_STATUS);
+			$statusText = __('ml-address-status-' . $status);
+			$actions = [];
+			$email = $address->getAttribute(self::FIELD_NAME_EMAIL);
+			if (isAdmin()) {
+				if ($status === self::ADDRESS_STATUS_PENDING) {
+					if ($address->getAttribute(self::FIELD_NAME_REMINDED) != true) {
+						$remindPath = $this->substituteSpecial(self::PATH_REMIND_EMAIL, ['email' => $email]);
+						$actions[] = $this->makeActionButton(__('ml-send-reminder'), $remindPath);
+					} else {
+						$statusText .= ', ' . __('ml-reminded');
+					}
+					$deletePath = $this->substituteSpecial(self::PATH_DELETE_ADDRESS_EMAIL, ['email' => $email]);
+					$actions[] = $this->makeActionButton(__('delete'), $deletePath);
+				}
+				if ($status === self::ADDRESS_STATUS_CONFIRMED) {
+					$unsubscribePath = $this->substituteSpecial(self::PATH_UNSUBSCRIBE_BY_ADMIN_EMAIL, ['email' => $email]);
+					$actions[] = $this->makeActionButton(__('unsubscribe'), $unsubscribePath);
+				}
 			}
+			$row = $table->addRow();
+			$row->addCells(['', $email, $statusText]);
+			$row->addCell()->setHtml(implode(' ', $actions));
 		}
+		$table->addRow()->addCells([__('total'), count($addresses), '', '']);
 
-		// check given id
-		/** @var HyphaDomElement $mailing */
-		if (null != $mailingId) {
-			$mailing = $this->xml->document()->getElementById($mailingId);
-			if (!$mailing instanceof HyphaDomElement) {
-				notify('error', __('not-found')); // 404
-
-				return null;
-			}
-			// check if status is correct
-			$status = $mailing->getAttribute('status');
-			if (self::MAILING_STATUS_SENT == $status) {
-				notify('success', ucfirst(__('ml-successfully-sent')));
-				return ['redirect', $this->constructFullPath($this->pagename . '/' . $mailingId)];
-			}
-			if (self::MAILING_STATUS_DRAFT != $status) {
-				notify('error', __('unable-to-edit'));
-
-				return null;
-			}
-		}
-
-		// create form
-		$form = $this->handleMailingForm($mailingId);
-
-		// process posted form
-		if ($isPosted && empty($form->errors)) {
-			// get the mailing id, it could be that it was created by handling the form
-			$mailingId = $form->dataFor(self::FIELD_NAME_ID);
-
-			$msg = ucfirst(__('ml-successfully-created'));
-			$msgType = 'success';
-
-			// goto view page with notification
-			notify($msgType, $msg);
-			return ['redirect', $this->constructFullPath($this->pagename . '/' . $mailingId)];
-		}
-
-		// display form
-		$this->findBySelector('#main')->append($form);
-
+		// add buttons
+		/** @var HyphaDomElement $commands */
+		$commands = $this->html->find('#pageCommands');
+		$commands->append($this->makeActionButton(__('back')));
 		return null;
 	}
 
 	/**
-	 * @param string $mailingId
+	 * @param HyphaRequest $request
 	 *
-	 * @return array|null
+	 * @return null
+	 * @throws Exception
 	 */
-	private function showMailingAction($mailingId) {
-		if ($this->isPosted(self::FORM_CMD_MAILING_SEND) || $this->isPosted(self::FORM_CMD_MAILING_TEST_SEND)) {
-			try {
-				if ($this->isPosted(self::FORM_CMD_MAILING_SEND)) $this->sendMailing($mailingId);
-				if ($this->isPosted(self::FORM_CMD_MAILING_TEST_SEND)) $this->testSendMailing($mailingId, $_POST['argument']);
-				$msg = ucfirst(__('ml-successfully-sent'));
-				$msgType = 'success';
-			} catch (\Exception $e) {
-				$msg = $e->getMessage();
-				$msgType = 'error';
-			}
-
-			// goto view page with notification
-			notify($msgType, $msg);
-			return ['redirect', $this->constructFullPath($this->pagename . '/' . $mailingId)];
-		}
+	private function mailingView(HyphaRequest $request) {
+		$mailingId = $request->getArg(1);
 
 		// check if given id was correct
 		/** @var HyphaDomElement $mailing */
-		$mailing = $this->xml->document()->getElementById($mailingId);
+		$mailing = $this->xml->getElementById($mailingId);
 		if (!$mailing instanceof HyphaDomElement) {
-			notify('error', __('not-found')); // 404
-
-			return null;
+			return '404';
 		}
 
-		// get status
-		$status = $mailing->getAttribute('status');
-		$inDraft = self::MAILING_STATUS_DRAFT == $status;
-
-		// throw error if status is draft without client logged in
-		if ($inDraft && !isUser()) {
-			notify('error', __('not-found')); // 404
-
-			return null;
+		// return false if status is draft without client logged in
+		if (self::MAILING_STATUS_DRAFT == $mailing->getAttribute('status') && !isUser()) {
+			return '404';
 		}
 
 		// display mailing
+		/** @var HyphaDomElement $main */
+		$subject = $mailing->getAttribute('subject');
+		$main = $this->html->find('#main');
+		$main->append('<div><h2>' . htmlspecialchars($subject) . '</h2></div>');
 		$date = $mailing->getAttribute('date');
-		$main = $this->findBySelector('#main');
-		$main->append('<div><h2>' . $mailing->getAttribute('subject') . '</h2></div>');
 		if ($date) {
-			$date = new \DateTime($date);
-			$main->append('<div>' . __('date') . ': ' . $date->format(__('ml-date-format')) . '</h2></div>');
+			$date = new DateTime($date);
+			$main->append('<div>' . htmlspecialchars(__('date')) . ': ' . $date->format(__('ml-date-format')) . '</h2></div>');
 		}
 		if (isUser()) {
 			$receivers = $mailing->getAttribute('receivers');
 			if (null != $receivers) {
-				$main->append('<div>' . __('ml-received-by') . ': ' . $receivers . '</div>');
+				$main->append('<div>' . htmlspecialchars(__('ml-received-by')) . ': ' . $receivers . '</div>');
 			}
 		}
 		$main->append($mailing->getHtml());
 
 		// buttons
-		$commands = $this->findBySelector('#pageCommands');
-		$commands->append($this->makeActionButton(__('back'), ''));
+		/** @var HyphaDomElement $commands */
+		$commands = $this->html->find('#pageCommands');
+		$commands->append($this->makeActionButton(__('back')));
+
+		// get status
+		$status = $mailing->getAttribute('status');
 
 		// add edit button when in draft
-		if ($inDraft) {
-			$commands->append($this->makeActionButton(__('edit'), $mailingId . '/edit'));
-			$num = count($this->getDoc()->findXPath('//address[@status="' . self::ADDRESS_STATUS_CONFIRMED . '"]'));
+		if (self::MAILING_STATUS_DRAFT == $status) {
+			$editPath = $this->substituteSpecial(self::PATH_MAILS_EDIT_ID, ['id' => $mailing->getId()]);
+			$commands->append($this->makeActionButton(__('edit'), $editPath));
+			$xpath = './/' . self::FIELD_NAME_ADDRESS . '[@' . self::FIELD_NAME_STATUS . '="' . self::ADDRESS_STATUS_CONFIRMED . '"]';
+			$addresses = $this->findAddresses($xpath);
+			$num = count($addresses);
 
-			$path = $this->language . '/' . $this->pagename . '/' . $mailingId;
-			$commands->append(makeButton(__('send'), 'if(confirm(\'' . __('ml-sure-to-send', array("count" => $num)) . '\'))' . makeAction($path, self::FORM_CMD_MAILING_SEND, '')));
-			$commands->append(makeButton(__('ml-test-send'), 'hypha(\''.$path.'\', \''.self::FORM_CMD_MAILING_TEST_SEND.'\', prompt(\'' . __('email') . '\'), $(this).closest(\'form\'));'));
+			$linkToMailing = $this->path(self::PATH_MAILS_VIEW_ID, ['id' => $mailingId]);
+			$action = 'if(confirm(' . json_encode(__('ml-sure-to-send', ['count' => $num])) . '))' . makeAction($linkToMailing, self::CMD_SEND, '');
+			$action = str_replace(['"'], ['\''], $action);
+			$commands->append(makeButton(__('send'), $action));
+			$action = 'hypha('.json_encode($linkToMailing).', '.json_encode(self::CMD_SEND_TEST).', prompt(' . json_encode(__('email')) . '), $(this).closest(\'form\'));';
+			$action = str_replace(['"'], ['\''], $action);
+			$commands->append(makeButton(__('ml-test-send'), $action));
 		}
 
 		return null;
 	}
 
 	/**
-	 * @param array $data
-	 *
-	 * @return WymHTMLForm
+	 * @param HyphaRequest $request
+	 * @return array|null|void
 	 */
-	private function createSubscribeForm(array $data = []) {
-		$email = __('email');
-		$emailFieldName = self::FIELD_NAME_EMAIL;
-		$html = <<<EOF
-			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
-				<label for="$emailFieldName">$email</label>: <input type="text" id="$emailFieldName" name="$emailFieldName" placeholder="$email" />
-			</div>
-EOF;
-		/** @var HyphaDomElement $form */
-		$form = $this->html->createElement('form');
-		/** @var \DOMWrap\Element $elem */
-		$elem = $form->html($html);
-
-		// buttons
-		/** @var NodeList $field */
-		$field = $elem->find('#' . $emailFieldName);
-		$field->parent()->append($this->makeActionButton(__('subscribe'), null, self::FORM_CMD_LIST_SUBSCRIBE));
-
-		return $this->createForm($elem->children(), $data);
-	}
-
-	/**
-	 * @param array $data
-	 *
-	 * @return WymHTMLForm
-	 */
-	private function createEditForm(array $data = []) {
-		$title = __('title');
-		$pageNameFieldName = self::FIELD_NAME_PAGE_NAME;
-		$senderName = __('mailing-sender-name');
-		$senderNameFieldName = self::FIELD_NAME_SENDER_NAME;
-		$senderEmail = __('mailing-sender-email');
-		$senderEmailFieldName = self::FIELD_NAME_SENDER_EMAIL;
-		$privatePage = __('private-page');
-		$privateFieldName = self::FIELD_NAME_PRIVATE;
-		$description = __('description');
-		$descriptionFieldName = self::FIELD_NAME_DESCRIPTION;
-		$emailWelcomeText = __('email-welcome-text');
-		$emailWelcomeTextFieldName = self::FIELD_NAME_EMAIL_WELCOME_TEXT;
-		$html = <<<EOF
-			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
-				<strong><label for="$pageNameFieldName">$title</label></strong> <input type="text" id="$pageNameFieldName" name="$pageNameFieldName" />
-				<strong><label for="$senderNameFieldName"> $senderName </label></strong><input type="text" id="$senderNameFieldName" name="$senderNameFieldName" />
-				<strong><label for="$senderEmailFieldName"> $senderEmail </label></strong><input type="text" id="$senderEmailFieldName" name="$senderEmailFieldName" />
-				<strong><label for="$privateFieldName"> $privatePage </label></strong><input type="checkbox" name="$privateFieldName" id="$privateFieldName" />
-			</div>
-			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
-				<strong><label for="$descriptionFieldName"> $description </label></strong><editor name="$descriptionFieldName"></editor>
-			</div>
-			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
-				<strong><label for="$emailWelcomeTextFieldName"> $emailWelcomeText </label></strong><editor name="$emailWelcomeTextFieldName"></editor>
-			</div>
-EOF;
-		
-		// buttons
-		$commands = $this->findBySelector('#pageCommands');
-		$commands->append($this->makeActionButton(__('cancel')));
-		$commands->append($this->makeActionButton(__('save'), 'edit', self::FORM_CMD_LIST_EDIT));
-
-		return $this->createForm($html, $data);
-	}
-
-	/**
-	 * @param array $data
-	 *
-	 * @return WymHTMLForm
-	 */
-	private function createMailingForm(array $data = []) {
-		$idFieldName = self::FIELD_NAME_ID;
-		$subject = __('subject');
-		$subjectFieldName = self::FIELD_NAME_SUBJECT;
-		$message = __('message');
-		$messageFieldName = self::FIELD_NAME_MESSAGE;
-		$html = <<<EOF
-			<input type="hidden" id="$idFieldName" name="$idFieldName" />
-			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
-				<label for="$subjectFieldName"> $subject </label> <input type="text" id="$subjectFieldName" name="$subjectFieldName" />
-			</div>
-			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
-				<strong><label for="$messageFieldName"> $message </label></strong><editor id="$messageFieldName" name="$messageFieldName"></editor>
-			</div>
-EOF;
-
-		// buttons
-		$commands = $this->findBySelector('#pageCommands');
-
-		if (isset($data[self::FIELD_NAME_ID])) {
-			$commands->append($this->makeActionButton(__('cancel'), $data[self::FIELD_NAME_ID]));
-			$commands->append($this->makeActionButton(__('save'), $data[self::FIELD_NAME_ID] . '/edit', self::FORM_CMD_MAILING_SAVE));
-		} else {
-			$commands->append($this->makeActionButton(__('cancel')));
-			$commands->append($this->makeActionButton(__('save'), 'create', self::FORM_CMD_MAILING_SAVE));
-		}
-
-		return $this->createForm($html, $data);
-	}
-
-	/**
-	 * @param null|string $mailingId
-	 *
-	 * @return WymHTMLForm
-	 */
-	private function handleMailingForm($mailingId = null) {
-		// check if form is posted and get form data
-		$formPosted = $this->isPosted();
-		$formData = [];
-		if ($formPosted) {
-			$formData = $_POST;
-		} elseif (null != $mailingId) {
-			/** @var HyphaDomElement $mailing */
-			// get mailing if id was given
-			$mailing = $this->xml->document()->getElementById($mailingId);
-			if ($mailing instanceof HyphaDomElement) {
-				$formData = [
-					self::FIELD_NAME_ID => $mailingId,
-					self::FIELD_NAME_SUBJECT => $mailing->getAttribute('subject'),
-					self::FIELD_NAME_MESSAGE => $mailing->getHtml(),
-				];
-			}
+	private function mailingNewView(HyphaRequest $request) {
+		if (!isUser()) {
+			notify('error', __('login-to-perform-action'));
+			return null;
 		}
 
 		// create form
-		$form = $this->createMailingForm($formData);
+		$form = $this->createMailingForm();
 
-		// process form if it was posted
-		if ($formPosted) {
-			$form->validateRequiredField(self::FIELD_NAME_SUBJECT);
-			$form->validateRequiredField(self::FIELD_NAME_MESSAGE);
-			if (empty($form->errors)) {
-				// create or update mailing with given data
-				$mailing = $this->createOrUpdateMailing($form->data);
-				$form->data = array_merge($form->data, [self::FIELD_NAME_ID => $mailing->getId()]);
-			}
-		}
+		return $this->mailingFormViewRender($form, '', self::PATH_MAILS_NEW);
+	}
 
-		// update the form dom so that error can be displayed, if there are any
+	private function mailingFormViewRender(WymHTMLForm $form, $cancelPath, $submitPath) {
+		// update the form dom so that values and errors can be displayed
 		$form->updateDom();
 
-		return $form;
+		/** @var HyphaDomElement $main */
+		$main = $this->html->find('#main');
+		$main->append($form);
+
+		/** @var HyphaDomElement $commands */
+		$commands = $this->html->find('#pageCommands');
+		$commands->append($this->makeActionButton(__('cancel'), $cancelPath));
+		$commands->append($this->makeActionButton(__('save'), $submitPath, self::CMD_SAVE));
 	}
 
 	/**
-	 * @param array $data
-	 *
-	 * @return HyphaDomElement
+	 * @param HyphaRequest $request
+	 * @return array|null|void
 	 */
-	private function createOrUpdateMailing(array $data) {
-		$this->xml->lockAndReload();
-		/** @var HyphaDomElement $mailing */
-		if (isset($data[self::FIELD_NAME_ID]) && $data[self::FIELD_NAME_ID]) {
-			$mailing = $this->xml->document()->getElementById($data[self::FIELD_NAME_ID]);
-		} else {
-			$mailing = $this->xml->createElement('mailing');
-			$mailing->generateId();
+	private function mailingNewAction(HyphaRequest $request) {
+		if (!isUser()) {
+			notify('error', __('login-to-perform-action'));
+			return null;
 		}
-		$mailing->setAttribute('subject', $data[self::FIELD_NAME_SUBJECT]);
-		$mailing->setAttribute('status', self::MAILING_STATUS_DRAFT);
-		$message = wikify_html($data[self::FIELD_NAME_MESSAGE]);
-		$mailing->setHtml($message);
-		/** @var HyphaDomElement $mailings */
-		$mailings = $this->getDoc()->getOrCreate('mailings');
-		$mailings->append($mailing);
+
+		// create form
+		$form = $this->createMailingForm($request->getPostData());
+
+		$form->validateRequiredField(self::FIELD_NAME_SUBJECT);
+		$form->validateRequiredField(self::FIELD_NAME_MESSAGE);
+		if (!empty($form->errors)) {
+			return $this->mailingFormViewRender($form, '', self::PATH_MAILS_NEW);
+		}
+
+		$this->xml->lockAndReload();
+
+		// create mailing with given data
+		/** @var HyphaDomElement|NodeList $mailingsContainer */
+		$mailingsContainer = $this->getDoc()->get(self::FIELD_NAME_MAILINGS_CONTAINER);
+
+		/** @var HyphaDomElement $mailing */
+		$mailing = $this->xml->createElement(self::FIELD_NAME_MAILING);
+		$mailingsContainer->append($mailing);
+
+		$mailing->generateId();
+		$mailing->setAttr(self::FIELD_NAME_STATUS, self::MAILING_STATUS_DRAFT);
+		$mailing->setAttr(self::FIELD_NAME_SUBJECT, $form->dataFor(self::FIELD_NAME_SUBJECT));
+		$mailing->setHtml(wikify_html($form->dataFor(self::FIELD_NAME_MESSAGE)));
+
 		$this->xml->saveAndUnlock();
 
-		return $mailing;
+		notify('success', ucfirst(__('ml-successfully-created')));
+
+		return ['redirect', $this->path(self::PATH_MAILS_EDIT_ID, ['id' => $mailing->getId()])];
 	}
 
-	private function testSendMailing($mailingId, $email) {
-		if (!$this->hasSender()) {
-			throw new \Exception(__('ml-no-sender'));
+	/**
+	 * @param HyphaRequest $request
+	 * @return string|array|null
+	 */
+	private function mailingEditView(HyphaRequest $request) {
+		if (!isUser()) {
+			notify('error', __('login-to-perform-action'));
+
+			return null;
 		}
 
-		$senderName = $this->getDoc()->getAttribute('sender-name');
-		$senderEmail = $this->getDoc()->getAttribute('sender-email');
+		$mailingId = $request->getArg(1);
+
+		// check given id
+		/** @var HyphaDomElement $mailing */
+		$mailing = $this->xml->getElementById($mailingId);
+		if (!$mailing instanceof HyphaDomElement) {
+			return '404';
+		}
+
+		if (self::MAILING_STATUS_DRAFT != $mailing->getAttribute('status')) {
+			notify('error', __('unable-to-edit'));
+			return null;
+		}
+
+		// create form
+		$formData = [
+			self::FIELD_NAME_SUBJECT => $mailing->getAttribute('subject'),
+			self::FIELD_NAME_MESSAGE => $mailing->getHtml(),
+		];
+		$form = $this->createMailingForm($formData);
+
+		$cancelPath = $this->substituteSpecial(self::PATH_MAILS_VIEW_ID, ['id' => $mailingId]);
+		$submitPath = $this->substituteSpecial(self::PATH_MAILS_EDIT_ID, ['id' => $mailingId]);
+
+		return $this->mailingFormViewRender($form, $cancelPath, $submitPath);
+	}
+
+	/**
+	 * no user
+	 * check mailing id
+	 * check mailing
+	 * check draft status
+	 *
+	 * @param HyphaRequest $request
+	 * @return string|array|null
+	 */
+	private function mailingEditAction(HyphaRequest $request) {
+		// throw error if edit is requested without client logged in
+		if (!isUser()) {
+			notify('error', __('login-to-edit'));
+			return null;
+		}
+
+		$mailingId = $request->getArg(1);
 
 		/** @var HyphaDomElement $mailing */
-		$mailing = $this->xml->document()->getElementById($mailingId);
-		$this->send($mailing->getAttribute('subject'), $mailing->getHtml(), [$email], $senderEmail, $senderName);
+		$mailing = $this->xml->getElementById($mailingId);
+		if (!$mailing instanceof HyphaDomElement) {
+			return '404';
+		}
+
+		// check if status is correct
+		$status = $mailing->getAttribute('status');
+		if (self::MAILING_STATUS_DRAFT !== $status) {
+			notify('error', __('unable-to-edit'));
+			return null;
+		}
+
+		// create form
+		$form = $this->createMailingForm($request->getPostData());
+
+		// process form if it was posted
+		$form->validateRequiredField(self::FIELD_NAME_SUBJECT);
+		$form->validateRequiredField(self::FIELD_NAME_MESSAGE);
+		if (!empty($form->errors)) {
+			$cancelPath = $this->substituteSpecial(self::PATH_MAILS_VIEW_ID, ['id' => $mailingId]);
+			$submitPath = $this->substituteSpecial(self::PATH_MAILS_EDIT_ID, ['id' => $mailingId]);
+			return $this->mailingFormViewRender($form, $cancelPath, $submitPath);
+		}
+
+		$this->xml->lockAndReload();
+
+		/** @var HyphaDomElement $mailing */
+		$mailing = $this->xml->getElementById($mailingId);
+		$mailing->setAttr(self::FIELD_NAME_SUBJECT, $form->dataFor(self::FIELD_NAME_SUBJECT));
+		$mailing->setHtml(wikify_html($form->dataFor(self::FIELD_NAME_MESSAGE)));
+
+		$this->xml->saveAndUnlock();
+
+		// goto view page with notification
+		notify('success', __('ml-successfully-created'));
+		return ['redirect', $this->path(self::PATH_MAILS_VIEW_ID, ['id' => $mailingId])];
+	}
+
+	/**
+	 * Creates a HTML form object for the subscribers.
+	 *
+	 * @param array $values
+	 * @return WymHTMLForm
+	 */
+	private function createSubscribeForm(array $values = []) {
+		$html = <<<EOF
+			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
+				<label for="[[field-name-email]]">[[email]]</label>: <input type="text" id="[[field-name-email]]" name="[[field-name-email]]" placeholder="[[email]]" />
+			</div>
+EOF;
+
+		$vars = [
+			'email' => __('email'),
+			'field-name-email' => self::FIELD_NAME_EMAIL,
+		];
+
+		$html = hypha_substitute($html, $vars);
+
+		return new WymHTMLForm($html, $values);
+	}
+
+	/**
+	 * @param array $values
+	 * @return WymHTMLForm
+	 */
+	private function createEditForm(array $values = []) {
+		$html = <<<EOF
+			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
+				<strong><label for="[[field-name-page-name]]">[[title]]</label></strong> <input type="text" id="[[field-name-page-name]]" name="[[field-name-page-name]]" />
+				<strong><label for="[[field-name-sender-name]]"> [[sender-name]] </label></strong><input type="text" id="[[field-name-sender-name]]" name="[[field-name-sender-name]]" />
+				<strong><label for="[[field-name-sender-email]]"> [[sender-email]] </label></strong><input type="text" id="[[field-name-sender-email]]" name="[[field-name-sender-email]]" />
+				<strong><label for="[[field-name-private-page]]"> [[private-page]] </label></strong><input type="checkbox" name="[[field-name-private-page]]" id="[[field-name-private-page]]" />
+			</div>
+			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
+				<strong><label for="[[field-name-description]]"> [[description]] </label></strong><editor name="[[field-name-description]]"></editor>
+			</div>
+			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
+				<strong><label for="[[field-name-email-welcome-text]]"> [[email-welcome-text]] </label></strong><editor name="[[field-name-email-welcome-text]]"></editor>
+			</div>
+EOF;
+
+		$vars = [
+			'title' => __('title'),
+			'field-name-page-name' => self::FIELD_NAME_PAGE_NAME,
+			'sender-name' => __('mailing-sender-name'),
+			'field-name-sender-name' => self::FIELD_NAME_SENDER_NAME,
+			'sender-email' => __('mailing-sender-email'),
+			'field-name-sender-email' => self::FIELD_NAME_SENDER_EMAIL,
+			'private-page' => __('private-page'),
+			'field-name-private-page' => self::FIELD_NAME_PRIVATE,
+			'description' => __('description'),
+			'field-name-description' => self::FIELD_NAME_DESCRIPTION,
+			'email-welcome-text' => __('email-welcome-text'),
+			'field-name-email-welcome-text' => self::FIELD_NAME_EMAIL_WELCOME_TEXT,
+		];
+
+		$html = hypha_substitute($html, $vars);
+
+		return new WymHTMLForm($html, $values);
+	}
+
+	/**
+	 * @param array $values
+	 *
+	 * @return WymHTMLForm
+	 */
+	private function createMailingForm(array $values = []) {
+		$html = <<<EOF
+			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
+				<label for="[[field-name-subject]]"> [[subject]] </label> <input type="text" id="[[field-name-subject]]" name="[[field-name-subject]]" />
+			</div>
+			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
+				<strong><label for="[[field-name-message]]"> [[message]] </label></strong><editor id="[[field-name-message]]" name="[[field-name-message]]"></editor>
+			</div>
+EOF;
+
+		$vars = [
+			'subject' => __('subject'),
+			'field-name-subject' => self::FIELD_NAME_SUBJECT,
+			'message' => __('message'),
+			'field-name-message' => self::FIELD_NAME_MESSAGE,
+		];
+
+		$html = hypha_substitute($html, $vars);
+
+		return new WymHTMLForm($html, $values);
 	}
 
 	/**
@@ -781,22 +975,37 @@ EOF;
 	 *  implement if option (2) message with 'do not close client'
 	 *  store date with locale
 	 *
-	 * @param string $mailingId
-	 *
+	 * @param HyphaRequest $request
 	 * @throws Exception
+	 * @return null
 	 */
-	private function sendMailing($mailingId) {
+	private function mailingSendAction(HyphaRequest $request) {
 		if (!$this->hasSender()) {
-			throw new \Exception(__('ml-no-sender'));
+			notify('error', __('ml-no-sender'));
+			return null;
 		}
 
-		$senderName = $this->getDoc()->getAttribute('sender-name');
-		$senderEmail = $this->getDoc()->getAttribute('sender-email');
+		$mailingId = $request->getArg(1);
+
+		// check if given id was correct
+		/** @var HyphaDomElement $mailing */
+		$mailing = $this->xml->getElementById($mailingId);
+		if (!$mailing instanceof HyphaDomElement) {
+			return '404';
+		}
+
+		// get status
+		$status = $mailing->getAttribute('status');
+		if (self::MAILING_STATUS_DRAFT !== $status) {
+			notify('error', __('ml-mail-has-invalid-status'));
+			return null;
+		}
+
+		$senderData = $this->getSenderData();
 
 		// mark mailing as sending
 		$this->xml->lockAndReload();
-		/** @var HyphaDomElement $mailing */
-		$mailing = $this->xml->document()->getElementById($mailingId);
+		$mailing = $this->xml->getElementById($mailingId);
 		$mailing->setAttribute('status', self::MAILING_STATUS_SENDING);
 		/** @var HyphaDomElement $mailings */
 		$mailings = $this->getDoc()->getOrCreate('mailings');
@@ -804,29 +1013,70 @@ EOF;
 		$this->xml->saveAndUnlock();
 
 		// iterate over the confirmed addresses and send the mailing
-		/** @var HyphaDomElement[] $receivers */
-		$receivers = $this->getDoc()->findXPath('//address[@status="' . self::ADDRESS_STATUS_CONFIRMED . '"]');
-		$linkToMailing = $this->constructFullPath($this->pagename . '/' . $mailingId);
+		$xpath = './/' . self::FIELD_NAME_ADDRESS . '[@' . self::FIELD_NAME_STATUS . '="' . self::ADDRESS_STATUS_CONFIRMED . '"]';
+		$receivers = $this->findAddresses($xpath);
+		$linkToMailing = $this->path(self::PATH_MAILS_VIEW_ID, ['id' => $mailingId]);
+		/** @var HyphaDomElement $receiver */
 		foreach ($receivers as $receiver) {
 			$email = $receiver->getAttribute('email');
 			$code = $receiver->getAttribute('unsubscribe-code');
-			$linkToUnsubscribe = $this->constructFullPath(sprintf('%s/unsubscribe?address=%s&code=%s', $this->pagename, $receiver->getId(), $code));
+			// include email for server record purposes
+			$linkToUnsubscribe = $this->path(self::PATH_UNSUBSCRIBE_CODE, ['address' => $email, 'code' => $code]);
 			$message = '<p><a href="' . $linkToMailing . '">' . __('ml-if-unreadable-use-link') . '</a></p>';
 			$message .= $mailing->getHtml();
 			$message .= '<p><a href="' . $linkToUnsubscribe . '">' . __('ml-unsubscribe') . '</a></p>';
-			$this->send($mailing->getAttribute('subject'), $message, [$email], $senderEmail, $senderName);
+			$this->sendMail($mailing->getAttribute('subject'), $message, [$email], $senderData['email'], $senderData['name']);
 		}
 
 		// mark mailing as sent
 		$this->xml->lockAndReload();
-		$mailing = $this->xml->document()->getElementById($mailingId);
-		$mailing->setAttribute('status', self::MAILING_STATUS_SENT);
+		$mailing = $this->xml->getElementById($mailingId);
+		$mailing->setAttribute(self::FIELD_NAME_STATUS, self::MAILING_STATUS_SENT);
 		$mailing->setAttribute('date', date('Y-m-d H:i:s'));
 		$mailing->setAttribute('receivers', count($receivers));
 		/** @var HyphaDomElement $mailings */
 		$mailings = $this->getDoc()->getOrCreate('mailings');
 		$mailings->append($mailing);
 		$this->xml->saveAndUnlock();
+
+		// goto view page with notification
+		notify('success', __('ml-successfully-sent'));
+		return 'reload';
+	}
+
+	private function mailingSendTestAction(HyphaRequest $request) {
+		if (!$this->hasSender()) {
+			notify('error', __('ml-no-sender'));
+			return null;
+		}
+
+		$mailingId = $request->getArg(1);
+
+		// check if given id was correct
+		/** @var HyphaDomElement $mailing */
+		$mailing = $this->xml->getElementById($mailingId);
+		if (!$mailing instanceof HyphaDomElement) {
+			return '404';
+		}
+
+		$email = $request->getPostValue('argument');
+		$code = 'this-is-your-unsubscribe-code';
+		$linkToMailing = $this->path(self::PATH_MAILS_VIEW_ID, ['id' => $mailingId]);
+		$linkToUnsubscribe = $this->path(self::PATH_UNSUBSCRIBE_CODE, ['address' => $email, 'code' => $code]);
+		$message = '<p><a href="' . $linkToMailing . '">' . __('ml-if-unreadable-use-link') . '</a></p>';
+		$message .= $mailing->getHtml();
+		$message .= '<p><a href="' . $linkToUnsubscribe . '">' . __('ml-unsubscribe') . '</a></p>';
+
+		$senderData = $this->getSenderData();
+
+		$subject = __('ml-test-mail-subject-prefix') . ' - ';
+		$subject .= $mailing->getAttribute('subject');
+
+		$this->sendMail($subject, $message, [$email], $senderData['email'], $senderData['name']);
+
+		// goto view page with notification
+		notify('success', __('ml-successfully-sent'));
+		return 'reload';
 	}
 
 	/**
@@ -858,7 +1108,6 @@ EOF;
 
 	/**
 	 * @param int $length
-	 *
 	 * @return string
 	 */
 	private function constructCode($length = 16) {
@@ -869,24 +1118,114 @@ EOF;
 			if (function_exists('mcrypt_create_iv')) {
 				return bin2hex(mcrypt_create_iv($length, MCRYPT_DEV_URANDOM));
 			}
-		} catch (\Exception $e) {
+		} catch (Exception $e) {
 		}
 
 		return bin2hex(openssl_random_pseudo_bytes($length));
 	}
 
-	/**
-	 * @todo [LRM]: move so it can be used throughout Hypha
-	 * @param string|NodeList|\DOMNode|\Closure $contents
-	 * @param array $data
-	 *
-	 * @return WymHTMLForm
-	 */
-	private function createForm($contents, array $data = []) {
-		$form = new WymHTMLForm($contents);
-		$form->setData($data);
+	private function savePage($pagename = null, $language = null, $privateFlag = null) {
+		$updateHyphaXml = false;
+		foreach (['pagename', 'language', 'privateFlag'] as $argument) {
+			if (null === $$argument) {
+				$$argument = $this->{$argument};
+			} elseif ($$argument !== $this->{$argument}) {
+				$updateHyphaXml = true;
+			}
+		}
+		if ($updateHyphaXml) {
+			global $hyphaXml;
+			$hyphaXml->lockAndReload();
+			// After reloading, our page list node might
+			// have changed, so find it in the newly loaded
+			// XML. This seems a bit dodgy, though...
+			$this->replacePageListNode(hypha_getPage($this->language, $this->pagename));
+			hypha_setPage($this->pageListNode, $language, $pagename, $privateFlag);
+			$hyphaXml->saveAndUnlock();
+		}
+	}
 
-		return $form;
+	/**
+	 * Creates archive index table and appends it to the given container.
+	 *
+	 * @param NodeList $container
+	 */
+	private function appendMailingsList(NodeList $container) {
+		/** @var HyphaDomElement $mailingsContainer */
+		$mailingsContainer = $this->getDoc()->get(self::FIELD_NAME_MAILINGS_CONTAINER);
+		if (isUser()) {
+			$mailings = $mailingsContainer->children();
+		} else {
+			$xpath = './/' . self::FIELD_NAME_MAILING . '[@' . self::FIELD_NAME_STATUS . '="' . self::MAILING_STATUS_SENT . '"]';
+			$mailings = $mailingsContainer->findXPath($xpath);
+		}
+		$mailings = array_reverse($mailings->toArray());
+
+		$table = new HTMLTable();
+		$container->appendChild($table);
+
+		$table->addClass('section');
+
+		$header = $table->addHeaderRow();
+		$header->addCell();
+		$header->addCell(__('subject'));
+		$header->addCell(__('status'));
+		$header->addCell();
+		$header->addCell()->setHtml(isUser() ? $this->makeActionButton(__('add-mailing'), self::PATH_MAILS_NEW) : '');
+		foreach ($mailings as $mailing) {
+			$status = $mailing->getAttribute(self::FIELD_NAME_STATUS);
+			$date = $mailing->getAttribute(self::FIELD_NAME_DATE);
+			try {
+				$date = $date ? (new DateTime($date))->format(__('ml-date-format')) : '';
+			} catch (Exception $e) {
+				$date = '';
+			}
+			$viewPath = $this->substituteSpecial(self::PATH_MAILS_VIEW_ID, ['id' => $mailing->getId()]);
+			$buttons = $this->makeActionButton(__('view'), $viewPath);
+			if (self::MAILING_STATUS_DRAFT == $status) {
+				$editPath = $this->substituteSpecial(self::PATH_MAILS_EDIT_ID, ['id' => $mailing->getId()]);
+				$buttons .= $this->makeActionButton(__('edit'), $editPath);
+			}
+
+			$row = $table->addRow();
+			$row->addCell()->setHtml('<span style="color:#b90;">∗</span>');
+			$row->addCell($mailing->getAttribute(self::FIELD_NAME_SUBJECT));
+			$row->addCell(__('ml-mailing-status-' . $status));
+			$row->addCell($date);
+			$row->addCell()->setHtml($buttons);
+		}
+	}
+
+	/**
+	 * Find addresses by xpath.
+	 *
+	 * @param string $xpath
+	 * @return NodeList
+	 */
+	private function findAddresses($xpath) {
+		/** @var HyphaDomElement $addressesContainer */
+		$addressesContainer = $this->getDoc()->get(self::FIELD_NAME_ADDRESSES_CONTAINER);
+
+		return $addressesContainer->findXPath($xpath);
+	}
+
+	/**
+	 * Construct a full path with the pagename as path prefix.
+	 *
+	 * The given vars will be substituted.
+	 *
+	 * @param string $path The path, within this datatype.
+	 * @param array $vars An associative array with variables to substitute.
+	 * @return string
+	 */
+	private function path($path = null, $vars = []) {
+		$path = $path ? '/' . $this->substituteSpecial($path, $vars) : '';
+		return $this->constructFullPath($this->pagename . $path);
+	}
+
+	private function substituteSpecial($string, $vars) {
+		foreach ($vars as $key => &$val) $val = htmlspecialchars($val);
+		return hypha_substitute($string, $vars);
 	}
 
 	/**
@@ -895,31 +1234,19 @@ EOF;
 	 * @param null|string $path
 	 * @param null|string $command
 	 * @param null|string $argument
-	 *
 	 * @return string
 	 */
 	private function makeActionButton($label, $path = null, $command = null, $argument = null) {
 		$path = $this->language . '/' . $this->pagename . ($path ? '/' . $path : '');
 		$_action = makeAction($path, ($command ? $command : ''), ($argument ? $argument : ''));
 
-		return makeButton(__($label), $_action);
-	}
-
-	/**
-	 * @todo [LRM]: move so it can be used throughout Hypha
-	 * @param string $selector
-	 *
-	 * @return NodeList
-	 */
-	private function findBySelector($selector) {
-		return $this->html->find($selector);
+		return makeButton($label, $_action);
 	}
 
 	/**
 	 * @todo [LRM]: move so it can be used throughout Hypha
 	 * @param string $path
 	 * @param null|string $language
-	 *
 	 * @return string
 	 */
 	private function constructFullPath($path, $language = null) {
@@ -931,23 +1258,13 @@ EOF;
 	}
 
 	/**
-	 * @todo [LRM]: move so it can be used throughout Hypha
-	 * @param null|string $command
-	 *
-	 * @return bool
-	 */
-	private function isPosted($command = null) {
-		return 'POST' == $_SERVER['REQUEST_METHOD'] && (null == $command || $command == $_POST['command']);
-	}
-
-	/**
 	 * @param string $subject
 	 * @param string $message
 	 * @param array $receivers
 	 * @param null|string $senderEmail
 	 * @param null|string $senderName
 	 */
-	private function send($subject, $message, array $receivers, $senderEmail = null, $senderName = null) {
+	private function sendMail($subject, $message, array $receivers, $senderEmail = null, $senderName = null) {
 		$style = 'body {margin-top:10px; margin-left: 10px; font-size:10pt; font-family: Sans; color:black; background-color:white;}';
 		foreach ($receivers as $receiver) {
 			sendMail($receiver, $subject, $message, $senderEmail, $senderName, $style);
