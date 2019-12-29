@@ -627,7 +627,7 @@ class mailinglist extends Page {
 				}
 				if ($status === self::ADDRESS_STATUS_CONFIRMED) {
 					$unsubscribePath = $this->substituteSpecial(self::PATH_UNSUBSCRIBE_BY_ADMIN_EMAIL, ['email' => $email]);
-					$actions[] = $this->makeActionButton(__('unsubscribe'), $unsubscribePath);
+					$actions[] = $this->makeActionButton(__('ml-unsubscribe'), $unsubscribePath);
 				}
 			}
 			$row = $table->addRow();
