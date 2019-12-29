@@ -33,9 +33,5 @@
 		Variable: $isoLangList
 		Associative array containing connecting iso639 language codes with their native name (and english translation)
 	*/
-  
-  if(file_exists('system/languages/languages.json')){
+
     $isoLangList = json_decode(file_get_contents('system/languages/languages.json'), true);
-  }else{
-    $isoLangList = json_decode('{\"en\": \"English\"}'), true);
-  }

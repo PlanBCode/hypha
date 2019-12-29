@@ -294,7 +294,7 @@
 
 			// extract list of languages
 			$iso639 = data('system/languages/languages.json');
-			$iso639 = json_decode(preg_replace('/\\\\\'/', '\'', $iso639));
+			$languageOptionList = '';
 			foreach($iso639 as $code => $langName) $languageOptionList.= '<option value="'.$code.'"'.( $code=='en' ? ' selected' : '').'>'.$code.': '.$langName.'</option>';
 
 			// build html
@@ -380,7 +380,7 @@
 					<th style="text-align:right; white-space:nowrap;">languages to include:</th><td>
 <?php
 		foreach ($localIndex as $file => $timestamp) {
-			if (substr($file, 0, 17) == 'system/languages/'  && substr($file, -4) == '.php') {
+			if (substr($file, 0, 17) == 'system/languages/' && substr($file, -4) == '.php') {
 				$name = substr($file, 17, -4);
 				echo '<input type="checkbox" name="build_'.substr($file,0,-4).'"'.($name == 'en' ? ' checked="checked"' : '').' /> '.$name.'<br/>'."\n";
 			}
@@ -418,9 +418,7 @@
 		switch ($name) {
 			//START_OF_DATA
 			case 'index': return '';
-			case 'system/core/language.php':
-        require_once('system/core/language.php');
-        return $isoLangList;
+			case 'system/languages/languages.json': return json_decode(file_get_contents('system/languages/languages.json'), true);
 			//END_OF_DATA
 		}
 		if ($zip) return gzdecode(base64_decode($zip));
