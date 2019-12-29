@@ -223,28 +223,15 @@
 			notify('error', __('error-registration'));
 			return 'reload';
 		}
-	
-		/*
-		 Function: typesOptionList
-		 Returns an html option list with data types
-		 
-		 Parameters:
-		 $select - which option should be preselected
-		 $omit - which data types should be omitted
-		 */
-		function typesOptionList($select, $omit) {
+
+		function typesOptionList($select, $excludeSystemDataTypes = false) {
 			$html = '';
-			foreach (scandir('system/datatypes') as $file) {
-				if ('.' === $file) continue;
-				if ('..' === $file) continue;
-				$name = substr($file,0,-4);
-				if($name!=$omit){
-					$html.= '<option value='.$name.($name==$select ? ' selected' : '').'>'.$name.'</option>';
-				}
+			foreach (getHyphaDataTypes($excludeSystemDataTypes) as $type => $name) {
+                $html.= '<option value=' . htmlspecialchars($type) . ($type == $select ? ' selected' : '') . '>' . htmlspecialchars($name) . '</option>';
 			}
-			return addslashes($html);
+			return $html;
 		}
-	
+
 		function editHyphaSettings() {
 			if (isAdmin()) {
 				$seconds = hypha_getDigestInterval();
@@ -277,7 +264,7 @@
 	</tr>
 	<tr>
 		<th><?=__('default-new-page-type')?>:</th>
-<td><select name="settingsDefaultNewPageType" id="settingsDefaultNewPageType"><?=self::typesOptionList(hypha_getDefaultNewPageType(), 'settings')?></select></td>
+<td><select name="settingsDefaultNewPageType" id="settingsDefaultNewPageType"><?=self::typesOptionList(hypha_getDefaultNewPageType(), true)?></select></td>
 	</tr>
 </table>
 <?php

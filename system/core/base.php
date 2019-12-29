@@ -111,7 +111,7 @@
 		if($hyphaXml->documentElement->hasAttribute('defaultNewPageType')){
 			return $hyphaXml->documentElement->getAttribute('defaultNewPageType');
 		}else{
-			return 'text';
+			return textpage::class;
 		}
 	}
 	
@@ -826,4 +826,29 @@
 	function hypha_substitute($string, array $vars) {
 		foreach ($vars as $key => $val) $string = str_replace('[[' . $key . ']]', $val, $string);
 		return $string;
+	}
+
+	/*
+		Function: getHyphaPageTypes
+		Returns an list with data types
+	*/
+	function getHyphaDataTypes($excludeSystemDataTypes = false) {
+		global $hyphaPageTypes;
+		if (empty($hyphaPageTypes)) {
+			$hyphaPageTypes = [];
+			$pageTypeIndex = count(get_declared_classes()) -1;
+			foreach (scandir('system/datatypes/') as $file) if (substr($file, -4) == '.php') include_once('system/datatypes/' . $file);
+			foreach (array_slice(get_declared_classes(), $pageTypeIndex) as $class) {
+				if (in_array(Page::class, class_parents($class)) && (new ReflectionClass($class))->isInstantiable()) {
+					$hyphaPageTypes[$class] = call_user_func($class . '::getDatatypeName');
+				}
+			}
+		}
+
+		$dataTypes = $hyphaPageTypes;
+		$systemDataTypes = [settingspage::class];
+
+		if ($excludeSystemDataTypes) foreach ($systemDataTypes as $systemDataType) unset($dataTypes[$systemDataType]);
+
+		return $dataTypes;
 	}
