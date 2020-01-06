@@ -39,18 +39,29 @@
 		Group: Stage 2 - Build hypha script
 		Additional scripts and data are included.
 		- *core* Include core scripts
-		- *dataypes* Include modules for available datatypes: textpage, mailinglist, blog et cetera
 		- *languages* Compile a list of available user interface languages
+		- *dataypes* Include modules for available datatypes: textpage, mailinglist, blog et cetera
 	*/
 
 	foreach (scandir("system/core/") as $_file) if (substr($_file, -4) == '.php') require_once("system/core/" . $_file);
+
+	// Build request
+	$hyphaRequest = new HyphaRequest($isoLangList);
+
+	// Build request context
+	$O_O = new RequestContext($hyphaRequest, hypha_getDefaultLanguage());
+
+	foreach (scandir("system/languages/") as $_file) if (substr($_file, -4) == '.php') $uiLangList[] = basename($_file, '.php');
 
 	$pageTypeIndex = count(get_declared_classes()) -1;
 	foreach (scandir("system/datatypes/") as $_file) if (substr($_file, -4) == '.php') include_once("system/datatypes/" . $_file);
 	$hyphaPageTypes = [];
 	foreach (array_slice(get_declared_classes(), $pageTypeIndex) as $class) if (in_array('Page', class_parents($class)) && (new \ReflectionClass($class))->isInstantiable()) $hyphaPageTypes[] = $class;
 
-	foreach (scandir("system/languages/") as $_file) if (substr($_file, -4) == '.php') $uiLangList[] = basename($_file, '.php');
+	$dataTypeMtx = [];
+	foreach ($hyphaPageTypes as $className) {
+		$dataTypeMtx[$className] = call_user_func($className . '::getDatatypeName');
+	}
 
 	/*
 		Group: Stage 3 - Get query and handle direct file requests
@@ -58,8 +69,6 @@
 		Some requests don't need the whole script to run. Certain file requests (css, javascript) can be handled directly here.
 	*/
 
-	// Build request
-	$hyphaRequest = new HyphaRequest($isoLangList);
 	$hyphaQuery = $hyphaRequest->getRelativeUrlPath();
 	$hyphaUrl = $hyphaRequest->getRootUrl();
 
@@ -95,9 +104,6 @@
 		Group: Stage 5 - Initialize user and determine language to use
 		Check is a user is logged in and load user data. Add login/logout functionality according to session login status.
 	*/
-
-	// Build request context
-	$O_O = new RequestContext($hyphaRequest, hypha_getDefaultLanguage());
 
 	/**
 	 * Set user as global variable.
@@ -141,10 +147,6 @@
 		$_cmds[] = '<a href="javascript:login();">'.__('login').'</a>';
 	}
 	else {
-		$dataTypeMtx = [];
-		foreach ($hyphaPageTypes as $className) {
-			$dataTypeMtx[$className] = call_user_func($className . '::getDatatypeName');
-		}
 		addNewPageRoutine($hyphaHtml, $hyphaRequest->getRelativeUrlPathParts(false), $dataTypeMtx);
 		$_cmds[] = makeLink(__('new-page'), 'newPage();');
 		$_cmds[] = makeLink(__('settings'), makeAction('settings', '', ''));
