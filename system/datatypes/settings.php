@@ -236,6 +236,14 @@
 			return 'reload';
 		}
 
+		function typesOptionList($select) {
+			$html = '';
+			foreach (hypha_getDataTypes() as $type => $name) {
+				$html.= '<option value=' . htmlspecialchars($type) . ($type == $select ? ' selected' : '') . '>' . htmlspecialchars($name) . '</option>';
+			}
+			return $html;
+		}
+
 		function editHyphaSettings() {
 			if (isAdmin()) {
 				$seconds = hypha_getDigestInterval();
@@ -266,6 +274,10 @@
 		<th><?=__('digest-interval')?>:</th>
 		<td><input name="settingsIntervalDays" id="settingsIntervalDays" type="text" size="3" value="<?=$days?>" /><?=__('D')?> <input name="settingsIntervalHours" id="settingsIntervalHours" type="text" size="2" value="<?=$hours?>" /><?=__('H')?> <input name="settingsIntervalMinutes" id="settingsIntervalMinutes" type="text" size="2" value="<?=$minutes?>" /><?=__('m')?></td>
 	</tr>
+	<tr>
+		<th><?=__('default-new-page-type')?>:</th>
+		<td><select name="settingsDefaultNewPageType" id="settingsDefaultNewPageType"><?=self::typesOptionList(hypha_getDefaultNewPageType())?></select></td>
+	</tr>
 </table>
 <?php
 			$this->html->writeToElement('main', ob_get_clean());
@@ -277,6 +289,7 @@
 			if (isAdmin()) {
 				$hyphaXml->lockAndReload();
 				hypha_setDefaultLanguage($_POST['settingsDefaultLanguage']);
+				hypha_setDefaultNewPageType($_POST['settingsDefaultNewPageType']);
 				hypha_setDefaultPage($_POST['settingsDefaultPage']);
 				hypha_setEmail($_POST['settingsSystemEmail']);
 				$digestInterval = 86400 * $_POST['settingsIntervalDays'] + 3600 * $_POST['settingsIntervalHours'] + 60 * $_POST['settingsIntervalMinutes'];
