@@ -85,7 +85,7 @@
 		if ($handle = opendir($dir)) {
 			while (false !== ($file = readdir($handle))) {
 				if ($file != "." && $file != "..") {
-					if (isAllowedFile($dir.'/'.$file)) $index[ltrim($dir.'/'.$file, "./")] = filemtime($dir.'/'.$file);
+					if (isAllowedFile($dir.'/'.$file)) $index[preg_replace("/^\.\//i","",$dir.'/'.$file)] = filemtime($dir.'/'.$file);
 					elseif (is_dir($dir.'/'.$file)) $index = array_merge($index, index($dir.'/'.$file));
 				}
 			}
