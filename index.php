@@ -53,15 +53,8 @@
 
 	foreach (scandir("system/languages/") as $_file) if (substr($_file, -4) == '.php') $uiLangList[] = basename($_file, '.php');
 
-	$pageTypeIndex = count(get_declared_classes()) -1;
-	foreach (scandir("system/datatypes/") as $_file) if (substr($_file, -4) == '.php') include_once("system/datatypes/" . $_file);
-	$hyphaPageTypes = [];
-	foreach (array_slice(get_declared_classes(), $pageTypeIndex) as $class) if (in_array('Page', class_parents($class)) && (new \ReflectionClass($class))->isInstantiable()) $hyphaPageTypes[] = $class;
-
-	$dataTypeMtx = [];
-	foreach ($hyphaPageTypes as $className) {
-		$dataTypeMtx[$className] = call_user_func($className . '::getDatatypeName');
-	}
+	// called for its side effects of loading the datatypes
+	hypha_getDataTypes();
 
 	/*
 		Group: Stage 3 - Get query and handle direct file requests
@@ -147,7 +140,7 @@
 		$_cmds[] = '<a href="javascript:login();">'.__('login').'</a>';
 	}
 	else {
-		addNewPageRoutine($hyphaHtml, $hyphaRequest->getRelativeUrlPathParts(false), $dataTypeMtx);
+		addNewPageRoutine($hyphaHtml, $hyphaRequest->getRelativeUrlPathParts(false), hypha_getDataTypes());
 		$_cmds[] = makeLink(__('new-page'), 'newPage();');
 		$_cmds[] = makeLink(__('settings'), makeAction('settings', '', ''));
 		$_cmds[] = makeLink(__('logout'), makeAction($hyphaRequest->getRelativeUrlPath(false),'logout',''));

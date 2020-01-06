@@ -821,3 +821,32 @@
 		foreach ($vars as $key => $val) $string = str_replace('[[' . $key . ']]', $val, $string);
 		return $string;
 	}
+
+	/*
+		Function: hypha_getDataTypes
+		loads all datatypes as a side effect
+		returns all non-system datatypes
+	*/
+	function hypha_getDataTypes() {
+		static $hyphaDatatypes = [];
+		if (empty($hyphaDatatypes)) {
+
+			// include all datatypes
+			$pageTypeIndex = count(get_declared_classes()) -1;
+			foreach (scandir('system/datatypes/') as $_file) {
+				if (substr($_file, -4) == '.php') {
+					include_once('system/datatypes/' . $_file);
+				}
+			}
+
+			// add all non-system datatypes to $hyphaDatatypes
+			$systemDatatypes = [settingspage::class];
+			foreach (array_slice(get_declared_classes(), $pageTypeIndex) as $class) {
+				if (!in_array($class, $systemDatatypes) && in_array(Page::class, class_parents($class)) && (new \ReflectionClass($class))->isInstantiable()) {
+					$hyphaDatatypes[$class] = call_user_func($class . '::getDatatypeName');
+				}
+			}
+		}
+
+		return $hyphaDatatypes;
+	}
