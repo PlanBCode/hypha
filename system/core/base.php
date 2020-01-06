@@ -780,7 +780,7 @@
 			}
 			$privatePos = strpos($pagename, '&#;');
 			if ($privatePos) $pagename = substr($pagename, 0, $privatePos);
-			$htmlList[] = '<div class="index-item type_'.$pageListDatatype[$pagename].'"><a href="'.$language.'/'.$pagename.'">'.showPagename($pagename).'</a>'.asterisk($privatePos).'</div>';
+			$htmlList[] = '<div class="index-item type_'.$pageListDatatype[$pagename].' '.($privatePos ? 'is-private' : 'is-public').'"><a href="'.$language.'/'.$pagename.'">'.showPagename($pagename).'</a></div>';
 		}
 
 		$html = '<div class="index">';
