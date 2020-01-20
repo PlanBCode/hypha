@@ -460,6 +460,26 @@
 	}
 
 	/*
+		Function: hypha_retireUser
+		Retires the given user and adds a note to the digest
+		about this.
+	*/
+	function hypha_retireUser($userId, $by_admin) {
+		global $hyphaXml, $hyphaUser;
+		$hyphaXml->requireLock();
+		$user = hypha_getUserById($userId);
+
+		if ($by_admin)
+			$msg = __('admin-removed-user', ['admin' => $hyphaUser->getAttribute('fullname'), 'username' => $user->getAttribute('username'), 'fullname' => $user->getAttribute('fullname')]);
+		else
+			$msg = __('user-has-left-project', ['name' => $user->getAttribute('fullname'), 'project' => hypha_getTitle()]);
+
+		if ($user->getAttribute('rights') != 'invitee')
+			writeToDigest($msg, 'settings');
+		$user->setAttribute('rights', 'exmember');
+	}
+
+	/*
 		Function: hypha_addUserRegistrationKey
 		sets extra key attribute for registration or recovering account.
 
