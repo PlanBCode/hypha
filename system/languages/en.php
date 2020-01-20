@@ -117,6 +117,7 @@
 		"remind-to-join" => "This is a reminder to join the project ",
 		"has-joined" => " has joined the project",
 		"admin-removed-user" => "[[admin]] removed user [[username]] ([[fullname]]) from the userlist",
+		"admin-reincarnated-user" => "[[admin]] made user [[username]] ([[fullname]]) active again",
 		"registration-successful" => "registration successful, you can now log in to this website and contribute to the project.",
 		"follow-link-to-register" => "Follow the link below to register",
 		"reregister-to" => "Follow the link below to recover your account",

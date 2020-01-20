@@ -117,6 +117,7 @@
 		"remind-to-join" => "Dit is een herinnering om aan het project deel te nemen ",
 		"has-joined" => " neemt deel aan het project",
 		"admin-removed-user" => "[[admin]] heeft de gebruiker [[username]] ([[fullname]]) uit de projectteamlijst verwijderd",
+		"admin-reincarnated-user" => "[[admin]] heeft de gebruiker [[username]] ([[fullname]]) weer actief gemaakt",
 		"registration-successful" => "registratie successvol, je kunt nu inloggen en aan het project deelnemen.",
 		"follow-link-to-register" => "om te registreren, volg onderstaande link",
 		"reregister-to" => "om te registreren, volg onderstaande link",
