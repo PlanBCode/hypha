@@ -149,14 +149,25 @@
 			$this->html->writeToElement('main', ob_get_clean());
 		}
 
-		function quit($message) {
-			global $hyphaUser;
+		function quit() {
+			global $hyphaUser, $hyphaXml, $O_O;
+			$message = $O_O->getRequest()->getPostValue('quitGoodbye');
 			if (isUser()) {
-				notify('error', sendMail(getUserEmailList(), $hyphaUser->getAttribute('fullname').__('has-left-project').'`'.hypha_getTitle().'`', nl2br($message)) );
-				if (dropUser($hyphaUser->getAttribute('id'))) {
-					logout();
-					notify('success', __('bye'));
-				}
+				$hyphaXml->lockAndReload();
+				$user = hypha_getUserById($hyphaUser->getAttribute('id'));
+				hypha_retireUser($user, /* by_admin */ false);
+				$hyphaXml->saveAndUnlock();
+
+				$subject = __('user-has-left-project', ['name' => $user->getAttribute('fullname'), 'project' => hypha_getTitle()]);
+				$body = nl2br(htmlspecialchars($message));
+				$error = sendMail(getUserEmailList(), $subject, $body);
+				if ($error)
+					notify('error', $error);
+
+				// Leave wil have worked, even when the e-mail failed
+				notify('success', __('bye'));
+
+				return logout();
 			}
 			return 'reload';
 		}
@@ -720,10 +731,8 @@
 			if (isAdmin()) { // only admin can remove users
 				$hyphaXml->lockAndReload();
 				$user = hypha_getUserById($userId);
-				$error = hypha_setUser($user, '', '', '', '', '', 'exmember');
+				hypha_retireUser($user, /* by_admin */ true);
 				$hyphaXml->saveAndUnlock();
-				if ($error) notify($error);
-				else if ($user->getAttribute('rights')!='invitee') writeToDigest($hyphaUser->getAttribute('fullname').' '.__('removed-from-user-list').' '.$userId, 'settings');
 			}
 			return 'reload';
 		}
