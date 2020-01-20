@@ -93,7 +93,6 @@
 		obj.setSelectionRange(pos, pos);
 	}
 	function newPage() {
-		
 		html = '<table class="section"><tr><th colspan="2"><?=__('create-new-page').'<br/>'.__('instruction-new-page')?></td></tr>';
 		var infoPageType = <?=json_encode(makeInfoButton('help-page-type'));?>;
 		// TODO [LRM]: find better way to set default new page type.
@@ -102,12 +101,10 @@
 		html+= '<tr><th><?=__('pagename')?></th><td><input type="text" id="newPagename" value="<?=$pagename?>" onblur="validatePagename(this);" onkeyup="validatePagename(this); document.getElementById(\'newPageSubmit\').disabled = this.value ? false : true;"/> ' + infoPageName + '</td></tr>';
 		var infoPrivate = <?=json_encode(makeInfoButton('help-private-page'));?>;
 		html+= '<tr><td></td><td><input type="checkbox" id="newPagePrivate" name="newPagePrivate"/> <?=__('private-page')?> ' + infoPrivate + '</td></tr>';
-		html+= '<tr><td></td><td><input type="button" class="button" value="<?=__('cancel')?>" onclick="document.getElementById(\'popup\').style.visibility=\'hidden\';" />';
+		html+= '<tr><td></td><td><input type="button" class="button" value="<?=__('cancel')?>" onclick="document.getElementById(\'popup\').style.display=\'none\';" />';
 		html+= '<input type="submit" id="newPageSubmit" class="button editButton" value="<?=__('create')?>" <?= $pagename ? '' : 'disabled="true"' ?> onclick="hypha(\'<?=$hyphaContentLanguage?>/\' + document.getElementById(\'newPagename\').value + \'/edit\', \'newPage\', document.getElementById(\'newPagename\').value, $(this).closest(\'form\'));" /></td></tr></table>';
 		document.getElementById('popup').innerHTML = html;
-		document.getElementById('popup').style.left = document.getElementById('hyphaCommands').offsetLeft + 'px';
-		document.getElementById('popup').style.top = (document.getElementById('hyphaCommands').offsetTop + 25) + 'px';
-		document.getElementById('popup').style.visibility = 'visible';
+		document.getElementById('popup').style.display = 'block';
 		document.getElementById('newPagename').focus();
 	}
 </script>

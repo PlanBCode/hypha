@@ -318,9 +318,7 @@ a.nopagelink {
  position: absolute;
  top: 50px;
  background: #FFFFE0;
- left: 10%;
  margin-right: auto;
- border: 1px solid darkgrey;
  z-index: 1;
 }
 
@@ -328,6 +326,72 @@ a.nopagelink {
  margin: 5px;
 }
 
+button, .button{
+ min-height: 40px;
+ margin-right: 10px;
+ padding-right: 20px;
+ padding-left: 20px;
+ font-weight: bold;
+ font-size: 16px;
+ background: #999;
+ color: #FFFFFF;
+ border: none;
+ border-radius: 5px;
+}
+
+button:hover, .button:hover{
+ background: #ddd;
+ color: #000000;
+}
+
+button: last-of-type{
+ margin-right: 0;
+}
+
+.login-wrapper{
+ padding:15px;
+ background-color: #eeeeff;
+ border: 1px solid grey;
+}
+
+.login-wrapper label{
+ font-weight: bold;
+}
+
+.login-wrapper label.username,
+.login-wrapper label.password{
+ width: 150px;
+ display: inline-block;
+}
+
+
+.login-wrapper button,
+.login-wrapper [type="submit"],
+.login-wrapper [type="button"],
+.login-wrapper [type="reset"],
+.login-wrapper [type="cancel"]{
+ -webkit-appearance: none;
+ -moz-appearance: none;
+ appearance: none;
+ border: none;
+ background:transparent;
+ color: inherit;
+}
+
+.login-wrapper .button{
+ display: inline-block;
+ padding-top: 7px;
+ box-sizing: border-box;
+}
+
+.login-wrapper .button input{
+ margin-bottom: 0;
+}
+
+.login-wrapper .forgot-password{
+ font-size: 80%;
+ margin-top: 10px;
+}
 
 .click {
  cursor: pointer;
@@ -645,28 +709,6 @@ nav.main{
 
 nav.tabs{
  z-index: 1;
-}
-
-button, .button{
- min-height: 40px;
- margin-right: 10px;
- padding-right: 20px;
- padding-left: 20px;
- font-weight: bold;
- font-size: 16px;
- background: #999;
- color: #FFFFFF;
- border: none;
- border-radius: 5px;
-}
-
-button:hover, .button:hover{
- background: #ddd;
- color: #000000;
-}
-
-button: last-of-type{
- margin-right: 0;
 }
 
 nav{

@@ -131,16 +131,15 @@
 		*/
 ?>
 	function login() {
-		html = '<table class="section">';
-		html+= '<tr><th><?=__('login-username')?>:</th><td><input name="loginUsername" id="loginUsername" type="text" size="10" /></td></tr>';
-		html+= '<tr><th><?=__('login-password')?>:</th><td><input name="loginPassword" type="password" size="10" /></td></tr>';
-		html+= '<tr><td></td><td><input type="submit" name="login" value="<?=__('login')?>" onclick="hypha(\'<?=$currentUrlPath?>\', \'login\', \'\', $(this).closest(\'form\'));" /><input type="button" name="cancel" value="<?=__('cancel')?>" onclick="document.getElementById(\'popup\').style.visibility=\'hidden\';" /></td></tr>';
-		html+= '<tr><td id="loginForgotPassword" colspan="2"><?=__('forgot-password')?><a href="javascript:reregister();"><?=__('reregister')?></a></td></tr>';
-		html+= '</table>';
+		html = '<div class="login-wrapper">';
+		html+= '<div class="username"><label class="username" for="loginUsername"><?=__('login-username')?>:</label><input name="loginUsername" id="loginUsername" type="text" /></div>';
+		html+= '<div class="password"><label class="password" for="loginPassword"><?=__('login-password')?>:</label><input name="loginPassword" id="loginPassword" type="password" /></td></div>';
+		html+= '<div class="submit"><input class="button" type="submit" name="login" value="<?=__('login')?>" onclick="hypha(\'<?=$currentUrlPath?>\', \'login\', \'\', $(this).closest(\'form\'));" /></div>';
+		html+= '<div class="cancel"><input class="button" type="button" name="cancel" value="<?=__('cancel')?>" onclick="document.getElementById(\'popup\').style.display=\'none\';" /></div>';
+		html+= '<div class="forgot-password"><?=__('forgot-password')?><a href="javascript:reregister();"><?=__('reregister')?></a></div>';
+		html+= '</div>';
 		document.getElementById('popup').innerHTML = html;
-		document.getElementById('popup').style.left = document.getElementById('hyphaCommands').offsetLeft + 'px';
-		document.getElementById('popup').style.top = (document.getElementById('hyphaCommands').offsetTop + 25) + 'px';
-		document.getElementById('popup').style.visibility = 'visible';
+		document.getElementById('popup').style.display = 'block';
 		document.getElementById('loginUsername').focus();
 	}
 	function reregister() {
@@ -149,9 +148,7 @@
 		html+= '<tr><td></td><td><input type="submit" name="submit" value="<?=__('submit')?>" onclick="hypha(\'<?=$currentUrlPath?>\', \'reregister\', document.getElementById(\'searchLogin\').value, $(this).closest(\'form\'));" /><input type="button" name="cancel" value="<?=__('cancel')?>" onclick="showLogin();" /></td></tr>';
 		html+= '</table>';
 		document.getElementById('popup').innerHTML = html;
-		document.getElementById('popup').style.left = document.getElementById('hyphaCommands').offsetLeft + 'px';
-		document.getElementById('popup').style.top = (document.getElementById('hyphaCommands').offsetTop + 25) + 'px';
-		document.getElementById('popup').style.visibility = 'visible';
+		document.getElementById('popup').style.display = 'block';
 		document.getElementById('searchLogin').focus();
 	}
 <?php
