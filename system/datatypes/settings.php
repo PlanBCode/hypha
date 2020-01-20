@@ -744,8 +744,17 @@
 				$user = hypha_getUserById($userId);
 				$error = hypha_setUser($user, '', '', '', '', '', 'user');
 				$hyphaXml->saveAndUnlock();
-				if ($error) notify($error);
-				else writeToDigest($hyphaUser->getAttribute('fullname').' '.__('reincarnated-user').' '.$userId, 'settings');
+				if ($error) {
+					notify($error);
+				} else {
+					$msg = __('admin-reincarnated-user', [
+						'admin' => $hyphaUser->getAttribute('fullname'),
+						'username' => $user->getAttribute('username'),
+						'fullname' => $user->getAttribute('fullname'),
+					]);
+
+					writeToDigest($msg, 'settings');
+				}
 			}
 			return 'reload';
 		}
