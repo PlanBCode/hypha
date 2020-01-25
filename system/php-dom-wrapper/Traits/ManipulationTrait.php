@@ -287,6 +287,36 @@ trait ManipulationTrait
     }
 
     /**
+     * @param string|NodeList|\DOMNode $selector
+     *
+     * @return self
+     */
+    public function prependTo($selector) {
+        if ($selector instanceof \DOMNode || $selector instanceof NodeList) {
+            $nodes = $this->inputAsNodeList($selector);
+        } else {
+            $nodes = $this->document()->find($selector);
+        }
+        $nodes->prepend($this);
+        return $this;
+    }
+
+    /**
+     * @param string|NodeList|\DOMNode $selector
+     *
+     * @return self
+     */
+    public function appendTo($selector) {
+        if ($selector instanceof \DOMNode || $selector instanceof NodeList) {
+            $nodes = $this->inputAsNodeList($selector);
+        } else {
+            $nodes = $this->document()->find($selector);
+        }
+        $nodes->append($this);
+        return $this;
+    }
+
+    /**
      * @return self
      */
     public function _empty() {
@@ -646,7 +676,7 @@ trait ManipulationTrait
      * @return string
      */
     public function getHtml() {
-        return $this->collection()->first()->children()->reduce(function($carry, $node) {
+        return $this->collection()->first()->contents()->reduce(function($carry, $node) {
             return $carry . $this->document()->saveHTML($node);
         }, '');
     }
@@ -680,4 +710,15 @@ trait ManipulationTrait
             return $this->setHtml($input);
         }
     }
+
+    /**
+     * @param string|NodeList|\DOMNode $input
+     *
+     * @return NodeList
+     */
+    public function create($input) {
+        return $this->inputAsNodeList($input);
+    }
+
+
 }

@@ -1,7 +1,11 @@
 .idea
-/system/wymeditor/
+.well-known
 /data/pages/
 /data/images/
 /data/hypha.xml
 /data/digest
 /data/hypha.stats
+/mockup/node_modules
+DEBUG
+/data/themes/*/
+!/data/themes/default/

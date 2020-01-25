@@ -9,9 +9,6 @@
 		Variable: $hyphaUrl
 		location of index.php, e.g. 'www.dom.ain/wiki'. This variable is set in 'index.php'
 
-		Variable: $hyphaQuery
-		page request, e.g. 'en/home/edit' or 'settings/username'. This variable is set in 'index.php'
-
 		Variable: $hyphaXml
 		<Xml> object with hypha system data from the file 'data/hypha.xml'. This variable is set in 'index.php' by invoking <loadHypha>.
 
@@ -27,11 +24,8 @@
 		Variable: $hyphaPageTypes
 		array containing available datatypes. The array is filled by the pagetype scripts in 'system/datatypes/' which are loaded in 'index.php'.
 
-		Variable: $hyphaLanguage
+		Variable: $hyphaContentLanguage
 		hypha language, e.g. 'en'. This is the language of the content that is served, not to be mistaken for the user interface language. This variable is set in 'index.php' by invoking <loadPage>.
-
-		Variable: $hyphaDictionary
-		array containing user interface translations. This array is by invoking <loadUser> which in turn calls <setLanguage>.
 
 		Variable: $isoLangList
 		array containing language codes and their full name accoring to ISO639-1 standard , e.g. en -> English. This array is loaded in 'system/core/language.php'
@@ -44,7 +38,6 @@
 	include_once ('language.php');
 	include_once ('crypto.php');
 
-	if (!is_file('data/hypha.xml')) die('serious error: missing system file hypha.xml');
 	$hyphaXml = new Xml('project', Xml::multiLingualOff, Xml::versionsOff);
 	$hyphaXml->loadFromFile('data/hypha.xml');
 
@@ -59,8 +52,9 @@
 	}
 
 	Hypha::$data = new StdClass();
-	Hypha::$data->css = new HyphaFile('data/hypha.css');
-	Hypha::$data->html = new HyphaFile('data/hypha.html');
+	Hypha::$data->theme = hypha_getAffectiveTheme();
+	Hypha::$data->css = new HyphaFile('data/themes/' . Hypha::$data->theme . '/hypha.css');
+	Hypha::$data->html = new HyphaFile('data/themes/' . Hypha::$data->theme . '/hypha.html');
 	Hypha::$data->digest = new HyphaFile('data/digest');
 	Hypha::$data->stats = new HyphaFile('data/hypha.stats');
 
@@ -106,6 +100,21 @@
 		global $hyphaXml;
 		$hyphaXml->requireLock();
 		$hyphaXml->documentElement->setAttribute('defaultLanguage', $string);
+	}
+
+	/*
+		Function: hypha_getUsedContentLanguages returns
+		list of language codes for languages that are used in
+		any of the pages.
+	*/
+	function hypha_getUsedContentLanguages() {
+		$langList = array();
+		foreach(hypha_getPageList() as $_page) {
+			foreach($_page->getElementsByTagName('language') as $_lang)
+				if (!in_array($_lang->getAttribute('id'), $langList))
+					$langList[] = $_lang->getAttribute('id');
+		}
+		return $langList;
 	}
 
 	/*
@@ -172,6 +181,52 @@
 		global $hyphaXml;
 		$hyphaXml->requireLock();
 		$hyphaXml->documentElement->setAttribute('lastDigestTime', $string);
+	}
+
+	/*
+		Function: hypha_getNormalTheme
+		returns hypha theme attribute set in hyphaXml, or default if not set.
+	*/
+	function hypha_getNormalTheme() {
+		global $hyphaXml;
+		$theme = $hyphaXml->documentElement->getAttribute('theme');
+		if ('' === $theme) {
+			$theme = 'default';
+		}
+		return $theme;
+	}
+
+	/*
+		Function: hypha_getPreviewTheme
+		returns preview theme set session, of false is not set.
+	*/
+	function hypha_getPreviewTheme() {
+		return isset($_SESSION['previewTheme']) ? $_SESSION['previewTheme'] : false;
+	}
+
+	/*
+		Function: hypha_getAffectiveTheme
+		returns theme, if preview was set, the preview theme otherwise the normal.
+	*/
+	function hypha_getAffectiveTheme() {
+		$theme = hypha_getPreviewTheme();
+		if (false === $theme) {
+			$theme = hypha_getNormalTheme();
+		}
+		return $theme;
+	}
+
+	/*
+		Function: hypha_setTheme
+		sets hypha theme attribute
+
+		Parameters:
+		$string - new theme value
+	*/
+	function hypha_setTheme($string) {
+		global $hyphaXml;
+		$hyphaXml->requireLock();
+		$hyphaXml->documentElement->setAttribute('theme', $string);
 	}
 
 	/*
@@ -329,7 +384,7 @@
 		$username - identifier for the user
 	*/
 	function hypha_getUserByName($username) {
-		foreach(hypha_getUserList() as $user) if ($user->getAttribute('username') == $username) return $user;
+		foreach(hypha_getUserList() as $user) if (strtolower($user->getAttribute('username')) == strtolower($username)) return $user;
 		return false;
 	}
 
@@ -485,6 +540,15 @@
 		return hypha_setPage($newPage, $language, $name, $private);
 	}
 
+	function hypha_deletePage($id) {
+		global $hyphaXml;
+		$hyphaXml->requireLock();
+		$targetPage = hypha_getPageById($id);
+		if ($targetPage instanceof HyphaDomElement) {
+			$hyphaXml->getElementsByTagName('pageList')->Item(0)->removeChild($targetPage);
+		}
+	}
+
 	/*
 		Function: hypha_setPage
 		updates page settings. Parameters which are left empty are not updated. Returns false on success, error message on failure.
@@ -504,7 +568,7 @@
 		$langFound = false;
 		foreach($page->getElementsByTagName('language') as $lang) if ($lang->getAttribute('id')==$language) {
 			if ($name && ($name!=$lang->getAttribute('name'))) {
-				$try = hypha_getPage($page->getAttribute('language'), $name);
+				$try = hypha_getPage($language, $name);
 				if (!$try || $try===$page) $lang->setAttribute('name', $name);
 				else return __('page-name-conflict');
 			}
@@ -522,9 +586,47 @@
 				$page->appendChild($newLanguage);
 			}
 		}
+		$private = in_array($private, ['true', '1', 'on']) ? 'on' : 'off';
 		if ($private!=$page->getAttribute('private')) $page->setAttribute('private', $private);
 
 		return false;
+	}
+
+	function hypha_setBodyClass(HyphaRequest $hyphaRequest, $hyphaPage) {
+		/** @var \DOMWrap\NodeList $bodyElement */
+		$bodyElement = $hyphaPage->html->find('body');
+		$classes = explode(' ', $bodyElement->attr('class'));
+		if (isset($hyphaPage->pagename)) {
+			$classes[] = $hyphaPage->pagename;
+			if ($hyphaPage->pagename === hypha_getDefaultPage()) {
+				$classes[] = 'is_home';
+			}
+		}
+		$classes[] = isUser() ? 'is_logged_in' : '';
+		$classes[] = isAdmin() ? 'is_admin' : '';
+		$classes[] = 'type_' . get_class($hyphaPage);
+
+		if ($hyphaRequest->getLanguage()) {
+			$classes[] = 'lang_' . $hyphaRequest->getLanguage();
+		}
+		if ($hyphaRequest->isSystemPage()) {
+			$classes[] = implode('_', $hyphaRequest->getRelativeUrlPathParts());
+		}
+		$bodyElement->attr('class', implode(' ', array_filter($classes)));
+	}
+
+	function hypha_setPreviewPanel($hyphaPage) {
+		$previewTheme = hypha_getPreviewTheme();
+		if (false !== $previewTheme) {
+			/** @var \DOMWrap\NodeList $bodyElement */
+			$bodyElement = $hyphaPage->html->find('body');
+			$panel = '<div class="preview_panel" style="position:fixed; bottom:0; background-color: rgba(0, 0, 0, 0.8);">';
+			$panel .= '<div class="panel_text">' . __('previewing').': '.$previewTheme . '</div>';
+			$panel .= '<div class="panel_action_button">' . makeButton(__('apply-preview-theme'), makeAction('settings/theme', 'settingApplyPreviewTheme', '')) . '</div>';
+			$panel .= '<div class="panel_cancel_button">' . makeButton(__('cancel-preview-theme'), makeAction('settings/theme', 'settingsCancelPreviewTheme', '')) . '</div>';
+			$panel .= '</div>';
+			$bodyElement->parent()->append($panel);
+		}
 	}
 
 	/*
@@ -624,10 +726,7 @@
 		$language - page language
 	*/
 	function hypha_indexLanguages($page, $language) {
-		$langList = array();
-		foreach(hypha_getPageList() as $_page) foreach($_page->getElementsByTagName('language') as $_lang) {
-			if (!in_array($_lang->getAttribute('id'), $langList)) $langList[] = $_lang->getAttribute('id');
-		}
+		$langList = hypha_getUsedContentLanguages();
 		if (count($langList)) asort($langList);
 
 		$pageLangList = array();
@@ -658,34 +757,35 @@
 		// get list of available pages and sort alphabetically
 		foreach(hypha_getPageList() as $page) {
 			$lang = hypha_pageGetLanguage($page, $language);
-			if ($lang) if (isUser() || ($page->getAttribute('private')!='on')) $pageList[] = $lang->getAttribute('name').($page->getAttribute('private')=='on' ? '&#;' : '');
+			if ($lang) if (isUser() || ($page->getAttribute('private')!='on')) {
+				$pageList[] = $lang->getAttribute('name').($page->getAttribute('private')=='on' ? '&#;' : '');
+				$pageListDatatype[$lang->getAttribute('name')] = $page->getAttribute('type');
+			}
 		}
 		if ($pageList) array_multisort(array_map('strtolower', $pageList), $pageList);
 
 		// add capitals
 		$capital = 'A';
+		$first = true;
 		if ($pageList) foreach($pageList as $pagename) {
 			while($capital < strtoupper($pagename[0])) $capital++;
 			if (strtoupper($pagename[0]) == $capital) {
-				$htmlList[] = '<div style="text-align:center;">- '.$capital.' -</div>';
+				if (!$first) {
+					$htmlList[] = '</div>';
+				}
+				$htmlList[] = '<div class="letter-wrapper">';
+				$htmlList[] = '<div class="letter">'.$capital.'</div>';
 				$capital++;
+				$first = false;
 			}
 			$privatePos = strpos($pagename, '&#;');
 			if ($privatePos) $pagename = substr($pagename, 0, $privatePos);
-			$htmlList[] = '<a href="'.$language.'/'.$pagename.'">'.showPagename($pagename).'</a>'.asterisk($privatePos).'<br/>';
+			$htmlList[] = '<div class="index-item type_'.$pageListDatatype[$pagename].' '.($privatePos ? 'is-private' : 'is-public').'"><a href="'.$language.'/'.$pagename.'">'.showPagename($pagename).'</a></div>';
 		}
 
-		// output list in a maximum of 3 colunms with a minimum of 10 lines per column
-		$lines = count($htmlList);
-		$columns = min($lines/10, 3);
-		$i = 0;
-		$html = '<table><tr>';
-		for ($column=1; $column<$columns+1; $column++) {
-			$html.= '<td>';
-			while($i<$lines && $i<$lines*$column/$columns) $html.= $htmlList[$i++];
-			$html.= '</td>';
-		}
-		$html.= '</tr></table>';
+		$html = '<div class="index">';
+		foreach($htmlList as $htmlLine) $html.= $htmlLine;
+		$html.= '</div>';
 		return $html;
 	}
 
@@ -695,4 +795,9 @@
 
 	function hypha_indexFiles() {
 		return 'file index is not yet implemented';
+	}
+
+	function hypha_substitute($string, array $vars) {
+		foreach ($vars as $key => $val) $string = str_replace('[[' . $key . ']]', $val, $string);
+		return $string;
 	}

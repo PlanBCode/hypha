@@ -7,7 +7,11 @@ class WymHTMLForm extends HTMLForm {
 		return array_merge(parent::getFormFieldTypes(), ['editor']);
 	}
 
-	function getFieldType($field) {
-		return $field->tagName == 'editor' ? 'textarea' : parent::getFieldType($field);
+	function updateFormField($field, $value) {
+		// Editor tags must always contain valid HTML, so use
+		// setHtml rather than setText
+		if ($field->tagName == 'editor')
+			$field->setHtml($value);
+		return parent::updateFormField($field, $value);
 	}
 }

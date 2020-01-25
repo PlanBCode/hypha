@@ -7,8 +7,8 @@
 	<Page>
 */
 	class settingspage extends Page {
-		function __construct($args) {
-			parent::__construct('', $args);
+		function __construct(RequestContext $O_O) {
+			parent::__construct('', $O_O);
 			registerCommandCallback('settingsInvite', Array($this, 'invite'));
 			registerCommandCallback('settingsRemind', Array($this, 'remindNewUser'));
 			registerCommandCallback('settingsRegister', Array($this, 'register'));
@@ -20,12 +20,18 @@
 			registerCommandCallback('settingsSaveAccount', Array($this, 'saveAccount'));
 			registerCommandCallback('settingsSaveHyphaSettings', Array($this, 'saveHyphaSettings'));
 			registerCommandCallback('settingsSaveMarkup', Array($this, 'saveMarkup'));
+			registerCommandCallback('settingsSaveTheme', Array($this, 'saveTheme'));
+			registerCommandCallback('settingsCopyTheme', Array($this, 'copyTheme'));
+			registerCommandCallback('settingsCopyThemeAndActivate', Array($this, 'copyThemeAndActivate'));
+			registerCommandCallback('settingsPreviewTheme', Array($this, 'previewTheme'));
+			registerCommandCallback('settingsCancelPreviewTheme', Array($this, 'cancelPreviewTheme'));
+			registerCommandCallback('settingApplyPreviewTheme', Array($this, 'applyPreviewTheme'));
 			registerCommandCallback('settingsSaveStyles', Array($this, 'saveStyles'));
 			registerCommandCallback('settingsSaveSiteElements', Array($this, 'saveSiteElements'));
 			registerCommandCallback('settingsSaveMenu', Array($this, 'saveMenu'));
 		}
 
-		function build() {
+		function process(HyphaRequest $request) {
 //			global $isoLangList, $html;
 //			if ($view=='register') $html->pagename =  'registration';
 //			elseif ($this->hypha->login) $html->pagename = 'settings';
@@ -37,6 +43,7 @@
 				case 'register': $this->editRegistration($this->getArg(1)); break;
 				case 'hypha': $this->editHyphaSettings(); break;
 				case 'markup': $this->editMarkup(); break;
+				case 'theme': $this->editTheme(); break;
 				case 'styles': $this->editStyles(); break;
 				case 'elements': $this->editSiteElements(); break;
 				case 'menu': $this->editMenu(); break;
@@ -131,8 +138,11 @@
 ?>
 <table class="section">
 	<tr>
-		<th><?=__('message')?>:</th>
-		<td><textarea name="quitGoodbye" cols="36" rows="4"><?=__('goodbye-message')?></textarea></td>
+		<td colspan="2"><?=nl2br(__('quit-explain-message'));?></td>
+	</tr>
+	<tr>
+		<th><?=__('message');?>:</th>
+		<td><textarea name="quitGoodbye" cols="36" rows="4"></textarea></td>
 	</tr>
 </table>
 <?php
@@ -206,7 +216,7 @@
 					writeToDigest($user->getAttribute('fullname').' '.__('has-joined'), 'settings');
 					notify('success', __('registration-successful'));
 					$hyphaXml->saveAndUnlock();
-					return 'reload';
+					return ['redirect', $hyphaUrl];
 				}
 			}
 			$hyphaXml->unlock();
@@ -266,10 +276,18 @@
 
 		function editMarkup() {
 			if (isAdmin()) {
-				$this->html->writeToElement('pagename', __('edit-html'));
 				$this->html->writeToElement('pageCommands', makeButton(__('cancel'), makeAction('settings', '', '')));
-				$this->html->writeToElement('pageCommands', makeButton(__('save'), makeAction('settings', 'settingsSaveMarkup', '')));
-				ob_start();
+                ob_start();
+				if (Hypha::$data->theme === 'default') {
+					global $hyphaUrl;
+					$this->html->writeToElement('pagename', __('view-html-of-theme', ['theme' => Hypha::$data->theme]));
+					$this->html->writeToElement('main', __('cannot-edit-default-theme-explanation', ['link' => $hyphaUrl.'settings/theme']));
+?>
+<blockquote><pre><code><?=htmlspecialchars(hypha_getHtml());?></code></pre></blockquote>
+<?php
+				} else {
+					$this->html->writeToElement('pagename', __('edit-html-of-theme', ['theme' => Hypha::$data->theme]));
+					$this->html->writeToElement('pageCommands', makeButton(__('save'), makeAction('settings', 'settingsSaveMarkup', '')));
 ?>
 <table class="section">
 	<tr>
@@ -277,34 +295,210 @@
 	</tr>
 </table>
 <?php
+				}
 				$this->html->writeToElement('main', ob_get_clean());
 			}
 		}
 
 		function saveMarkup($argument) {
-			global $hyphaUrl, $hyphaQuery;
+			global $hyphaUrl;
 			if (isAdmin()) {
 				hypha_setHtml($_POST['editHtml']);
 			}
 			return 'reload';
 		}
 
+		function editTheme() {
+			if (isAdmin()) {
+				$this->html->writeToElement('pageCommands', makeButton(__('cancel'), makeAction('settings', '', '')));
+				$this->html->writeToElement('pagename', __('select-theme'));
+				ob_start();
+				echo '<select name="editTheme" id="editTheme">';
+				$themes = $this->getThemes();
+				$normalTheme = hypha_getNormalTheme();
+				foreach ($themes as $theme) {
+					echo '<option' . ($normalTheme === $theme ? ' selected' : '') . '>' . htmlspecialchars($theme) . '</option>';
+				}
+				echo '</select>';
+				echo makeButton(__('save'), makeAction('settings/theme', 'settingsSaveTheme', ''));
+				echo makeButton(__('preview-theme'), makeAction('settings/theme', 'settingsPreviewTheme', ''));
+				$this->html->writeToElement('main', ob_get_clean());
+
+				$this->html->writeToElement('main', '<div id="copy-theme"></div>');
+				$this->html->writeToElement('copy-theme', '<h2>'.__('copy-theme').'</h2>');
+				ob_start();
+				echo '<div class="theme-options">' . "\n";
+				foreach ($themes as $theme) {
+					$value = htmlspecialchars($theme);
+					echo '<div class="theme-option"><input type="radio" id="'.$value.'" name="srcTheme" value="'.$value.'"' . (Hypha::$data->theme === $theme ? ' checked' : '') . '><label for="'.$value.'">'.$theme.'</label></div>' . "\n";
+				}
+				echo '</div>' . "\n";
+				echo '<div class="new-theme-name"><input type="text" name="dstTheme" placeholder="'.__('new-theme-name').'"></div>';
+				echo makeButton(__('copy-theme'), makeAction('settings/theme', 'settingsCopyTheme', ''));
+				echo makeButton(__('copy-theme-and-activate'), makeAction('settings/theme', 'settingsCopyThemeAndActivate', ''));
+				$this->html->writeToElement('copy-theme', ob_get_clean());
+
+				$this->html->writeToElement('main', '<div id="preview-theme"></div>');
+			}
+		}
+
+		function saveTheme($argument) {
+			if (isAdmin()) {
+				global $hyphaUrl, $hyphaXml;
+				$hyphaXml->lockAndReload();
+				hypha_setTheme($_POST['editTheme']);
+				$hyphaXml->saveAndUnlock();
+			}
+			return 'reload';
+		}
+
+		function copyTheme($argument) {
+			if (isAdmin()) {
+				$errors = $this->validateAndCopyTheme();
+				foreach ($errors as $error) notify('error', $error);
+				if (empty($errors)) {
+					notify('success', __('copied-theme-successful'));
+				}
+			}
+			return 'reload';
+		}
+
+		function copyThemeAndActivate($argument) {
+			if (isAdmin()) {
+				$errors = $this->validateAndCopyTheme();
+				foreach ($errors as $error) notify('error', $error);
+				if (empty($errors)) {
+					global $hyphaXml;
+					$hyphaXml->lockAndReload();
+					hypha_setTheme($_POST['dstTheme']);
+					$hyphaXml->saveAndUnlock();
+					notify('success', __('copied-theme-successful'));
+				}
+			}
+			return 'reload';
+		}
+
+		function previewTheme($argument) {
+			if (isAdmin()) {
+				// get list of existing themes
+				$themes = $this->getThemes();
+
+				$errors = [];
+				// validate srcTheme
+				if (!isset($_POST['editTheme']) || '' == $_POST['editTheme']) {
+					$errors[] = __('source-theme-name-required');
+				} elseif (!in_array($_POST['editTheme'], $themes)) {
+					$errors[] = __('source-theme-name-not-found');
+				}
+				foreach ($errors as $error) notify('error', $error);
+				if (empty($errors)) {
+					session_start();
+					$_SESSION['previewTheme'] = $_POST['editTheme'];
+					session_write_close();
+					notify('success', __('preview-theme-set-successful'));
+				}
+			}
+			return 'reload';
+		}
+
+		function cancelPreviewTheme($argument) {
+			if (isAdmin() && isset($_SESSION['previewTheme'])) {
+				session_start();
+				unset($_SESSION['previewTheme']);
+				session_write_close();
+			}
+			return 'reload';
+		}
+
+		function applyPreviewTheme($argument) {
+			if (isAdmin() && isset($_SESSION['previewTheme'])) {
+				global $hyphaUrl, $hyphaXml;
+				$hyphaXml->lockAndReload();
+				hypha_setTheme($_SESSION['previewTheme']);
+				$hyphaXml->saveAndUnlock();
+				$this->cancelPreviewTheme($argument);
+			}
+			return 'reload';
+		}
+
+		function validateAndCopyTheme() {
+			// get list of existing themes
+			$themes = $this->getThemes();
+
+			$errors = [];
+			// validate dstTheme
+			if (empty($_POST['dstTheme'])) {
+				$errors[] = __('destination-theme-name-required');
+			} elseif (strpbrk($_POST['dstTheme'], "\\/?%*:|\"<>") !== false) {
+				$errors[] = __('destination-theme-not-valid');
+			} elseif (in_array($_POST['dstTheme'], $themes)) {
+				$errors[] = __('destination-theme-name-already-taken');
+			}
+
+			// validate srcTheme
+			if (empty($_POST['srcTheme'])) {
+				$errors[] = __('source-theme-name-required');
+			} elseif (!in_array($_POST['srcTheme'], $themes)) {
+				$errors[] = __('source-theme-name-not-found');
+			}
+
+			// return the errors if there are any
+			if (empty($errors)) {
+				// TODO [LRM]: move this copy function so it can be used throughout the system.
+				// create an anonymous function to cursively copy the theme directory
+				$dirCopy = function ($src, $dst) use (&$dirCopy) {
+					mkdir($dst, 0744);
+					foreach (scandir($src) as $file) {
+						if (in_array($file, ['.', '..'])) {
+							continue;
+						}
+						if (is_dir($src . '/' . $file)) {
+							$dirCopy($src . '/' . $file, $dst . '/' . $file);
+						} else {
+							copy($src . '/' . $file, $dst . '/' . $file);
+						}
+					}
+				};
+				$dirCopy('data/themes/' . $_POST['srcTheme'], 'data/themes/' . $_POST['dstTheme']);
+			}
+
+			return $errors;
+		}
+
+		function getThemes() {
+			$themes = [];
+			foreach (scandir('data/themes/') as $theme) {
+				if (!in_array($theme, ['.', '..'])) {
+					$themes[] = $theme;
+				}
+			}
+			return $themes;
+		}
+
 		function editStyles() {
 			if (isAdmin()) {
-				$this->html->writeToElement('pagename', __('edit-css'));
 				$this->html->writeToElement('pageCommands', makeButton(__('cancel'), makeAction('settings', '', '')));
-				$this->html->writeToElement('pageCommands', makeButton(__('save'), makeAction('settings', 'settingsSaveStyles', '')));
 				ob_start();
+				if (Hypha::$data->theme === 'default') {
+					global $hyphaUrl;
+					$this->html->writeToElement('pagename', __('view-css-of-theme', ['theme' => Hypha::$data->theme]));
+					$this->html->writeToElement('main', __('cannot-edit-default-theme-explanation', ['link' => $hyphaUrl.'settings/theme']));
 ?>
-<textarea class="section" name="editCss" id="editCss" cols="100%" rows="18" wrap="off"><?=file_get_contents('data/hypha.css')?></textarea>
+<blockquote><pre><code><?=hypha_getCss();?></code></pre></blockquote>
 <?php
+				} else {
+					$this->html->writeToElement('pagename', __('edit-css-of-theme', ['theme' => Hypha::$data->theme]));
+					$this->html->writeToElement('pageCommands', makeButton(__('save'), makeAction('settings', 'settingsSaveStyles', '')));
+?>
+<textarea class="section" name="editCss" id="editCss" cols="100%" rows="18" wrap="off"><?=hypha_getCss();?></textarea>
+<?php
+				}
 				$this->html->writeToElement('main', ob_get_clean());
 			}
 		}
 
 		function saveStyles($argument) {
 			$hyphaUrl;
-			$hyphaQuery;
 			if (isAdmin()) {
 				hypha_setCss($_POST['editCss']);
 			}
@@ -391,6 +585,7 @@
 				$this->html->writeToElement('pageCommands', makeButton(__('system-tools'), makeAction('hypha.php?maintenance', '', '')));
 				$this->html->writeToElement('pageCommands', makeButton(__('hypha-settings'), makeAction('settings/hypha', '', '')));
 				$this->html->writeToElement('pageCommands', makeButton(__('markup'), makeAction('settings/markup', '', '')));
+				$this->html->writeToElement('pageCommands', makeButton(__('theme'), makeAction('settings/theme', '', '')));
 				$this->html->writeToElement('pageCommands', makeButton(__('styles'), makeAction('settings/styles', '', '')));
 				$this->html->writeToElement('pageCommands', makeButton(__('site-elements'), makeAction('settings/elements', '', '')));
 				$this->html->writeToElement('pageCommands', makeButton(__('menu'), makeAction('settings/menu', '', '')));
@@ -398,7 +593,7 @@
 			ob_start();
 ?>
 <h3><?=__('personal-settings')?> `<?=$hyphaUser->getAttribute('username')?>`</h3>
-<table class="section">
+<table class="section personal-settings">
 	<tr>
 		<th><?=__('username')?>:</th>
 		<td><?=$hyphaUser->getAttribute('username')?></td>
@@ -412,17 +607,17 @@
 		<td><?=$hyphaUser->getAttribute('language')?></td>
 	</tr>
 	<tr>
-		<td colspan="4"><input type="button" class="button right" value="<?=__('edit')?>" onclick="hypha('settings/user/<?=$hyphaUser->getAttribute('username')?>', '', '');" /><input type="button" class="button right" value="<?=__('quit')?>" onclick="hypha('settings/quit', '', '');" /></td>
+		<td colspan="4"><input type="button" class="button edit" value="<?=__('edit')?>" onclick="hypha('settings/user/<?=$hyphaUser->getAttribute('username')?>', '', '');" /><input type="button" class="button quit" value="<?=__('quit')?>" onclick="hypha('settings/quit', '', '');" /></td>
 	</tr>
 </table>
 <h3><?=__('member-list')?></h3>
-<table class="section">
+<table class="section user-list">
 	<tr>
 		<th></th>
 		<th><?=__('username')?></th>
 		<th><?=__('fullname')?></th>
 		<th><?=__('email')?></th>
-		<td><input type="button" class="button" value="<?=__('invite')?>" onclick="hypha('settings/invite', '', '');" /></td>
+		<td><input type="button" class="button invite" value="<?=__('invite')?>" onclick="hypha('settings/invite', '', '');" /></td>
 	</tr>
 <?php
 			$numAdmins = 0;
@@ -452,19 +647,19 @@
 					echo '<td>';
 					if ($user->getAttribute('rights')!='exmember') {
 						if ($user->getAttribute('username'))
-							echo makeButton(__('edit'), makeAction('settings/user/'.$user->getAttribute('username'), '', ''));
+							echo makeButton(__('edit'), makeAction('settings/user/'.$user->getAttribute('username'), '', ''), '', 'edit');
 
-						if ($user->getAttribute('rights')=='none') echo makeButton(__('restore'), makeAction('settings', 'settingsRestore', $user->getAttribute('id')));
-						else echo makeButton(__('remove'), makeAction('settings', 'settingsRemove', $user->getAttribute('id')));
+						if ($user->getAttribute('rights')=='none') echo makeButton(__('restore'), makeAction('settings', 'settingsRestore', $user->getAttribute('id')), '', 'restore');
+						else echo makeButton(__('remove'), makeAction('settings', 'settingsRemove', $user->getAttribute('id')), '', 'remove');
 
-						if ($user->getAttribute('rights')=='invitee') echo makeButton(__('remind'), makeAction('settings', 'settingsRemind', $user->getAttribute('id')));
+						if ($user->getAttribute('rights')=='invitee') echo makeButton(__('remind'), makeAction('settings', 'settingsRemind', $user->getAttribute('id')), '', 'remind');
 						elseif ($user->getAttribute('rights') !== 'none') {
-							if ($user->getAttribute('rights') !== 'admin') echo makeButton(__('admin'), makeAction('settings', 'settingsAdmin', $user->getAttribute('id')));
-							elseif ($numAdmins>1) echo makeButton(__('unadmin'), makeAction('settings', 'settingsUnadmin', $user->getAttribute('id')));
+							if ($user->getAttribute('rights') !== 'admin') echo makeButton(__('admin'), makeAction('settings', 'settingsAdmin', $user->getAttribute('id')), '', 'admin');
+							elseif ($numAdmins>1) echo makeButton(__('unadmin'), makeAction('settings', 'settingsUnadmin', $user->getAttribute('id')), '', 'unadmin');
 						}
 					}
 					else {
-						echo makeButton(__('reincarnate'), makeAction('settings', 'settingsReincarnate', $user->getAttribute('id')));
+						echo makeButton(__('reincarnate'), makeAction('settings', 'settingsReincarnate', $user->getAttribute('id')), '', 'reincarnate');
 					}
 					echo '</td>';
 				}

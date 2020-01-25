@@ -12,20 +12,41 @@
 		abstract class for handling a certain kind of data
 	*/
 	abstract class Page {
-		public $pageListNode, $html, $language, $pagename, $args, $privateFlag;
-		function __construct($node, $args) {
+		public $pageListNode, $html, $language, $pagename, $O_O, $args, $privateFlag;
+		function __construct($node, RequestContext $O_O) {
 			global $hyphaHtml;
 			$this->html = $hyphaHtml;
-			$this->args = $args;
+			$this->O_O = $O_O;
+			// TODO: Remove args (and let subclasses talk to the request instead)
+			$this->args = $O_O->getRequest()->getArgs();
 			if ($node)
 				$this->replacePageListNode($node);
 		}
 
+		public static function getDatatypeName() {
+			return str_replace('_', ' ', get_called_class());
+		}
+
+		protected function deletePage() {
+			global $hyphaXml, $hyphaUser;
+			$id = $this->pageListNode->getAttribute('id');
+			$hyphaXml->lockAndReload();
+			hypha_deletePage($id);
+			$hyphaXml->saveAndUnlock();
+
+			$file = 'data/pages/' . $id;
+			if (file_exists($file)) {
+				unlink($file);
+			}
+
+			writeToDigest($hyphaUser->getAttribute('fullname').__('deleted-page').$this->language.'/'.$this->pagename, 'page delete');
+		}
+
 		protected function replacePageListNode($node) {
-			global $hyphaLanguage;
+			global $O_O;
 			$this->pageListNode = $node;
-			$this->privateFlag = ($node->getAttribute('private') == 'on' ? true : false);
-			$language = hypha_pageGetLanguage($node, $hyphaLanguage);
+			$this->privateFlag = in_array($node->getAttribute('private'), ['true', '1', 'on']);
+			$language = hypha_pageGetLanguage($node, $O_O->getContentLanguage());
 			$this->language = $language->getAttribute('id');
 			$this->pagename = $language->getAttribute('name');
 		}
@@ -40,7 +61,7 @@
 			return null;
 		}
 
-		abstract function build();
+		abstract function process(HyphaRequest $request);
 	}
 
 	/*
@@ -53,7 +74,7 @@
 		types - array with available page types (i.e. 'text', 'blog' etc)
 	*/
 	function addNewPageRoutine($html, $query, $types) {
-		global $hyphaLanguage;
+		global $hyphaContentLanguage;
 		// If a pagename is specified that does not exist yet,
 		// prefill that page name
 		if (count($query) >= 2 && !hypha_getPage($query[0], $query[1]))
@@ -66,49 +87,29 @@
 <script>
 	function validatePagename(obj) {
 		var pos = obj.selectionStart;
-		var val = obj.value.replace(/\s+/g, ' ').replace(/^\s|[^\d\w\s\.-]/gi, '');
+		var val = obj.value.replace(/\s+/g, ' ').replace(/^\s|[^\d\w\s\-]/gi, '');
 		if (val.length < pos) pos = val.length;
 		obj.value = val;
 		obj.setSelectionRange(pos, pos);
 	}
 	function newPage() {
-		html = '<table class="section"><tr><th colspan="2"><?=__('create-new-page')?></td><tr>';
-		html+= '<tr><th><?=__('type')?></th><td><select id="newPageType" name="newPageType">' + '<?php foreach($types as $type) echo '<option value="'.$type.'"'.($type=='textPage' ? 'selected="selected"' : '').'>'.$type.'</option>'; ?>' + '</select></td></tr>';
-		html+= '<tr><th><?=__('name')?></th><td><input type="text" id="newPagename" value="<?=$pagename?>" onblur="validatePagename(this);" onkeyup="validatePagename(this); document.getElementById(\'newPageSubmit\').disabled = this.value ? false : true;"/></td></tr>';
-		html+= '<tr><td></td><td><input type="checkbox" id="newPagePrivate" name="newPagePrivate"/> <?=__('private-page')?></td></tr>';
-		html+= '<tr><td></td><td><input type="button" class="button" value="<?=__('cancel')?>" onclick="document.getElementById(\'popup\').style.visibility=\'hidden\';" />';
-		html+= '<input type="submit" id="newPageSubmit" class="button editButton" value="<?=__('create')?>" <?= $pagename ? '' : 'disabled="true"' ?> onclick="hypha(\'<?=$hyphaLanguage?>/\' + document.getElementById(\'newPagename\').value + \'/edit\', \'newPage\', document.getElementById(\'newPagename\').value);" /></td></tr></table>';
+		html = '<table class="section"><tr><th colspan="2"><?=__('create-new-page').'<br/>'.__('instruction-new-page')?></td></tr>';
+		var infoPageType = <?=json_encode(makeInfoButton('help-page-type'));?>;
+		// TODO [LRM]: find better way to set default new page type.
+		html+= '<tr><th><?=__('type')?></th><td><select id="newPageType" name="newPageType">' + '<?php foreach($types as $type => $datatypeName) echo '<option value="'.$type.'"'.($type=='textpage' ? 'selected="selected"' : '').'>'.$datatypeName.'</option>'; ?>' + '</select> ' + infoPageType + '</td></tr>';
+		var infoPageName = <?=json_encode(makeInfoButton('help-page-name'));?>;
+		html+= '<tr><th><?=__('pagename')?></th><td><input type="text" id="newPagename" value="<?=$pagename?>" onblur="validatePagename(this);" onkeyup="validatePagename(this); document.getElementById(\'newPageSubmit\').disabled = this.value ? false : true;"/> ' + infoPageName + '</td></tr>';
+		var infoPrivate = <?=json_encode(makeInfoButton('help-private-page'));?>;
+		html+= '<tr><td></td><td><input type="checkbox" id="newPagePrivate" name="newPagePrivate"/> <?=__('private-page')?> ' + infoPrivate + '</td></tr>';
+		html+= '<tr><td></td><td><input type="button" class="button" value="<?=__('cancel')?>" onclick="document.getElementById(\'popup\').style.display=\'none\';" />';
+		html+= '<input type="submit" id="newPageSubmit" class="button editButton" value="<?=__('create')?>" <?= $pagename ? '' : 'disabled="true"' ?> onclick="hypha(\'<?=$hyphaContentLanguage?>/\' + document.getElementById(\'newPagename\').value + \'/edit\', \'newPage\', document.getElementById(\'newPagename\').value, $(this).closest(\'form\'));" /></td></tr></table>';
 		document.getElementById('popup').innerHTML = html;
-		document.getElementById('popup').style.left = document.getElementById('hyphaCommands').offsetLeft + 'px';
-		document.getElementById('popup').style.top = (document.getElementById('hyphaCommands').offsetTop + 25) + 'px';
-		document.getElementById('popup').style.visibility = 'visible';
+		document.getElementById('popup').style.display = 'block';
 		document.getElementById('newPagename').focus();
 	}
 </script>
 <?php
 		$html->writeScript(ob_get_clean());
-	}
-
-	/*
-		Function: loadLanguage
-		Pulls the language from the url.
-
-		Parameters:
-		HyphaRequest $hyphaRequest
-	*/
-	function loadLanguage(HyphaRequest $hyphaRequest) {
-		global $hyphaLanguage;
-
-		$language = $hyphaRequest->getLanguage();
-
-		// set wiki language. we want to store this in a session variable, so we don't loose language when an image or the settingspage are requested
-		$hyphaLanguage = $language !== null ? $language : hypha_getDefaultLanguage();
-
-		if (!isset($_SESSION['hyphaLanguage']) || $hyphaLanguage != $_SESSION['hyphaLanguage']) {
-			session_start();
-			$_SESSION['hyphaLanguage'] = $hyphaLanguage;
-			session_write_close();
-		}
 	}
 
 	/*
@@ -121,29 +122,35 @@
 		See Also:
 		<buildhtml>
 	*/
-	function loadPage(HyphaRequest $hyphaRequest) {
-		global $isoLangList, $hyphaHtml, $hyphaPage, $hyphaLanguage, $hyphaUrl;
+	function loadPage(RequestContext $O_O) {
+		global $isoLangList, $hyphaHtml, $hyphaPage, $hyphaUrl;
 
-		$args = $hyphaRequest->getArgs();
+		$request = $O_O->getRequest();
+		$args = $request->getArgs();
 
-		if (!$hyphaRequest->isSystemPage()) {
+		if (!$request->isSystemPage()) {
 			// fetch the requested page
-			$_name = $hyphaRequest->getPageName();
+			$_name = $request->getPageName();
 			if ($_name === null) {
 				$_name = hypha_getDefaultPage();
 			}
-			$_node = hypha_getPage($hyphaLanguage, $_name);
+			$_node = hypha_getPage($O_O->getContentLanguage(), $_name);
 
-			if ($_node) {
+			$isPrivate = $_node && in_array($_node->getAttribute('private'), ['true', '1', 'on']);
+			if ($_node && (!$isPrivate || isUser())) {
 				$_type = $_node->getAttribute('type');
-				$hyphaPage = new $_type($_node, $args);
+				$hyphaPage = new $_type($_node, $O_O);
 
 				// write stats
 				if (!isUser())
 					hypha_incrementStats(hypha_getLastDigestTime() + hypha_getDigestInterval());
 			} else {
 				http_response_code(404);
-				notify('error', __('no-page'));
+				if ($isPrivate && !isUser()) {
+					notify('error', __('login-to-view'));
+				} else {
+					notify('error', __('no-page'));
+				}
 				if (isUser()) $hyphaHtml->writeToElement('main', '<span class="right""><input type="button" class="button" value="' . __('create') . '" onclick="newPage();"></span>');
 				$hyphaPage = false;
 			}
@@ -156,7 +163,7 @@
 		while (count($args) < 1)
 			array_push($args, null);
 
-		switch ($hyphaRequest->getSystemPage()) {
+		switch ($request->getSystemPage()) {
 			case HyphaRequest::HYPHA_SYSTEM_PAGE_FILES:
 				serveFile('data/files/' . $args[0], 'data/files');
 				exit;
@@ -175,16 +182,21 @@
 						$hyphaHtml->writeToElement('main', hypha_indexFiles());
 						break;
 					default:
-						$languageName = $isoLangList[$hyphaLanguage];
+						$languageName = $isoLangList[$O_O->getContentLanguage()];
 						$languageName = substr($languageName, 0, strpos($languageName, ' ('));
 						$hyphaHtml->writeToElement('pagename', __('page-index').': '.$languageName);
-						$hyphaHtml->writeToElement('main', hypha_indexPages($hyphaLanguage));
+						$hyphaHtml->writeToElement('main', hypha_indexPages($O_O->getContentLanguage()));
 						break;
 				}
 				break;
+			case HyphaRequest::HYPHA_SYSTEM_PAGE_HELP:
+				$subject = isset($args[0]) ? urldecode($args[0]) : 'undefined';
+				$helpLanguage = isset($args[1]) ? $args[1] : $O_O->getInterfaceLanguage();
+				echo hypha_searchHelp($O_O, $subject, $helpLanguage);
+				exit;
 			case HyphaRequest::HYPHA_SYSTEM_PAGE_SETTINGS:
 				if (isUser() || $args[0]=='register') {
-					$hyphaPage = new settingspage($args);
+					$hyphaPage = new settingspage($O_O);
 				}
 				else {
 					header('Location: '.$hyphaUrl.hypha_getDefaultLanguage().'/'.hypha_getDefaultPage());
@@ -193,18 +205,44 @@
 				break;
 			case HyphaRequest::HYPHA_SYSTEM_PAGE_UPLOAD:
 				if ($args[0]=='image') {
-					if(!$_FILES['wymFile']) $response = __('too-big-file').ini_get('upload_max_filesize');
+					$return = null;
+					if(!$_FILES['uploadedfile']) $response = __('too-big-file').ini_get('upload_max_filesize');
 					else {
-						$ext = strtolower(substr(strrchr($_FILES['wymFile']['name'], '.'), 1));
-						@$size = getimagesize($_FILES['wymFile']['tmp_name']);
+						$ext = strtolower(substr(strrchr($_FILES['uploadedfile']['name'], '.'), 1));
+						@$size = getimagesize($_FILES['uploadedfile']['tmp_name']);
 						if(!$size || !in_array($ext, array('jpg','jpeg','png','gif','bmp'))) $response = __('invalid-image-file').ini_get('upload_max_filesize');
 						else {
-							$filename = uniqid().'.'.$ext;
-							if(!move_uploaded_file($_FILES['wymFile']['tmp_name'], 'data/images/'.$filename)) $response = __('server-error');
-							else $response = 'images/'.$filename;
+							$maxSize = [1120, 800];
+							$needResize = $size[0] > $maxSize[0] || $size[1] > $maxSize[1];
+							$filename = uniqid() . '.' . $ext;
+							$destinations = ['org' => 'data/images/org/' . $filename, 'img' => 'data/images/' . $filename];
+							$destinationPaths = ['org' => 'images/org/' . $filename, 'img' => 'images/' . $filename];
+							if ($needResize && !file_exists('data/images/org/')) {
+								mkdir('data/images/org/', 0777, true);
+							}
+							$orgUrlIndex = $needResize ? 'org' : 'img';
+							if (move_uploaded_file($_FILES['uploadedfile']['tmp_name'], $destinations[$orgUrlIndex])) {
+								$response = 'images/' . $filename . '?' . 'w=' . $size[0] . '&h=' . $size[1];
+								if ($needResize) {
+									if (true !== image_resize($destinations[$orgUrlIndex], $destinations['img'], $maxSize[0], $maxSize[1])) {
+										$response = __('server-error-resize-image');
+									}
+								}
+								$return = [[
+									'original_filename' => $_FILES['uploadedfile']['name'],             // The original filename, this will be put in as the "alt" text
+									'downloadUrl'       => $hyphaUrl . $destinationPaths[$orgUrlIndex], // The URL to the original file to be downloaded. This is not used by image_upload, but by site_links
+									'thumbUrl'          => $hyphaUrl . $destinationPaths['img'],        // The URL to be used, it's called a Thumb URL because you may have used $_POST['thumbnailSize'] to resize it. This is used by site_links but not image_upload
+								]];
+							} else {
+								$response = __('server-error');
+							}
 						}
 					}
-					echo '<script language="javascript" type="text/javascript">window.top.window.uploadResponse(\''.$response.'\');</script>';
+					if ($return !== null) {
+						echo json_encode($return);
+					} else {
+						echo '<script language="javascript" type="text/javascript">window.top.window.uploadResponse(\''.$response.'\');</script>';
+					}
 				}
 				exit;
 			case HyphaRequest::HYPHA_SYSTEM_PAGE_CHOOSER:
@@ -234,19 +272,19 @@
 	*/
 	registerCommandCallback('newPage', 'newPage');
 	function newPage($newName) {
-		global $hyphaXml, $hyphaUrl, $hyphaLanguage;
+		global $hyphaXml, $hyphaUrl, $hyphaContentLanguage;
 
 
 		$newName = validatePagename($newName);
 		if (isUser()) {
 			$hyphaXml->lockAndReload();
-			$error = hypha_addPage($_POST['newPageType'], $hyphaLanguage, $newName, isset($_POST['newPagePrivate']));
+			$error = hypha_addPage($_POST['newPageType'], $hyphaContentLanguage, $newName, isset($_POST['newPagePrivate']));
 			$hyphaXml->saveAndUnlock();
 			if ($error) {
 				notify('error', $error);
 				return 'reload';
 			} else {
-				return ['redirect', $hyphaUrl . $hyphaLanguage . '/' . $newName . '/edit'];
+				return ['redirect', $hyphaUrl . $hyphaContentLanguage . '/' . $newName . '/edit'];
 			}
 		}
 	}
@@ -261,7 +299,9 @@
 		name - pagename
 	*/
 	function validatePagename($name) {
-		return preg_replace('/\s/', '_', preg_replace('/^\s|\s$|[^\d\w\s\.-_]/i', '', preg_replace('/\s+/', ' ', $name)));
+		$name = preg_replace('/\s+/', ' ', $name); // Collapse multiple spaces
+		$name = preg_replace('/^\s|\s$|[^\s\d\w\-_]/i', '', $name); //remove spaces from start and remove everythin g but alphanumeric _ - and space
+		return preg_replace('/\s/', '_', $name); // replace spaces with underscores
 	}
 
 	/*
@@ -275,6 +315,21 @@
 		return preg_replace('/_/', ' ', $name);
 	}
 
+	/* Like dewikify, but accepts a HTML string instead of a document */
+	function dewikify_html($html) {
+		$doc = new DomWrap\Document();
+		// Dewikify a separate element instead of the entire
+		// document, since loading html into a document adds
+		// <html><body>.
+		$elem = $doc->createElement('root');
+		$elem->html($html);
+		dewikify($elem);
+
+		// TODO: This should probably not use getInnerHtml,
+		// probably just return the element instead.
+		return getInnerHtml($elem);
+	}
+
 	/*
 		Function: wikify
 		Convert links containing page ids back to working links,
@@ -284,31 +339,38 @@
 		doc - A DomWrap\Element to process
 	*/
 	function dewikify($element) {
-		foreach ($element->findXPath("//a[@href]") as $node) {
+		foreach ($element->findXPath(".//a[@href]") as $node) {
 			dewikify_link($node);
 		}
 	}
 
 	function dewikify_link($node) {
 		global $hyphaXml, $isoLangList;
-		global $hyphaLanguage;
+		global $hyphaContentLanguage;
 		global $hyphaPage;
 
-		$uri = $node->getAttribute('href');
-
-		$path = explode('/', $uri, 2);
-		$parts = explode(':', $path[0], 2);
-		if (count($parts) != 2 || $parts[0] != 'hypha')
+		$href = $node->getAttribute('href');
+		// This matches a url of the form hypha:123abc/subpath#anchor
+		// and splits that into the page id (123abc), followed
+		// by an optional subpath and/or anchor. The page id
+		// will be replaced by the real url, the rest will be
+		// kept as-is.
+		//
+		// Note that pipes are used to enclose the regex rather
+		// than slashes, so we can use slashes without escaping
+		// them.
+		if (!preg_match('|^hypha:([^/#]+)(.*)$|', $href, $matches))
 			return;
+		list($all, $id, $extra) = $matches;
 
-		$page = hypha_getPageById($parts[1]);
+		$page = hypha_getPageById($id);
 		if (!$page)
 			return;
 
 		// Find out what language to use (current language,
 		// default language, or any language offered by the
 		// page).
-		$language = hypha_pageGetLanguage($page, $hyphaLanguage);
+		$language = hypha_pageGetLanguage($page, $hyphaContentLanguage);
 		if (!$language) $language = hypha_pageGetLanguage($page, hypha_getDefaultLanguage());
 		if (!$language) $language = $page->getElementsByTagName('language')->Item(0);
 		if (!$language)
@@ -316,21 +378,21 @@
 
 		// Use the page name (in the appropriate language) as
 		// the link text
-		if ($node->text() == '')
+		if ($node->html() == '')
 			$node->text(showPagename($language->getAttribute('name')));
 
 		// Check permissions, replace by a span with just the
 		// pagename if the link would lead to an inaccessible
 		// page
 		if(!isUser() && $page->getAttribute('private') == 'on') {
-			$span = $page->createElement('span');
-			$span->text($node->text());
+			$span = $node->document()->createElement('span');
+			$span->html($node->html());
 			$node->replaceWith($span);
 			return;
 		}
 
 		// Add appropriate class and/or title attributes
-		if ($language->getAttribute('id') != $hyphaLanguage) {
+		if ($language->getAttribute('id') != $hyphaContentLanguage) {
 			if (!$node->getAttribute('title'))
 				$node->setAttribute('title', __('page-in-other-language'));
 			$node->addClass('otherLanguageLink');
@@ -340,8 +402,7 @@
 
 		// Generate and set the url
 		$url = $language->getAttribute('id').'/'.urlencode($language->getAttribute('name'));
-		if (count($path) > 1)
-			$url .= '/' . $path[1];
+		$url .= $extra;
 		$node->setAttribute('href', $url);
 	}
 
@@ -369,7 +430,7 @@
 		doc - A DomWrap\Element to process
 	*/
 	function wikify($elem) {
-		foreach ($elem->findXPath("//*[@href] | //*[@src]") as $node) {
+		foreach ($elem->findXPath(".//*[@href] | .//*[@src]") as $node) {
 			// Make all urls relative
 			foreach (['href', 'src'] as $attr) {
 				if ($node->hasAttribute($attr))
@@ -384,12 +445,19 @@
 	function wikify_link($node) {
 		global $hyphaXml, $isoLangList;
 
-		$path = explode('/', $node->getAttribute('href'), 3);
-		if (count($path) < 2)
+		$href = $node->getAttribute('href');
+		// This parses a query string of the form en/pagename/subpath#anchor
+		// and splits that into the language and pagename,
+		// followed by an optional subpath and/or anchor. The
+		// language and pagename will be replaced by the page
+		// id, the rest will be kept as-is.
+		//
+		// Note that pipes are used to enclose the regex rather
+		// than slashes, so we can use slashes without escaping
+		// them.
+		if (!preg_match('|^([^/#]+)/([^/#]+)(.*)$|', $href, $matches))
 			return;
-
-		$language = $path[0];
-		$pagename = $path[1];
+		list($all, $language, $pagename, $extra) = $matches;
 
 		// Prevent mangling urls to other files, such as images or downloads
 		if (!array_key_exists($language, $isoLangList))
@@ -424,9 +492,7 @@
 		if ($node->getAttribute('title') == __('page-in-other-language'))
 			$node->removeAttribute('title');
 
-		$uri = 'hypha:' . $page->getAttribute('id');
-		if (count($path) > 2)
-			$uri .= '/' . $path[2];
+		$uri = 'hypha:' . $page->getAttribute('id') . $extra;
 		$node->setAttribute('href', $uri);
 
 		// Clear out the page name in the link text, but keep
@@ -465,4 +531,53 @@
 		}
 		else $html = __('no-versions');
 		return $html;
+	}
+
+	function image_resize($src, $dst, $width, $height) {
+		list($w, $h) = getimagesize($src);
+
+		$type = strtolower(substr(strrchr($src,"."),1));
+		if ($type == 'jpeg') $type = 'jpg';
+		switch ($type) {
+			case 'bmp': $img = imagecreatefromwbmp($src); break;
+			case 'gif': $img = imagecreatefromgif($src); break;
+			case 'jpg': $img = imagecreatefromjpeg($src); break;
+			case 'png': $img = imagecreatefrompng($src); break;
+			default : return "Unsupported picture type!";
+		}
+
+		// resize
+		$ratio = min($width/$w, $height/$h);
+		$width = $w * $ratio;
+		$height = $h * $ratio;
+
+		$new = imagecreatetruecolor($width, $height);
+
+		// preserve transparency
+		if ($type == 'gif' || $type == 'png') {
+			imagecolortransparent($new, imagecolorallocatealpha($new, 0, 0, 0, 127));
+			imagealphablending($new, false);
+			imagesavealpha($new, true);
+		}
+
+		imagecopyresampled($new, $img, 0, 0, 0, 0, $width, $height, $w, $h);
+
+		switch($type){
+			case 'bmp': imagewbmp($new, $dst); break;
+			case 'gif': imagegif($new, $dst); break;
+			case 'jpg': imagejpeg($new, $dst); break;
+			case 'png': imagepng($new, $dst); break;
+		}
+		return true;
+	}
+
+	function hypha_searchHelp(RequestContext $O_O, $subject, $lang = 'en') {
+		$options = [$lang, $O_O->getInterfaceLanguage(), $O_O->getContentLanguage()];
+		foreach ($options as $lang) {
+			$dict = $O_O->getDictionaryByLanguage($lang);
+			if (null !== $dict && array_key_exists($subject, $dict)) {
+				return nl2br($dict[$subject]);
+			}
+		}
+		return 'Subject: "' . htmlspecialchars($subject) . '" not found';
 	}

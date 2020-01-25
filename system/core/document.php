@@ -34,14 +34,19 @@
 	*/
 
 	class HTMLDocument extends DOMWrap\Document {
+		const XML_HTML_UNKNOWN_TAG = 801;
+
+		/** @var null|HTMLForm */
+		private $defaultForm;
+
 		/*
 			Function: __construct
 			creates an empty HTML file
 
 			Parameters:
-			$filename - optional parameter of HTML template file (HyphaFile instance).
+			$file - optional parameter of HTML template file (HyphaFile instance).
 		*/
-		public function __construct($file = false, $base_url = false) {
+		public function __construct($file = false) {
 			parent::__construct('1.0', 'UTF-8');
 			$this->preserveWhiteSpace = false;
 			$this->formatOutput = true;
@@ -49,22 +54,58 @@
 				$contents = $file->read();
 			else
 				$contents = '<html><head></head><body></body></html>';
+			$previousSetting = libxml_use_internal_errors(true);
 			$this->loadHTML('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">'.$contents);
+			$map = [LIBXML_ERR_WARNING => E_USER_WARNING, LIBXML_ERR_ERROR => E_USER_WARNING, LIBXML_ERR_FATAL => E_USER_WARNING];
+			foreach (libxml_get_errors() as $error) {
+				// Ignore warnings for unknown tags, log the rest
+				if (self::XML_HTML_UNKNOWN_TAG !== $error->code) {
+					trigger_error($error->message, $map[$error->level]);
+				}
+			}
+			libxml_use_internal_errors($previousSetting);
+			$this->registerNodeClass('DOMDocument', 'HTMLDocument');
+			$this->registerNodeClass('DOMElement', 'HyphaDomElement');
+		}
+
+		public function initForBrowser($base_url = null) {
 			$this->documentElement->setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
+			$head = $this->find('head');
 			$metaMime = $this->createElement('meta', '');
 			$metaMime->setAttribute('http-equiv', "Content-Type");
 			$metaMime->setAttribute('content', "text/html; charset=utf-8");
-			$this->getElementsByTagName('head')->Item(0)->appendChild($metaMime);
+			$head->appendChild($metaMime);
 			$metaViewport = $this->createElement('meta', '');
 			$metaViewport->setAttribute('name', "viewport");
 			$metaViewport->setAttribute('content', "width=device-width, initial-scale=1");
-			$this->getElementsByTagName('head')->Item(0)->appendChild($metaViewport);
+			$head->appendChild($metaViewport);
 
-			if ($base_url) {
-				$base = $this->createElement('base', '');
+			if (null !== $base_url) {
+				$base = $this->createElement('base');
 				$base->setAttribute('href', $base_url);
-				$this->find('head')->prepend($base);
+				$head->prepend($base);
 			}
+		}
+
+		/*
+			Function: setDefaultForm
+			Set the default form to be retrieved later by
+			getDefaultForm(). Does not append the form to
+			the body.
+
+			Parameters:
+			$defaultForm - HTMLForm
+		*/
+		public function setDefaultForm(HTMLForm $defaultForm) {
+			$this->defaultForm = $defaultForm;
+		}
+
+		/*
+			Function: getDefaultForm
+			Returns the default form
+		*/
+		public function getDefaultForm() {
+			return $this->defaultForm;
 		}
 
 		/*
@@ -222,13 +263,16 @@
 		Wrapper around a DomElement that contains form fields,
 		to allow manipulating the form more easily.
 	*/
-	class HTMLForm {
+	class HTMLForm implements IteratorAggregate {
 		/**
-		 * The DOM form being wrapped
+		 * A dummy root element that contains the form (which
+		 * can be just a single tag wrapping the entire form,
+		 * but also multiple elements). The root itself is
+                * ignored, only its children are relevant.
 		 *
 		 * @var \DOMWrap\Element
 		 */
-		public $elem;
+		public $root;
 		/** The data associated with this form */
 		public $data;
 		/** Any collected errors from validation */
@@ -245,18 +289,39 @@
 			Wraps an existing form
 
 			Parameters:
-			$form - A DOMWrap\Element that contains the form
-			        fields.
+			@param string|NodeList|\DOMNode|\Closure $form
+			$form - The form, either as a single DomElement,
+				a list (or any traversable) of
+				DomElements, or a string containing
+				HTML. Accepts anything that can be passed
+				to domwrap's append method.
 		*/
-		function __construct($form, $data = array()) {
-			$this->elem = $form;
-			$this->data = $data;
-			$this->errors = array();
-			$this->fields = array();
-			$this->labels = array();
-			$this->image_previews = array();
+		function __construct($form, $data = []) {
+			$this->root = (new HTMLDocument())->createElement('root');
+			$this->root->append($form);
 
-			$this->scanForm($form);
+			$this->data = $data;
+			$this->errors = [];
+			$this->fields = [];
+			$this->labels = [];
+			$this->image_previews = [];
+
+			$this->scanForm($this->root);
+		}
+
+		// This is called when the for is iterated over (e.g.
+		// foreach ($elem in $form)). This returns the
+		// children() NodeList (which is also an iterator) so
+		// all content of the form will be iterated over.
+		// This allows a form to be directly appended to a
+		// DomElement (e.g. $div->append($form)) as if it was a
+		// DomElement itself.
+		public function getIterator() {
+			return $this->root->children();
+		}
+
+		public function getId() {
+			return $this->root->find('form')->first()->getId();
 		}
 
 		/*
@@ -264,7 +329,7 @@
 
 			Form fields to look through
 		 */
-		function getFormFieldTypes() {
+		protected function getFormFieldTypes() {
 			return ['input', 'select', 'textarea', 'label', 'img'];
 		}
 
@@ -274,9 +339,9 @@
 			Look through the DOM to find form fields and
 			their labels
 		 */
-		function scanForm($form)
+		protected function scanForm($root)
 		{
-			foreach($form->find(implode(', ', $this->getFormFieldTypes())) as $elem) {
+			foreach($root->find(implode(', ', $this->getFormFieldTypes())) as $elem) {
 				if ($elem->tagName == 'label') {
 					$name = self::getNameAttr($elem, 'for');
 					if ($name)
@@ -300,7 +365,7 @@
 			element, and process it as a form field name by
 			stripping any [] suffix.
 		*/
-		static function getNameAttr($elem, $attr) {
+		protected static function getNameAttr($elem, $attr) {
 			$name = $elem->getAttribute($attr);
 			// If a field name ends in [], PHP will construct an array
 			// when the form is submitted, whose name does not include
@@ -316,7 +381,7 @@
 			Set the data to be used by validation and
 			updateDom().
 		*/
-		function setData($data) {
+		public function setData($data) {
 			$this->data = $data;
 		}
 
@@ -331,7 +396,7 @@
 			validation to an ul.form-errors list (creating
 			it if needed).
 		 */
-		function updateDom() {
+		public function updateDom() {
 			// Put new values in the form
 			foreach($this->fields as $name => $elems) {
 				$value = $this->dataFor($name);
@@ -347,10 +412,10 @@
 
 			// Show any errors
 			if ($this->errors) {
-				$list = $this->elem->find('ul.form-errors')->first();
+				$list = $this->root->find('ul.form-errors')->first();
 				if (!$list) {
-					$list = $this->elem->ownerDocument->createElement('ul')->addClass('form-errors');
-					$this->elem->prepend($list);
+					$list = $this->root->document()->createElement('ul')->addClass('form-errors');
+					$this->root->prepend($list);
 				}
 
 				foreach ($this->errors as $name => $error) {
@@ -367,9 +432,8 @@
 			Update the value of the given DOM node that contains a
 			single HTML form field with the value given.
 		*/
-		function updateFormField($field, $value) {
-			$fieldType = $this->getFieldType($field);
-			if ($fieldType == 'checkbox') {
+		protected function updateFormField($field, $value) {
+			if ($field->tagName == 'input' && $field->getAttribute('type') == 'checkbox') {
 				// For multiple checkboxes that have a
 				// name ending in [], PHP will put an
 				// array in $_POST containing the value
@@ -381,36 +445,22 @@
 					$field->setAttribute('checked', 'checked');
 				else
 					$field->removeAttribute('checked');
-			} else if ($fieldType == 'input') {
+			} else if ($field->tagName == 'input') {
 				$field->setAttribute('value', $value);
-			} else if ($fieldType == 'select') {
+			} else if ($field->tagName == 'select') {
 				foreach($field->find('option') as $option) {
 					if ($option->getAttribute('value') == $value)
 						$option->setAttribute('selected', 'selected');
 					else
 						$option->removeAttribute('selected');
 				}
-			} else if ($fieldType == 'textarea') {
+			} else if ($field->tagName == 'textarea') {
 				$field->setText($value);
 			}
 		}
 
-		function getFieldType($field)
-		{
-			switch ($field->tagName) {
-				case 'input':
-					return $field->getAttribute('type') == 'checkbox' ? 'checkbox' : 'input';
-				case 'select':
-				case 'textarea':
-				case 'img':
-				case 'label':
-					return $field->tagName;
-			}
 
-			return null;
-		}
-
-		function updateImagePreview($field, $value) {
+		protected function updateImagePreview($field, $value) {
 			if ($value) {
 				$image = new HyphaImage($value);
 
@@ -425,13 +475,13 @@
 			}
 		}
 
-		function labelFor($name) {
+		public function labelFor($name) {
 			if (array_key_exists($name, $this->labels))
 				return $this->labels[$name];
 			return $name;
 		}
 
-		function dataFor($name, $default = null) {
+		public function dataFor($name, $default = null) {
 			if (is_array($this->data)) {
 				if (array_key_exists($name, $this->data))
 					return $this->data[$name];

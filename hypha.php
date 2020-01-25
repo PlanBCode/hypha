@@ -60,6 +60,7 @@
 		$path = pathinfo($file);
 		$dir = preg_replace('#[\./]*(.*)/*#', '$1', $path['dirname']);
 		$file = $path['basename'];
+		if ($dir == '' && $file == '.htaccess') return true;
 		if ($dir == '' && $file == 'index.php') return true;
 		if ($dir == '' && $file == 'documentation.txt') return true;
 		if ($dir == 'data' && $file == 'hypha.html') return true;
@@ -68,6 +69,7 @@
 		if ($dir == 'system/datatypes') return true;
 		if ($dir == 'system/languages') return true;
 		if ($dir == 'system/php-dom-wrapper') return true;
+		if ($dir == 'system/wymeditor') return true;
 		return false;
 	}
 
@@ -217,11 +219,6 @@
 			mkdir('data/pages', 0755);
 			mkdir('data/images', 0755);
 
-			// create .htaccess file
-			file_put_contents('.htaccess', "php_flag short_open_tag on\nphp_flag display_errors on\nRewriteEngine On\nRewriteRule hypha.php$ hypha.php [L]\nRewriteRule ^(.*)$ index.php [L]\n");
-
-			getWymeditor();
-
 			// create default page
 			$id = uniqid();
 			$xml = new DomDocument('1.0', 'UTF-8');
@@ -258,7 +255,7 @@
 			$header = $xml->createElement('header', $_POST['setupTitle']);
 			$hypha->appendChild($header);
 			$footer = $xml->createElement('footer', '');
-			setNodeHtml($footer, '<a href="http://creativecommons.org/licenses/by-sa/3.0/"><img alt="Creative Commons License" style="border-width: 0pt; float: right; margin-left: 5px;" src="http://i.creativecommons.org/l/by-sa/3.0/88x31.png" /></a> This work is licensed under a <a href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>. Website powered by <a href="http://www.hypha.net">hypha</a>.');
+			setNodeHtml($footer, '<a href="http://creativecommons.org/licenses/by-sa/3.0/"><img alt="Creative Commons License" style="border-width: 0pt; float: right; margin-left: 5px;" src="https://i.creativecommons.org/l/by-sa/3.0/88x31.png" /></a> This work is licensed under a <a href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>. Website powered by <a href="http://www.hypha.net">hypha</a>.');
 			$hypha->appendChild($footer);
 			$menu = $xml->createElement('menu', '');
 			setNodeHtml($menu, '<a href="hypha:'.$id.'"/>');
@@ -396,81 +393,6 @@
 			</table>
 <?php
 		return ob_get_clean();
-	}
-
-	/*
-		Function: getWymeditor
-		install latest version of wymeditor from github
-	*/
-	function getWymeditor() {
-		// get download link for latest release
-		$ch = curl_init('https://api.github.com/repos/wymeditor/wymeditor/releases/latest');
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch,CURLOPT_USERAGENT,'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13');
-		$githubLatest = json_decode(curl_exec($ch), true);
-		curl_close($ch);
-
-		// download file
-		file_put_contents('system/wymeditor.tar.gz', file_get_contents($githubLatest['assets'][0]['browser_download_url']));
-
-		// unzip file
-		$buffer_size = 4096; // read 4kb at a time
-		$file = gzopen('system/wymeditor.tar.gz', 'rb');
-		$out_file = fopen('system/wymeditor.tar', 'wb');
-		while(!gzeof($file)) fwrite($out_file, gzread($file, $buffer_size));
-		fclose($out_file);
-		gzclose($file);
-		unlink('system/wymeditor.tar.gz');
-
-		// unpack tar
-		$filesize = filesize('system/wymeditor.tar');
-		$fh = fopen('system/wymeditor.tar', 'rb');
-		$total = 0;
-		while (false !== ($block = fread($fh, 512))) {
-			$total += 512;
-			$meta = array();
-			// Extract meta data
-			// http://www.mkssoftware.com/docs/man4/tar.4.asp
-			$meta['filename'] = trim(substr($block, 0, 99));
-			$meta['mode'] = octdec((int)trim(substr($block, 100, 8)));
-			$meta['userid'] = octdec(substr($block, 108, 8));
-			$meta['groupid'] = octdec(substr($block, 116, 8));
-			$meta['filesize'] = octdec(substr($block, 124, 12));
-			$meta['mtime'] = octdec(substr($block, 136, 12));
-			$meta['header_checksum'] = octdec(substr($block, 148, 8));
-			$meta['link_flag'] = octdec(substr($block, 156, 1));
-			$meta['linkname'] = trim(substr($block, 157, 99));
-			$meta['databytes'] = ($meta['filesize'] + 511) & ~511;
-
-			if ($meta['link_flag'] == 5) {
-				// Create folder
-				mkdir('system/' . $meta['filename'], 0777, true);
-				chmod('system/' . $meta['filename'], $meta['mode']);
-			}
-
-			if ($meta['databytes'] > 0) {
-				$block = fread($fh, $meta['databytes']);
-				// Extract data
-				$data = substr($block, 0, $meta['filesize']);
-				// Write data and set permissions
-				if (strpos($meta['filename'], 'wymeditor/')===0) {
-					if (!file_exists(dirname('system/'.$meta['filename']))) mkdir(dirname('system/'.$meta['filename']), 0777, true);
-					if (false !== ($ftmp = fopen('system/' . $meta['filename'], 'wb'))) {
-						fwrite($ftmp, $data);
-						fclose($ftmp);
-						touch('system/' . $meta['filename'], $meta['mtime'], $meta['mtime']);
-
-						if ($meta['mode'] == 0744) $meta['mode'] = 0644;
-						chmod('system/' . $meta['filename'], $meta['mode']);
-					}
-				}
-				$total += $meta['databytes'];
-			}
-
-			if ($total >= $filesize-1024) break;
-		}
-		fclose($fh);
-		unlink('system/wymeditor.tar');
 	}
 
 	/*

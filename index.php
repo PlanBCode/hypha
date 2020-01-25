@@ -14,7 +14,7 @@
 		Group: Stage 1 - Security
 		Basic security is obtained in a number of ways.
 		- *htaccess* All http requests (pages, images, ajax calls, whatever...) to the folder where hypha resides or one of its subfolder are directed to this script (index.php) by a RewriteRule in .htaccess. One exception is made for calls to hypha.php, our maintenance script. In this way we can shield off direct access to data files.
-		- *session* When the main script is run it first initializes the session data through session_start(); This is a standard php command to administer data associated with a certain client, e.g. if a user is logged in. When no action is noticed from the client side within a ceratin time the data is dropped. In the above example the user will be considered logged out. For hypha, the login state is stored in the variable $_SESSION['hyphaLogin']
+		- *session* When the main script is run it first initializes the session data through session_start(); This is a standard php command to administer data associated with a certain client, e.g. if a user is logged in. When no action is noticed from the client side within a certain time the data is dropped. In the above example the user will be considered logged out. For hypha, the login state is stored in the variable $_SESSION['hyphaLogin']
 		- *errors* Switch off php error reporting to the client.
 		- *sanity check* Check if the version of php is compatible with our script.
 		- *code scan* Client data sent through $_GET or $_POST variables are scanned for malicious code injection before continuing to the main script.
@@ -29,80 +29,99 @@
 	session_start();
 	session_write_close();
 
-	$DEBUG = false;
+	$DEBUG = file_exists('DEBUG');
 	ini_set('display_errors', $DEBUG ? true : false);
 
 	if (strnatcmp(phpversion(),'5.4') < 0) die('Error: you are running php version '.substr(phpversion(),0,strpos(phpversion(), '-')).'; Hypha works only with php version 5.4 and higher');
 	if (function_exists('apache_get_modules') && !in_array('mod_rewrite', apache_get_modules())) die ('Error: Apache should have mod_rewrite enabled');
 
 	/*
-		Group: Stage 2 - Get query and handle direct file requests
-		Here we extract our page query from the php $_SERVER data. Page requests should be formatted in a directory like structure, e.g. http://www.dom.ain/en/home/edit, the first level usually being a language id, the second level begin a page id, and the third level being an optional view.
-		Some requests don't need the whole script to run. Certain file requests (css, javascript) can be handled directly here.
-	*/
-
-	$_path = substr($_SERVER["PHP_SELF"], 0, strpos($_SERVER["PHP_SELF"], 'index.php'));
-	$hyphaUrl = 'http://'.$_SERVER["SERVER_NAME"].$_path;
-	$hyphaQuery = substr($_SERVER["REQUEST_URI"], strlen($_path));
-	// Strip off any query parameters
-	$parampos = strpos($hyphaQuery, '?');
-	if ($parampos !== false)
-		$hyphaQuery = substr($hyphaQuery, 0, $parampos);
-//	$hyphaQuery = urldecode(substr($_SERVER["REQUEST_URI"], strlen($_path)));
-
-
-	/*
-		Group: Stage 3 - Build hypha script
+		Group: Stage 2 - Build hypha script
 		Additional scripts and data are included.
 		- *core* Include core scripts
 		- *dataypes* Include modules for available datatypes: textpage, mailinglist, blog et cetera
 		- *languages* Compile a list of available user interface languages
 	*/
 
-	$_handle = opendir("system/core/");
-	while ($_file = readdir($_handle)) if (substr($_file, -4) == '.php') require_once("system/core/".$_file);
-	closedir($_handle);
+	foreach (scandir("system/core/") as $_file) if (substr($_file, -4) == '.php') require_once("system/core/" . $_file);
 
-	$_handle = opendir("system/datatypes/");
-	while ($_file = readdir($_handle)) if (substr($_file, -4) == '.php') include_once("system/datatypes/".$_file);
-	closedir($_handle);
+	$pageTypeIndex = count(get_declared_classes()) -1;
+	foreach (scandir("system/datatypes/") as $_file) if (substr($_file, -4) == '.php') include_once("system/datatypes/" . $_file);
+	$hyphaPageTypes = [];
+	foreach (array_slice(get_declared_classes(), $pageTypeIndex) as $class) if (in_array('Page', class_parents($class)) && (new \ReflectionClass($class))->isInstantiable()) $hyphaPageTypes[] = $class;
 
-	$_handle = opendir("system/languages/");
-	while ($_file = readdir($_handle)) if (substr($_file, -4) == '.php') $uiLangList[] = basename($_file, '.php');
-	closedir($_handle);
+	foreach (scandir("system/languages/") as $_file) if (substr($_file, -4) == '.php') $uiLangList[] = basename($_file, '.php');
+
+	/*
+		Group: Stage 3 - Get query and handle direct file requests
+		Here we extract our page query from the php $_SERVER data. Page requests should be formatted in a directory like structure, e.g. http://www.dom.ain/en/home/edit, the first level usually being a language id, the second level begin a page id, and the third level being an optional view.
+		Some requests don't need the whole script to run. Certain file requests (css, javascript) can be handled directly here.
+	*/
+
+	// Build request
+	$hyphaRequest = new HyphaRequest($isoLangList);
+	$hyphaQuery = $hyphaRequest->getRelativeUrlPath();
+	$hyphaUrl = $hyphaRequest->getRootUrl();
 
 	// Shortcut for direct file requests
-	if ($hyphaQuery == 'data/hypha.css')
-		serveFile($hyphaQuery, false);
-	if (startsWith($hyphaQuery, 'system/wymeditor'))
-		serveFile($hyphaQuery, 'system/wymeditor');
+	if (startsWith($hyphaQuery, 'data/themes/')) serveFile($hyphaQuery, 'data/themes');
+	if (startsWith($hyphaQuery, 'system/wymeditor')) serveFile($hyphaQuery, 'system/wymeditor');
+	if (startsWith($hyphaQuery, 'system/bowser')) serveFile($hyphaQuery, 'system/bowser');
+	if (startsWith($hyphaQuery, 'system/assets')) serveFile($hyphaQuery, 'system/assets');
+
+	// jump to installation procedure when hypha.xml is missing
+	if (!is_file('data/hypha.xml')) header('Location: ' . $hyphaUrl . 'hypha.php');
 
 	/*
 		Group: Stage 4 - Load website data
 		Website data is loaded, see chapter about <Base> functions. The HTMLDocument $hyphaHtml is loaded with the website default layout.
 	*/
 
-	$hyphaHtml = new HTMLDocument(Hypha::$data->html, $hyphaUrl);
-	$hyphaHtml->linkStyle('data/hypha.css');
+	$hyphaHtml = new HTMLDocument(Hypha::$data->html);
+	$hyphaHtml->initForBrowser($hyphaUrl);
+	$pathToTheme = 'data/themes/' . Hypha::$data->theme;
+	$hyphaHtml->linkStyle('system/assets/hypha-core.css');
+	$hyphaHtml->linkStyle($pathToTheme . '/hypha.css');
+	$hyphaHtml->linkScript('//code.jquery.com/jquery-1.7.1.min.js');
+	$hyphaHtml->linkScript('system/assets/help.js');
 	$hyphaHtml->setTitle(hypha_getTitle());
 	$hyphaHtml->writeToElement('header', hypha_getHeader());
 	$hyphaHtml->writeToElement('footer', hypha_getFooter());
 	$hyphaHtml->writeToElement('menu', hypha_getMenu());
+	$defaultForm = new HTMLForm('<form id="hyphaForm" method="post" action="" accept-charset="utf-8" enctype="multipart/form-data" />');
+	$hyphaHtml->setDefaultForm($defaultForm);
 
 	/*
 		Group: Stage 5 - Initialize user and determine language to use
 		Check is a user is logged in and load user data. Add login/logout functionality according to session login status.
 	*/
 
-	$hyphaRequest = new HyphaRequest($hyphaQuery, $isoLangList);
-	loadLanguage($hyphaRequest);
+	// Build request context
+	$O_O = new RequestContext($hyphaRequest, hypha_getDefaultLanguage());
 
-	// Load user and page and execute the posted command. The latter
+	/**
+	 * Set user as global variable.
+	 * @deprecated Use O_O instead
+	 */
+	$hyphaUser = $O_O->getUser();
+
+	/**
+	 * Set language as global variable.
+	 * @deprecated Use O_O instead
+	 */
+	$hyphaLanguage = $O_O->getInterfaceLanguage();
+
+	/**
+	 * Set content language as global variable.
+	 * @deprecated Use O_O instead
+	 */
+	$hyphaContentLanguage = $O_O->getContentLanguage();
+
+	// Load page and execute the posted command. This
 	// is tried twice, since some commands need to run before
 	// loading the page, and some commands need to run after.
-	loadUser();
 	executePostedCommand(); // Might redirect and exit
-	loadPage($hyphaRequest);
+	loadPage($O_O);
 	executePostedCommand(); // Might redirect and exit
 
 	/*
@@ -111,27 +130,39 @@
 		If a command was issued from the client side (using a $_POST variable 'command') the eventhandler is called to take the appropriate action. When necessary (e.g. when the page query implicated an update of the database, or the user state was changed) this step is reiterated until no more events have to be processed.
 	*/
 
-	if ($hyphaPage) processCommandResult($hyphaPage->build());
+	if ($hyphaPage) processCommandResult($hyphaPage->process($O_O->getRequest()));
 
 	registerPostProcessingFunction('dewikify');
 
 	// add hypha commands and navigation
 	$_cmds[] = '<a href="index/'.$hyphaLanguage.'">'.__('index').'</a>';
-	if (!$hyphaUser) {
+	if (!$O_O->isUser()) {
 		addLoginRoutine($hyphaHtml);
 		$_cmds[] = '<a href="javascript:login();">'.__('login').'</a>';
 	}
 	else {
-		addNewPageRoutine($hyphaHtml, explode('/', $hyphaQuery), $hyphaPageTypes);
+		$dataTypeMtx = [];
+		foreach ($hyphaPageTypes as $className) {
+			$dataTypeMtx[$className] = call_user_func($className . '::getDatatypeName');
+		}
+		addNewPageRoutine($hyphaHtml, $hyphaRequest->getRelativeUrlPathParts(false), $dataTypeMtx);
 		$_cmds[] = makeLink(__('new-page'), 'newPage();');
 		$_cmds[] = makeLink(__('settings'), makeAction('settings', '', ''));
-		$_cmds[] = makeLink(__('logout'), makeAction($hyphaQuery, 'logout', ''));
+		$_cmds[] = makeLink(__('logout'), makeAction($hyphaRequest->getRelativeUrlPath(false),'logout',''));
 	}
-	$hyphaHtml->writeToElement('hyphaCommands', implode(' - ', $_cmds));
-	if ($hyphaUser) $hyphaHtml->writeToElement('hyphaCommands', '<br/><span id="loggedIn">'.__('logged-in-as').' `'.$hyphaUser->getAttribute('username').'`'.asterisk(isAdmin()).'</span>');
+	$hyphaHtml->writeToElement('hyphaCommands', implode('', $_cmds));
+	if ($O_O->isUser()) $hyphaHtml->writeToElement('hyphaCommands', '<br/><div id="loggedIn">'.__('logged-in-as').' `'.$O_O->getUser()->getAttribute('username').'`'.asterisk(isAdmin()).'</div>');
 
-	// obfuscate email addresses to strangers. It's ok to send readible addresses to logged in members. This also prevents conflicts in the editor.
-//	if (!$hyphaUser) registerPostProcessingFunction('obfuscateEmail');
+	// obfuscate email addresses to strangers. It's ok to send readable addresses to logged in members. This also prevents conflicts in the editor.
+//	if (!$O_O->isUser()) registerPostProcessingFunction('obfuscateEmail');
+
+	if ($hyphaPage) hypha_setBodyClass($hyphaRequest, $hyphaPage);
+	if ($hyphaPage) hypha_setPreviewPanel($hyphaPage);
+
+	// Add the default form. This does not happen earlier, since
+	// appending makes a copy of the form, so now we can be sure
+	// that all changes (if any) to the form are taken into account.
+	$hyphaHtml->find('body')->children()->wrapAll($hyphaHtml->getDefaultForm());
 
 	// poor man's cron job
 	if (time() - hypha_getLastDigestTime() >= hypha_getDigestInterval()) flushDigest();
@@ -144,4 +175,3 @@
 	header('Content-Type: text/html; charset=utf-8');
 	print $hyphaHtml->toString();
 	exit;
-?>

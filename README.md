@@ -1,5 +1,5 @@
 Hypha is a lightweight CMS for small to medium sized communities and project teams, offering the possibility to create a basic website that is easy to set up and maintain.
-It is open source and doesn't rely on third party code, making it a safe tool that can be self hosted. Hypha is written in php.
+It is open source and doesn't rely on proprietary third party code, making it a safe tool that can be self hosted. Hypha is written in php.
 
 The saying goes: "If you can't open it you don't own it." We'd like to add however: "It's no good if you have to use a screwdriver to simply turn it on."
 
@@ -17,7 +17,6 @@ This script packages a fully self contained copy of hypha in a single monolithic
 
 **Advanced install though git**<br/>
 1. Pull in a git clone, either by downloading a <a href="https://github.com/PlanBCode/hypha/archive/master.zip">zip file</a> and extracting it in your webfolder of choice, or by issuing a <pre>git clone https://github.com/PlanBCode/hypha.git .</pre> from the commandline in that folder.
-2. For the time being you should switch to our current development branch articlePlusCSS, use <pre>git checkout articlePlusCSS</pre>
-3. Open the file 'hypha.php' in a text editor and enter a superuser name and password.
-4. Set write permissions to the folder 'data/', e.g. by issuing a <pre>chmod -R 777 .</pre>
-5. Navigate to your webfolder in a browser and follow instructions from there.
+2. Open the file 'hypha.php' in a text editor and enter a superuser name and password.
+3. Set write permissions to the folder 'data/', e.g. by issuing a <pre>chmod -R 777 .</pre>
+4. Navigate to your webfolder in a browser and follow instructions from there.

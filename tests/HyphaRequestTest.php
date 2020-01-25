@@ -7,7 +7,7 @@ class HyphaRequestTest {
 	protected $counter = 0;
 	protected $results = [];
 	protected $testResultMaxLength = [
-		'query' => 0,
+		'relativeUrlPath' => 0,
 		'test' => [],
 		'testText' => [],
 	];
@@ -15,15 +15,15 @@ class HyphaRequestTest {
 	public function test(array $isoLangList) {
 		$data = $this->getData();
 		foreach ($data as $item) {
-			$query = $item['query'];
-			$request = new HyphaRequest($query, $isoLangList);
-			$this->assertSame($request->getRequestQuery(false), $query, $query, 'query');
-			$this->assertSame($request->isSystemPage(), $item['system'], $query, 'isSystem');
-			$this->assertSame($request->getLanguage(), $item['lang'], $query, 'getLanguage');
-			$this->assertSame($request->getPageName(), $item['name'], $query, 'getPageName');
-			$this->assertSame($request->getArgs(), $item['args'], $query, 'getArgs');
-			$this->assertSame($request->getRequestParts(), $item['parts'], $query, 'getRequestParts');
-			$this->assertSame($request->getRequestParts(false), $item['partsInclude'], $query, 'getRequestParts(false)');
+			$relativeUrlPath = $item['relativeUrlPath'];
+			$request = new HyphaRequest($isoLangList, null, $relativeUrlPath);
+			$this->assertSame($request->getRelativeUrlPath(false), $relativeUrlPath, $relativeUrlPath, 'relativeUrlPath');
+			$this->assertSame($request->isSystemPage(), $item['system'], $relativeUrlPath, 'isSystem');
+			$this->assertSame($request->getLanguage(), $item['lang'], $relativeUrlPath, 'getLanguage');
+			$this->assertSame($request->getPageName(), $item['name'], $relativeUrlPath, 'getPageName');
+			$this->assertSame($request->getArgs(), $item['args'], $relativeUrlPath, 'getArgs');
+			$this->assertSame($request->getRelativeUrlPathParts(), $item['parts'], $relativeUrlPath, 'getRequestParts');
+			$this->assertSame($request->getRelativeUrlPathParts(false), $item['partsInclude'], $relativeUrlPath, 'getRequestParts(false)');
 		}
 
 		return $this;
@@ -32,7 +32,7 @@ class HyphaRequestTest {
 	private function getData() {
 		return [
 			[
-				'query' => '',
+				'relativeUrlPath' => '',
 				'system' => false,
 				'lang' => null,
 				'name' => null,
@@ -41,7 +41,7 @@ class HyphaRequestTest {
 				'partsInclude' => [],
 			],
 			[
-				'query' => 'nl/festival',
+				'relativeUrlPath' => 'nl/festival',
 				'system' => false,
 				'lang' => 'nl',
 				'name' => 'festival',
@@ -50,7 +50,7 @@ class HyphaRequestTest {
 				'partsInclude' => ['nl', 'festival'],
 			],
 			[
-				'query' => 'en/festival',
+				'relativeUrlPath' => 'en/festival',
 				'system' => false,
 				'lang' => 'en',
 				'name' => 'festival',
@@ -59,7 +59,7 @@ class HyphaRequestTest {
 				'partsInclude' => ['en', 'festival'],
 			],
 			[
-				'query' => 'en/festival/edit',
+				'relativeUrlPath' => 'en/festival/edit',
 				'system' => false,
 				'lang' => 'en',
 				'name' => 'festival',
@@ -68,17 +68,16 @@ class HyphaRequestTest {
 				'partsInclude' => ['en', 'festival', 'edit'],
 			],
 			[
-				'query' => 'festival/festival',
+				'relativeUrlPath' => 'festival/festival',
 				'system' => false,
 				'lang' => null,
-				'type' => 'festival',
 				'name' => 'festival',
 				'args' => [],
 				'parts' => ['festival', 'festival'],
 				'partsInclude' => ['festival', 'festival'],
 			],
 			[
-				'query' => HyphaRequest::HYPHA_SYSTEM_PAGE_FILES,
+				'relativeUrlPath' => HyphaRequest::HYPHA_SYSTEM_PAGE_FILES,
 				'system' => true,
 				'lang' => null,
 				'name' => null,
@@ -87,7 +86,7 @@ class HyphaRequestTest {
 				'partsInclude' => [HyphaRequest::HYPHA_SYSTEM_PAGE_FILES],
 			],
 			[
-				'query' => HyphaRequest::HYPHA_SYSTEM_PAGE_SETTINGS,
+				'relativeUrlPath' => HyphaRequest::HYPHA_SYSTEM_PAGE_SETTINGS,
 				'system' => true,
 				'lang' => null,
 				'name' => null,
@@ -96,7 +95,7 @@ class HyphaRequestTest {
 				'partsInclude' => [HyphaRequest::HYPHA_SYSTEM_PAGE_SETTINGS],
 			],
 			[
-				'query' => 'mailing/' . HyphaRequest::HYPHA_SYSTEM_PAGE_SETTINGS,
+				'relativeUrlPath' => 'mailing/' . HyphaRequest::HYPHA_SYSTEM_PAGE_SETTINGS,
 				'system' => false,
 				'lang' => null,
 				'name' => 'settings',
@@ -105,7 +104,7 @@ class HyphaRequestTest {
 				'partsInclude' => ['mailing', HyphaRequest::HYPHA_SYSTEM_PAGE_SETTINGS],
 			],
 			[
-				'query' => HyphaRequest::HYPHA_SYSTEM_PAGE_FILES . '/' . HyphaRequest::HYPHA_SYSTEM_PAGE_FILES,
+				'relativeUrlPath' => HyphaRequest::HYPHA_SYSTEM_PAGE_FILES . '/' . HyphaRequest::HYPHA_SYSTEM_PAGE_FILES,
 				'system' => true,
 				'lang' => null,
 				'name' => null,
@@ -114,7 +113,7 @@ class HyphaRequestTest {
 				'partsInclude' => [HyphaRequest::HYPHA_SYSTEM_PAGE_FILES, HyphaRequest::HYPHA_SYSTEM_PAGE_FILES],
 			],
 			[
-				'query' => 'text/system',
+				'relativeUrlPath' => 'text/system',
 				'system' => false,
 				'lang' => null,
 				'name' => 'system',
@@ -123,7 +122,7 @@ class HyphaRequestTest {
 				'partsInclude' => ['text', 'system'],
 			],
 			[
-				'query' => 'text/system/edit',
+				'relativeUrlPath' => 'text/system/edit',
 				'system' => false,
 				'lang' => null,
 				'name' => 'system',
@@ -132,7 +131,7 @@ class HyphaRequestTest {
 				'partsInclude' => ['text', 'system', 'edit'],
 			],
 			[
-				'query' => 'en/index',
+				'relativeUrlPath' => 'en/index',
 				'system' => false,
 				'lang' => 'en',
 				'name' => 'index',
@@ -143,8 +142,8 @@ class HyphaRequestTest {
 		];
 	}
 
-	protected function assertSame($actual, $expected, $query, $test) {
-		$result = $this->assert($actual === $expected, $query);
+	protected function assertSame($actual, $expected, $relativeUrlPath, $test) {
+		$result = $this->assert($actual === $expected, $relativeUrlPath);
 		$actualText = $actual;
 		$expectedText = $expected;
 		if (is_array($actualText)) {
@@ -154,14 +153,14 @@ class HyphaRequestTest {
 			$expectedText = json_encode($expectedText);
 		}
 		$resultText = ($result ? '' : '! ' . $expectedText . '(' . gettype($expected) . ') -> ') . $actualText . ($result ? '' : '(' . gettype($actual) . ')');
-		$this->results[$query][$test] = [$resultText, $actual, $expected, $result];
+		$this->results[$relativeUrlPath][$test] = [$resultText, $actual, $expected, $result];
 
-		if ($this->testResultMaxLength['test'][$test] < strlen($test)) {
+		if (!isset($this->testResultMaxLength['test'][$test]) || $this->testResultMaxLength['test'][$test] < strlen($test)) {
 			$this->testResultMaxLength['testText'][$test]  = $test;
 			$this->testResultMaxLength['test'][$test] = strlen($test);
 		}
-		if ($this->testResultMaxLength['query'] < strlen($query)) {
-			$this->testResultMaxLength['query'] = strlen($query);
+		if ($this->testResultMaxLength['relativeUrlPath'] < strlen($relativeUrlPath)) {
+			$this->testResultMaxLength['relativeUrlPath'] = strlen($relativeUrlPath);
 		}
 		if ($this->testResultMaxLength['test'][$test] < strlen($resultText)) {
 			$this->testResultMaxLength['test'][$test] = strlen($resultText);
@@ -178,8 +177,8 @@ class HyphaRequestTest {
 
 	public function summary() {
 		$delimiter = ' | ';
-		$summary = str_pad('', $this->testResultMaxLength['query']);
-		$headSeparation = str_pad('', $this->testResultMaxLength['query']+1, '-');
+		$summary = str_pad('', $this->testResultMaxLength['relativeUrlPath']);
+		$headSeparation = str_pad('', $this->testResultMaxLength['relativeUrlPath']+1, '-');
 		foreach ($this->testResultMaxLength['testText'] as $test) {
 			$summary .= $delimiter . str_pad($test, $this->testResultMaxLength['test'][$test]);
 			$headSeparation .= '+' . str_pad('', $this->testResultMaxLength['test'][$test]+2, '-');
@@ -192,10 +191,10 @@ class HyphaRequestTest {
 		$summary .= PHP_EOL;
 		$summary .= $headSeparation . PHP_EOL;
 
-		foreach ($this->results as $query => $resultsPerQuery) {
-			$summary .= str_pad($query, $this->testResultMaxLength['query']);
+		foreach ($this->results as $relativeUrlPath => $resultsPerRelativeUrlPath) {
+			$summary .= str_pad($relativeUrlPath, $this->testResultMaxLength['relativeUrlPath']);
 			$success = true;
-			foreach ($resultsPerQuery as $test => $resultSet) {
+			foreach ($resultsPerRelativeUrlPath as $test => $resultSet) {
 				$summary .= $delimiter . str_pad($resultSet[0], $this->testResultMaxLength['test'][$test]);
 				if ($resultSet[3] === false) {
 					$success = false;

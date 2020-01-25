@@ -35,30 +35,10 @@
 	*/
 	registerPostProcessingFunction('addEventHandler');
 	function addEventHandler($html) {
-
-		// place all body content in a form
-		$body = $html->getElementsByTagName('body')->Item(0);
-		ob_start();
-?>
-	<form name="hyphaForm" method="post" action="" accept-charset="utf-8" enctype="multipart/form-data">
-		<input id="command" name="command" type="hidden">
-		<input id="argument" name="argument" type="hidden">
-		<input id="csrfToken" name="csrfToken" type="hidden" value="<?=getCsrfToken()?>">
-		<?=getInnerHtml($body)?>
-	</form>
-<?php
-		setInnerHtml($body, ob_get_clean());
-
 		// add a javascript function to process client commands and ajax calls
 		ob_start();
 ?>
 <script>
-	/*
-		Variable: baseUrl
-		Javascript variable containing the base url from the document location object.
-	*/
-	var postProcessingList = new Array();
-
 	/*
 		Function: hypha
 		Javascript function to load another page or view.
@@ -67,15 +47,52 @@
 		url - the hypha-formatted page identifier, e.g. 'en/hompage/defaultview'. When left empty the current paged is reloaded.
 		cmd - php function to execute, e.g. 'save'
 		arg - argument to pass to the cmd function
+		form - the form tag to use for posting (if cmd or arg are given)
 	*/
-	function hypha(url, cmd, arg) {
+	function hypha(url, cmd, arg, form) {
+		// update url
 		url = url.replace(/\s\//g, '/').replace(/\s$/g, '').replace(/\s/g, '_');
-		document.getElementById('command').value = cmd;
-		document.getElementById('argument').value = arg;
-		document.forms['hyphaForm'].action = url;
-		for(i=0; i<postProcessingList.length; i++) postProcessingList[i]();
-		if (cmd||arg) document.forms['hyphaForm'].submit();
-		else window.location = url;
+
+		// if no cmd or arg is given, redirect to url
+		if (!cmd && !arg) { window.location = url; return; }
+
+		var $form = $(form);
+		$form.attr('action', url);
+
+		// Add a command and argument hidden field if needed
+		// (but do not bother if it would be empty). Always set
+		// the fields (even to the empty value) if they exist,
+		// though.
+		var $cmd = $form.find('input[name="command"]');
+		if (cmd && $cmd.length < 1) {
+			$cmd = $('<input type="hidden" name="command" />');
+			$form.append($cmd);
+		}
+		$cmd.val(cmd);
+
+		var $arg = $form.find('input[name="argument"]');
+		if (arg && $arg.length < 1) {
+			$arg = $('<input type="hidden" name="argument" />');
+			$form.append($arg);
+		}
+		$arg.val(arg);
+
+		// When there is a field with name "submit",
+		// $form.submit (and $form[0].submit) will be a
+		// reference to that field rather than a function we can
+		// call to submit the field. To work around that, we
+		// call the submit function from the prototype manually,
+		// but that only submits the form, without running any
+		// event handlers. So we first run the event handles
+		// manually by calling trigger. To prevent trigger from
+		// also submitting the form (and throwing an error if
+		// there is a field named submit), we pass it an Event
+		// object with preventDefault set, since then trigger
+		// knows not to submit the form.
+		var evt = new jQuery.Event("submit");
+		evt.preventDefault();
+		$form.trigger(evt);
+		$form[0].__proto__.submit.call($form[0]);
 	}
 
 	/*
@@ -184,8 +201,12 @@
 		return false;
 	}
 
-	function makeAction($langPageView, $command, $argument) {
-		return 'hypha(\''.$langPageView.'\', \''.$command.'\', \''.$argument.'\');';
+	function makeAction($langPageView, $command, $argument, HTMLForm $form = null) {
+		if (null === $form) {
+			global $hyphaHtml;
+			$form = $hyphaHtml->getDefaultForm();
+		}
+		return 'hypha(\''.$langPageView.'\', \''.$command.'\', \''.$argument.'\', document.getElementById(\''.$form->getId().'\'));';
 	}
 
 	/*
@@ -251,6 +272,20 @@
 		$_SESSION['hyphaCsrfToken'] = bin2hex(openssl_random_pseudo_bytes(8));
 	}
 
+	// Automatically insert the CSRF token into all forms in the
+	// generated document
+	registerPostProcessingFunction('injectCsrf');
+	function injectCsrf(HTMLDocument $html) {
+		$forms = $html->find('form');
+		foreach ($forms as $form) {
+			// if form does not have a csrf field, inject csrf field.
+			if ($form->find('input[name=csrfToken]')->count() === 0) {
+				$form->append($input = $html->create('<input name="csrfToken" type="hidden"'));
+				$input->setAttr('value', getCsrfToken());
+			}
+		}
+	}
+
 	// execute posted commands
 	function executePostedCommand() {
 		if(isset($_POST['command'])) {
@@ -260,7 +295,7 @@
 				return;
 			}
 
-			$result = processCommand($_POST['command'], $_POST['argument']);
+			$result = processCommand($_POST['command'], isset($_POST['argument']) ? $_POST['argument'] : null);
 			if ($result !== false) {
 				// Command was handled
 				unset($_POST['command']);
@@ -273,8 +308,16 @@
 		if (!$result)
 			return;
 
+		if ($result === '404') {
+			http_response_code(404);
+			// TODO: Show a nicer error message
+			echo("Page not found");
+			exit;
+		}
+
 		// Command requests a reload
 		if ($result === 'reload') {
+			preserveDumps();
 			$url = preserveNotifications($_SERVER['REQUEST_URI']);
 			header('Location: ' . $url);
 			exit;
@@ -282,6 +325,7 @@
 
 		// Command requests a redirect
 		if (count($result) == 2 && $result[0] == 'redirect') {
+			preserveDumps();
 			$url = preserveNotifications($result[1]);
 			header('Location: ' . $url);
 			exit;
@@ -392,12 +436,6 @@
 	$GLOBALS['hyphaNotificationList'] = array();
 	function addNotifier($html) {
 		global $hyphaNotificationList;
-		// add hyphaNotify element to body
-		$body = $html->getElementsByTagName('body')->Item(0);
-		$msgdiv = $html->createElement('div', '');
-		$msgdiv->setAttribute('id', 'hyphaNotify');
-		$msgdiv->setAttribute('style', 'visibility:'.(count($hyphaNotificationList)?'visible':'hidden').';');
-		$body->appendChild($msgdiv);
 
 		// Show any notifications from before a redirect. The
 		// notifications themselves are stored in the session
@@ -416,6 +454,13 @@
 			}
 			session_write_close();
 		}
+
+
+		// Compatibility for older version that did not have the
+		// #hyphaNotify element in their html. Add to the
+		// header, to ensure it will be seen.
+		if (!$html->getElementById('hyphaNotify'))
+			$html->writeToElement('header', '<div id="hyphaNotify"></div>');
 
 		if (count($hyphaNotificationList))
 			foreach ($hyphaNotificationList as $msg)
@@ -451,16 +496,14 @@
 					var next = msg.nextSibling;
 					if (msg.nodeType === 1) {
 						if(!msg.hasAttribute('time')) msg.setAttribute('time', now);
-						else if (now - msg.getAttribute('time') > 5000) msg.parentNode.removeChild(msg);
+						else if (now - msg.getAttribute('time') > 10000) msg.parentNode.removeChild(msg);
 					}
 					msg = next;
 				}
 			}
 			if (msgbox.children.length) {
-				document.getElementById('hyphaNotify').style.visibility = 'visible';
 				setTimeout(notifyTimer, 100);
 			}
-			else document.getElementById('hyphaNotify').style.visibility = 'hidden';
 		}
 	}
 	setTimeout(notifyTimer, 1000);
@@ -480,4 +523,71 @@
 	function notify($type, $message) {
 		global $hyphaNotificationList;
 		if ($message) $hyphaNotificationList[] = '<div class="'.$type.'">'.$message.'</div>';
+	}
+
+	/*
+		Function: preserveDumps
+
+		Store pending dumps in the session, so they can be loaded
+		in the next request.
+	*/
+	function preserveDumps() {
+		global $hyphaDumpList;
+		if (count($hyphaDumpList)) {
+			session_start();
+			$_SESSION['dumps'] = $hyphaDumpList;
+			session_write_close();
+			$hyphaDumpList = [];
+		}
+	}
+
+	/*
+		Function: addDumps
+		Dumps the entries in the $hyphaDumpList to the <HTMLDocument>
+		Parameters:
+		$html - an instance of <HTMLDocument>
+	*/
+	registerPostProcessingFunction('addDumps');
+	$GLOBALS['hyphaDumpList'] = [];
+	function addDumps($html) {
+		global $hyphaDumpList;
+
+		session_start();
+		if (isset($_SESSION['dumps'])) {
+			$hyphaDumpList = array_merge($_SESSION['dumps'], $hyphaDumpList);
+
+			unset($_SESSION['dumps']);
+		}
+		session_write_close();
+
+		if (count($hyphaDumpList)) {
+			foreach ($hyphaDumpList as $vars) {
+				foreach ($vars as &$value) $value = json_encode($value);
+				call_user_func_array([$html, 'writeScript'], ['console.log(' . implode(', ', $vars) . ');']);
+			}
+		}
+	}
+
+	/*
+		Function: dump
+
+		Dumps the given variables to the html console
+
+		Adds the given variables to the $hyphaDumpList which will be
+		post processed so the given variables will be logged in the console.
+		Parameters:
+		@param array $vars - variables to dump
+	*/
+	function dump(...$vars) {
+		global $O_O;
+		global $hyphaDumpList;
+
+		// add caller as first variable
+		$caller = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0];
+		$file = str_replace($O_O->getRootPath(), '', $caller['file']);
+		$line = $caller['line'];
+		array_unshift($vars, $file . ':' . $line);
+
+		// adds the variables to the $hyphaDumpList for later processing
+		$hyphaDumpList[] = $vars;
 	}
