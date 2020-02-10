@@ -56,6 +56,8 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	const FIELD_NAME_AUTHOR = 'author';
 	const FIELD_NAME_STATUS = 'status';
 	const FIELD_NAME_EXCERPT = 'excerpt';
+	const FIELD_NAME_FEATURED_IMAGE = 'featured_image';
+	const FIELD_NAME_FEATURED_IMAGE_DELETED = 'featured_image_deleted';
 	const FIELD_NAME_METHOD = 'method';
 
 	const STATUS_NEWLY_CREATED = 'newly created';
@@ -180,6 +182,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 				self::FIELD_NAME_CONTEXT => [
 					self::FIELD_NAME_TITLE => [],
 					self::FIELD_NAME_EXCERPT => [],
+					self::FIELD_NAME_FEATURED_IMAGE => [],
 					self::FIELD_NAME_METHOD => [],
 				],
 			],
@@ -418,6 +421,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 			self::FIELD_NAME_AUTHOR => $this->xml->find(self::FIELD_NAME_ARTICLE)->getAttribute(self::FIELD_NAME_AUTHOR),
 			self::FIELD_NAME_TEXT => $this->xml->find(self::FIELD_NAME_TEXT)->children(),
 			self::FIELD_NAME_EXCERPT => $this->xml->find(self::FIELD_NAME_EXCERPT)->children(),
+			self::FIELD_NAME_FEATURED_IMAGE => $this->xml->documentElement->getOrCreate(self::FIELD_NAME_FEATURED_IMAGE)->text(),
 			self::FIELD_NAME_METHOD => $this->xml->find(self::FIELD_NAME_METHOD)->children(),
 			self::FIELD_NAME_SOURCES => $this->xml->find(self::FIELD_NAME_SOURCES)->children(),
 		];
@@ -466,12 +470,47 @@ class peer_reviewed_article extends HyphaDatatypePage {
 			return ['redirect', $this->constructFullPath($this->pagename)];
 		}
 
+		$formData = $request->getPostData() + $_FILES;
+
 		// create form
-		$form = $this->createEditForm($request->getPostData());
+		$form = $this->createEditForm($formData);
+
+		$featuredImageData = $form->dataFor(self::FIELD_NAME_FEATURED_IMAGE);
+		$orgImg = $this->xml->documentElement->getOrCreate(self::FIELD_NAME_FEATURED_IMAGE)->getText();
+		$hasNewImg = $featuredImageData && !$featuredImageData['error'];
+
+		if ($hasNewImg) {
+			$ext = strtolower(substr(strrchr($featuredImageData['name'], '.'), 1));
+			@$size = getimagesize($_FILES[self::FIELD_NAME_FEATURED_IMAGE]['tmp_name']);
+			if (!$size || !in_array($ext, ['jpg','jpeg','png','gif','bmp'])) {
+				$form->errors[self::FIELD_NAME_FEATURED_IMAGE] = __('invalid-image-file').ini_get('upload_max_filesize');
+			}
+		}
 
 		// process form if there are no errors
 		if (!empty($form->errors)) {
 			return $this->editViewRender($request, $form);
+		}
+
+		$newImage = null;
+		if ($hasNewImg) {
+			$maxSize = [1120, 800];
+			$needResize = $size[0] > $maxSize[0] || $size[1] > $maxSize[1];
+			$filename = uniqid() . '.' . $ext;
+			$destinations = ['org' => 'data/images/org/' . $filename, 'img' => 'data/images/' . $filename];
+			if ($needResize && !file_exists('data/images/org/')) {
+				mkdir('data/images/org/', 0777, true);
+			}
+			$orgUrlIndex = $needResize ? 'org' : 'img';
+			if (move_uploaded_file($_FILES[self::FIELD_NAME_FEATURED_IMAGE]['tmp_name'], $destinations[$orgUrlIndex])) {
+				if ($needResize) {
+					image_resize($destinations[$orgUrlIndex], $destinations['img'], $maxSize[0], $maxSize[1]);
+				}
+			}
+
+			if (file_exists($destinations['img'])) {
+				$newImage = $destinations['img'];
+			}
 		}
 
 		$this->xml->lockAndReload();
@@ -484,6 +523,13 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		$this->xml->find(self::FIELD_NAME_EXCERPT)->setHtml($form->dataFor(self::FIELD_NAME_EXCERPT));
 		$this->xml->find(self::FIELD_NAME_METHOD)->setHtml($form->dataFor(self::FIELD_NAME_METHOD));
 		$this->xml->find(self::FIELD_NAME_SOURCES)->setHtml($form->dataFor(self::FIELD_NAME_SOURCES));
+		if ($newImage) {
+			$this->xml->documentElement->getOrCreate(self::FIELD_NAME_FEATURED_IMAGE)->setText($newImage);
+		}
+
+		if ($orgImg !== '' && $form->dataFor(self::FIELD_NAME_FEATURED_IMAGE_DELETED)) {
+			unlink($orgImg);
+		}
 
 		$this->xml->saveAndUnlock();
 
@@ -1182,6 +1228,13 @@ class peer_reviewed_article extends HyphaDatatypePage {
 				</div>
 			</div>
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
+				<div class="input-wrapper field_type_editor field_name_[[field-name-featured-image]]">
+					<strong><label for="[[field-name-featured-image]]">[[featured-image]]</label></strong><br>
+					<input type="hidden" id="[[field-name-featured-image-deleted]]" name="[[field-name-featured-image-deleted]]" value="0" />
+					<input type="file" id="[[field-name-featured-image]]" name="[[field-name-featured-image]]" data-image-uploader data-image-uploader-src="[[featured-image-src]]" data-image-uploader-deleted-field-id="[[field-name-featured-image-deleted]]" accept="image/png,image/jpeg,image/jpg,image/gif,image/bmp" />
+				</div>
+			</div>
+			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
 				<div class="input-wrapper field_type_editor field_name_[[field-name-text]]">
 					<strong><label for="[[field-name-text]]">[[text]]</label></strong>[[info-button-text]]<br><editor name="[[field-name-text]]"></editor>
 				</div>
@@ -1198,6 +1251,8 @@ class peer_reviewed_article extends HyphaDatatypePage {
 			</div>
 EOF;
 
+		$src = array_key_exists(self::FIELD_NAME_FEATURED_IMAGE, $values) && is_string($values[self::FIELD_NAME_FEATURED_IMAGE]) && file_exists($values[self::FIELD_NAME_FEATURED_IMAGE]) ? $values[self::FIELD_NAME_FEATURED_IMAGE] : null;
+
 		$vars = [
 			'title' => __('art-title'),
 			'field-name-title' => self::FIELD_NAME_TITLE,
@@ -1205,6 +1260,10 @@ EOF;
 			'field-name-author' => self::FIELD_NAME_AUTHOR,
 			'excerpt' => __('art-excerpt'),
 			'field-name-excerpt' => self::FIELD_NAME_EXCERPT,
+			'featured-image' => __('art-featured-image'),
+			'field-name-featured-image' => self::FIELD_NAME_FEATURED_IMAGE,
+			'field-name-featured-image-deleted' => self::FIELD_NAME_FEATURED_IMAGE_DELETED,
+			'featured-image-src' => $src,
 			'info-button-excerpt' => makeInfoButton('help-art-excerpt'),
 			'text' => __('art-article'),
 			'field-name-text' => self::FIELD_NAME_TEXT,
