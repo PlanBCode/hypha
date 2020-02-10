@@ -991,6 +991,7 @@ body.type_peer_reviewed_article .input-wrapper.field_type_editor:not(.field_name
 .share-links .facebook-link{
     background-image: url(images/shareFacebook.png);
 }
+
 .index-item.is-private:after {
     content: " *";
     color: #b90;
@@ -1021,4 +1022,15 @@ body.type_peer_reviewed_article .input-wrapper.field_type_editor:not(.field_name
 .tagindex-item > a {
     text-decoration: none;
     color: inherit;
+}
+
+.preview_uploaded_image {
+ max-width: 150px;
+ max-height: 150px;
+}
+.delete-uploaded-image-button {
+ width: 40px;
+ height: 40px;
+ background-image: url('https://image.flaticon.com/icons/svg/261/261935.svg');
+ display: inline-block;
 }
