@@ -197,6 +197,22 @@
 				$helpLanguage = isset($args[1]) ? $args[1] : $O_O->getInterfaceLanguage();
 				echo hypha_searchHelp($O_O, $subject, $helpLanguage);
 				exit;
+			case HyphaRequest::HYPHA_SYSTEM_PAGE_DELETE_UPLOADED_IMAGE:
+				$src = $O_O->getRequest()->getPostValue('src');
+				if (strpos($src, 'data/images') === 0) {
+					$success = unlink($src);
+					$code = $success ? 204 : 410;
+					$basename = basename($src);
+					$orgImgSrc = 'data/images/org/' . $basename;
+					if (file_exists($orgImgSrc)) {
+						unlink($orgImgSrc);
+					}
+				} else {
+					$code = 500;
+				}
+				http_response_code($code);
+				echo json_encode($code === 204);
+				exit;
 			case HyphaRequest::HYPHA_SYSTEM_PAGE_SETTINGS:
 				if (isUser() || $args[0]=='register') {
 					$hyphaPage = new settingspage($O_O);

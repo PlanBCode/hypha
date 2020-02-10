@@ -17,6 +17,7 @@
 		const HYPHA_SYSTEM_PAGE_UPLOAD = 'upload';
 		const HYPHA_SYSTEM_PAGE_CHOOSER = 'chooser';
 		const HYPHA_SYSTEM_PAGE_HELP = 'help';
+		const HYPHA_SYSTEM_PAGE_DELETE_UPLOADED_IMAGE = 'delete_uploaded_image';
 
 		/** @var string */
 		private $rootUrlPath;
@@ -123,6 +124,7 @@
 				HyphaRequest::HYPHA_SYSTEM_PAGE_UPLOAD,
 				HyphaRequest::HYPHA_SYSTEM_PAGE_CHOOSER,
 				HyphaRequest::HYPHA_SYSTEM_PAGE_HELP,
+				HyphaRequest::HYPHA_SYSTEM_PAGE_DELETE_UPLOADED_IMAGE,
 			];
 		}
 
