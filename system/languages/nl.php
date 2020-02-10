@@ -383,6 +383,7 @@
 		"art-email" => "e-mail",
 		"art-author" => "auteur",
 		"art-excerpt" => "uittreksel",
+		"art-featured-image" => "afbeelding bij uittreksel",
 		"art-article" => "artikel",
 		"art-invalid-code" => "ongeldige code",
 

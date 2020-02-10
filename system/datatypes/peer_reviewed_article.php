@@ -47,6 +47,7 @@ class peer_reviewed_article extends Page {
 	const FIELD_NAME_AUTHOR = 'author';
 	const FIELD_NAME_STATUS = 'status';
 	const FIELD_NAME_EXCERPT = 'excerpt';
+	const FIELD_NAME_FEATURED_IMAGE = 'featured_image';
 	const FIELD_NAME_METHOD = 'method';
 
 	const STATUS_NEWLY_CREATED = 'newly created';
@@ -142,6 +143,7 @@ class peer_reviewed_article extends Page {
 				self::FIELD_NAME_CONTEXT => [
 					self::FIELD_NAME_TITLE => [],
 					self::FIELD_NAME_EXCERPT => [],
+					self::FIELD_NAME_FEATURED_IMAGE => [],
 					self::FIELD_NAME_METHOD => [],
 				],
 			],
@@ -377,6 +379,7 @@ class peer_reviewed_article extends Page {
 			self::FIELD_NAME_AUTHOR => $this->xml->find(self::FIELD_NAME_ARTICLE)->getAttr(self::FIELD_NAME_AUTHOR),
 			self::FIELD_NAME_TEXT => $this->xml->find(self::FIELD_NAME_TEXT)->children(),
 			self::FIELD_NAME_EXCERPT => $this->xml->find(self::FIELD_NAME_EXCERPT)->children(),
+			self::FIELD_NAME_FEATURED_IMAGE => $this->xml->find(self::FIELD_NAME_FEATURED_IMAGE)->text(),
 			self::FIELD_NAME_METHOD => $this->xml->find(self::FIELD_NAME_METHOD)->children(),
 			self::FIELD_NAME_SOURCES => $this->xml->find(self::FIELD_NAME_SOURCES)->children(),
 		];
@@ -435,6 +438,32 @@ class peer_reviewed_article extends Page {
 
 		$this->xml->lockAndReload();
 
+		$newImage = $form->dataFor(self::FIELD_NAME_FEATURED_IMAGE);
+		if ($_FILES[self::FIELD_NAME_FEATURED_IMAGE]) {
+			$ext = strtolower(substr(strrchr($_FILES[self::FIELD_NAME_FEATURED_IMAGE]['name'], '.'), 1));
+			@$size = getimagesize($_FILES[self::FIELD_NAME_FEATURED_IMAGE]['tmp_name']);
+			if ($size && in_array($ext, array('jpg','jpeg','png','gif','bmp'))) {
+				$maxSize = [1120, 800];
+				$needResize = $size[0] > $maxSize[0] || $size[1] > $maxSize[1];
+				$filename = uniqid() . '.' . $ext;
+				$destinations = ['org' => 'data/images/org/' . $filename, 'img' => 'data/images/' . $filename];
+				if ($needResize && !file_exists('data/images/org/')) {
+					mkdir('data/images/org/', 0777, true);
+				}
+				$orgUrlIndex = $needResize ? 'org' : 'img';
+				if (move_uploaded_file($_FILES[self::FIELD_NAME_FEATURED_IMAGE]['tmp_name'], $destinations[$orgUrlIndex])) {
+					if ($needResize) {
+						image_resize($destinations[$orgUrlIndex], $destinations['img'], $maxSize[0], $maxSize[1]);
+					}
+				}
+
+				$newImage = $destinations['img'];
+			}
+		}
+		if (!file_exists($newImage)) {
+			$newImage = '';
+		}
+
 		$author = $form->dataFor(self::FIELD_NAME_AUTHOR);
 		$this->xml->find(self::FIELD_NAME_ARTICLE)->setAttr(self::FIELD_NAME_AUTHOR, $author);
 		$this->xml->find(self::FIELD_NAME_ARTICLE)->setAttr(self::FIELD_NAME_UPDATED_AT, 't' . time());
@@ -443,6 +472,7 @@ class peer_reviewed_article extends Page {
 		$this->xml->find(self::FIELD_NAME_EXCERPT)->setHtml($form->dataFor(self::FIELD_NAME_EXCERPT));
 		$this->xml->find(self::FIELD_NAME_METHOD)->setHtml($form->dataFor(self::FIELD_NAME_METHOD));
 		$this->xml->find(self::FIELD_NAME_SOURCES)->setHtml($form->dataFor(self::FIELD_NAME_SOURCES));
+		$this->xml->documentElement->getOrCreate(self::FIELD_NAME_FEATURED_IMAGE)->setText($newImage);
 
 		$this->xml->saveAndUnlock();
 
@@ -1047,6 +1077,11 @@ class peer_reviewed_article extends Page {
 				</div>
 			</div>
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
+				<div class="input-wrapper field_type_editor field_name_[[field-name-featured-image]]">
+					<strong><label for="[[field-name-featured-image]]">[[featured-image]]</label></strong><br><input type="file" id="[[field-name-featured-image]]" name="[[field-name-featured-image]]" data-image-uploader data-image-uploader-src="[[featured-image-src]]" accept="image/png,image/jpeg,image/jpg,image/gif,image/bmp" />
+				</div>
+			</div>
+			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
 				<div class="input-wrapper field_type_editor field_name_[[field-name-text]]">
 					<strong><label for="[[field-name-text]]">[[text]]</label></strong>[[info-button-text]]<br><editor name="[[field-name-text]]"></editor>
 				</div>
@@ -1063,6 +1098,8 @@ class peer_reviewed_article extends Page {
 			</div>
 EOF;
 
+		$src = array_key_exists(self::FIELD_NAME_FEATURED_IMAGE, $values) && file_exists($values[self::FIELD_NAME_FEATURED_IMAGE]) ? $values[self::FIELD_NAME_FEATURED_IMAGE] : null;
+
 		$vars = [
 			'title' => __('art-title'),
 			'field-name-title' => self::FIELD_NAME_TITLE,
@@ -1070,6 +1107,9 @@ EOF;
 			'field-name-author' => self::FIELD_NAME_AUTHOR,
 			'excerpt' => __('art-excerpt'),
 			'field-name-excerpt' => self::FIELD_NAME_EXCERPT,
+			'featured-image' => __('art-featured-image'),
+			'field-name-featured-image' => self::FIELD_NAME_FEATURED_IMAGE,
+			'featured-image-src' => $src,
 			'info-button-excerpt' => makeInfoButton('help-art-excerpt'),
 			'text' => __('art-article'),
 			'field-name-text' => self::FIELD_NAME_TEXT,
