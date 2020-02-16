@@ -194,6 +194,7 @@ class peer_reviewed_article extends Page {
 	 */
 	public function defaultView(HyphaRequest $request) {
 		$status = $this->getStatus();
+		$this->html->writeToElement('tagList', hypha_indexTags($this->pageListNode, $this->language));
 
 		// add buttons for registered users
 		if (isUser()) {
@@ -1354,7 +1355,7 @@ EOF;
 	 *
 	 * @return string
 	 */
-	private function getTitle() {
+	public function getTitle() {
 		$title = $this->xml->find(self::FIELD_NAME_TITLE);
 		if ($title instanceof NodeList) {
 			$title = $title->getText();
@@ -1364,6 +1365,19 @@ EOF;
 		}
 
 		return $title;
+	}
+
+	/**
+	 * Gets the article excerpt.
+	 *
+	 * @return string
+	 */
+	public function getExcerpt() {
+		return $this->xml->find(self::FIELD_NAME_EXCERPT)->html();
+	}
+
+	public function getFeaturedImage() {
+		return $this->xml->find(self::FIELD_NAME_FEATURED_IMAGE)->text();
 	}
 
 	/**

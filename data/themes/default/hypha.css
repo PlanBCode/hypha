@@ -997,6 +997,11 @@ body.type_peer_reviewed_article .input-wrapper.field_type_editor:not(.field_name
     color: #b90;
 }
 
+.result-item.is-private .title:after {
+    content: " *";
+    color: #b90;
+}
+
 .preview_uploaded_image {
     max-width: 150px;
     max-height: 150px;
