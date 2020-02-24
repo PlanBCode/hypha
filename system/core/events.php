@@ -48,8 +48,9 @@
 		cmd - php function to execute, e.g. 'save'
 		arg - argument to pass to the cmd function
 		form - the form tag to use for posting (if cmd or arg are given)
+		callback - optional callback function for making ajax calls
 	*/
-	function hypha(url, cmd, arg, form) {
+	function hypha(url, cmd, arg, form, callback = null) {
 		// update url
 		url = url.replace(/\s\//g, '/').replace(/\s$/g, '').replace(/\s/g, '_');
 
@@ -76,6 +77,11 @@
 			$form.append($arg);
 		}
 		$arg.val(arg);
+
+		if (callback) {
+			ajax(url, callback, true);
+			return;
+		}
 
 		// When there is a field with name "submit",
 		// $form.submit (and $form[0].submit) will be a

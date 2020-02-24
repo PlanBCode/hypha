@@ -141,6 +141,9 @@
 				$_type = $_node->getAttribute('type');
 				$hyphaPage = new $_type($_node, $O_O);
 
+				// add tag list to all non-system pages
+				$hyphaHtml->writeToElement('tagList', hypha_indexTags($_node, $hyphaPage->language));
+
 				// write stats
 				if (!isUser())
 					hypha_incrementStats(hypha_getLastDigestTime() + hypha_getDigestInterval());
