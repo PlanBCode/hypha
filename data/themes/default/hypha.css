@@ -286,6 +286,12 @@ a.nopagelink {
  background: var(--formheaderback);
 }
 
+/* below page */
+
+.below-page{
+    border-top: 1px dotted grey;
+}
+
 /* ---- Footer ---- */
 #footerContainer {
  padding-bottom: 2em;
@@ -297,7 +303,6 @@ a.nopagelink {
  float: right;
  margin: 30px 0 10px;
  padding-top: 5px;
- border-top: 1px dotted #222;
  font-size: 80%;
 }
 
