@@ -559,10 +559,10 @@ input {
  max-width: 100%; }
 
 
- .prefix {
+ #langList .prefix {
  display: none; }
 
- .language {
+ #langList .language {
  display: inline-block;
  margin-right: 5px; }
 }
