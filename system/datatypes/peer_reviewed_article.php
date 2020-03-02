@@ -68,7 +68,6 @@ class peer_reviewed_article extends Page {
 	const CMD_DELETE = 'delete';
 	const CMD_STATUS_CHANGE = 'status_change';
 	const CMD_STATUS_CHANGE_REVIEW = self::CMD_STATUS_CHANGE . '_' . self::STATUS_REVIEW;
-	const CMD_STATUS_CHANGE_APPROVED = self::CMD_STATUS_CHANGE . '_' . self::STATUS_APPROVED;
 	const CMD_STATUS_CHANGE_PUBLISHED = self::CMD_STATUS_CHANGE . '_' . self::STATUS_PUBLISHED;
 	const CMD_APPROVE = 'approve';
 	const CMD_DISCUSSION_STARTED = 'discussion_started';
@@ -78,7 +77,7 @@ class peer_reviewed_article extends Page {
 	private $statusMtx = [
 		self::STATUS_NEWLY_CREATED => [],
 		self::STATUS_DRAFT => [self::STATUS_REVIEW => ['label' => 'art-start-review', 'cmd' => self::CMD_STATUS_CHANGE_REVIEW]],
-		self::STATUS_REVIEW => [self::STATUS_APPROVED => ['label' => 'art-approve', 'cmd' => self::CMD_STATUS_CHANGE_APPROVED]],
+		self::STATUS_REVIEW => [self::STATUS_APPROVED => ['label' => 'art-approve']],
 		self::STATUS_APPROVED => [self::STATUS_PUBLISHED => ['label' => 'art-publish', 'cmd' => self::CMD_STATUS_CHANGE_PUBLISHED]],
 		self::STATUS_PUBLISHED => [/*self::STATUS_RETRACTED => 'retract'*/], // retracted is not supported yet
 		self::STATUS_RETRACTED => [/*self::STATUS_DRAFT => 'to_draft'*/], // "to draft" is not supported yet
@@ -111,7 +110,6 @@ class peer_reviewed_article extends Page {
 			case [null,                   null]:                              return $this->defaultView($request);
 			case [null,                   self::CMD_DELETE]:                  return $this->deleteAction($request);
 			case [null,                   self::CMD_STATUS_CHANGE_REVIEW]:    return $this->statusChangeAction($request, self::STATUS_REVIEW);
-			case [null,                   self::CMD_STATUS_CHANGE_APPROVED]:  return $this->statusChangeAction($request, self::STATUS_APPROVED);
 			case [null,                   self::CMD_STATUS_CHANGE_PUBLISHED]: return $this->statusChangeAction($request, self::STATUS_PUBLISHED);
 			case [null,                   self::CMD_APPROVE]:                 return $this->approveAction($request);
 			case [self::PATH_EDIT,        null]:                              return $this->editView($request);
