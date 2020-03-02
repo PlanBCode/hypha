@@ -604,6 +604,10 @@
 	*/
 	function hypha_addPage($type, $language, $name, $private) {
 		global $hyphaXml;
+		if (!array_key_exists($language, Language::getIsoList())) {
+			return __('invalid-language');
+		}
+
 		$hyphaXml->requireLock();
 		if (hypha_getPage($language, $name)) return __('page-exists');
 		$id = uniqid();

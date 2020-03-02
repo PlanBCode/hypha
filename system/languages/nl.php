@@ -202,6 +202,7 @@
 		"unable-to-edit" => "kan niet worden bewerkt",
 		"missing-arguments" => "argumenten ontbreken",
 		"invalid-argument" => "foutief argument",
+		"invalid-language" => "foutieve taal",
 		"archive" => "archief",
 		"sure-to-delete" => "Weet je zeker dat je deze pagina wilt verwijderen",
 		"enter-tag-label" => "Voer nieuwe tag in (gebruik een kort woord)",

@@ -202,6 +202,7 @@
 		"unable-to-edit" => "unable to edit",
 		"missing-arguments" => "missing arguments",
 		"invalid-argument" => "invalid argument",
+		"invalid-language" => "invalid language",
 		"archive" => "archive",
 		"sure-to-delete" => "Are you sure you want to delete this page",
 		"enter-tag-label" => "Enter new tag (use a short word)",
