@@ -19,7 +19,6 @@
 		const PATH_EDIT = 'edit';
 		const PATH_TRANSLATE = 'translate';
 		const PATH_REVERT = 'revert';
-		const PATH_DELETE = 'delete';
 
 		const CMD_SAVE = 'edit';
 		const CMD_TRANSLATE = 'translate';
@@ -36,7 +35,7 @@
 			$this->html->writeToElement('pagename', showPagename($this->pagename) . ' ' . asterisk($this->privateFlag));
 
 			switch ([$request->getView(), $request->getCommand()]) {
-				case [null,                 null]:                return $this->indexView($request);
+				case [null,                 null]:                return $this->defaultView($request);
 				case [null,                 self::CMD_REVERT]:    return $this->revertAction($request);
 				case [null,                 self::CMD_DELETE]:    return $this->deleteAction($request);
 				case [self::PATH_EDIT,      null]:                return $this->editView($request);
@@ -48,7 +47,7 @@
 			return '404';
 		}
 
-		private function indexView(HyphaRequest $request) {
+		private function defaultView(HyphaRequest $request) {
 			// setup language and tag list for the selected page
 			$this->html->writeToElement('langList', hypha_indexLanguages($this->pageListNode, $this->language));
 
@@ -266,17 +265,16 @@ EOF;
 		}
 
 		/**
-		 * @param array $data
-		 *
+		 * @param array $values
 		 * @return WymHTMLForm
 		 */
 		private function createTranslationForm(array $values = []) {
-			$selectedLanguage = isset($data[self::FIELD_NAME_LANGUAGE]) ? $data[self::FIELD_NAME_LANGUAGE] : null;
+			$selectedLanguage = isset($values[self::FIELD_NAME_LANGUAGE]) ? $values[self::FIELD_NAME_LANGUAGE] : null;
 			$optionListLanguage = languageOptionList($selectedLanguage, $this->language);
 			$html = <<<EOF
 				<div class="section">
 					<label for="[[field-name-language]]">[[language]]</label>
-					<select id="[[field-name-language]]" name="[[field-name-language]]">[[languageOptionList]]</select>
+					<select id="[[field-name-language]]" name="[[field-name-language]]">[[option-list-language]]</select>
 				</div>
 				<div class="section">
 					<label for="[[field-name-title]]">[[title]]</label>
