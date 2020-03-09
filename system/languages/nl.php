@@ -51,6 +51,7 @@
 		"default-page" => "standaard pagina",
 		"default-language" => "standaard taal",
 		"digest-interval" => "notificatie-interval",
+		"default-new-page-type" => "standaardtype voor nieuwe pagina's",
 		"file" => "bestand",
 		"image" => "afbeelding",
 		"url" => "url",

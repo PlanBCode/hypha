@@ -103,6 +103,32 @@
 	}
 
 	/*
+	 Function: hypha_getDefaultNewPageType
+	 returns hypha defaultNewPageType attribute
+	 */
+	function hypha_getDefaultNewPageType() {
+		global $hyphaXml;
+		if ($hyphaXml->documentElement->hasAttribute('defaultNewPageType')) {
+			return $hyphaXml->documentElement->getAttribute('defaultNewPageType');
+		} else {
+			return textpage::class;
+		}
+	}
+
+	/*
+	 Function: hypha_setDefaultNewPageType
+	 sets hypha defaultNewPageType attribute
+
+	 Parameters:
+	 $string - new defaultNewPageType value
+	 */
+	function hypha_setDefaultNewPageType($string) {
+		global $hyphaXml;
+		$hyphaXml->requireLock();
+		$hyphaXml->documentElement->setAttribute('defaultNewPageType', $string);
+	}
+
+	/*
 		Function: hypha_getUsedContentLanguages returns
 		list of language codes for languages that are used in
 		any of the pages.
@@ -820,4 +846,33 @@
 	function hypha_substitute($string, array $vars) {
 		foreach ($vars as $key => $val) $string = str_replace('[[' . $key . ']]', $val, $string);
 		return $string;
+	}
+
+	/*
+		Function: hypha_getDataTypes
+		loads all datatypes as a side effect
+		returns all non-system datatypes
+	*/
+	function hypha_getDataTypes() {
+		static $hyphaDatatypes = [];
+		if (empty($hyphaDatatypes)) {
+
+			// include all datatypes
+			$pageTypeIndex = count(get_declared_classes()) -1;
+			foreach (scandir('system/datatypes/') as $_file) {
+				if (substr($_file, -4) == '.php') {
+					include_once('system/datatypes/' . $_file);
+				}
+			}
+
+			// add all non-system datatypes to $hyphaDatatypes
+			$systemDatatypes = [settingspage::class];
+			foreach (array_slice(get_declared_classes(), $pageTypeIndex) as $class) {
+				if (!in_array($class, $systemDatatypes) && in_array(Page::class, class_parents($class)) && (new \ReflectionClass($class))->isInstantiable()) {
+					$hyphaDatatypes[$class] = call_user_func($class . '::getDatatypeName');
+				}
+			}
+		}
+
+		return $hyphaDatatypes;
 	}
