@@ -26,7 +26,7 @@
 		global $isoLangList;
 		$html = '';
 		foreach($isoLangList as $code => $langName) if ($code!=$omit) $html.= '<option value='.$code.($code==$select ? ' selected' : '').'>'.$code.': '.$langName.'</option>';
-		return addslashes($html);
+		return $html;
 	}
 
 	/*
