@@ -40,9 +40,9 @@
 			$inUse = '';
 			foreach ($langList as $code) if ($code != $omit) {
 				$inUse.= hypha_substitute($htmlOption, [
-					'value' => $code,
+					'value' => htmlspecialchars($code),
 					'selected' => $code === $select ? ' selected' : '',
-					'display' => $code . ': ' . $isoLangList[$code],
+					'display' => htmlspecialchars($code . ': ' . $isoLangList[$code]),
 				]);
 			}
 			$html = hypha_substitute($htmlOptgroup, [
@@ -53,9 +53,9 @@
 			$new = '';
 			foreach($isoLangList as $code => $langName) if (!in_array($code, $langList) && $code!=$omit ) {
 				$new.= hypha_substitute($htmlOption, [
-					'value' => $code,
+					'value' => htmlspecialchars($code),
 					'selected' => $code === $select ? ' selected' : '',
-					'display' => $code . ': ' . $langName,
+					'display' => htmlspecialchars($code . ': ' . $langName),
 				]);
 			}
 			$html .= hypha_substitute($htmlOptgroup, [
@@ -88,7 +88,7 @@
 
 			$html = '';
 			foreach(self::getInterfaceLanguageList() as $code) if ($code != $omit) {
-				$html.= '<option value='.$code.($code==$select ? ' selected' : '').'>'.$code.(array_key_exists($code, $isoLangList) ? ': ' . $isoLangList[$code] : '').'</option>';
+				$html.= '<option value="'.htmlspecialchars($code).'"'.($code==$select ? ' selected="selected"' : '').'>'.htmlspecialchars($code.(array_key_exists($code, $isoLangList) ? ': ' . $isoLangList[$code] : '')).'</option>';
 			}
 
 			return $html;
