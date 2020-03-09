@@ -206,7 +206,7 @@ trait ManipulationTrait
     /**
      * @param string|NodeList|\DOMNode|\Closure $input
      *
-     * @return string
+     * @return self
      */
     public function setText($input) {
         if (is_string($input)) {
@@ -220,6 +220,8 @@ trait ManipulationTrait
             // Add new contents in it's place.
             $node->append(new Text($newNodes->getText()));
         });
+
+        return $this;
     }
 
     /**
