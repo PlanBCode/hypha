@@ -1375,6 +1375,11 @@ EOF;
 		// also send newly create comment to all who subscribed to this discussion, with unsubscribe link
 		foreach ($this->getSubscribers($comment) as $subscriber) {
 			$email = $subscriber->getAttribute(self::FIELD_NAME_DISCUSSION_SUBSCRIBER_EMAIL);
+
+			// Do not notify people of their own comments
+			if ($email == $comment->getAttribute(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL))
+				continue;
+
 			$code = $subscriber->getAttribute(self::FIELD_NAME_DISCUSSION_SUBSCRIBER_UNSUBSCRIBE_CODE);
 			// include email for server record purposes
 			$path = hypha_substitute(self::PATH_UNSUBSCRIBE_CODE, ['address' => $email, 'code' => $code]);
