@@ -342,9 +342,11 @@
 		"art-block-resolved-subject" => "Breekpunt opgelost bij '[[title]]'",
 		"art-block-resolved-body" => "[[author]] hief een breekpunt op bij '<a href=\"[[link]]\">[[title]]</a>'.<br />------------------------------<br />Dit is een geautomatiseerde mail. Antwoorden hierop heeft geen zin.",
 		"art-confirm-comment-subject" => "Bevestig de plaatsing van uw reactie",
-		"art-confirm-comment-body" => "Op de website van [[sitename]] heeft u (of iemand die uw emailadres gebruikte) net een reactie geplaatst bij het artikel: [[title]].<br /><br /> ------------------------------ <br />Uw reactie was:<br />[[comment]]<br />------------------------------<br />[[sitename]] is een platform voor constructieve discussie, daarom hebben we wat regels opgesteld voor commentatoren. Overweeg of uw commentaar nieuwe informatie of overwegingen aan de discussie toevoegt. Houd de toon beschaafd. Maak uwzelf bekend met uw volledige naam. De redactie behoudt zich het recht voor om uw identiteit bekend te maken als u dat zelf niet doet. De redactie kan uw commentaar verwijderen als het niet aan de criteria voldoet.<br/>Als u wilt dat deze reactie geplaatst wordt, dan dient u deze te <b>bevestigen door op onderstaande link te klikken</b>. Deze actie is nodig om spam te voorkomen.<br /><a href=\"[[link]]\">[[link]]</a><br /><br/>Dit is een geautomatiseerde mail. Antwoorden hierop heeft geen zin.",
+		"art-confirm-comment-body" => "Op de website van [[sitename]] heeft u (of iemand die uw emailadres gebruikte) net een reactie geplaatst bij het artikel: [[title]].<br /><br /> ------------------------------ <br />De reactie was:<br />[[comment]]<br />------------------------------<br />[[sitename]] is een platform voor constructieve discussie, daarom hebben we wat regels opgesteld voor commentatoren. Overweeg of uw commentaar nieuwe informatie of overwegingen aan de discussie toevoegt. Houd de toon beschaafd. Vermeld uw volledige naam. De redactie behoudt zich het recht voor om uw identiteit bekend te maken als u dat zelf niet doet. De redactie kan uw commentaar verwijderen als het niet aan de criteria voldoet.<br/>Als u wilt dat deze reactie geplaatst wordt, <b>bevestig dit dan door op onderstaande link te klikken</b>. Deze actie is nodig om spam te voorkomen.<br /><a href=\"[[link]]\">[[link]]</a><br /><br/>Dit is een geautomatiseerde mail. Antwoorden hierop heeft geen zin.",
 		"art-comment-subject" => "Nieuw commentaar door [[name]] bij '[[title]]'",
 		"art-comment-body" => "[[name]] schreef het volgende commentaar bij '<a href=\"[[link]]\">[[title]]</a>':<br />[[comment]]<br /><br />------------------------------<br />Dit is een geautomatiseerde mail. Antwoorden hierop heeft geen zin.",
+		"art-comment-subscriber-subject" => "Nieuw commentaar door [[name]] bij '[[title]]'",
+		"art-comment-subscriber-body" => "[[name]] schreef het volgende commentaar bij '<a href=\"[[link]]\">[[title]]</a>':<br />[[comment]]<br /><br />------------------------------<br />Dit is een geautomatiseerde mail. Antwoorden hierop heeft geen zin.",
 
 		// peer_reviewed_article - status
 		"art-status-draft" => "schets",
@@ -365,6 +367,12 @@
 		"art-comment-on-comment" => "discussieer mee",
 		"art-public-comment-count-singular" => "[[count]] reactie",
 		"art-public-comment-count-plural" => "[[count]] reacties",
+
+		// peer_reviewed_article - subscribe
+		"art-subscribe" => "houd me op de hoogte",
+		"art-subscriber-has-invalid-status" => "de status van de abonnee is onjuist",
+		"art-subscriber-deleted" => "u zult geen mails meer ontvangen over de voortgang van deze discussie",
+		"art-unsubscribe" => "afmelden",
 
 		// peer_reviewed_article - edit
 		"art-cancel" => "afbreken",
@@ -412,6 +420,7 @@
 		"help-art-excerpt" => "In dit veld kun je een korte samenvatting schrijven van het artikel.",
 		"help-art-method" => "Type hier een korte biografie van jezelf, inclusief mogelijke vooringenomenheden. \n Indien relevant kun je de lezer laten weten hoe een artikel tot stand is gekomen.",
 		"help-art-text" => "Type je artikel hier of plak vanuit een texteditor. \n Als je wilt plakken vanuit Word, Pages of een andere wordprocessor, \n gebruik dan de 'paste from word' knop. \nPlaatjes moeten niet geplakt worden maar \ngeüpload met de 'image' knop.",
+		"help-art-subscribe" => "Blijf op de hoogte van deze discussie, door bij iedere nieuwe reactie een mail te ontvangen.",
 	);
 
 	return $LANG;

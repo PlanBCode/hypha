@@ -350,6 +350,8 @@
 		"art-confirm-comment-body" => "On the website of [[sitename]] you (or someone that used your email address) have submitted a comment on the article: [[title]].<br /><br /> ------------------------------ <br />Your comment was:<br />[[comment]]<br />------------------------------<br/>To make [[sitename]] a platform for contructive discussion, we have formulated some rules that a commentor has to adhere to. Please consider if you comment adds new information or considerations to the discussion. Keep the tone civil. Make yourself known with your full name. We will complement your identity information if you do not make yourself known. The editors have the right to remove your contribution if it does not adhere to these rules. <br />If you want this comment to be published, <b>you need to confirm</b> by clicking the link underneath this line. This action is needed to avoid spam.<br /><a href=\"[[link]]\">[[link]]</a><br /><br />This is an automated email. Replying to this email is useless.",
 		"art-comment-subject" => "New comment by [[name]] to '[[title]]'",
 		"art-comment-body" => "[[name]] wrote this comment to '<a href=\"[[link]]\">[[title]]</a>':<br />[[comment]]<br /><br />------------------------------<br />This is an automatised mail. Replying to this mail is useless.",
+		"art-comment-subscriber-subject" => "New comment by [[name]] to '[[title]]'",
+		"art-comment-subscriber-body" => "[[name]] wrote this comment to '<a href=\"[[link]]\">[[title]]</a>':<br />[[comment]]<br /><br />------------------------------<br />This is an automatised mail. Replying to this mail is useless.",
 
 		// peer_reviewed_article - status
 		"art-status-draft" => "draft",
@@ -370,6 +372,12 @@
 		"art-comment-on-comment" => "join this discussion",
 		"art-public-comment-count-singular" => "[[count]] comment",
 		"art-public-comment-count-plural" => "[[count]] comments",
+
+		// peer_reviewed_article - subscribe
+		"art-subscribe" => "keep me informed",
+		"art-subscriber-has-invalid-status" => "this subscriber has an invalid status",
+		"art-subscriber-deleted" => "you are no longer subscribed to this discussion",
+		"art-unsubscribe" => "unsubscribe",
 
 		// peer_reviewed_article - edit
 		"art-cancel" => "cancel",
@@ -417,6 +425,7 @@
 		"help-art-excerpt" => "In this field you can type a short excerpt of your article.",
 		"help-art-method" => "Please type a bio of yourself containing relevant experience or possible biasses. \n If relevant, also let the reader know how the article came into existence.",
 		"help-art-text" => "Type your article here or paste from a text editor. \n If you want to paste from Word, Pages or other word processors, \n please use the 'paste from word' button. \nImages should not be pasted but \nuploaded using the 'image' button.",
+		"help-art-subscribe" => "Keep me informed about this discussion, by receiving an email with every new comment.",
 	);
 
 	return $LANG;

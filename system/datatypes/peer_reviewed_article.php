@@ -34,6 +34,15 @@ class peer_reviewed_article extends Page {
 	const FIELD_NAME_DISCUSSION_COMMENT_CONFIRM_CODE = 'confirm_code';
 	const FIELD_NAME_DISCUSSION_COMMENTER_NAME = 'commenter_name';
 	const FIELD_NAME_DISCUSSION_COMMENTER_EMAIL = 'commenter_email';
+	const FIELD_NAME_DISCUSSION_COMMENTER_SUBSCRIBE = 'commenter_subscribe';
+	const FIELD_NAME_DISCUSSION_SUBSCRIBER_CONTAINER = 'subscribers';
+	const FIELD_NAME_DISCUSSION_SUBSCRIBER = 'subscriber';
+	const FIELD_NAME_DISCUSSION_SUBSCRIBER_STATUS = 'subscriber_status';
+	const FIELD_NAME_DISCUSSION_SUBSCRIBER_CONFIRM_CODE = 'subscriber_confirm_code';
+	const FIELD_NAME_DISCUSSION_SUBSCRIBER_CODE = 'code';
+	const FIELD_NAME_DISCUSSION_SUBSCRIBER_NAME = 'subscriber_name';
+	const FIELD_NAME_DISCUSSION_SUBSCRIBER_EMAIL = 'subscriber_email';
+	const FIELD_NAME_DISCUSSION_SUBSCRIBER_UNSUBSCRIBE_CODE = 'subscriber_unsubscribe_code';
 	const FIELD_NAME_DISCUSSION_CLOSED_BY = 'closed_by';
 	const FIELD_NAME_DISCUSSION_CLOSED_AT = 'closed_at';
 	const FIELD_NAME_APPROVE_CONTAINER = 'approves';
@@ -56,13 +65,19 @@ class peer_reviewed_article extends Page {
 	const STATUS_PUBLISHED = 'published';
 	const STATUS_RETRACTED = 'retracted';
 
+	const SUBSCRIBER_STATUS_PENDING = 'pending';
+	const SUBSCRIBER_STATUS_CONFIRMED = 'confirmed';
+	const SUBSCRIBER_STATUS_UNSUBSCRIBED = 'unsubscribed';
+
 	const PATH_EDIT = 'edit';
 	const PATH_DISCUSSIONS = 'discussions';
-	const PATH_DISCUSSIONS_TYPE = 'discussions/{type}';
-	const PATH_DISCUSSIONS_CLOSED = 'discussions/{id}/closed';
-	const PATH_DISCUSSIONS_COMMENT = 'discussions/{id}/comment';
+	const PATH_DISCUSSIONS_TYPE = 'discussions/{type}'; // TODO [LRM]: use hypha_substitute
+	const PATH_DISCUSSIONS_CLOSED = 'discussions/{id}/closed'; // TODO [LRM]: use hypha_substitute
+	const PATH_DISCUSSIONS_COMMENT = 'discussions/{id}/comment'; // TODO [LRM]: use hypha_substitute
 	const PATH_COMMENT = 'comment';
-	const PATH_DISCUSSIONS_COMMENT_CONFIRM = 'comment/{id}/confirm?code={code}';
+	const PATH_DISCUSSIONS_COMMENT_CONFIRM = 'comment/{id}/confirm?code={code}'; // TODO [LRM]: use hypha_substitute
+	const PATH_UNSUBSCRIBE = 'unsubscribe';
+	const PATH_UNSUBSCRIBE_CODE = 'unsubscribe?address=[[address]]&code=[[code]]';
 
 	const CMD_SAVE = 'save';
 	const CMD_DELETE = 'delete';
@@ -93,7 +108,7 @@ class peer_reviewed_article extends Page {
 	 */
 	public function __construct(DomElement $pageListNode, RequestContext $O_O) {
 		parent::__construct($pageListNode, $O_O);
-		$this->xml = new Xml(get_called_class(), Xml::multiLingualOff, Xml::versionsOff);
+		$this->xml = new Xml('peer_reviewed_article', Xml::multiLingualOff, Xml::versionsOff);
 		$this->xml->loadFromFile('data/pages/' . $pageListNode->getAttribute('id'));
 	}
 
@@ -118,6 +133,7 @@ class peer_reviewed_article extends Page {
 			case [self::PATH_DISCUSSIONS, self::CMD_COMMENT]:                 return $this->discussionCommentAction($request);
 			case [self::PATH_DISCUSSIONS, self::CMD_DISCUSSION_CLOSED]:       return $this->discussionClosedAction($request);
 			case [self::PATH_COMMENT,     null]:                              return $this->commentConfirmAction($request);
+			case [self::PATH_UNSUBSCRIBE, null]:                              return $this->unsubscribeAction($request);
 		}
 
 		return '404';
@@ -173,11 +189,11 @@ class peer_reviewed_article extends Page {
 		// set initial status, author, timestamps and title
 		/** @var HyphaDomElement $article */
 		$article = $this->xml->find(self::FIELD_NAME_ARTICLE);
-		$article->setAttr(self::FIELD_NAME_STATUS, self::STATUS_DRAFT);
-		$article->setAttr(self::FIELD_NAME_AUTHOR, $this->O_O->getUser()->getAttribute('fullname'));
-		$article->setAttr(self::FIELD_NAME_CREATED_AT, 't' . time());
-		$article->setAttr(self::FIELD_NAME_UPDATED_AT, 't' . time());
-		$article->setAttr(self::FIELD_NAME_PUBLISHED_AT, '');
+		$article->setAttribute(self::FIELD_NAME_STATUS, self::STATUS_DRAFT);
+		$article->setAttribute(self::FIELD_NAME_AUTHOR, $this->O_O->getUser()->getAttribute('fullname'));
+		$article->setAttribute(self::FIELD_NAME_CREATED_AT, 't' . time());
+		$article->setAttribute(self::FIELD_NAME_UPDATED_AT, 't' . time());
+		$article->setAttribute(self::FIELD_NAME_PUBLISHED_AT, '');
 		/** @var HyphaDomElement $title */
 		$title = $this->xml->find(self::FIELD_NAME_TITLE);
 		$title->setText(showPagename($this->pagename));
@@ -224,8 +240,8 @@ class peer_reviewed_article extends Page {
 		/** @var HyphaDomElement $content */
 		$content = $this->xml->find(self::FIELD_NAME_CONTENT);
 
-		$author = $article->getAttr(self::FIELD_NAME_AUTHOR);
-		$publishedTimestamp = ltrim($article->getAttr(self::FIELD_NAME_PUBLISHED_AT), 't');
+		$author = $article->getAttribute(self::FIELD_NAME_AUTHOR);
+		$publishedTimestamp = ltrim($article->getAttribute(self::FIELD_NAME_PUBLISHED_AT), 't');
 
 		/** @var HyphaDomElement $main */
 		$main = $this->html->find('#main');
@@ -234,7 +250,8 @@ class peer_reviewed_article extends Page {
 		$discussions = $this->xml->find(self::FIELD_NAME_DISCUSSION_PUBLIC_CONTAINER);
 
 		/** @var NodeList $commentCollection */
-		$commentCollection = $discussions->findXPath('.//' . self::FIELD_NAME_DISCUSSION_COMMENT . '[not(@pending="1")]');
+		$xpath = './/' . self::FIELD_NAME_DISCUSSION_COMMENT . '[@' . self::FIELD_NAME_DISCUSSION_COMMENT_PENDING . '!="1"]';
+		$commentCollection = $discussions->findXPath($xpath);
 
 		$commentCount = $commentCollection->count();
 		if ($commentCount > 0) {
@@ -253,11 +270,11 @@ class peer_reviewed_article extends Page {
 		$themeImgPath = 'data/themes/' . Hypha::$data->theme . '/images';
 
 		// Email
-		$subject = __('share-email-subject', array("domain" => hypha_getTitle(), "title" => $this->getTitle()));
-		$body = __('share-email-body', array("domain" => hypha_getTitle(), "title" => $this->getTitle(), "url" => $linkToPage));
+		$subject = __('share-email-subject', ['domain' => hypha_getTitle(), 'title' => $this->getTitle()]);
+		$body = __('share-email-body', ['domain' => hypha_getTitle(), 'title' => $this->getTitle(), 'url' => $linkToPage]);
 		$shareDiv->append('<a href="mailto:?subject='.rawurlencode($subject).'&body='.rawurlencode($body).'"><div class="email-link"></div></a>');
 		// Twitter
-		$text = __('share-twitter', array("domain" => hypha_getTitle(), "title" => $this->getTitle(), "url" => $linkToPage));
+		$text = __('share-twitter', ['domain' => hypha_getTitle(), 'title' => $this->getTitle(), 'url' => $linkToPage]);
 		$shareDiv->append('<a href="https://twitter.com/intent/tweet?text='.rawurlencode($text).'&url='.rawurlencode($linkToPage).'" target="_blank"><div class="twitter-link"></div></a>');
 		// Facebook
 		$shareDiv->append('<a href="https://www.facebook.com/sharer/sharer.php?u='.rawurlencode($linkToPage).'" target="_blank"><div class="facebook-link"></div></a>');
@@ -291,7 +308,7 @@ class peer_reviewed_article extends Page {
 
 		/** @var NodeList $method */
 		$method = $this->xml->find(self::FIELD_NAME_METHOD)->children();
-		if ($method->count()) {
+		if ($method->count() > 0) {
 			/** @var HyphaDomElement $methodContainer */
 			$methodContainer = $this->html->createElement('div');
 			$methodContainer->attr('class', 'method');
@@ -302,7 +319,7 @@ class peer_reviewed_article extends Page {
 
 		/** @var NodeList $sources */
 		$sources = $this->xml->find(self::FIELD_NAME_SOURCES)->children();
-		if ($sources->count()) {
+		if ($sources->count() > 0) {
 			/** @var HyphaDomElement $div */
 			$div = $this->html->createElement('div');
 			$div->setAttribute('class', 'sources');
@@ -312,22 +329,12 @@ class peer_reviewed_article extends Page {
 		}
 
 		if (isUser() && self::STATUS_DRAFT !== $status) {
-			/** @var HyphaDomElement $discussionsDomElement */
-			$discussionsDomElement = $this->html->createElement('div');
-			$discussionsDomElement->attr('class', 'review-comments-wrapper');
-			$discussionsDomElement->append('<h2>' . __('art-review-comments') . '</h2>');
-			$this->fillDiscussionsContainer('review', $discussionsDomElement);
-			$main->append($discussionsDomElement);
+			$main->append($this->createDiscussionsDomElement('review'));
 			$main->append($this->createApprovesDomElement());
 		}
 
 		if (self::STATUS_PUBLISHED === $status) {
-			/** @var HyphaDomElement $discussionsContainer */
-			$discussionsDomElement = $this->html->createElement('div');
-			$discussionsDomElement->attr('class', 'public-comments-wrapper');
-			$discussionsDomElement->append('<h2>' . __('art-comments') . '</h2>');
-			$this->fillDiscussionsContainer('public', $discussionsDomElement);
-			$main->append($discussionsDomElement);
+			$main->append($this->createDiscussionsDomElement('public'));
 		}
 
 		return null;
@@ -341,7 +348,8 @@ class peer_reviewed_article extends Page {
 	 */
 	public function deleteAction(HyphaRequest $request) {
 		if (!isAdmin()) {
-			return ['errors' => ['art-insufficient-rights-to-perform-action']];
+			notify('error', __('admin-rights-needed-to-perform-action'));
+			return null;
 		}
 
 		$this->deletePage();
@@ -365,7 +373,7 @@ class peer_reviewed_article extends Page {
 		// create form
 		$formData = [
 			self::FIELD_NAME_TITLE => html_entity_decode(strip_tags($this->xml->find(self::FIELD_NAME_TITLE)->text())),
-			self::FIELD_NAME_AUTHOR => $this->xml->find(self::FIELD_NAME_ARTICLE)->getAttr(self::FIELD_NAME_AUTHOR),
+			self::FIELD_NAME_AUTHOR => $this->xml->find(self::FIELD_NAME_ARTICLE)->getAttribute(self::FIELD_NAME_AUTHOR),
 			self::FIELD_NAME_TEXT => $this->xml->find(self::FIELD_NAME_TEXT)->children(),
 			self::FIELD_NAME_EXCERPT => $this->xml->find(self::FIELD_NAME_EXCERPT)->children(),
 			self::FIELD_NAME_METHOD => $this->xml->find(self::FIELD_NAME_METHOD)->children(),
@@ -427,8 +435,8 @@ class peer_reviewed_article extends Page {
 		$this->xml->lockAndReload();
 
 		$author = $form->dataFor(self::FIELD_NAME_AUTHOR);
-		$this->xml->find(self::FIELD_NAME_ARTICLE)->setAttr(self::FIELD_NAME_AUTHOR, $author);
-		$this->xml->find(self::FIELD_NAME_ARTICLE)->setAttr(self::FIELD_NAME_UPDATED_AT, 't' . time());
+		$this->xml->find(self::FIELD_NAME_ARTICLE)->setAttribute(self::FIELD_NAME_AUTHOR, $author);
+		$this->xml->find(self::FIELD_NAME_ARTICLE)->setAttribute(self::FIELD_NAME_UPDATED_AT, 't' . time());
 		$this->xml->find(self::FIELD_NAME_TITLE)->setText($form->dataFor(self::FIELD_NAME_TITLE));
 		$this->xml->find(self::FIELD_NAME_TEXT)->setHtml($form->dataFor(self::FIELD_NAME_TEXT));
 		$this->xml->find(self::FIELD_NAME_EXCERPT)->setHtml($form->dataFor(self::FIELD_NAME_EXCERPT));
@@ -487,8 +495,8 @@ class peer_reviewed_article extends Page {
 			/** @var HyphaDomElement $approve */
 			$approve = $this->xml->createElement(self::FIELD_NAME_APPROVE);
 			$approves->append($approve);
-			$approve->setAttr(self::FIELD_NAME_USER, $userId);
-			$approve->setAttr(self::FIELD_NAME_CREATED_AT, 't' . time());
+			$approve->setAttribute(self::FIELD_NAME_USER, $userId);
+			$approve->setAttribute(self::FIELD_NAME_CREATED_AT, 't' . time());
 			$this->xml->saveAndUnlock();
 			if ($this->canBeSetAsApproved()) {
 				$this->updateToNewStatus(self::STATUS_APPROVED);
@@ -520,7 +528,7 @@ class peer_reviewed_article extends Page {
 			return ['redirect', $this->constructFullPath($this->pagename)];
 		}
 
-		$dataFieldSuffix = '/new_' . $type;
+		$dataFieldSuffix = $this->constructDiscussionFieldSuffix($type);
 
 		// create form to start a discussion
 		$form = $this->createCommentForm($type, $request->getPostData());
@@ -539,30 +547,21 @@ class peer_reviewed_article extends Page {
 		$this->xml->lockAndReload();
 
 		// store discussion and comment
-		$discussions = $this->xml->find($type);
-		$discussion = $this->createDiscussionDomElement($discussions, $form, $dataFieldSuffix);
-		$comment = $this->createDiscussionCommentDomElement($discussion, $form, $dataFieldSuffix);
+		$discussionContainer = $this->xml->find($type);
+		$discussion = $this->addDiscussion($discussionContainer, $form, $dataFieldSuffix);
+		$comment = $this->addDiscussionComment($discussion, $form, $dataFieldSuffix);
 		$this->xml->saveAndUnlock();
 
-		$blocking = (bool)$discussion->getAttr(self::FIELD_NAME_DISCUSSION_BLOCKING);
-		$pending = (bool)$comment->getAttr(self::FIELD_NAME_DISCUSSION_COMMENT_PENDING);
+		$blocking = (bool)$discussion->getAttribute(self::FIELD_NAME_DISCUSSION_BLOCKING);
+		$pending = (bool)$comment->getAttribute(self::FIELD_NAME_DISCUSSION_COMMENT_PENDING);
 
 		// send notification mails if needed
-		if ($review && $blocking) {
-			$this->sendBlockingDiscussionMail($discussion);
-		}
-		if (!$review && $pending) {
-			$this->sendCommentConfirmMail($comment);
-		}
-		if (!$review && !$pending) {
-			$this->sendNewCommentMail($comment);
-		}
+		if ($review && $blocking) $this->sendBlockingDiscussionMail($discussion);
+		if ($public && $pending) $this->sendCommentConfirmMail($comment);
+		if ($public && !$pending) $this->sendNewCommentMail($comment);
 
-		if ($pending) {
-			notify('success', ucfirst(__('art-comment-pending')));
-		} else {
-			notify('success', ucfirst(__('art-comment-posted')));
-		}
+		$msg = $pending ? __('art-comment-pending') : __('art-comment-posted');
+		notify('success', ucfirst($msg));
 
 		return ['redirect', $this->constructFullPath($this->pagename)];
 	}
@@ -623,15 +622,12 @@ class peer_reviewed_article extends Page {
 			return null;
 		}
 
-		/** @var HyphaDomElement $discussions */
-		$discussions = $discussion->parent();
-		$type = $discussions->nodeName;
+		$type = $discussion->parent()->nodeName;
 		$review = self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER === $type;
 
-		$dataFieldSuffix = '/' . $discussionId;
+		$dataFieldSuffix = $this->constructDiscussionFieldSuffix($type, $discussion);
 
 		// create form to comment on a discussion
-		$type = $discussion->parent()->nodeName;
 		$form = $this->createCommentForm($type, $request->getPostData(), $discussion);
 		if (!$review && !isUser()) {
 			$form->validateRequiredField(self::FIELD_NAME_DISCUSSION_COMMENTER_NAME . $dataFieldSuffix);
@@ -646,21 +642,15 @@ class peer_reviewed_article extends Page {
 			return $this->discussionRender($request, $form, $type, $discussion);
 		}
 
-		$comment = $this->createDiscussionCommentDomElement($discussion, $form, $dataFieldSuffix);
+		$comment = $this->addDiscussionComment($discussion, $form, $dataFieldSuffix);
 		$this->xml->saveAndUnlock();
-		$pending = (bool)$comment->getAttr(self::FIELD_NAME_DISCUSSION_COMMENT_PENDING);
-		if (!$review && $pending) {
-			$this->sendCommentConfirmMail($comment);
-		}
-		if (!$review && !$pending) {
-			$this->sendNewCommentMail($comment);
+		$pending = (bool)$comment->getAttribute(self::FIELD_NAME_DISCUSSION_COMMENT_PENDING);
+		if (!$review) {
+			$pending ? $this->sendCommentConfirmMail($comment) : $this->sendNewCommentMail($comment);
 		}
 
-		if ($pending) {
-			notify('success', ucfirst(__('art-comment-pending')));
-		} else {
-			notify('success', ucfirst(__('art-comment-posted')));
-		}
+		$msg = $pending ? __('art-comment-pending') : __('art-comment-posted');
+		notify('success', ucfirst($msg));
 
 		return ['redirect', $this->constructFullPath($this->pagename)];
 	}
@@ -730,28 +720,91 @@ class peer_reviewed_article extends Page {
 
 		$this->xml->lockAndReload();
 
-		/** @var NodeList $commentCollection */
-		$path = '//' . self::FIELD_NAME_DISCUSSION_COMMENT . '[@'.self::FIELD_NAME_DISCUSSION_COMMENT_CONFIRM_CODE.'=' . xpath_encode($code) . ']';
-		$commentCollection = $this->xml->findXPath($path);
-		$comment = $commentCollection->first();
+		/** @var NodeList $commentNodeList */
+		$xpath = '//' . self::FIELD_NAME_DISCUSSION_COMMENT . '[@' . self::FIELD_NAME_DISCUSSION_COMMENT_CONFIRM_CODE . '=' . xpath_encode($code) . ']';
+		$commentNodeList = $this->xml->findXPath($xpath);
+		$comment = $commentNodeList->first();
 		if (!$comment instanceof HyphaDomElement) {
 			$this->xml->unlock();
 			notify('error', __('art-invalid-code'));
 			return null;
 		}
 
-		if (!(bool)$comment->getAttribute(self::FIELD_NAME_DISCUSSION_COMMENT_PENDING)) {
-			$this->xml->unlock();
-			notify('success', ucfirst(__('art-comment-posted')));
-			return ['redirect', $this->constructFullPath($this->pagename)];
+		$confirmedComment = false;
+		$confirmedSubscriber = false;
+
+		if ((bool)$comment->getAttribute(self::FIELD_NAME_DISCUSSION_COMMENT_PENDING)) {
+			$comment->setAttribute(self::FIELD_NAME_DISCUSSION_COMMENT_PENDING, false);
+			$confirmedComment = true;
 		}
 
-		$comment->setAttribute(self::FIELD_NAME_DISCUSSION_COMMENT_PENDING, false);
-		$this->xml->saveAndUnlock();
+		/** @var NodeList $confirmCodeNodeList */
+		$xpath = '//' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER_CONFIRM_CODE . '[@' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER_CODE . '=' . xpath_encode($code) . ']';
+		$confirmCodeNodeList = $this->xml->findXPath($xpath);
+		if ($confirmCodeNodeList->count() >= 1) {
+			/** @var HyphaDomElement $subscriber */
+			$subscriber = $confirmCodeNodeList->first()->parent();
+			$subscriber->setAttribute(self::FIELD_NAME_DISCUSSION_SUBSCRIBER_STATUS, self::SUBSCRIBER_STATUS_CONFIRMED);
+			$subscriber->setAttribute(self::FIELD_NAME_DISCUSSION_SUBSCRIBER_UNSUBSCRIBE_CODE, $this->constructCode());
 
-		$this->sendNewCommentMail($comment);
+			// no need anymore for other confirmation codes
+			/** @var NodeList $confirmations */
+			$confirmations = $subscriber->find(self::FIELD_NAME_DISCUSSION_SUBSCRIBER_CONFIRM_CODE);
+			$confirmations->remove();
+			$confirmedSubscriber = true;
+		}
+
+		if ($confirmedComment || $confirmedSubscriber) {
+			$this->xml->saveAndUnlock();
+		} else {
+			$this->xml->unlock();
+		}
+
+		if ($confirmedComment) {
+			$this->sendNewCommentMail($comment);
+		}
 
 		notify('success', ucfirst(__('art-comment-posted')));
+		return ['redirect', $this->constructFullPath($this->pagename)];
+	}
+
+	/**
+	 * @param HyphaRequest $request
+	 * @return array|null
+	 */
+	private function unsubscribeAction(HyphaRequest $request) {
+		$code = isset($_GET['code']) ? $_GET['code'] : null;
+		if (null == $code) {
+			notify('error', __('missing-arguments'));
+			return null;
+		}
+
+		$this->xml->lockAndReload();
+
+		/** @var NodeList $subscriberContainer */
+		$xpath = '//' . self::FIELD_NAME_DISCUSSION_CONTAINER . '//' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER . '[@' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER_UNSUBSCRIBE_CODE . '=' . xpath_encode($code) . ']';
+		/** @var HyphaDomElement $subscriber */
+		$subscriber = $this->xml->findXPath($xpath)->first();
+		if (!$subscriber instanceof HyphaDomElement) {
+			$this->xml->unlock();
+			notify('error', __('art-invalid-code'));
+			return null;
+		}
+
+		if ($subscriber->getAttribute(self::FIELD_NAME_DISCUSSION_SUBSCRIBER_STATUS) === self::SUBSCRIBER_STATUS_PENDING) {
+			// weird case, should never happen, let's handle it anyway
+			$this->xml->unlock();
+			notify('error', __('art-subscriber-has-invalid-status'));
+		}
+
+		if ($subscriber->getAttribute(self::FIELD_NAME_DISCUSSION_SUBSCRIBER_STATUS) != self::SUBSCRIBER_STATUS_UNSUBSCRIBED) {
+			$subscriber->setAttribute(self::FIELD_NAME_DISCUSSION_SUBSCRIBER_STATUS, self::SUBSCRIBER_STATUS_UNSUBSCRIBED);
+			$this->xml->saveAndUnlock();
+		} else {
+			$this->xml->unlock();
+		}
+
+		notify('success', ucfirst(__('art-subscriber-deleted')));
 		return ['redirect', $this->constructFullPath($this->pagename)];
 	}
 
@@ -771,9 +824,9 @@ class peer_reviewed_article extends Page {
 		$this->xml->lockAndReload();
 		/** @var HyphaDomElement $article */
 		$article = $this->xml->find(self::FIELD_NAME_ARTICLE);
-		$article->setAttr(self::FIELD_NAME_STATUS, $newStatus);
+		$article->setAttribute(self::FIELD_NAME_STATUS, $newStatus);
 		if ($newStatus === self::STATUS_PUBLISHED) {
-			$article->setAttr(self::FIELD_NAME_PUBLISHED_AT, 't' . time());
+			$article->setAttribute(self::FIELD_NAME_PUBLISHED_AT, 't' . time());
 		}
 		$this->xml->saveAndUnlock();
 
@@ -793,44 +846,47 @@ class peer_reviewed_article extends Page {
 	}
 
 	/**
-	 * Creates a discussion DOM element.
+	 * Adds a discussion DOM element to the database.
 	 *
-	 * @param NodeList $container
+	 * @param NodeList|HyphaDomElement $discussionContainer
 	 * @param WymHTMLForm $form
 	 * @param string dataFieldSuffix
 	 * @return HyphaDomElement
 	 */
-	private function createDiscussionDomElement(NodeList $container, WymHTMLForm $form, $dataFieldSuffix) {
+	private function addDiscussion(NodeList $discussionContainer, WymHTMLForm $form, $dataFieldSuffix) {
+		$this->xml->requireLock();
+
 		/** @var HyphaDomElement $discussion */
 		$discussion = $this->xml->createElement(self::FIELD_NAME_DISCUSSION);
 		$discussion->generateId();
-		$container->append($discussion);
+		$discussionContainer->append($discussion);
 
-		$review = self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER === $container->nodeName;
+		$type = $discussionContainer->nodeName;
+		$review = self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER === $type;
 		if ($review) {
-			$discussion->setAttr(self::FIELD_NAME_USER, $this->O_O->getUser()->getAttribute('id'));
+			$discussion->setAttribute(self::FIELD_NAME_USER, $this->O_O->getUser()->getAttribute('id'));
 		}
 
 		$blocking = $form->dataFor(self::FIELD_NAME_DISCUSSION_BLOCKING . $dataFieldSuffix) !== null;
-		$discussion->setAttr(self::FIELD_NAME_DISCUSSION_BLOCKING, $blocking);
+		$discussion->setAttribute(self::FIELD_NAME_DISCUSSION_BLOCKING, $blocking);
 		if ($blocking) {
-			$discussion->setAttr(self::FIELD_NAME_DISCUSSION_BLOCK_RESOLVED, false);
+			$discussion->setAttribute(self::FIELD_NAME_DISCUSSION_BLOCK_RESOLVED, false);
 		}
-		$discussion->setAttr(self::FIELD_NAME_DISCUSSION_CLOSED, false);
+		$discussion->setAttribute(self::FIELD_NAME_DISCUSSION_CLOSED, false);
 
 		return $discussion;
 	}
 
 	/**
-	 * Creates a comment DOM element.
+	 * Adds a comment DOM element to a discussion in the database.
 	 *
 	 * @param HyphaDomElement $discussion
 	 * @param WymHTMLForm $form
 	 * @param string dataFieldSuffix
 	 * @return HyphaDomElement
 	 */
-	private function createDiscussionCommentDomElement(HyphaDomElement $discussion, WymHTMLForm $form, $dataFieldSuffix) {
-		$container = $discussion->parent();
+	private function addDiscussionComment(HyphaDomElement $discussion, WymHTMLForm $form, $dataFieldSuffix) {
+		$this->xml->requireLock();
 
 		/** @var HyphaDomElement $comment */
 		$comment = $this->xml->createElement(self::FIELD_NAME_DISCUSSION_COMMENT);
@@ -840,30 +896,62 @@ class peer_reviewed_article extends Page {
 		$text = $form->dataFor(self::FIELD_NAME_DISCUSSION_COMMENT . $dataFieldSuffix);
 		$comment->setText($text);
 		if (isUser()) {
-			$comment->setAttr(self::FIELD_NAME_USER, $this->O_O->getUser()->getAttribute('id'));
+			$comment->setAttribute(self::FIELD_NAME_USER, $this->O_O->getUser()->getAttribute('id'));
 		}
-		$comment->setAttr(self::FIELD_NAME_CREATED_AT, 't' . time());
+		$comment->setAttribute(self::FIELD_NAME_CREATED_AT, 't' . time());
 
-		$review = self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER === $container->nodeName;
+		$type = $discussion->parent()->nodeName;
+		$review = self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER === $type;
 		if (!$review) {
 			if (isUser()) {
 				$userEmail = $this->O_O->getUser()->getAttribute('email');
 				$userName = $this->O_O->getUser()->getAttribute('fullname');
 			} else {
+				$code = $this->constructCode();
 				$userEmail = $form->dataFor(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL . $dataFieldSuffix);
 				$userName = $form->dataFor(self::FIELD_NAME_DISCUSSION_COMMENTER_NAME . $dataFieldSuffix);
-				$comment->setAttr(self::FIELD_NAME_DISCUSSION_COMMENT_PENDING, true);
-				$comment->setAttr(self::FIELD_NAME_DISCUSSION_COMMENT_CONFIRM_CODE, $this->constructCode());
+				$comment->setAttribute(self::FIELD_NAME_DISCUSSION_COMMENT_PENDING, true);
+				$comment->setAttribute(self::FIELD_NAME_DISCUSSION_COMMENT_CONFIRM_CODE, $code);
+
+				if ($form->dataFor(self::FIELD_NAME_DISCUSSION_COMMENTER_SUBSCRIBE . $dataFieldSuffix)) {
+					/** @var HyphaDomElement $subscriberContainer */
+					$subscriberContainer = $discussion->getOrCreate(self::FIELD_NAME_DISCUSSION_SUBSCRIBER_CONTAINER);
+
+					$subscriberEmail = trim(strtolower($userEmail));
+
+					// get or create subscriber element by email
+					$xpath = './/' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER .
+						'[@' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER_EMAIL . '=' . xpath_encode($subscriberEmail) .
+						' and @' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER_STATUS . '!=' . xpath_encode(self::SUBSCRIBER_STATUS_UNSUBSCRIBED) .
+						']';
+					/** @var NodeList $subscriberNodeList */
+					$subscriber = $subscriberContainer->findXPath($xpath)->first();
+					if (!$subscriber instanceof HyphaDomElement) {
+						$subscriber = $this->xml->createElement(self::FIELD_NAME_DISCUSSION_SUBSCRIBER);
+						$subscriber->setAttribute(self::FIELD_NAME_DISCUSSION_SUBSCRIBER_STATUS, self::SUBSCRIBER_STATUS_PENDING);
+						$subscriber->setAttribute(self::FIELD_NAME_DISCUSSION_SUBSCRIBER_EMAIL, $subscriberEmail);
+						$subscriber->setAttribute(self::FIELD_NAME_DISCUSSION_SUBSCRIBER_NAME, $userName);
+						$subscriberContainer->append($subscriber);
+					}
+
+					// if still pending, add notification confirm code
+					if ($subscriber->getAttribute(self::FIELD_NAME_DISCUSSION_SUBSCRIBER_STATUS) === self::SUBSCRIBER_STATUS_PENDING) {
+						/** @var HyphaDomElement $subscribeConfirmCode */
+						$subscribeConfirmCode = $this->xml->createElement(self::FIELD_NAME_DISCUSSION_SUBSCRIBER_CONFIRM_CODE);
+						$subscribeConfirmCode->setAttribute(self::FIELD_NAME_DISCUSSION_SUBSCRIBER_CODE, $code);
+						$subscriber->append($subscribeConfirmCode);
+					}
+				}
 			}
-			$comment->setAttr(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL, $userEmail);
-			$comment->setAttr(self::FIELD_NAME_DISCUSSION_COMMENTER_NAME, $userName);
+			$comment->setAttribute(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL, $userEmail);
+			$comment->setAttribute(self::FIELD_NAME_DISCUSSION_COMMENTER_NAME, $userName);
 		}
 
 		return $comment;
 	}
 
 	/**
-	 * Creates the approves DOM element.
+	 * Creates the approves HTML DOM element.
 	 *
 	 * @return HyphaDomElement
 	 */
@@ -877,8 +965,8 @@ class peer_reviewed_article extends Page {
 		/** @var HyphaDomElement $list */
 		$list = $this->html->createElement('ul');
 		foreach ($approves as $approve) {
-			$createdAt = date('j-m-y, H:i', ltrim($approve->getAttr(self::FIELD_NAME_CREATED_AT), 't'));
-			$approverId = $approve->getAttr(self::FIELD_NAME_USER);
+			$createdAt = date('j-m-y, H:i', ltrim($approve->getAttribute(self::FIELD_NAME_CREATED_AT), 't'));
+			$approverId = $approve->getAttribute(self::FIELD_NAME_USER);
 			$approver = hypha_getUserById($approverId);
 			$approverName = $approver instanceof HyphaDomElement ? $approver->getAttribute('fullname') : $approverId;
 			$html = '<p>' . __('art-by') . ' <strong>' . $approverName . '</strong> ' . __('art-at') . ' ' . $createdAt . '</p>';
@@ -894,16 +982,18 @@ class peer_reviewed_article extends Page {
 	}
 
 	/**
-	 * Creates discussion DOM elements and appends them to the discussions container.
+	 * Creates discussions HTML DOM element.
 	 *
 	 * @param string $type
-	 * @param HyphaDomElement $discussionsContainer
-	 * @return void
+	 * @return HyphaDomElement
 	 */
-	private function fillDiscussionsContainer($type, HyphaDomElement $discussionsContainer) {
-		$container = $type === 'review' ? self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER : self::FIELD_NAME_DISCUSSION_PUBLIC_CONTAINER;
+	private function createDiscussionsDomElement($type) {
+		/** @var HyphaDomElement $discussionsDomElement */
+		$discussionsDomElement = $this->html->createElement('div');
+		$review = self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER === $type;
+
 		/** @var HyphaDomElement $container */
-		$container = $this->xml->find($container);
+		$container = $this->xml->find($review ? self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER : self::FIELD_NAME_DISCUSSION_PUBLIC_CONTAINER);
 
 		/** @var HyphaDomElement[] $discussions */
 		$discussions = $container->find(self::FIELD_NAME_DISCUSSION)->toArray();
@@ -911,7 +1001,7 @@ class peer_reviewed_article extends Page {
 		// in case of no discussions
 		if (empty($discussions)) {
 			/** @var HyphaDomElement $noCommentContainer */
-			$noCommentContainer = $this->html->createElement('ul')->appendTo($discussionsContainer);
+			$noCommentContainer = $this->html->createElement('ul')->appendTo($discussionsDomElement);
 			$noComment = $this->html->create('li')->appendTo($noCommentContainer);
 			$noComment->text(__('art-no-comments-yet'));
 		}
@@ -920,63 +1010,60 @@ class peer_reviewed_article extends Page {
 		$reviewCommentContainersSorted = [0 => [0 => [], 1 => [],], 1 => [0 => [], 1 => [],],];
 
 		foreach ($discussions as $discussion) {
-			$blocking = (bool)$discussion->getAttr(self::FIELD_NAME_DISCUSSION_BLOCKING);
-			$closed = (bool)$discussion->getAttr(self::FIELD_NAME_DISCUSSION_CLOSED);
-			$resolved = (bool)$discussion->getAttr(self::FIELD_NAME_DISCUSSION_BLOCK_RESOLVED);
+			$blocking = (bool)$discussion->getAttribute(self::FIELD_NAME_DISCUSSION_BLOCKING);
+			$closed = (bool)$discussion->getAttribute(self::FIELD_NAME_DISCUSSION_CLOSED);
+			$resolved = (bool)$discussion->getAttribute(self::FIELD_NAME_DISCUSSION_BLOCK_RESOLVED);
 
-			// create discussion container
-			/** @var HyphaDomElement $list */
-			$discussionContainer = $this->html->createElement('ul');
+			// create comment list
+			/** @var HyphaDomElement $commentList */
+			$commentList = $this->html->createElement('ul');
 
-			foreach ($discussion->children() as $comments) {
-				/** @var HyphaDomElement[] $comments */
-				if (!is_array($comments)) {
-					$comments = [$comments];
+			/** @var NodeList|HyphaDomElement[] $comments */
+			$comments = $discussion->find(self::FIELD_NAME_DISCUSSION_COMMENT);
+			$firstComment = true;
+			foreach ($comments as $comment) {
+				// skip pending non-review comments
+				if (!$review && (bool)$comment->getAttribute(self::FIELD_NAME_DISCUSSION_COMMENT_PENDING)) {
+					continue;
 				}
-				$firstComment = true;
-				foreach ($comments as $comment) {
-					if (self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER !== $type && (bool)$comment->getAttr(self::FIELD_NAME_DISCUSSION_COMMENT_PENDING)) {
-						continue;
-					}
-					$createdAt = date('j-m-y, H:i', ltrim($comment->getAttr(self::FIELD_NAME_CREATED_AT), 't'));
-					$committerName = $this->getCommentCommenter($comment);
-					$html = nl2br(htmlspecialchars($comment->getText()));
-					$html .= '<p>' . __('art-by') . ' <strong>' . htmlspecialchars($committerName) . '</strong> ' . __('art-at') . ' ' . htmlspecialchars($createdAt);
-					if (self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER !== $type && isUser()) {
-						$committerEmail = $comment->getAttr(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL);
-						$html .= ' <span> | ' . __('art-email') . ': <a href="mailto:' . htmlspecialchars($committerEmail) . '">' . htmlspecialchars($committerEmail) . '</a></span>';
-					}
-					if ($firstComment) {
-						if ($blocking) {
-							$html .= ' | ' . ($resolved ? __('art-is-resolved') : __('art-is-blocking'));
-						}
-					}
-					$html .= '</p>';
-					$discussionContainer->append('<li ' . ($firstComment ? 'class="first-comment"' : '') . '>' . $html . '</li>');
-					$firstComment = false;
+				$createdAt = date('j-m-y, H:i', ltrim($comment->getAttribute(self::FIELD_NAME_CREATED_AT), 't'));
+				$committerName = $this->getCommentCommenter($comment);
+				$commentHtml = nl2br(htmlspecialchars($comment->getText()));
+				$commentHtml .= '<p>' . __('art-by') . ' <strong>' . htmlspecialchars($committerName) . '</strong> ' . __('art-at') . ' ' . htmlspecialchars($createdAt);
+				if (!$review && isUser()) {
+					$committerEmail = $comment->getAttribute(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL);
+					$commentHtml .= ' <span> | ' . __('art-email') . ': <a href="mailto:' . htmlspecialchars($committerEmail) . '">' . htmlspecialchars($committerEmail) . '</a></span>';
 				}
+				if ($firstComment) {
+					if ($blocking) {
+						$commentHtml .= ' | ' . ($resolved ? __('art-is-resolved') : __('art-is-blocking'));
+					}
+				}
+				$commentHtml .= '</p>';
+				$commentList->append('<li ' . ($firstComment ? 'class="first-comment"' : '') . '>' . $commentHtml . '</li>');
+				$firstComment = false;
 			}
 
-			if (!$discussionContainer->hasChildNodes()) {
+			if (!$commentList->hasChildNodes()) {
 				// if there are no comments to be displayed, all discussion parts do not need to be displayed.
 				continue;
 			}
 
-			/** @var HyphaDomElement $reviewCommentContainer */
-			$reviewCommentContainer = $this->html->createElement('div');
+			/** @var HyphaDomElement $discussionHtml */
+			$discussionHtml = $this->html->createElement('div');
 			$class = $type . '-comment-wrapper collapsed';
 			foreach (['blocking' => $blocking, 'resolved' => $resolved, 'closed' => $closed] as $name => $isTrue) {
 				if ($isTrue) {
 					$class .= ' ' . $name;
 				}
 			}
-			$reviewCommentContainer->attr('class', $class);
-			$reviewCommentContainer->append($discussionContainer);
+			$discussionHtml->attr('class', $class);
+			$discussionHtml->append($commentList);
 
-			if (self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER === $type) {
+			if ($review) {
 				$msgId = null;
 				if ($blocking) {
-					if (!$resolved && ($discussion->getAttr(self::FIELD_NAME_USER) === $this->O_O->getUser()->getAttribute('id') || isAdmin())) {
+					if (!$resolved && ($discussion->getAttribute(self::FIELD_NAME_USER) === $this->O_O->getUser()->getAttribute('id') || isAdmin())) {
 						$msgId = __('art-set-as-resolved');
 					}
 				} elseif (!$closed) {
@@ -984,34 +1071,49 @@ class peer_reviewed_article extends Page {
 				}
 				if (null !== $msgId) {
 					$path = str_replace('{id}', $discussion->getId(), self::PATH_DISCUSSIONS_CLOSED);
-					$discussionContainer->append('<p>' . $this->makeActionButton(__($msgId), $path, self::CMD_DISCUSSION_CLOSED) . '</p>');
+					$commentList->append('<p>' . $this->makeActionButton(__($msgId), $path, self::CMD_DISCUSSION_CLOSED) . '</p>');
 				}
 			}
 
 			// display comment form if the discussion is still open
 			if (!$closed) {
 				// create form to comment on a discussion
-				$type = $discussion->parent()->nodeName;
-				$replyForm = $this->createCommentForm($type, [], $discussion);
-				$discussionContainer->append($replyForm);
-				$discussionContainer->append($this->makeDiscussionActionButton($type, $discussion));
+				$dataFieldSuffix = $this->constructDiscussionFieldSuffix($type, $discussion);
+				$formData = [
+					self::FIELD_NAME_DISCUSSION_COMMENTER_SUBSCRIBE . $dataFieldSuffix => true,
+				];
+				$replyForm = $this->createCommentForm($type, $formData, $discussion);
+				$replyForm->updateDom();
+				$commentList->append($replyForm);
+				$commentList->append($this->makeDiscussionActionButton($type, $discussion));
 			}
 
-			$reviewCommentContainersSorted[(int)$closed][(int)!$blocking][] = $reviewCommentContainer;
+			$reviewCommentContainersSorted[(int)$closed][(int)!$blocking][] = $discussionHtml;
 		}
 
 		foreach ($reviewCommentContainersSorted as $openClosedSorted) {
 			foreach ($openClosedSorted as $blockingNonBLockingSorted) {
-				foreach ($blockingNonBLockingSorted as $reviewCommentContainer) {
-					$discussionsContainer->append($reviewCommentContainer);
+				foreach ($blockingNonBLockingSorted as $discussionHtml) {
+					$discussionsDomElement->append($discussionHtml);
 				}
 			}
 		}
 
 		// create form to start a discussion
-		$commentForm = $this->createCommentForm($type);
-		$discussionsContainer->append($commentForm);
-		$discussionsContainer->append($this->makeDiscussionActionButton($type));
+		$dataFieldSuffix = $this->constructDiscussionFieldSuffix($type);
+		$formData = [
+			self::FIELD_NAME_DISCUSSION_COMMENTER_SUBSCRIBE . $dataFieldSuffix => true,
+		];
+		$commentForm = $this->createCommentForm($type, $formData);
+		$commentForm->updateDom();
+		$discussionsDomElement->append($commentForm);
+		$discussionsDomElement->append($this->makeDiscussionActionButton($type));
+
+		$title = $review ? __('art-review-comments') : __('art-comments');
+		$discussionsDomElement->append('<h2>' . $title . '</h2>');
+		$discussionsDomElement->attr('class', $type . '-comments-wrapper');
+
+		return $discussionsDomElement;
 	}
 
 	/**
@@ -1081,30 +1183,27 @@ EOF;
 	 * Constructs the WymHTMLForm for the comment form.
 	 *
 	 * @param string $type
-	 * @param array $data
+	 * @param array $values
 	 * @param null|HyphaDomElement $discussion
 	 * @return WymHTMLForm
 	 */
-	private function createCommentForm($type, array $data = [], HyphaDomElement $discussion = null) {
+	private function createCommentForm($type, array $values = [], HyphaDomElement $discussion = null) {
 		$new = $discussion === null;
 
 		$review = self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER === $type;
 
-		$dataFieldSuffix = $new ? '/new_' . $type : '/' . $discussion->getId();
+		$dataFieldSuffix = $this->constructDiscussionFieldSuffix($type, $discussion);
 
 		$html = <<<EOF
-			<div class="new-comment $type">
+			<div class="new-comment [[type]]">
 			<div>
 				<strong><label for="[[field-name-comment]]">[[comment]]</label></strong><textarea name="[[field-name-comment]]" id="[[field-name-comment]]"></textarea>
 			</div>
 EOF;
 
 		$vars = [];
+		$vars['type'] = $type;
 		$vars['comment'] = $new ? __('art-comment-on-article') : __('art-comment-on-comment');
-		if (!isUser()) {
-			// only non-users need to enter their name
-			$vars['comment'] .= ' ' . makeInfoButton('help-comment-rules');
-		}
 		$vars['field-name-comment'] = self::FIELD_NAME_DISCUSSION_COMMENT . $dataFieldSuffix;
 
 		if ($new && $review && !in_array($this->getStatus(), [self::STATUS_APPROVED, self::STATUS_PUBLISHED])) {
@@ -1119,6 +1218,7 @@ EOF;
 		}
 
 		if (!isUser()) {
+			// only non-users need to enter their name
 			$html .= <<<EOF
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
 				<strong><label for="[[field-name-name]]">[[name]]</label></strong><div class="label_suffix">[[un-anonymous]]</div> <input type="text" id="[[field-name-name]]" name="[[field-name-name]]" />
@@ -1126,18 +1226,38 @@ EOF;
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
 				<strong><label for="[[field-name-email]]">[[email]]</label></strong> <input type="text" id="[[field-name-email]]" name="[[field-name-email]]" />
 			</div>
+			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
+				<strong><label for="[[field-name-subscribe]]">[[subscribe]]</label></strong> <input type="checkbox" id="[[field-name-subscribe]]" name="[[field-name-subscribe]]" /> [[info-button-subscribe]]
+			</div>
 EOF;
+			// make non-users aware why they need to enter their name
+			$vars['comment'] .= ' ' . makeInfoButton('help-comment-rules');
+
 			$vars['name'] = __('art-name');
 			$vars['field-name-name'] = self::FIELD_NAME_DISCUSSION_COMMENTER_NAME . $dataFieldSuffix;
 			$vars['un-anonymous'] = __('art-comment-unanonymous');
 			$vars['email'] = __('art-email');
 			$vars['field-name-email'] = self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL . $dataFieldSuffix;
+			$vars['subscribe'] = __('art-subscribe');
+			$vars['info-button-subscribe'] = makeInfoButton('help-art-subscribe');
+			$vars['field-name-subscribe'] = self::FIELD_NAME_DISCUSSION_COMMENTER_SUBSCRIBE . $dataFieldSuffix;
 		}
 		$html .= '</div>';
 
 		$html = hypha_substitute($html, $vars);
 
-		return new WymHTMLForm($html, $data);
+		return new WymHTMLForm($html, $values);
+	}
+
+	/**
+	 * Constructs the field suffix for a discussion.
+	 *
+	 * @param string $type
+	 * @param null|HyphaDomElement $discussion
+	 * @return string
+	 */
+	private function constructDiscussionFieldSuffix($type, HyphaDomElement $discussion = null) {
+		return $discussion === null ? '/new_' . $type : '/' . $discussion->getId();
 	}
 
 	/**
@@ -1203,21 +1323,21 @@ EOF;
 	 * @param HyphaDomElement $comment
 	 */
 	private function sendCommentConfirmMail(HyphaDomElement $comment) {
-		$code = $comment->getAttr(self::FIELD_NAME_DISCUSSION_COMMENT_CONFIRM_CODE);
+		$code = $comment->getAttribute(self::FIELD_NAME_DISCUSSION_COMMENT_CONFIRM_CODE);
 		$commentBody = $comment->textContent;
 
 		$title = $this->getTitle();
 		$path = str_replace(['{id}', '{code}'], [$comment->getId(), $code], self::PATH_DISCUSSIONS_COMMENT_CONFIRM);
 		$linkToConfirm = $this->constructFullPath($this->pagename . '/' . $path);
 
-		$email = $comment->getAttr(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL);
+		$email = $comment->getAttribute(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL);
 		$subject = __('art-confirm-comment-subject');
-		$message = __('art-confirm-comment-body', array(
+		$message = __('art-confirm-comment-body', [
 			'sitename' => htmlspecialchars(hypha_getTitle()),
 			'title' => htmlspecialchars($title),
 			'comment' => nl2br(htmlspecialchars($commentBody)),
-			'link' => htmlspecialchars($linkToConfirm)
-		));
+			'link' => htmlspecialchars($linkToConfirm),
+		]);
 		$this->sendMail($email, $subject, $message);
 	}
 
@@ -1233,17 +1353,62 @@ EOF;
 		$name = $this->getCommentCommenter($comment);
 		$commentBody = $comment->getText();
 
-		$subject = __('art-comment-subject', array(
+		$subject = __('art-comment-subject', [
 			'name' => $name,
 			'title' => $title
-		));
-		$message = __('art-comment-body', array(
+		]);
+		$messageArgs = [
 			'name' => htmlspecialchars($name),
 			'link' => htmlspecialchars($linkToPage),
 			'title' => htmlspecialchars($title),
-			'comment' => nl2br(htmlspecialchars($commentBody))
-		));
+			'comment' => nl2br(htmlspecialchars($commentBody)),
+		];
+		$message = __('art-comment-body', $messageArgs);
 		$this->sendMail(getUserEmailList(), $subject, $message);
+
+		$subscriberSubject = __('art-comment-subscriber-subject', [
+			'name' => $name,
+			'title' => $title
+		]);
+		$subscriberMessage = __('art-comment-subscriber-body', $messageArgs);
+
+		// also send newly create comment to all who subscribed to this discussion, with unsubscribe link
+		foreach ($this->getSubscribers($comment) as $subscriber) {
+			$email = $subscriber->getAttribute(self::FIELD_NAME_DISCUSSION_SUBSCRIBER_EMAIL);
+
+			// Do not notify people of their own comments
+			if ($email == $comment->getAttribute(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL))
+				continue;
+
+			$code = $subscriber->getAttribute(self::FIELD_NAME_DISCUSSION_SUBSCRIBER_UNSUBSCRIBE_CODE);
+			// include email for server record purposes
+			$path = hypha_substitute(self::PATH_UNSUBSCRIBE_CODE, ['address' => $email, 'code' => $code]);
+			$linkToUnsubscribe = $this->constructFullPath($this->pagename . '/' . $path);
+			$message = $subscriberMessage;
+			$message .= '<p><a href="' . htmlspecialchars($linkToUnsubscribe) . '">' . htmlspecialchars(__('art-unsubscribe')) . '</a></p>';
+			$this->sendMail($email, $subscriberSubject, $message);
+		}
+	}
+
+	/**
+	 * @param HyphaDomElement $comment
+	 * @return HyphaDomElement[]
+	 */
+	private function getSubscribers(HyphaDomElement $comment) {
+		/** @var HyphaDomElement $discussion */
+		$discussion = $comment->parent();
+
+		/** @var NodeList|HyphaDomElement[] $subscriberElements */
+		$xpath = './/' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER_CONTAINER . '/' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER . '[@ ' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER_STATUS . '=' . xpath_encode(self::SUBSCRIBER_STATUS_CONFIRMED) . ']';
+		$subscriberElements = $discussion->findXPath($xpath);
+
+		$subscribers = [];
+		foreach ($subscriberElements as $subscriber) {
+			$email = $subscriber->getAttribute(self::FIELD_NAME_DISCUSSION_SUBSCRIBER_EMAIL);
+			$subscribers[$email] = $subscriber;
+		}
+
+		return array_values($subscribers);
 	}
 
 	/**
@@ -1257,15 +1422,15 @@ EOF;
 		$linkToPage = $this->constructFullPath($this->pagename);
 
 		$comment = $discussion->lastChild->textContent;
-		$subject = __('art-block-submitted-subject', array(
+		$subject = __('art-block-submitted-subject', [
 			'title' => $title
-		));
-		$message = __('art-block-submitted-body', array(
+		]);
+		$message = __('art-block-submitted-body', [
 			'link' => htmlspecialchars($linkToPage),
 			'title' => htmlspecialchars($title),
 			'author' => htmlspecialchars($author),
-			'comment' => htmlspecialchars($comment)
-		));
+			'comment' => htmlspecialchars($comment),
+		]);
 
 		$this->sendMail(getUserEmailList(), $subject, $message);
 	}
@@ -1277,14 +1442,14 @@ EOF;
 		$title = $this->getTitle();
 		$author = $this->O_O->getUser()->getAttribute('fullname');
 		$linkToPage = $this->constructFullPath($this->pagename);
-		$subject = __('art-block-resolved-subject', array(
+		$subject = __('art-block-resolved-subject', [
 			'title' => $title
-		));
-		$message = __('art-block-resolved-body', array(
+		]);
+		$message = __('art-block-resolved-body', [
 			'link' => htmlspecialchars($linkToPage),
 			'title' => htmlspecialchars($title),
-			'author' => htmlspecialchars($author)
-		));
+			'author' => htmlspecialchars($author),
+		]);
 		$this->sendMail(getUserEmailList(), $subject, $message);
 	}
 
@@ -1325,7 +1490,7 @@ EOF;
 	private function getStatus() {
 		/** @var HyphaDomElement $article */
 		$article = $this->xml->find(self::FIELD_NAME_ARTICLE);
-		$status = $article->getAttr(self::FIELD_NAME_STATUS);
+		$status = $article->getAttribute(self::FIELD_NAME_STATUS);
 		if ('' == $status) {
 			$status = self::STATUS_NEWLY_CREATED;
 		}
@@ -1339,9 +1504,11 @@ EOF;
 	 * @return bool
 	 */
 	private function canBeSetAsApproved() {
+		/** @var HyphaDomElement $discussions */
 		$discussions = $this->xml->find(self::FIELD_NAME_DISCUSSION_CONTAINER);
 		/** @var NodeList $blockingDiscussions */
-		$blockingDiscussions = $discussions->findXPath('//' . self::FIELD_NAME_DISCUSSION . '[@' . self::FIELD_NAME_DISCUSSION_BLOCKING . '="1"][@' . self::FIELD_NAME_DISCUSSION_BLOCK_RESOLVED . '!="1"]');
+		$xpath = './/' . self::FIELD_NAME_DISCUSSION . '[@' . self::FIELD_NAME_DISCUSSION_BLOCKING . '="1" and @' . self::FIELD_NAME_DISCUSSION_BLOCK_RESOLVED . '!="1"]';
+		$blockingDiscussions = $discussions->findXPath($xpath);
 		$blockingDiscussionsCount = $blockingDiscussions->count();
 		if ($blockingDiscussionsCount > 0) {
 			return false;
@@ -1362,9 +1529,11 @@ EOF;
 	 * @return bool
 	 */
 	private function hasUserApproved($userId) {
+		/** @var HyphaDomElement $approves */
 		$approves = $this->xml->find(self::FIELD_NAME_APPROVE_CONTAINER);
 		/** @var NodeList $approveCollection */
-		$approveCollection = $approves->findXPath('//' . self::FIELD_NAME_APPROVE . '[@' . self::FIELD_NAME_USER . '="' . $userId . '"]');
+		$xpath = './/' . self::FIELD_NAME_APPROVE . '[@' . self::FIELD_NAME_USER . '="' . $userId . '"]';
+		$approveCollection = $approves->findXPath($xpath);
 		return $approveCollection->count() >= 1;
 	}
 
@@ -1375,12 +1544,12 @@ EOF;
 	 * @return string
 	 */
 	private function getCommentCommenter(HyphaDomElement $comment) {
-		$userId = $comment->getAttr(self::FIELD_NAME_USER);
+		$userId = $comment->getAttribute(self::FIELD_NAME_USER);
 		if ($userId) {
 			$user = hypha_getUserById($userId);
 			return ($user instanceof HyphaDomElement) ? $user->getAttribute('fullname') : $userId;
 		}
-		return $comment->getAttr(self::FIELD_NAME_DISCUSSION_COMMENTER_NAME);
+		return $comment->getAttribute(self::FIELD_NAME_DISCUSSION_COMMENTER_NAME);
 	}
 
 	/**
