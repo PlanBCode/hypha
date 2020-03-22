@@ -93,17 +93,66 @@
 		obj.setSelectionRange(pos, pos);
 	}
 	function newPage() {
-		html = '<table class="section"><tr><th colspan="2"><?=__('create-new-page').'<br/>'.__('instruction-new-page')?></td></tr>';
-		var infoPageType = <?=json_encode(makeInfoButton('help-page-type'));?>;
-		// TODO [LRM]: find better way to set default new page type.
-		html+= '<tr><th><?=__('type')?></th><td><select id="newPageType" name="newPageType">' + '<?php foreach($types as $type => $datatypeName) echo '<option value="'.$type.'"'.($type==hypha_getDefaultNewPageType() ? 'selected="selected"' : '').'>'.$datatypeName.'</option>'; ?>' + '</select> ' + infoPageType + '</td></tr>';
-		var infoPageName = <?=json_encode(makeInfoButton('help-page-name'));?>;
-		html+= '<tr><th><?=__('pagename')?></th><td><input type="text" id="newPagename" value="<?=$pagename?>" onblur="validatePagename(this);" onkeyup="validatePagename(this); document.getElementById(\'newPageSubmit\').disabled = this.value ? false : true;"/> ' + infoPageName + '</td></tr>';
-		var infoPrivate = <?=json_encode(makeInfoButton('help-private-page'));?>;
-		html+= '<tr><td></td><td><input type="checkbox" id="newPagePrivate" name="newPagePrivate"/> <?=__('private-page')?> ' + infoPrivate + '</td></tr>';
-		html+= '<tr><td></td><td><input type="button" class="button" value="<?=__('cancel')?>" onclick="document.getElementById(\'popup\').style.display=\'none\';" />';
-		html+= '<input type="submit" id="newPageSubmit" class="button editButton" value="<?=__('create')?>" <?= $pagename ? '' : 'disabled="true"' ?> onclick="hypha(\'<?=$hyphaContentLanguage?>/\' + document.getElementById(\'newPagename\').value + \'/edit\', \'newPage\', document.getElementById(\'newPagename\').value, $(this).closest(\'form\'));" /></td></tr></table>';
-		document.getElementById('popup').innerHTML = html;
+<?php
+		$popup = <<<EOF
+			<table class="section">
+				<tr>
+					<th colspan="2">[[create-new-page]]<br/>[[instruction-new-page]]</th>
+				</tr>
+				<tr>
+					<th>[[type]]</th>
+					<td><select id="newPageType" name="newPageType">[[pagetype-options]]</select>[[help-page-type]]</td>
+				</tr>
+				<tr>
+					<th>[[pagename]]</th>
+					<td><input type="text" id="newPagename" value="[[pagename-value]]" onblur="validatePagename(this);" onkeyup="validatePagename(this); document.getElementById('newPageSubmit').disabled = this.value ? false : true;"/>[[help-page-name]]</td>
+				</tr>
+				<tr>
+					<th>[[language]]</th>
+					<td><select id="newPageLanguage" name="newPageLanguage">[[language-options]]</select></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td><input type="checkbox" id="newPagePrivate" name="newPagePrivate"/>[[private-page]][[help-private]]</td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>
+						<input type="button" class="button" value="[[cancel]]" onclick="document.getElementById('popup').style.display='none';" />
+						<input type="submit" id="newPageSubmit" class="button editButton" value="[[create]]" [[submit-disabled]] onclick="hypha([[content-language-js]] + document.getElementById('newPagename').value + '/edit', 'newPage', document.getElementById('newPagename').value, $(this).closest('form'));" />
+					</td>
+				</tr>
+			</table>
+EOF;
+		$pagetype_options = $html->create('<dummy/>');
+		foreach($types as $type => $datatypeName) {
+			$option = $html->create('<option/>')->setAttr('value', $type)->setText($datatypeName);
+			if ($type==hypha_getDefaultNewPageType())
+				$option->setAttr('selected', 'selected');
+			$pagetype_options->append($option);
+		}
+		$vars = [
+			'create-new-page' => __('create-new-page'),
+			'instruction-new-page' => __('instruction-new-page'),
+			'type' => __('type'),
+			'pagename' => __('pagename'),
+			'private-page' => __('private-page'),
+			'cancel' => __('cancel'),
+			'create' => __('create'),
+			'language' => __('language'),
+			'help-page-type' => makeInfoButton('help-page-type'),
+			'help-page-name' => makeInfoButton('help-page-name'),
+			'help-private' => makeInfoButton('help-private-page'),
+			'pagetype-options' => $pagetype_options->getHtml(),
+			'language-options' => Language::getLanguageOptionList($hyphaContentLanguage, ''),
+			'pagename-value' => $pagename,
+			'submit-disabled' => $pagename ? 'disabled="disabled"' : '',
+			'content-language-js' => htmlspecialchars(json_encode($hyphaContentLanguage)),
+		];
+?>
+		popup = <?= json_encode(hypha_substitute($popup, $vars)) ?>;
+
+		document.getElementById('popup').innerHTML = popup;
 		document.getElementById('popup').style.display = 'block';
 		document.getElementById('newPagename').focus();
 	}
@@ -123,7 +172,8 @@
 		<buildhtml>
 	*/
 	function loadPage(RequestContext $O_O) {
-		global $isoLangList, $hyphaHtml, $hyphaPage, $hyphaUrl;
+		global $hyphaHtml, $hyphaPage, $hyphaUrl;
+		$isoLangList = Language::getIsoList();
 
 		$request = $O_O->getRequest();
 		$args = $request->getArgs();
@@ -275,20 +325,23 @@
 	*/
 	registerCommandCallback('newPage', 'newPage');
 	function newPage($newName) {
-		global $hyphaXml, $hyphaUrl, $hyphaContentLanguage;
+		global $O_O, $hyphaXml;
 
+		$private = $O_O->getRequest()->getPostValue('newPagePrivate') !== null;
+		$type = $O_O->getRequest()->getPostValue('newPageType');
+		$language = $O_O->getRequest()->getPostValue('newPageLanguage', $O_O->getContentLanguage());
 
 		$newName = validatePagename($newName);
 		if (isUser()) {
 			$hyphaXml->lockAndReload();
-			$error = hypha_addPage($_POST['newPageType'], $hyphaContentLanguage, $newName, isset($_POST['newPagePrivate']));
+			$error = hypha_addPage($type, $language, $newName, $private);
 			$hyphaXml->saveAndUnlock();
 			if ($error) {
 				notify('error', $error);
 				return 'reload';
-			} else {
-				return ['redirect', $hyphaUrl . $hyphaContentLanguage . '/' . $newName . '/edit'];
 			}
+
+			return ['redirect', $O_O->getRequest()->getRootUrl() . $language . '/' . $newName . '/edit'];
 		}
 	}
 
@@ -348,9 +401,10 @@
 	}
 
 	function dewikify_link($node) {
-		global $hyphaXml, $isoLangList;
+		global $hyphaXml;
 		global $hyphaContentLanguage;
 		global $hyphaPage;
+		$isoLangList = Language::getIsoList();
 
 		$href = $node->getAttribute('href');
 		// This matches a url of the form hypha:123abc/subpath#anchor
@@ -446,7 +500,8 @@
 	}
 
 	function wikify_link($node) {
-		global $hyphaXml, $isoLangList;
+		global $hyphaXml;
+		$isoLangList = Language::getIsoList();
 
 		$href = $node->getAttribute('href');
 		// This parses a query string of the form en/pagename/subpath#anchor
@@ -577,7 +632,7 @@
 	function hypha_searchHelp(RequestContext $O_O, $subject, $lang = 'en') {
 		$options = [$lang, $O_O->getInterfaceLanguage(), $O_O->getContentLanguage()];
 		foreach ($options as $lang) {
-			$dict = $O_O->getDictionaryByLanguage($lang);
+			$dict = Language::getDictionaryByLanguage($lang);
 			if (null !== $dict && array_key_exists($subject, $dict)) {
 				return nl2br($dict[$subject]);
 			}

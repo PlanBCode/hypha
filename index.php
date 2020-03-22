@@ -46,12 +46,10 @@
 	foreach (scandir("system/core/") as $_file) if (substr($_file, -4) == '.php') require_once("system/core/" . $_file);
 
 	// Build request
-	$hyphaRequest = new HyphaRequest($isoLangList);
+	$hyphaRequest = new HyphaRequest();
 
 	// Build request context
-	$O_O = new RequestContext($hyphaRequest, hypha_getDefaultLanguage());
-
-	foreach (scandir("system/languages/") as $_file) if (substr($_file, -4) == '.php') $uiLangList[] = basename($_file, '.php');
+	$O_O = new RequestContext($hyphaRequest);
 
 	// called for its side effects of loading the datatypes
 	hypha_getDataTypes();
@@ -109,6 +107,10 @@
 	 * @deprecated Use O_O instead
 	 */
 	$hyphaLanguage = $O_O->getInterfaceLanguage();
+	$locale = __('_locale');
+	if ($locale !== '_locale') {
+		setlocale(LC_TIME, $locale);
+	}
 
 	/**
 	 * Set content language as global variable.

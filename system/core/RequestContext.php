@@ -8,23 +8,55 @@
 		private $hyphaUser;
 
 		/** @var string */
-		private $defaultLanguage;
+		private $fallbackLanguage;
+
+		/** @var string */
+		private $fallbackInterfaceLanguage;
 
 		/** @var array */
 		private $dictionary;
 
-		/** @var array */
-		private $dictionaries = [];
-
 		/**
 		 * @param HyphaRequest $hyphaRequest
-		 * @param string $defaultLanguage
 		 */
-		public function __construct(HyphaRequest $hyphaRequest, $defaultLanguage) {
+		public function __construct(HyphaRequest $hyphaRequest) {
 			$this->hyphaRequest = $hyphaRequest;
-			$this->defaultLanguage = $defaultLanguage;
 			$user = isset($_SESSION['hyphaLogin']) ? hypha_getUserById($_SESSION['hyphaLogin']) : false;
 			$this->hyphaUser = $user ?: null;
+		}
+
+		/**
+		 * @param string $fallbackLanguage
+		 */
+		public function setFallbackLanguage($fallbackLanguage) {
+			$this->fallbackLanguage = $fallbackLanguage;
+		}
+
+		/**
+		 * @return string
+		 */
+		protected function getFallbackLanguage() {
+			if ($this->fallbackLanguage === null) {
+				$this->fallbackLanguage = hypha_getDefaultLanguage();
+			}
+			return $this->fallbackLanguage;
+		}
+
+		/**
+		 * @param string $fallbackInterfaceLanguage
+		 */
+		public function setFallbackInterfaceLanguage($fallbackInterfaceLanguage) {
+			$this->fallbackInterfaceLanguage = $fallbackInterfaceLanguage;
+		}
+
+		/**
+		 * @return string
+		 */
+		protected function getFallbackInterfaceLanguage() {
+			if ($this->fallbackInterfaceLanguage === null) {
+				$this->fallbackInterfaceLanguage = hypha_getDefaultInterfaceLanguage();
+			}
+			return $this->fallbackInterfaceLanguage;
 		}
 
 		/**
@@ -52,56 +84,40 @@
 		 * @return string
 		 */
 		public function getContentLanguage() {
-			return $this->hyphaRequest->getLanguage() ?: $this->defaultLanguage;
+			return $this->hyphaRequest->getLanguage() ?: $this->getFallbackLanguage();
 		}
 
 		/**
 		 * @return string
+		 * @throws Exception
 		 */
 		public function getInterfaceLanguage() {
-			return $this->hyphaUser instanceof HyphaDomElement ? $this->hyphaUser->getAttribute('language') : $this->getContentLanguage();
+			$languageOptions = [];
+			if ($this->hyphaUser instanceof HyphaDomElement) {
+				$languageOptions[] = $this->hyphaUser->getAttribute('language');
+			}
+			if (array_key_exists('HTTP_ACCEPT_LANGUAGE', $_SERVER)) {
+				$languageOptions[] = strtolower(substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2));
+			}
+			$languageOptions[] = $this->getContentLanguage();
+			$languageOptions[] = $this->getFallbackInterfaceLanguage();
+			foreach ($languageOptions as $languageOption) if (in_array($languageOption, Language::getInterfaceLanguageList())) {
+				return $languageOption;
+			}
+
+			throw new \Exception('Cannot determine the interface language');
 		}
 
 		/**
 		 * @return array
-		 */
-		protected function getDictionaryLanguageOptions() {
-			return [
-				$this->getInterfaceLanguage(),
-				$this->getContentLanguage(),
-				$this->defaultLanguage,
-				'en',
-			];
-		}
-
-		/**
-		 * @return array
+		 * @throws Exception
 		 */
 		public function getDictionary() {
 			if (null === $this->dictionary) {
-				$this->dictionary = [];
-				foreach ($this->getDictionaryLanguageOptions() as $lang) {
-					$dict = $this->getDictionaryByLanguage($lang);
-					if (null !== $dict) {
-						$this->dictionary = $dict;
-						break;
-					}
-				}
+				$this->dictionary = Language::getDictionaryByLanguage($this->getInterfaceLanguage());
 			}
 
 			return $this->dictionary;
-		}
-
-		/**
-		 * @param string $lang
-		 * @return null|array
-		 */
-		public function getDictionaryByLanguage($lang) {
-			if (!array_key_exists($lang, $this->dictionaries)) {
-				$file = $this->getRootPath() . '/system/languages/' . $lang . '.php';
-				$this->dictionaries[$lang] = file_exists($file) ? include($file) : null;
-			}
-			return $this->dictionaries[$lang];
 		}
 
 		/**

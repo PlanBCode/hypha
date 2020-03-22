@@ -1,5 +1,6 @@
 <?php
 	$LANG = array (
+		"_locale" => "en_UK",
 		"language-id" => "English",
 		"languages" => "languages",
 		"language" => "language",
@@ -50,6 +51,7 @@
 		"system-email" => "system email",
 		"default-page" => "default page",
 		"default-language" => "default language",
+		"default-interface-language" => "default interface language",
 		"digest-interval" => "digest interval",
 		"default-new-page-type" => "default new page type",
 		"file" => "file",
@@ -200,6 +202,7 @@
 		"unable-to-edit" => "unable to edit",
 		"missing-arguments" => "missing arguments",
 		"invalid-argument" => "invalid argument",
+		"invalid-language" => "invalid language",
 		"archive" => "archive",
 		"sure-to-delete" => "Are you sure you want to delete this page",
 		"enter-tag-label" => "Enter new tag (use a short word)",
@@ -395,8 +398,8 @@
 		"art-start-review" => "start review",
 		"art-approve(s)" => "approve(s)",
 		"art-unresolved-block(s)" => "unresolved block(s)",
-		"art-date-format-date" => "F j, Y", // see for format: https://www.php.net/manual/en/function.date.php
-		"art-date-format-time" => '\a\t g\:ia', // see for format: https://www.php.net/manual/en/function.date.php
+		"art-date-format-date" => "%B %e, %Y", // see for format: https://www.php.net/manual/en/function.date.php
+		"art-date-format-time" => "at %l:%M%p", // see for format: https://www.php.net/manual/en/function.date.php
 
 		// sharing links
 		"share-email-subject" => "See '[[title]]' at [[domain]]",

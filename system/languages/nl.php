@@ -1,5 +1,6 @@
 <?php
 	$LANG = array (
+		"_locale" => "nl_NL",
 		"language-id" => "Nederlands",
 		"languages" => "talen",
 		"language" => "taal",
@@ -50,6 +51,7 @@
 		"system-email" => "systeememail",
 		"default-page" => "standaard pagina",
 		"default-language" => "standaard taal",
+		"default-interface-language" => "standaard interface taal",
 		"digest-interval" => "notificatie-interval",
 		"default-new-page-type" => "standaardtype voor nieuwe pagina's",
 		"file" => "bestand",
@@ -200,6 +202,7 @@
 		"unable-to-edit" => "kan niet worden bewerkt",
 		"missing-arguments" => "argumenten ontbreken",
 		"invalid-argument" => "foutief argument",
+		"invalid-language" => "foutieve taal",
 		"archive" => "archief",
 		"sure-to-delete" => "Weet je zeker dat je deze pagina wilt verwijderen",
 		"enter-tag-label" => "Voer nieuwe tag in (gebruik een kort woord)",
@@ -390,8 +393,8 @@
 		"art-start-review" => "start beoordeling",
 		"art-approve(s)" => "beoordeling(en)",
 		"art-unresolved-block(s)" => "onopgeloste breekpunt(en)",
-		"art-date-format-date" => "j F Y", // see for format: https://www.php.net/manual/en/function.date.php
-		"art-date-format-time" => '\o\m G\:i\u', // see for format: https://www.php.net/manual/en/function.date.php
+		"art-date-format-date" => "%e %B %Y", // see for format: https://www.php.net/manual/en/function.date.php
+		"art-date-format-time" => "om %k:%Mu", // see for format: https://www.php.net/manual/en/function.date.php
 
 		// sharing links
 		"share-email-subject" => "Zie '[[title]]' op [[domain]]",
