@@ -1489,9 +1489,13 @@ EOF;
 	 */
 	private function getStatus() {
 		/** @var HyphaDomElement $article */
-		$article = $this->xml->find(self::FIELD_NAME_ARTICLE);
-		$status = $article->getAttribute(self::FIELD_NAME_STATUS);
-		if ('' == $status) {
+		$article = $this->xml->find(self::FIELD_NAME_ARTICLE)->first();
+		if ($article instanceof HyphaDomElement) {
+			$status = $article->getAttribute(self::FIELD_NAME_STATUS);
+			if ('' == $status) {
+				$status = self::STATUS_NEWLY_CREATED;
+			}
+		} else {
 			$status = self::STATUS_NEWLY_CREATED;
 		}
 
