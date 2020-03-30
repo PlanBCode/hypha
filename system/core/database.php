@@ -633,6 +633,7 @@
 			}
 
 			$contents = stream_get_contents($fd);
+			$contents = stream_get_contents($fd, /* maxlength */ -1, /* offset */ 0);
 
 			if (!$this->fd)
 				fclose($fd);
