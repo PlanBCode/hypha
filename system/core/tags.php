@@ -29,6 +29,8 @@
 		// Construct html output
 		$html = '';
 		if (!empty($selectedTagIds) || isUser()) {
+			uasort($selectedTags, function($a, $b) { return strnatcasecmp($a['label'], $b['label']); });
+
 			$html.= '<span class="prefix">' . __('tags') . ': </span>';
 			$html.= '<div class="selectedTags">';
 			foreach ($selectedTags as $id => $tag) {
@@ -39,6 +41,8 @@
 			}
 			$html.= '</div>';
 			if ((isUser() && !empty($deselectedTags)) || isAdmin()) {
+				uasort($deselectedTags, function($a, $b) { return strnatcasecmp($a['label'], $b['label']); });
+
 				$html.= '<select class="remainingTags" onchange="selectTag(this, this.value);">';
 				$html.= '<option value="_add_" selected="selected" disabled="disabled">'.__('add').'...</option>';
 				foreach ($deselectedTags as $id => $tag) {
