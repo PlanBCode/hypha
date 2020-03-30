@@ -659,17 +659,9 @@
 			Write the given string to the file, replacing any
 			current contents.
 
-			If the file is not opened yet, it is opened and
-			an exclusive lock is taken. After writing, the
-			file is closed and the lock is released.
-
-			If the file was already opened (and thus an
-			exclusive lock is held), the file is not closed
-			after writing, and the lock remains in effect.
-
-			This method can essentially be used just like
-			file_put_contents(), but with locking enabled by
-			default.
+			The file must be already locked before calling
+			this. It is not closed or unlocked after
+			writing.
 		*/
 		function write($content) {
 			if (!$this->fd)
