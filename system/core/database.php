@@ -602,7 +602,11 @@
 			$this->fd = fopen($this->filename, 'c+');
 			if ($this->fd === false)
 				throw new RuntimeException('Cannot lock file ' . $this->filename . ', open failed: ' . error_get_last()['message']);
-			flock($this->fd, LOCK_EX);
+			if (!flock($this->fd, LOCK_EX)) {
+				fclose($this->fd);
+				$this->fd = false;
+				throw new RuntimeException('Cannot lock file ' . $this->filename . ', lock failed: ' . error_get_last()['message']);
+			}
 		}
 
 
