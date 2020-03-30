@@ -644,34 +644,25 @@
 
 			Read and return the contents of the file.
 
-			If the file is not opened yet, it is opened and
-			a shared lock is taken. After reading the file,
-			it is closed and the lock is released.
-
-			If the file was already opened (and thus an
-			exclusive lock is held), the file is not closed
-			after reading, and the lock remains in effect.
+			If the file is not open already, it is opened,
+			read, and closed. No locking is needed in this
+			case, since writes always happen on a temporary
+			files and atomically replace the actual file, so
+			if we open the actual filename, we will always
+			see a consistent file (which could be replaced
+			by the time we finish reading, but then we'll
+			just have read the older version completely,
+			which is ok).
 
 			This method can essentially be used just like
-			file_get_contents, but with support for locking.
+			file_get_contents, but with support for an
+			existing lock.
 		*/
 		function read() {
-			if ($this->fd) {
-				$fd = $this->fd;
-			} else {
-				$fd = fopen($this->filename, 'r');
-				if ($fd === false)
-					throw new RuntimeException('Cannot lock file ' . $this->filename . ', open failed: ' . error_get_last()['message']);
-				flock($fd, LOCK_SH);
-			}
-
-			$contents = stream_get_contents($fd);
-			$contents = stream_get_contents($fd, /* maxlength */ -1, /* offset */ 0);
-
-			if (!$this->fd)
-				fclose($fd);
-
-			return $contents;
+			if ($this->fd)
+				return stream_get_contents($this->fd, /* maxlength */ -1, /* offset */ 0);
+			else
+				return file_get_contents($this->filename);
 		}
 
 		/*
