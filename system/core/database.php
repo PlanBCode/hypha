@@ -606,14 +606,36 @@
 			// before PHP 7.4).
 			error_clear_last();
 
-			$this->fd = fopen($this->filename, 'c+');
-			if ($this->fd === false)
-				throw new RuntimeException('Cannot lock file ' . $this->filename . ', open failed: ' . error_get_last()['message']);
-			if (!flock($this->fd, LOCK_EX)) {
-				fclose($this->fd);
-				$this->fd = false;
-				throw new RuntimeException('Cannot lock file ' . $this->filename . ', lock failed: ' . error_get_last()['message']);
+			// Limit maximum number of attempts to prevent
+			// looping indefinitely.
+			$MAX_ATTEMPTS=10;
+			for ($attempt = 0; $attempt < $MAX_ATTEMPTS; ++$attempt) {
+				$fd = fopen($this->filename, 'c+');
+				if ($fd === false)
+					throw new RuntimeException('Cannot lock file ' . $this->filename . ', open failed: ' . error_get_last()['message']);
+
+				if (!flock($fd, LOCK_EX)) {
+					fclose($fd);
+					throw new RuntimeException('Cannot lock file ' . $this->filename . ', lock failed: ' . error_get_last()['message']);
+				}
+
+				// If the locked file still exists
+				// (non-zero link count), we're done.
+				// Otherwise, another process has replaced the
+				// file and we still have the
+				// old (now replaced) file open, so
+				// retry opening and locking the new
+				// file. Note: This makes all locking
+				// fail when the file is hardlinked
+				// elsewhere.
+				if (fstat($fd)['nlink'] > 0) {
+					$this->fd = $fd;
+					return;
+				}
+				fclose($fd);
 			}
+
+			throw new RuntimeException('Cannot lock file ' . $this->filename . ', repeatedly deleted by other processes');
 		}
 
 
@@ -678,9 +700,79 @@
 		function write($content) {
 			if (!$this->fd)
 				throw new LogicException('Cannot write to file ' . $this->filename . ', not locked');
-			ftruncate($this->fd, 0);
-			rewind($this->fd);
-			fwrite($this->fd, $content);
+
+			// Clear the last error, to prevent using an
+			// older error when something goes wrong without
+			// generating a PHP error (e.g. like read/write
+			// before PHP 7.4).
+			error_clear_last();
+
+			// Write data to a tempfile first and then
+			// rename the tempfile over the existing file. This:
+			//  - Ensures that file reading can be done
+			//    without locks, since the actual file will
+			//    never be modified.
+			//  - Prevents corruption on full disk (since
+			//    rename will be atomic, unlike the
+			//    truncate-and-write that would happen when
+			//    writing to the file directly).
+			//
+			// This uses a fixed temp filename instead of
+			// using tempnam, since the latter might default
+			// to a different directory on permission
+			// problems, which would break atomicity if it
+			// is on another filesystem.
+			//
+			$tmpfilename = $this->filename . '.tmp_for_writing';
+
+			// The lock should make sure that no two
+			// processes try to use the same tmpfile at the
+			// same time (we cannot use the 'x' O_EXCL mode
+			// to fail if the file already exists, since
+			// if we then get interrupted and leave a
+			// tmpfile lying around, all further writes to
+			// the file are prevented).
+			$fd = fopen($tmpfilename, 'w');
+			if ($fd === false)
+				throw new RuntimeException('Failed to write to file ' . $this->filename . ', open ' . $tmpfilename . ' failed: ' . error_get_last()['message']);
+
+			// Take an exclusive lock on the new file
+			// already, so we still have a lock after the
+			// rename. Use non-blocking, since we should
+			// always be able to lock this file directly
+			// (and if not, blocking with the original lock
+			// held might cause a deadlock).
+			if (!flock($fd, LOCK_EX | LOCK_NB)) {
+				fclose($fd);
+				unlink($tmpfilename);
+				throw new RuntimeException('Failed to write to file ' . $this->filename . ', lock ' . $tmpfilename . ' failed: ' . error_get_last()['message']);
+			}
+
+			// Write to the new file
+			if (fwrite($fd, $content) !== strlen($content)) {
+				fclose($fd);
+				unlink($tmpfilename);
+				throw new RuntimeException('Failed to write to file ' . $this->filename . ', write to ' . $tmpfilename . ' failed: ' . error_get_last()['message']);
+			}
+
+			// Overwrite the original (but only if the write
+			// succeeded)
+			if (!rename($tmpfilename, $this->filename)) {
+				fclose($fd);
+				unlink($tmpfilename);
+				throw new RuntimeException('Failed to write to file ' . $this->filename . ', rename from ' . $tmpfilename . ' failed: ' . error_get_last()['message']);
+			}
+
+			// Close the old file, but only after the
+			// rename, since this unlocks the old file and
+			// ensures any other writers waiting for this
+			// lock can detect the old file (that they now
+			// have locked) is deleted and the lock they
+			// have gotten is no longer valid.
+			fclose($this->fd);
+
+			// And continue using the new file
+			$this->fd = $fd;
 		}
 
 		/*
@@ -692,8 +784,8 @@
 			reading the contents within the lock as well).
 		*/
 		function writeWithLock($content) {
-			if (file_put_contents($this->filename, $content, LOCK_EX) === false)
-				throw new RuntimeException('Cannot write to file ' . $this->filename . ': ' . error_get_last()['message']);
+			$this->lock();
+			$this->writeAndUnlock($content);
 		}
 
 		/*
