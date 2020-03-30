@@ -599,6 +599,13 @@
 		function lock() {
 			if ($this->fd)
 				throw new LogicException('Cannot lock file ' . $this->filename . ', already locked');
+
+			// Clear the last error, to prevent using an
+			// older error when something goes wrong without
+			// generating a PHP error (e.g. like read/write
+			// before PHP 7.4).
+			error_clear_last();
+
 			$this->fd = fopen($this->filename, 'c+');
 			if ($this->fd === false)
 				throw new RuntimeException('Cannot lock file ' . $this->filename . ', open failed: ' . error_get_last()['message']);
