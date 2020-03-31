@@ -574,9 +574,9 @@
 	 */
 	class HyphaFile {
 		private $filename;
-		// The opened file. If this is non-null, the file is
+		// The opened file. If this is not false, the file is
 		// opened and has an active exclusive lock.
-		private $fd = false;
+		private $fileHandle = false;
 
 		/*
 			Constructor
@@ -597,7 +597,7 @@
 			empty file.
 		*/
 		function lock() {
-			if ($this->fd)
+			if ($this->fileHandle)
 				throw new LogicException('Cannot lock file ' . $this->filename . ', already locked');
 
 			// Clear the last error, to prevent using an
@@ -610,12 +610,12 @@
 			// looping indefinitely.
 			$MAX_ATTEMPTS=10;
 			for ($attempt = 0; $attempt < $MAX_ATTEMPTS; ++$attempt) {
-				$fd = fopen($this->filename, 'c+');
-				if ($fd === false)
+				$fileHandle = fopen($this->filename, 'c+');
+				if ($fileHandle === false)
 					throw new RuntimeException('Cannot lock file ' . $this->filename . ', open failed: ' . error_get_last()['message']);
 
-				if (!flock($fd, LOCK_EX)) {
-					fclose($fd);
+				if (!flock($fileHandle, LOCK_EX)) {
+					fclose($fileHandle);
 					throw new RuntimeException('Cannot lock file ' . $this->filename . ', lock failed: ' . error_get_last()['message']);
 				}
 
@@ -628,11 +628,11 @@
 				// file. Note: This makes all locking
 				// fail when the file is hardlinked
 				// elsewhere.
-				if (fstat($fd)['nlink'] > 0) {
-					$this->fd = $fd;
+				if (fstat($fileHandle)['nlink'] > 0) {
+					$this->fileHandle = $fileHandle;
 					return;
 				}
-				fclose($fd);
+				fclose($fileHandle);
 			}
 
 			throw new RuntimeException('Cannot lock file ' . $this->filename . ', repeatedly deleted by other processes');
@@ -659,8 +659,8 @@
 			existing lock.
 		*/
 		function read() {
-			if ($this->fd)
-				return stream_get_contents($this->fd, /* maxlength */ -1, /* offset */ 0);
+			if ($this->fileHandle)
+				return stream_get_contents($this->fileHandle, /* maxlength */ -1, /* offset */ 0);
 			else
 				return file_get_contents($this->filename);
 		}
@@ -689,7 +689,7 @@
 			writing.
 		*/
 		function write($content) {
-			if (!$this->fd)
+			if (!$this->fileHandle)
 				throw new LogicException('Cannot write to file ' . $this->filename . ', not locked');
 
 			// Clear the last error, to prevent using an
@@ -723,8 +723,8 @@
 			// if we then get interrupted and leave a
 			// tmpfile lying around, all further writes to
 			// the file are prevented).
-			$fd = fopen($tmpfilename, 'w');
-			if ($fd === false)
+			$fileHandle = fopen($tmpfilename, 'w');
+			if ($fileHandle === false)
 				throw new RuntimeException('Failed to write to file ' . $this->filename . ', open ' . $tmpfilename . ' failed: ' . error_get_last()['message']);
 
 			// Take an exclusive lock on the new file
@@ -733,15 +733,15 @@
 			// always be able to lock this file directly
 			// (and if not, blocking with the original lock
 			// held might cause a deadlock).
-			if (!flock($fd, LOCK_EX | LOCK_NB)) {
-				fclose($fd);
+			if (!flock($fileHandle, LOCK_EX | LOCK_NB)) {
+				fclose($fileHandle);
 				unlink($tmpfilename);
 				throw new RuntimeException('Failed to write to file ' . $this->filename . ', lock ' . $tmpfilename . ' failed: ' . error_get_last()['message']);
 			}
 
 			// Write to the new file
-			if (fwrite($fd, $content) !== strlen($content)) {
-				fclose($fd);
+			if (fwrite($fileHandle, $content) !== strlen($content)) {
+				fclose($fileHandle);
 				unlink($tmpfilename);
 				throw new RuntimeException('Failed to write to file ' . $this->filename . ', write to ' . $tmpfilename . ' failed: ' . error_get_last()['message']);
 			}
@@ -749,7 +749,7 @@
 			// Overwrite the original (but only if the write
 			// succeeded)
 			if (!rename($tmpfilename, $this->filename)) {
-				fclose($fd);
+				fclose($fileHandle);
 				unlink($tmpfilename);
 				throw new RuntimeException('Failed to write to file ' . $this->filename . ', rename from ' . $tmpfilename . ' failed: ' . error_get_last()['message']);
 			}
@@ -760,10 +760,10 @@
 			// lock can detect the old file (that they now
 			// have locked) is deleted and the lock they
 			// have gotten is no longer valid.
-			fclose($this->fd);
+			fclose($this->fileHandle);
 
 			// And continue using the new file
-			$this->fd = $fd;
+			$this->fileHandle = $fileHandle;
 		}
 
 		/*
@@ -785,10 +785,10 @@
 			Close and unlock the file.
 		*/
 		function unlock() {
-			if (!$this->fd)
+			if (!$this->fileHandle)
 				throw new LogicException('Cannot unlock file ' . $this->filename . ', not locked');
-			fclose($this->fd);
-			$this->fd = false;
+			fclose($this->fileHandle);
+			$this->fileHandle = false;
 		}
 
 		/*
@@ -808,7 +808,7 @@
 			exclusive lock is held.
 		*/
 		function isLocked() {
-			return !!$this->fd;
+			return !!$this->fileHandle;
 		}
 	}
 
