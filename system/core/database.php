@@ -921,14 +921,14 @@
 			do {
 				$image = new HyphaImage(uniqid() . '.' . $extension);
 				$filename = $image->getPath();
-				$fd = @fopen($filename, 'x');
+				$fileHandle = @fopen($filename, 'x');
 				// If fopen failed, but the file does
 				// not exist, error out (to prevent
 				// looping infinitely)
-				if ($fd === false && !file_exists($filename))
+				if ($fileHandle === false && !file_exists($filename))
 					return __('failed-to-process-image') . error_get_last();
-			} while ($fd === false);
-			fclose($fd);
+			} while ($fileHandle === false);
+			fclose($fileHandle);
 
 			move_uploaded_file($fileinfo['tmp_name'], $filename);
 			return $image;
