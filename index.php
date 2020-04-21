@@ -82,7 +82,7 @@
 	$pathToTheme = 'data/themes/' . Hypha::$data->theme;
 	$hyphaHtml->linkStyle('system/assets/hypha-core.css');
 	$hyphaHtml->linkStyle($pathToTheme . '/hypha.css');
-	$hyphaHtml->linkScript('//code.jquery.com/jquery-1.7.1.min.js');
+	$hyphaHtml->linkScript('system/assets/jquery-1.7.1.min.js');
 	$hyphaHtml->linkScript('system/assets/help.js');
 	$hyphaHtml->setTitle(hypha_getTitle());
 	$hyphaHtml->writeToElement('header', hypha_getHeader());
