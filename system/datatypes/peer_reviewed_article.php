@@ -139,6 +139,15 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		return '404';
 	}
 
+	public function getSortDateTime() {
+		$article = $this->xml->find(self::FIELD_NAME_ARTICLE);
+		$value = $article->getAttribute(self::FIELD_NAME_PUBLISHED_AT);
+		if (!$value)
+			$value = $article->getAttribute(self::FIELD_NAME_UPDATED_AT);
+		$timestamp = ltrim($value, "t");
+		return new DateTime("@" . $timestamp);
+	}
+
 	/**
 	 * Checks if the status is new and if so builds the structure and sets the status to draft.
 	 */

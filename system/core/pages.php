@@ -81,6 +81,15 @@
 			$this->language = $language->getAttribute('id');
 			$this->pagename = $language->getAttribute('name');
 		}
+
+		/*
+		 * Returns a date typically used for sorting these pages
+		 * (i.e. the publish date or last update date).
+		 *
+		 * Returns a DateTime object or null if no timestamp is
+		 * available.
+		 */
+		abstract public function getSortDateTime();
 	}
 
 	/*

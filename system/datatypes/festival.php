@@ -97,6 +97,11 @@
 			}
 		}
 
+		public function getSortDateTime() {
+			// TODO: What to return here?
+			return null;
+		}
+
 		/**
 		 * Retrieve a config value from the XML. This finds a
 		 * tag with the given id, and retrieves the given

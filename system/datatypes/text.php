@@ -47,6 +47,12 @@
 			return '404';
 		}
 
+		public function getSortDateTime() {
+			$version = getCurrentVersionNode($this->xml);
+			$timestamp = ltrim($version->getId(), "t");
+			return new DateTime("@" . $timestamp);
+		}
+
 		private function defaultView(HyphaRequest $request) {
 			// setup language and tag list for the selected page
 			$this->html->writeToElement('langList', hypha_indexLanguages($this->pageListNode, $this->language));

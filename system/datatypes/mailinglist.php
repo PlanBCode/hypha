@@ -125,6 +125,11 @@ class mailinglist extends HyphaDatatypePage {
 		return '404';
 	}
 
+	public function getSortDateTime() {
+		// TODO: Return last mailing sent date?
+		return null;
+	}
+
 	/**
 	 * Checks if the status is new and if so builds the structure and sets the status to draft.
 	 */
