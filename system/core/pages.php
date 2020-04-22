@@ -181,6 +181,21 @@ EOF;
 	}
 
 	/*
+		Function: createPageInstance
+		Creates a page object (appropriate subclass of
+		HyphaDatatypePage, e.g. textpage) instance from the
+		given page node.
+
+		Parameters:
+		RequestContext $O_O
+		HyphaDomElement $node - The page node from $hyphaXml
+	*/
+	function createPageInstance(RequestContext $O_O, HyphaDomElement $node) {
+		$type = $node->getAttribute('type');
+		return new $type($node, $O_O);
+	}
+
+	/*
 		Function: loadPage
 		loads all html needed for page pagename/view
 
@@ -207,8 +222,7 @@ EOF;
 
 			$isPrivate = $_node && in_array($_node->getAttribute('private'), ['true', '1', 'on']);
 			if ($_node && (!$isPrivate || isUser())) {
-				$_type = $_node->getAttribute('type');
-				$hyphaPage = new $_type($_node, $O_O);
+				$hyphaPage = createPageInstance($O_O, $_node);
 
 				// add tag list to all non-system pages
 				$hyphaHtml->writeToElement('tagList', hypha_indexTags($_node, $hyphaPage->language));
