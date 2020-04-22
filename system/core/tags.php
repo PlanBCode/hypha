@@ -3,6 +3,26 @@
 	// - implement error notification if new tag exists
 	// - implement tag management page: edit, translate, remove or merge tags
 	// - implement tagcontainer pagetype
+	class HyphaTags {
+		static function findTagByLabel($lang, $label) {
+			/** @var HyphaDomElement $hyphaXml */
+			global $hyphaXml;
+			$path = 'hypha/tagList/tag/language[@id=' . xpath_encode($lang) . ' and @label=' . xpath_encode($label) . ']';
+			$node = $hyphaXml->findXPath($path)->parent()->first();
+			return ($node ? new HyphaTag($node) : null);
+		}
+	}
+
+	class HyphaTag {
+		private $node;
+		function __construct(HyphaDomElement $node) {
+			$this->node = $node;
+		}
+
+		function getId() {
+			return $this->node->getId();
+		}
+	}
 
 	function tagList(HyphaDomElement $pageListNode, $lang) {
 		/** @var HyphaDomElement $hyphaXml */
