@@ -1488,7 +1488,7 @@ EOF;
 	 *
 	 * @return string
 	 */
-	private function getTitle() {
+	public function getTitle() {
 		$title = $this->xml->find(self::FIELD_NAME_TITLE);
 		if ($title instanceof NodeList) {
 			$title = $title->getText();

@@ -83,6 +83,16 @@
 		}
 
 		/*
+		 * Returns the title to be used for e.g. linking to this
+		 * page.
+		 */
+		public function getTitle() {
+			// TODO: Implement a meaningful title in all
+			// subclasses and make this function abstract?
+			return showPagename($this->pagename);
+		}
+
+		/*
 		 * Returns a date typically used for sorting these pages
 		 * (i.e. the publish date or last update date).
 		 *
