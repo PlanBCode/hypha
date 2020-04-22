@@ -77,7 +77,7 @@
 		foreach ($hyphaXml->findXPath('hypha/tagList/tag/language[@id=' . xpath_encode($lang) . ']') as $tagLang) {
 			/** @var HyphaDomElement $tagLang */
 			$id = $tagLang->parent()->getId();
-			$tag = ['label' => $tagLang->getAttribute('label'), 'description' => $tagLang->nodeValue];
+			$tag = ['label' => $tagLang->getAttribute('label'), 'description' => $tagLang->nodeValue, 'lang' => $tagLang->getAttribute('id')];
 			if (in_array($id, $selectedTagIds)) $selectedTags[$id] = $tag;
 			else $deselectedTags[$id] = $tag;
 		}
@@ -91,7 +91,11 @@
 			$html.= '<div class="selectedTags">';
 			foreach ($selectedTags as $id => $tag) {
 				$html.= '<div class="tagSel_'.htmlspecialchars($id).'" class="tag">';
+
+				$tag_index_url = HyphaRequest::HYPHA_SYSTEM_PAGE_TAG_INDEX . '/' . $tag['lang'] . '/' . $tag['label'];
+				$html.= '<a href="'.htmlspecialchars($tag_index_url).'">';
 				$html.= '<span title="'.htmlspecialchars($tag['description']).'">'.htmlspecialchars($tag['label']).'</span>';
+				$html.= '</a>';
 				if (isUser()) $html.= ' <span class="delete-tag" title="'.__('remove-tag').'" onclick="deselectTag('.htmlspecialchars(json_encode($id)).');">⨯</span>';
 				$html.= '</div>';
 			}
