@@ -995,3 +995,30 @@ body.type_peer_reviewed_article .input-wrapper.field_type_editor:not(.field_name
     content: " *";
     color: #b90;
 }
+
+.tagindex {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.tagindex-item {
+    border-bottom: 1px black solid;
+}
+
+.tagindex-item:last-child {
+    border-bottom: none;
+}
+
+.tagindex-item h2 {
+    margin: 0;
+}
+
+.tagindex-item.is-private h2:after {
+    content: " *";
+    color: #b90;
+}
+
+.tagindex-item > a {
+    text-decoration: none;
+    color: inherit;
+}

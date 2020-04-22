@@ -14,6 +14,7 @@
 		const HYPHA_SYSTEM_PAGE_IMAGES = 'images';
 		const HYPHA_SYSTEM_PAGE_INDEX = 'index';
 		const HYPHA_SYSTEM_PAGE_SETTINGS = 'settings';
+		const HYPHA_SYSTEM_PAGE_TAG_INDEX = 'tag';
 		const HYPHA_SYSTEM_PAGE_UPLOAD = 'upload';
 		const HYPHA_SYSTEM_PAGE_CHOOSER = 'chooser';
 		const HYPHA_SYSTEM_PAGE_HELP = 'help';
@@ -118,6 +119,7 @@
 				HyphaRequest::HYPHA_SYSTEM_PAGE_FILES,
 				HyphaRequest::HYPHA_SYSTEM_PAGE_IMAGES,
 				HyphaRequest::HYPHA_SYSTEM_PAGE_INDEX,
+				HyphaRequest::HYPHA_SYSTEM_PAGE_TAG_INDEX,
 				HyphaRequest::HYPHA_SYSTEM_PAGE_SETTINGS,
 				HyphaRequest::HYPHA_SYSTEM_PAGE_UPLOAD,
 				HyphaRequest::HYPHA_SYSTEM_PAGE_CHOOSER,

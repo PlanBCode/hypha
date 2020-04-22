@@ -305,6 +305,9 @@ EOF;
 						break;
 				}
 				break;
+			case HyphaRequest::HYPHA_SYSTEM_PAGE_TAG_INDEX:
+				$hyphaPage = new tagindexpage($O_O);
+				break;
 			case HyphaRequest::HYPHA_SYSTEM_PAGE_HELP:
 				$subject = isset($args[0]) ? urldecode($args[0]) : 'undefined';
 				$helpLanguage = isset($args[1]) ? $args[1] : $O_O->getInterfaceLanguage();
