@@ -148,6 +148,19 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		return new DateTime("@" . $timestamp);
 	}
 
+	public function renderExcerpt($container) {
+		$doc = $container->document();
+		$h2 = $doc->createElement('h2')->setText($this->getTitle());
+		$h2->appendTo($container);
+
+		$article = $this->xml->find(self::FIELD_NAME_ARTICLE);
+		$this->appendAuthorAndTimestamp($container, $article);
+		$excerpt_div = $doc->createElement('div');
+		$excerpt_div->addClass('excerpt');
+		$excerpt_div->append($this->getExcerpt());
+		$excerpt_div->appendTo($container);
+	}
+
 	/**
 	 * Checks if the status is new and if so builds the structure and sets the status to draft.
 	 */
@@ -1509,6 +1522,15 @@ EOF;
 		}
 
 		return $title;
+	}
+
+	/**
+	 * Gets the article excerpt.
+	 *
+	 * @return NodeList
+	 */
+	public function getExcerpt() {
+		return $this->xml->find(self::FIELD_NAME_EXCERPT);
 	}
 
 	/**

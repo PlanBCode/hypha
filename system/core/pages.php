@@ -92,6 +92,17 @@
 			return showPagename($this->pagename);
 		}
 
+		public function renderSingleLine(HyphaDomElement $container) {
+			$h2 = $container->document()->createElement('h2');
+			$h2->setText($this->getTitle());
+			$h2->appendTo($container);
+		}
+
+		public function renderExcerpt(HyphaDomElement $container) {
+			// Default to just the single line version
+			$this->renderSingleLine($container);
+		}
+
 		/*
 		 * Returns a date typically used for sorting these pages
 		 * (i.e. the publish date or last update date).
