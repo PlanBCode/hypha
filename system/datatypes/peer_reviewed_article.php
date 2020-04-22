@@ -299,6 +299,15 @@ class peer_reviewed_article extends Page {
 			$main->append($publish);
 		}
 
+		if (isUser()) {
+			$excerpt = $this->xml->find(self::FIELD_NAME_EXCERPT)->children();
+			/** @var HyphaDomElement $div */
+			$div = $this->html->createElement('div');
+			$div->setAttribute('class', 'excerpt');
+			$div->append($excerpt);
+			$main->append($div);
+		}
+
 		$text = $content->find(self::FIELD_NAME_TEXT)->children();
 		/** @var HyphaDomElement $div */
 		$div = $this->html->createElement('div');
@@ -1135,13 +1144,13 @@ class peer_reviewed_article extends Page {
 				</div>
 			</div>
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
-				<div class="input-wrapper field_type_editor field_name_[[field-name-text]]">
-					<strong><label for="[[field-name-text]]">[[text]]</label></strong>[[info-button-text]]<br><editor name="[[field-name-text]]"></editor>
+				<div class="input-wrapper field_type_editor field_name_[[field-name-excerpt]]">
+					<strong><label for="[[field-name-excerpt]]">[[excerpt]]</label></strong>[[info-button-excerpt]]<br><editor name="[[field-name-excerpt]]"></editor>
 				</div>
 			</div>
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
-				<div class="input-wrapper field_type_editor field_name_[[field-name-excerpt]]">
-					<strong><label for="[[field-name-excerpt]]">[[excerpt]]</label></strong>[[info-button-excerpt]]<br><editor name="[[field-name-excerpt]]"></editor>
+				<div class="input-wrapper field_type_editor field_name_[[field-name-text]]">
+					<strong><label for="[[field-name-text]]">[[text]]</label></strong>[[info-button-text]]<br><editor name="[[field-name-text]]"></editor>
 				</div>
 			</div>
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
@@ -1161,12 +1170,12 @@ EOF;
 			'field-name-title' => self::FIELD_NAME_TITLE,
 			'author' => __('art-author'),
 			'field-name-author' => self::FIELD_NAME_AUTHOR,
-			'text' => __('art-article'),
-			'field-name-text' => self::FIELD_NAME_TEXT,
-			'info-button-text' => makeInfoButton('help-art-text'),
 			'excerpt' => __('art-excerpt'),
 			'field-name-excerpt' => self::FIELD_NAME_EXCERPT,
 			'info-button-excerpt' => makeInfoButton('help-art-excerpt'),
+			'text' => __('art-article'),
+			'field-name-text' => self::FIELD_NAME_TEXT,
+			'info-button-text' => makeInfoButton('help-art-text'),
 			'method' => __('art-method'),
 			'field-name-method' => self::FIELD_NAME_METHOD,
 			'info-button-method' => makeInfoButton('help-art-method'),
