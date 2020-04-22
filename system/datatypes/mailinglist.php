@@ -12,7 +12,7 @@ use DOMWrap\NodeList;
  * Class: mailinglist
  */
 
-class mailinglist extends Page {
+class mailinglist extends HyphaDatatypePage {
 	/** @var Xml */
 	private $xml;
 

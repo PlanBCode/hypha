@@ -897,10 +897,9 @@
 				}
 			}
 
-			// add all non-system datatypes to $hyphaDatatypes
-			$systemDatatypes = [settingspage::class];
+			// add all datatypes to $hyphaDatatypes
 			foreach (array_slice(get_declared_classes(), $pageTypeIndex) as $class) {
-				if (!in_array($class, $systemDatatypes) && in_array(Page::class, class_parents($class)) && (new \ReflectionClass($class))->isInstantiable()) {
+				if (in_array(HyphaDatatypePage::class, class_parents($class)) && (new \ReflectionClass($class))->isInstantiable()) {
 					$hyphaDatatypes[$class] = call_user_func($class . '::getDatatypeName');
 				}
 			}

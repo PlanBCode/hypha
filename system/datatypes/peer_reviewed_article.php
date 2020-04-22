@@ -13,7 +13,7 @@ use DOMWrap\NodeList;
  */
 
 // TODO [LRM]: add version control on peer_reviewed_article
-class peer_reviewed_article extends Page {
+class peer_reviewed_article extends HyphaDatatypePage {
 	/** @var Xml */
 	private $xml;
 

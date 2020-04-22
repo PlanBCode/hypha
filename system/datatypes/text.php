@@ -6,7 +6,7 @@
 	See Also:
 	<Page>
 */
-	class textpage extends Page {
+	class textpage extends HyphaDatatypePage {
 		/** @var Xml */
 		public $xml;
 

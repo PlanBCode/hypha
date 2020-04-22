@@ -4,23 +4,54 @@
 	/*
 		Title: Pages
 
-		This chapter describes the way pages are registered.
+		This chapter describes the way views and pages are registered.
 	*/
 
 	/*
-		Class: Page
-		abstract class for handling a certain kind of data
+		Class: HyphaPage
+		abstract class for a page that can process a request.
 	*/
-	abstract class Page {
-		public $pageListNode, $html, $language, $pagename, $O_O, $args, $privateFlag;
-		function __construct($node, RequestContext $O_O) {
+	abstract class HyphaPage {
+		public $html, $language, $pagename, $O_O, $args, $privateFlag;
+
+		function __construct(RequestContext $O_O) {
 			global $hyphaHtml;
 			$this->html = $hyphaHtml;
 			$this->O_O = $O_O;
 			// TODO: Remove args (and let subclasses talk to the request instead)
 			$this->args = $O_O->getRequest()->getArgs();
-			if ($node)
-				$this->replacePageListNode($node);
+		}
+
+		/**
+		 * Return the given url argument, or null if it is not
+		 * present.
+		 */
+		protected function getArg($index) {
+			if (array_key_exists($index, $this->args))
+				return $this->args[$index];
+			return null;
+		}
+
+		abstract function process(HyphaRequest $request);
+	}
+
+	/*
+		Class: HyphaSystemPage
+		abstract class for a system page that has no backing datatype.
+	*/
+	abstract class HyphaSystemPage extends HyphaPage {
+	}
+
+	/*
+		Class: HyphaDatatypePage
+		abstract class for a page backed by datatype and xml file.
+	*/
+	abstract class HyphaDatatypePage extends HyphaPage {
+		public $pageListNode, $language, $pagename, $privateFlag;
+
+		function __construct($node, RequestContext $O_O) {
+			parent::__construct($O_O);
+			$this->replacePageListNode($node);
 		}
 
 		public static function getDatatypeName() {
@@ -50,18 +81,6 @@
 			$this->language = $language->getAttribute('id');
 			$this->pagename = $language->getAttribute('name');
 		}
-
-		/**
-		 * Return the given url argument, or null if it is not
-		 * present.
-		 */
-		protected function getArg($index) {
-			if (array_key_exists($index, $this->args))
-				return $this->args[$index];
-			return null;
-		}
-
-		abstract function process(HyphaRequest $request);
 	}
 
 	/*
