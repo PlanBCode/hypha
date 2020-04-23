@@ -14,7 +14,9 @@
 
 		public function tagIndexView(HyphaRequest $request) {
 			$lang = $request->getArg(0);
-			$label = $request->getArg(1);
+			// TODO: This urldecode should really be done by
+			// HyphaRequest (#274)
+			$label = urldecode($request->getArg(1));
 
 			$tag = HyphaTags::findTagByLabel($lang, $label);
 			if ($tag === null)
