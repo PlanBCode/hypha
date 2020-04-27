@@ -49,7 +49,7 @@
 	abstract class HyphaDatatypePage extends HyphaPage {
 		public $pageListNode, $language, $pagename, $privateFlag;
 
-		function __construct($node, RequestContext $O_O) {
+		function __construct(HyphaDomElement $node, RequestContext $O_O) {
 			parent::__construct($O_O);
 			$this->replacePageListNode($node);
 		}
@@ -73,7 +73,7 @@
 			writeToDigest($hyphaUser->getAttribute('fullname').__('deleted-page').$this->language.'/'.$this->pagename, 'page delete');
 		}
 
-		protected function replacePageListNode($node) {
+		protected function replacePageListNode(HyphaDomElement $node) {
 			global $O_O;
 			$this->pageListNode = $node;
 			$this->privateFlag = in_array($node->getAttribute('private'), ['true', '1', 'on']);
