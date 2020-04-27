@@ -574,9 +574,9 @@
 	 */
 	class HyphaFile {
 		private $filename;
-		// The opened file. If this is non-null, the file is
+		// The opened file. If this is not false, the file is
 		// opened and has an active exclusive lock.
-		private $fd = false;
+		private $fileHandle = false;
 
 		/*
 			Constructor
@@ -597,12 +597,45 @@
 			empty file.
 		*/
 		function lock() {
-			if ($this->fd)
+			if ($this->fileHandle)
 				throw new LogicException('Cannot lock file ' . $this->filename . ', already locked');
-			$this->fd = fopen($this->filename, 'c+');
-			if ($this->fd === false)
-				throw new RuntimeException('Cannot lock file ' . $this->filename . ', open failed: ' . error_get_last()['message']);
-			flock($this->fd, LOCK_EX);
+
+			// Clear the last error, to prevent using an
+			// older error when something goes wrong without
+			// generating a PHP error (e.g. like read/write
+			// before PHP 7.4).
+			error_clear_last();
+
+			// Limit maximum number of attempts to prevent
+			// looping indefinitely.
+			$MAX_ATTEMPTS=10;
+			for ($attempt = 0; $attempt < $MAX_ATTEMPTS; ++$attempt) {
+				$fileHandle = fopen($this->filename, 'c+');
+				if ($fileHandle === false)
+					throw new RuntimeException('Cannot lock file ' . $this->filename . ', open failed: ' . error_get_last()['message']);
+
+				if (!flock($fileHandle, LOCK_EX)) {
+					fclose($fileHandle);
+					throw new RuntimeException('Cannot lock file ' . $this->filename . ', lock failed: ' . error_get_last()['message']);
+				}
+
+				// If the locked file still exists
+				// (non-zero link count), we're done.
+				// Otherwise, another process has replaced the
+				// file and we still have the
+				// old (now replaced) file open, so
+				// retry opening and locking the new
+				// file. Note: This makes all locking
+				// fail when the file is hardlinked
+				// elsewhere.
+				if (fstat($fileHandle)['nlink'] > 0) {
+					$this->fileHandle = $fileHandle;
+					return;
+				}
+				fclose($fileHandle);
+			}
+
+			throw new RuntimeException('Cannot lock file ' . $this->filename . ', repeatedly deleted by other processes');
 		}
 
 
@@ -611,33 +644,25 @@
 
 			Read and return the contents of the file.
 
-			If the file is not opened yet, it is opened and
-			a shared lock is taken. After reading the file,
-			it is closed and the lock is released.
-
-			If the file was already opened (and thus an
-			exclusive lock is held), the file is not closed
-			after reading, and the lock remains in effect.
+			If the file is not open already, it is opened,
+			read, and closed. No locking is needed in this
+			case, since writes always happen on a temporary
+			files and atomically replace the actual file, so
+			if we open the actual filename, we will always
+			see a consistent file (which could be replaced
+			by the time we finish reading, but then we'll
+			just have read the older version completely,
+			which is ok).
 
 			This method can essentially be used just like
-			file_get_contents, but with support for locking.
+			file_get_contents, but with support for an
+			existing lock.
 		*/
 		function read() {
-			if ($this->fd) {
-				$fd = $this->fd;
-			} else {
-				$fd = fopen($this->filename, 'r');
-				if ($fd === false)
-					throw new RuntimeException('Cannot lock file ' . $this->filename . ', open failed: ' . error_get_last()['message']);
-				flock($fd, LOCK_SH);
-			}
-
-			$contents = stream_get_contents($fd);
-
-			if (!$this->fd)
-				fclose($fd);
-
-			return $contents;
+			if ($this->fileHandle)
+				return stream_get_contents($this->fileHandle, /* maxlength */ -1, /* offset */ 0);
+			else
+				return file_get_contents($this->filename);
 		}
 
 		/*
@@ -659,24 +684,86 @@
 			Write the given string to the file, replacing any
 			current contents.
 
-			If the file is not opened yet, it is opened and
-			an exclusive lock is taken. After writing, the
-			file is closed and the lock is released.
-
-			If the file was already opened (and thus an
-			exclusive lock is held), the file is not closed
-			after writing, and the lock remains in effect.
-
-			This method can essentially be used just like
-			file_put_contents(), but with locking enabled by
-			default.
+			The file must be already locked before calling
+			this. It is not closed or unlocked after
+			writing.
 		*/
 		function write($content) {
-			if (!$this->fd)
+			if (!$this->fileHandle)
 				throw new LogicException('Cannot write to file ' . $this->filename . ', not locked');
-			ftruncate($this->fd, 0);
-			rewind($this->fd);
-			fwrite($this->fd, $content);
+
+			// Clear the last error, to prevent using an
+			// older error when something goes wrong without
+			// generating a PHP error (e.g. like read/write
+			// before PHP 7.4).
+			error_clear_last();
+
+			// Write data to a tempfile first and then
+			// rename the tempfile over the existing file. This:
+			//  - Ensures that file reading can be done
+			//    without locks, since the actual file will
+			//    never be modified.
+			//  - Prevents corruption on full disk (since
+			//    rename will be atomic, unlike the
+			//    truncate-and-write that would happen when
+			//    writing to the file directly).
+			//
+			// This uses a fixed temp filename instead of
+			// using tempnam, since the latter might default
+			// to a different directory on permission
+			// problems, which would break atomicity if it
+			// is on another filesystem.
+			//
+			$tmpfilename = $this->filename . '.tmp_for_writing';
+
+			// The lock should make sure that no two
+			// processes try to use the same tmpfile at the
+			// same time (we cannot use the 'x' O_EXCL mode
+			// to fail if the file already exists, since
+			// if we then get interrupted and leave a
+			// tmpfile lying around, all further writes to
+			// the file are prevented).
+			$fileHandle = fopen($tmpfilename, 'w');
+			if ($fileHandle === false)
+				throw new RuntimeException('Failed to write to file ' . $this->filename . ', open ' . $tmpfilename . ' failed: ' . error_get_last()['message']);
+
+			// Take an exclusive lock on the new file
+			// already, so we still have a lock after the
+			// rename. Use non-blocking, since we should
+			// always be able to lock this file directly
+			// (and if not, blocking with the original lock
+			// held might cause a deadlock).
+			if (!flock($fileHandle, LOCK_EX | LOCK_NB)) {
+				fclose($fileHandle);
+				unlink($tmpfilename);
+				throw new RuntimeException('Failed to write to file ' . $this->filename . ', lock ' . $tmpfilename . ' failed: ' . error_get_last()['message']);
+			}
+
+			// Write to the new file
+			if (fwrite($fileHandle, $content) !== strlen($content)) {
+				fclose($fileHandle);
+				unlink($tmpfilename);
+				throw new RuntimeException('Failed to write to file ' . $this->filename . ', write to ' . $tmpfilename . ' failed: ' . error_get_last()['message']);
+			}
+
+			// Overwrite the original (but only if the write
+			// succeeded)
+			if (!rename($tmpfilename, $this->filename)) {
+				fclose($fileHandle);
+				unlink($tmpfilename);
+				throw new RuntimeException('Failed to write to file ' . $this->filename . ', rename from ' . $tmpfilename . ' failed: ' . error_get_last()['message']);
+			}
+
+			// Close the old file, but only after the
+			// rename, since this unlocks the old file and
+			// ensures any other writers waiting for this
+			// lock can detect the old file (that they now
+			// have locked) is deleted and the lock they
+			// have gotten is no longer valid.
+			fclose($this->fileHandle);
+
+			// And continue using the new file
+			$this->fileHandle = $fileHandle;
 		}
 
 		/*
@@ -688,8 +775,8 @@
 			reading the contents within the lock as well).
 		*/
 		function writeWithLock($content) {
-			if (file_put_contents($this->filename, $content, LOCK_EX) === false)
-				throw new RuntimeException('Cannot write to file ' . $this->filename . ': ' . error_get_last()['message']);
+			$this->lock();
+			$this->writeAndUnlock($content);
 		}
 
 		/*
@@ -698,10 +785,10 @@
 			Close and unlock the file.
 		*/
 		function unlock() {
-			if (!$this->fd)
+			if (!$this->fileHandle)
 				throw new LogicException('Cannot unlock file ' . $this->filename . ', not locked');
-			fclose($this->fd);
-			$this->fd = false;
+			fclose($this->fileHandle);
+			$this->fileHandle = false;
 		}
 
 		/*
@@ -721,7 +808,7 @@
 			exclusive lock is held.
 		*/
 		function isLocked() {
-			return !!$this->fd;
+			return !!$this->fileHandle;
 		}
 	}
 
@@ -834,14 +921,14 @@
 			do {
 				$image = new HyphaImage(uniqid() . '.' . $extension);
 				$filename = $image->getPath();
-				$fd = @fopen($filename, 'x');
+				$fileHandle = @fopen($filename, 'x');
 				// If fopen failed, but the file does
 				// not exist, error out (to prevent
 				// looping infinitely)
-				if ($fd === false && !file_exists($filename))
+				if ($fileHandle === false && !file_exists($filename))
 					return __('failed-to-process-image') . error_get_last();
-			} while ($fd === false);
-			fclose($fd);
+			} while ($fileHandle === false);
+			fclose($fileHandle);
 
 			move_uploaded_file($fileinfo['tmp_name'], $filename);
 			return $image;
