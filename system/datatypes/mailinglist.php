@@ -12,7 +12,7 @@ use DOMWrap\NodeList;
  * Class: mailinglist
  */
 
-class mailinglist extends Page {
+class mailinglist extends HyphaDatatypePage {
 	/** @var Xml */
 	private $xml;
 
@@ -123,6 +123,11 @@ class mailinglist extends Page {
 		}
 
 		return '404';
+	}
+
+	public function getSortDateTime() {
+		// TODO: Return last mailing sent date?
+		return null;
 	}
 
 	/**

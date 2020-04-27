@@ -9,7 +9,7 @@
 /*
 	Class: festivalpage
 */
-	class festivalpage extends Page {
+	class festivalpage extends HyphaDatatypePage {
 		public function __construct($pageListNode, RequestContext $O_O) {
 			parent::__construct($pageListNode, $O_O);
 			$this->xml = new Xml('festival', Xml::multiLingualOn, Xml::versionsOff);
@@ -95,6 +95,11 @@
 				case 'timetable':
 					return $this->showTimetable();
 			}
+		}
+
+		public function getSortDateTime() {
+			// TODO: What to return here?
+			return null;
 		}
 
 		/**

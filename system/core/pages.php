@@ -4,23 +4,54 @@
 	/*
 		Title: Pages
 
-		This chapter describes the way pages are registered.
+		This chapter describes the way views and pages are registered.
 	*/
 
 	/*
-		Class: Page
-		abstract class for handling a certain kind of data
+		Class: HyphaPage
+		abstract class for a page that can process a request.
 	*/
-	abstract class Page {
-		public $pageListNode, $html, $language, $pagename, $O_O, $args, $privateFlag;
-		function __construct($node, RequestContext $O_O) {
+	abstract class HyphaPage {
+		public $html, $language, $pagename, $O_O, $args, $privateFlag;
+
+		function __construct(RequestContext $O_O) {
 			global $hyphaHtml;
 			$this->html = $hyphaHtml;
 			$this->O_O = $O_O;
 			// TODO: Remove args (and let subclasses talk to the request instead)
 			$this->args = $O_O->getRequest()->getArgs();
-			if ($node)
-				$this->replacePageListNode($node);
+		}
+
+		/**
+		 * Return the given url argument, or null if it is not
+		 * present.
+		 */
+		protected function getArg($index) {
+			if (array_key_exists($index, $this->args))
+				return $this->args[$index];
+			return null;
+		}
+
+		abstract function process(HyphaRequest $request);
+	}
+
+	/*
+		Class: HyphaSystemPage
+		abstract class for a system page that has no backing datatype.
+	*/
+	abstract class HyphaSystemPage extends HyphaPage {
+	}
+
+	/*
+		Class: HyphaDatatypePage
+		abstract class for a page backed by datatype and xml file.
+	*/
+	abstract class HyphaDatatypePage extends HyphaPage {
+		public $pageListNode, $language, $pagename, $privateFlag;
+
+		function __construct(HyphaDomElement $node, RequestContext $O_O) {
+			parent::__construct($O_O);
+			$this->replacePageListNode($node);
 		}
 
 		public static function getDatatypeName() {
@@ -42,7 +73,7 @@
 			writeToDigest($hyphaUser->getAttribute('fullname').__('deleted-page').$this->language.'/'.$this->pagename, 'page delete');
 		}
 
-		protected function replacePageListNode($node) {
+		protected function replacePageListNode(HyphaDomElement $node) {
 			global $O_O;
 			$this->pageListNode = $node;
 			$this->privateFlag = in_array($node->getAttribute('private'), ['true', '1', 'on']);
@@ -51,17 +82,35 @@
 			$this->pagename = $language->getAttribute('name');
 		}
 
-		/**
-		 * Return the given url argument, or null if it is not
-		 * present.
+		/*
+		 * Returns the title to be used for e.g. linking to this
+		 * page.
 		 */
-		protected function getArg($index) {
-			if (array_key_exists($index, $this->args))
-				return $this->args[$index];
-			return null;
+		public function getTitle() {
+			// TODO: Implement a meaningful title in all
+			// subclasses and make this function abstract?
+			return showPagename($this->pagename);
 		}
 
-		abstract function process(HyphaRequest $request);
+		public function renderSingleLine(HyphaDomElement $container) {
+			$h2 = $container->document()->createElement('h2');
+			$h2->setText($this->getTitle());
+			$h2->appendTo($container);
+		}
+
+		public function renderExcerpt(HyphaDomElement $container) {
+			// Default to just the single line version
+			$this->renderSingleLine($container);
+		}
+
+		/*
+		 * Returns a date typically used for sorting these pages
+		 * (i.e. the publish date or last update date).
+		 *
+		 * Returns a DateTime object or null if no timestamp is
+		 * available.
+		 */
+		abstract public function getSortDateTime();
 	}
 
 	/*
@@ -162,6 +211,21 @@ EOF;
 	}
 
 	/*
+		Function: createPageInstance
+		Creates a page object (appropriate subclass of
+		HyphaDatatypePage, e.g. textpage) instance from the
+		given page node.
+
+		Parameters:
+		RequestContext $O_O
+		HyphaDomElement $node - The page node from $hyphaXml
+	*/
+	function createPageInstance(RequestContext $O_O, HyphaDomElement $node) {
+		$type = $node->getAttribute('type');
+		return new $type($node, $O_O);
+	}
+
+	/*
 		Function: loadPage
 		loads all html needed for page pagename/view
 
@@ -188,8 +252,7 @@ EOF;
 
 			$isPrivate = $_node && in_array($_node->getAttribute('private'), ['true', '1', 'on']);
 			if ($_node && (!$isPrivate || isUser())) {
-				$_type = $_node->getAttribute('type');
-				$hyphaPage = new $_type($_node, $O_O);
+				$hyphaPage = createPageInstance($O_O, $_node);
 
 				// add tag list to all non-system pages
 				$hyphaHtml->writeToElement('tagList', hypha_indexTags($_node, $hyphaPage->language));
@@ -241,6 +304,9 @@ EOF;
 						$hyphaHtml->writeToElement('main', hypha_indexPages($O_O->getContentLanguage()));
 						break;
 				}
+				break;
+			case HyphaRequest::HYPHA_SYSTEM_PAGE_TAG_INDEX:
+				$hyphaPage = new tagindexpage($O_O);
 				break;
 			case HyphaRequest::HYPHA_SYSTEM_PAGE_HELP:
 				$subject = isset($args[0]) ? urldecode($args[0]) : 'undefined';

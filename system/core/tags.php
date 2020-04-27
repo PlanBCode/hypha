@@ -3,6 +3,62 @@
 	// - implement error notification if new tag exists
 	// - implement tag management page: edit, translate, remove or merge tags
 	// - implement tagcontainer pagetype
+	class HyphaTags {
+		static function findTagByLabel($lang, $label) {
+			/** @var HyphaDomElement $hyphaXml */
+			global $hyphaXml;
+			$path = 'hypha/tagList/tag/language[@id=' . xpath_encode($lang) . ' and @label=' . xpath_encode($label) . ']';
+			$node = $hyphaXml->findXPath($path)->parent()->first();
+			return ($node ? new HyphaTag($node) : null);
+		}
+
+		static function findPagesWithTags(HyphaTag $tag, array $pageTypes=[], bool $includePrivate=false, $skip=0, $limit=0) {
+			/** @var HyphaDomElement $hyphaXml */
+			global $hyphaXml;
+
+			$pageFilters = '';
+			if ($pageTypes) {
+				$filterFunc = function($type) { return "@type=" . xpath_encode($type); };
+				$attrFilters = array_map($filterFunc, $pageTypes);
+				$pageFilters .= "[" . implode(" or ", $attrFilters) . "]";
+			}
+			if ($includePrivate !== true) {
+				$pageFilters .= "[@private='off']";
+			}
+
+			// TODO: skip and limit might not be useful
+			// without sorting, but xpath 1.0 does not seem
+			// to support sorting.
+			$positionFilters = '';
+			if ($skip > 0) {
+				// Note: position() is 1-based
+				$positionFilters .= '[position() >= ' . ($skip + 1) . ']';
+			}
+			if ($limit > 0) {
+				// This refers to the position *after*
+				// applying skip, because it is in a
+				// different [] predicate block.
+				$positionFilters .= '[position() < ' . ($limit + 1) . ']';
+			}
+
+			$tagFilter = '@id=' . xpath_encode($tag->getId());
+			$xpath = "hypha/pageList/page${pageFilters}[child::tag[${tagFilter}]]${positionFilters}";
+			$pages = $hyphaXml->findXPath($xpath);
+
+			return $pages;
+		}
+	}
+
+	class HyphaTag {
+		private $node;
+		function __construct(HyphaDomElement $node) {
+			$this->node = $node;
+		}
+
+		function getId() {
+			return $this->node->getId();
+		}
+	}
 
 	function tagList(HyphaDomElement $pageListNode, $lang) {
 		/** @var HyphaDomElement $hyphaXml */
@@ -21,7 +77,7 @@
 		foreach ($hyphaXml->findXPath('hypha/tagList/tag/language[@id=' . xpath_encode($lang) . ']') as $tagLang) {
 			/** @var HyphaDomElement $tagLang */
 			$id = $tagLang->parent()->getId();
-			$tag = ['label' => $tagLang->getAttribute('label'), 'description' => $tagLang->nodeValue];
+			$tag = ['label' => $tagLang->getAttribute('label'), 'description' => $tagLang->nodeValue, 'lang' => $tagLang->getAttribute('id')];
 			if (in_array($id, $selectedTagIds)) $selectedTags[$id] = $tag;
 			else $deselectedTags[$id] = $tag;
 		}
@@ -35,7 +91,11 @@
 			$html.= '<div class="selectedTags">';
 			foreach ($selectedTags as $id => $tag) {
 				$html.= '<div class="tagSel_'.htmlspecialchars($id).'" class="tag">';
+
+				$tag_index_url = HyphaRequest::HYPHA_SYSTEM_PAGE_TAG_INDEX . '/' . $tag['lang'] . '/' . $tag['label'];
+				$html.= '<a href="'.htmlspecialchars($tag_index_url).'">';
 				$html.= '<span title="'.htmlspecialchars($tag['description']).'">'.htmlspecialchars($tag['label']).'</span>';
+				$html.= '</a>';
 				if (isUser()) $html.= ' <span class="delete-tag" title="'.__('remove-tag').'" onclick="deselectTag('.htmlspecialchars(json_encode($id)).');">⨯</span>';
 				$html.= '</div>';
 			}

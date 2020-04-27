@@ -6,9 +6,9 @@
 	See Also:
 	<Page>
 */
-	class settingspage extends Page {
+	class settingspage extends HyphaSystemPage {
 		function __construct(RequestContext $O_O) {
-			parent::__construct('', $O_O);
+			parent::__construct($O_O);
 			registerCommandCallback('settingsInvite', Array($this, 'invite'));
 			registerCommandCallback('settingsRemind', Array($this, 'remindNewUser'));
 			registerCommandCallback('settingsRegister', Array($this, 'register'));

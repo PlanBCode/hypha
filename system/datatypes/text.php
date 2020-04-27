@@ -6,7 +6,7 @@
 	See Also:
 	<Page>
 */
-	class textpage extends Page {
+	class textpage extends HyphaDatatypePage {
 		/** @var Xml */
 		public $xml;
 
@@ -45,6 +45,12 @@
 			}
 
 			return '404';
+		}
+
+		public function getSortDateTime() {
+			$version = getCurrentVersionNode($this->xml);
+			$timestamp = ltrim($version->getId(), "t");
+			return new DateTime("@" . $timestamp);
 		}
 
 		private function defaultView(HyphaRequest $request) {

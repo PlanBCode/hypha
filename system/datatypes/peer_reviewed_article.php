@@ -13,7 +13,7 @@ use DOMWrap\NodeList;
  */
 
 // TODO [LRM]: add version control on peer_reviewed_article
-class peer_reviewed_article extends Page {
+class peer_reviewed_article extends HyphaDatatypePage {
 	/** @var Xml */
 	private $xml;
 
@@ -139,6 +139,28 @@ class peer_reviewed_article extends Page {
 		return '404';
 	}
 
+	public function getSortDateTime() {
+		$article = $this->xml->find(self::FIELD_NAME_ARTICLE);
+		$value = $article->getAttribute(self::FIELD_NAME_PUBLISHED_AT);
+		if (!$value)
+			$value = $article->getAttribute(self::FIELD_NAME_UPDATED_AT);
+		$timestamp = ltrim($value, "t");
+		return new DateTime("@" . $timestamp);
+	}
+
+	public function renderExcerpt($container) {
+		$doc = $container->document();
+		$h2 = $doc->createElement('h2')->setText($this->getTitle());
+		$h2->appendTo($container);
+
+		$article = $this->xml->find(self::FIELD_NAME_ARTICLE);
+		$this->appendAuthorAndTimestamp($container, $article);
+		$excerpt_div = $doc->createElement('div');
+		$excerpt_div->addClass('excerpt');
+		$excerpt_div->append($this->getExcerpt());
+		$excerpt_div->appendTo($container);
+	}
+
 	/**
 	 * Checks if the status is new and if so builds the structure and sets the status to draft.
 	 */
@@ -240,9 +262,6 @@ class peer_reviewed_article extends Page {
 		/** @var HyphaDomElement $content */
 		$content = $this->xml->find(self::FIELD_NAME_CONTENT);
 
-		$author = $article->getAttribute(self::FIELD_NAME_AUTHOR);
-		$publishedTimestamp = ltrim($article->getAttribute(self::FIELD_NAME_PUBLISHED_AT), 't');
-
 		/** @var HyphaDomElement $main */
 		$main = $this->html->find('#main');
 
@@ -279,25 +298,7 @@ class peer_reviewed_article extends Page {
 		// Facebook
 		$shareDiv->append('<a href="https://www.facebook.com/sharer/sharer.php?u='.rawurlencode($linkToPage).'" target="_blank"><div class="facebook-link"></div></a>');
 
-		if ($author) {
-			$main->append('<div class="author">' . __('art-by') . ' ' . htmlspecialchars($author) . '</div>');
-		}
-		if ($publishedTimestamp) {
-			/** @var HyphaDomElement $publish */
-			$publish = $this->html->createElement('div');
-			$publish->setAttribute('class', 'published_at');
-			/** @var HyphaDomElement $publishDate */
-			$publishDate = $this->html->createElement('span');
-			$publishDate->setAttribute('class', 'date');
-			$publishDate->text(strftime(__('art-date-format-date'), $publishedTimestamp));
-			$publish->append($publishDate);
-			/** @var HyphaDomElement $publishTime */
-			$publishTime = $this->html->createElement('span');
-			$publishTime->setAttribute('class', 'time');
-			$publishTime->text(strftime(__('art-date-format-time'), $publishedTimestamp));
-			$publish->append($publishTime);
-			$main->append($publish);
-		}
+		$this->appendAuthorAndTimestamp($main, $article);
 
 		if (isUser()) {
 			$excerpt = $this->xml->find(self::FIELD_NAME_EXCERPT)->children();
@@ -348,6 +349,38 @@ class peer_reviewed_article extends Page {
 
 		return null;
 	}
+
+	public function appendAuthorAndTimestamp($container, $article) {
+		$doc = $container->document();
+
+		$author = $article->getAttribute(self::FIELD_NAME_AUTHOR);
+		$publishedTimestamp = ltrim($article->getAttribute(self::FIELD_NAME_PUBLISHED_AT), 't');
+
+		if ($author) {
+			$author_div = $doc->createElement('div');
+			$author_div->addClass('author');
+			$author_div->setText(__('art-by') . ' ' . $author);
+			$container->append($author_div);
+		}
+		if ($publishedTimestamp) {
+			/** @var HyphaDomElement $publish */
+			$publish_div = $doc->createElement('div');
+			$publish_div->setAttribute('class', 'published_at');
+			/** @var HyphaDomElement $publishDate */
+			$publishDate = $doc->createElement('span');
+			$publishDate->setAttribute('class', 'date');
+			$publishDate->text(strftime(__('art-date-format-date'), $publishedTimestamp));
+			$publish_div->append($publishDate);
+			/** @var HyphaDomElement $publishTime */
+			$publishTime = $doc->createElement('span');
+			$publishTime->setAttribute('class', 'time');
+			$publishTime->text(strftime(__('art-date-format-time'), $publishedTimestamp));
+			$publish_div->append($publishTime);
+			$container->append($publish_div);
+		}
+	}
+
+
 
 	/**
 	 * Deletes the article.
@@ -1479,7 +1512,7 @@ EOF;
 	 *
 	 * @return string
 	 */
-	private function getTitle() {
+	public function getTitle() {
 		$title = $this->xml->find(self::FIELD_NAME_TITLE);
 		if ($title instanceof NodeList) {
 			$title = $title->getText();
@@ -1489,6 +1522,15 @@ EOF;
 		}
 
 		return $title;
+	}
+
+	/**
+	 * Gets the article excerpt.
+	 *
+	 * @return NodeList
+	 */
+	public function getExcerpt() {
+		return $this->xml->find(self::FIELD_NAME_EXCERPT);
 	}
 
 	/**
