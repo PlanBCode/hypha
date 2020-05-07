@@ -148,7 +148,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		return new DateTime("@" . $timestamp);
 	}
 
-	public function renderExcerpt($container) {
+	public function renderExcerpt(HyphaDomElement $container) {
 		$doc = $container->document();
 		$h2 = $doc->createElement('h2')->setText($this->getTitle());
 		$h2->appendTo($container);
