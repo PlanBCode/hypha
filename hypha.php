@@ -117,7 +117,7 @@
 		$data .= "			//END_OF_DATA\n";
 
 		// include data library
-		$hypha = preg_replace('#^\t*//START_OF_DATA\n.*//END_OF_DATA\n#ms', $data, $hypha);
+		$hypha = preg_replace('#\t*//START_OF_DATA\n.*//END_OF_DATA\n#ms', $data, $hypha);
 
 		// push script to client
 		header('Content-Type: application/octet-stream');
@@ -415,13 +415,16 @@
 		<build>
 	*/
 	function data($name) {
+	    $zip = false;
 		switch ($name) {
+		    // Note: this switch data will be overwritten with file content data for the distributable
 			//START_OF_DATA
 			case 'index': return '';
 			case 'system/languages/languages.json': return file_get_contents('system/languages/languages.json');
 			//END_OF_DATA
 		}
-		if ($zip) return gzdecode(base64_decode($zip));
+		if ($zip) return gzdecode(base64_decode($zip)); // $zip can be set by the contents that will be written to the distributable
+        //TODO do we need to throw of return something here?
 	}
 
 	session_start();
