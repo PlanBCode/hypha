@@ -357,11 +357,9 @@ EOF;
 							}
 						}
 					}
-					if ($return !== null) {
-						echo json_encode($return);
-					} else {
-						echo '<script language="javascript" type="text/javascript">window.top.window.uploadResponse(\''.$response.'\');</script>';
-					}
+					if ($return === null)
+						$return = [['error' => $response]];
+					echo json_encode($return);
 				}
 				exit;
 			case HyphaRequest::HYPHA_SYSTEM_PAGE_CHOOSER:

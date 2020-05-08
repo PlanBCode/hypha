@@ -40,8 +40,12 @@ WYMeditor.editor.prototype.image_upload = function() {
 			},
 			complete: function(response){
 				response = response[0];
-				jQuery(".wym_src", doc).val(response.thumbUrl);
-				jQuery(".wym_alt", doc).val(response.original_filename);
+				if (response.error){
+					alert(response.error);
+				} else {
+					jQuery(".wym_src", doc).val(response.thumbUrl);
+					jQuery(".wym_alt", doc).val(response.original_filename);
+				}
 				jQuery("form#image_upload_form .submit", doc).val(oldSubmitLabel);
 			}
 		})
