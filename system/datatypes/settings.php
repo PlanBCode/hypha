@@ -32,6 +32,9 @@
 		}
 
 		function process(HyphaRequest $request) {
+			if (!isUser() && $this->getArg(0) != 'register')
+				return ['redirect', $request->getRootUrl()];
+
 			switch ($this->getArg(0)) {
 				case 'user': $this->editAccount($this->getArg(1)); break;
 				case 'invite': $this->editInvitation(); break;

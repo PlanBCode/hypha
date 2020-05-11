@@ -297,13 +297,7 @@ EOF;
 				echo hypha_searchHelp($O_O, $subject, $helpLanguage);
 				exit;
 			case HyphaRequest::HYPHA_SYSTEM_PAGE_SETTINGS:
-				if (isUser() || $args[0]=='register') {
-					$hyphaPage = new settingspage($O_O);
-				}
-				else {
-					header('Location: '.$hyphaUrl.hypha_getDefaultLanguage().'/'.hypha_getDefaultPage());
-					exit;
-				}
+				$hyphaPage = new settingspage($O_O);
 				break;
 			case HyphaRequest::HYPHA_SYSTEM_PAGE_UPLOAD:
 				if ($args[0]=='image') {
