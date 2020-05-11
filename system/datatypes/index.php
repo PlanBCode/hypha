@@ -30,7 +30,9 @@
 		}
 
 		public function pageIndexView(HyphaRequest $request) {
-			$language = $this->O_O->getContentLanguage();
+			$language = $request->getArg(0);
+			if ($language === null)
+				$language = $this->O_O->getContentLanguage();
 			$isoLangList = Language::getIsoList();
 			$languageName = $isoLangList[$language];
 			$languageName = substr($languageName, 0, strpos($languageName, ' ('));
