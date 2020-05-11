@@ -824,57 +824,6 @@
 		return $index;
 	}
 
-	/*
-		Function: hypha_indexPages
-		returns alphabetical overview of all pages in the given language
-
-		Parameters:
-		$language
-	*/
-	function hypha_indexPages($language) {
-		// get list of available pages and sort alphabetically
-		foreach(hypha_getPageList() as $page) {
-			$lang = hypha_pageGetLanguage($page, $language);
-			if ($lang) if (isUser() || ($page->getAttribute('private')!='on')) {
-				$pageList[] = $lang->getAttribute('name').($page->getAttribute('private')=='on' ? '&#;' : '');
-				$pageListDatatype[$lang->getAttribute('name')] = $page->getAttribute('type');
-			}
-		}
-		if ($pageList) array_multisort(array_map('strtolower', $pageList), $pageList);
-
-		// add capitals
-		$capital = 'A';
-		$first = true;
-		if ($pageList) foreach($pageList as $pagename) {
-			while($capital < strtoupper($pagename[0])) $capital++;
-			if (strtoupper($pagename[0]) == $capital) {
-				if (!$first) {
-					$htmlList[] = '</div>';
-				}
-				$htmlList[] = '<div class="letter-wrapper">';
-				$htmlList[] = '<div class="letter">'.$capital.'</div>';
-				$capital++;
-				$first = false;
-			}
-			$privatePos = strpos($pagename, '&#;');
-			if ($privatePos) $pagename = substr($pagename, 0, $privatePos);
-			$htmlList[] = '<div class="index-item type_'.$pageListDatatype[$pagename].' '.($privatePos ? 'is-private' : 'is-public').'"><a href="'.$language.'/'.$pagename.'">'.showPagename($pagename).'</a></div>';
-		}
-
-		$html = '<div class="index">';
-		foreach($htmlList as $htmlLine) $html.= $htmlLine;
-		$html.= '</div>';
-		return $html;
-	}
-
-	function hypha_indexImages() {
-		return 'image index is not yet implemented';
-	}
-
-	function hypha_indexFiles() {
-		return 'file index is not yet implemented';
-	}
-
 	function hypha_substitute($string, array $vars) {
 		foreach ($vars as $key => $val) $string = str_replace('[[' . $key . ']]', $val, $string);
 		return $string;

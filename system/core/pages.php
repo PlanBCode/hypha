@@ -237,7 +237,6 @@ EOF;
 	*/
 	function loadPage(RequestContext $O_O) {
 		global $hyphaHtml, $hyphaPage, $hyphaUrl;
-		$isoLangList = Language::getIsoList();
 
 		$request = $O_O->getRequest();
 		$args = $request->getArgs();
@@ -287,23 +286,7 @@ EOF;
 				serveFile('data/images/' . $args[0], 'data/images');
 				exit;
 			case HyphaRequest::HYPHA_SYSTEM_PAGE_INDEX:
-				$hyphaHtml->writeToElement('langList', hypha_indexLanguages('', ''));
-				switch ($args[0]) {
-					case 'images':
-						$hyphaHtml->writeToElement('pagename', __('image-index'));
-						$hyphaHtml->writeToElement('main', hypha_indexImages());
-						break;
-					case 'files':
-						$hyphaHtml->writeToElement('pagename', __('file-index'));
-						$hyphaHtml->writeToElement('main', hypha_indexFiles());
-						break;
-					default:
-						$languageName = $isoLangList[$O_O->getContentLanguage()];
-						$languageName = substr($languageName, 0, strpos($languageName, ' ('));
-						$hyphaHtml->writeToElement('pagename', __('page-index').': '.$languageName);
-						$hyphaHtml->writeToElement('main', hypha_indexPages($O_O->getContentLanguage()));
-						break;
-				}
+				$hyphaPage = new indexpage($O_O);
 				break;
 			case HyphaRequest::HYPHA_SYSTEM_PAGE_TAG_INDEX:
 				$hyphaPage = new tagindexpage($O_O);
