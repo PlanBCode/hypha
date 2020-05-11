@@ -32,10 +32,6 @@
 		}
 
 		function process(HyphaRequest $request) {
-//			global $isoLangList, $html;
-//			if ($view=='register') $html->pagename =  'registration';
-//			elseif ($this->hypha->login) $html->pagename = 'settings';
-//			else return notify('error', __('login-to-view'));
 			switch ($this->getArg(0)) {
 				case 'user': $this->editAccount($this->getArg(1)); break;
 				case 'invite': $this->editInvitation(); break;
