@@ -34,6 +34,8 @@
 			if ($language === null)
 				$language = $this->O_O->getContentLanguage();
 			$isoLangList = Language::getIsoList();
+			if (!array_key_exists($language, $isoLangList))
+				return '404';
 			$languageName = $isoLangList[$language];
 			$languageName = substr($languageName, 0, strpos($languageName, ' ('));
 
