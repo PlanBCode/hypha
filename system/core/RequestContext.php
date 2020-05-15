@@ -16,6 +16,9 @@
 		/** @var array */
 		private $dictionary;
 
+		/** @var null|string */
+		private $csrfToken;
+
 		/**
 		 * @param HyphaRequest $hyphaRequest
 		 */
@@ -23,6 +26,7 @@
 			$this->hyphaRequest = $hyphaRequest;
 			$user = isset($_SESSION['hyphaLogin']) ? hypha_getUserById($_SESSION['hyphaLogin']) : false;
 			$this->hyphaUser = $user ?: null;
+			$this->csrfToken = isset($_COOKIE['hyphaCsrfToken']) ? $_COOKIE['hyphaCsrfToken'] : null;
 		}
 
 		/**
@@ -128,25 +132,38 @@
 			yet, it will be generated automatically.
 		*/
 		public function getOrGenerateCsrfToken() {
-			if (!isset($_SESSION['hyphaCsrfToken'])) {
-				session_start();
+			if (!$this->csrfToken)
 				$this->regenerateCsrfToken();
-				session_write_close();
-			}
 
-			return $_SESSION['hyphaCsrfToken'];
+			return $this->csrfToken;
 		}
 
 		/*
 			Function: regenerateCsrfToken
 
 			Regenerate the CSRF token. Should be called when a new
-			session starts, such as during login. Should be called
-			while the session is already open (e.g. between
-			session_start() and session_write_close()).
+			session starts, such as during login.
 		*/
 		public function regenerateCsrfToken() {
-			$_SESSION['hyphaCsrfToken'] = bin2hex(openssl_random_pseudo_bytes(8));
+			$this->csrfToken = bin2hex(openssl_random_pseudo_bytes(8));
+			// Store the token in a cookie that is limited
+			// to our root path, secure (not sent over HTTP)
+			// if appropriate, and *only* sent on http(s)
+			// requests (not accessible to scripts).
+			//
+			// Storing it in a cookie instead of in the
+			// session removes the need for creating a
+			// session for site visitors.
+			//
+			// Cookies are well-protected by the browser, so
+			// it is not possible for other sites to get
+			// access to this cookie to do an CSRF attack.
+			setcookie('hyphaCsrfToken', $this->csrfToken,
+			          /* expire */ 0,
+			          /* path */ $this->getRequest()->getRootUrlPath(),
+				  /* domain */ "",
+				  /* secure */ $this->getRequest()->isSecure(),
+				  /* http_only */ true);
 		}
 
 		/*
