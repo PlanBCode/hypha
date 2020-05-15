@@ -215,6 +215,20 @@
 		}
 
 		/**
+		 * Sets the name of the theme being previewed. Pass
+		 * null to stop previewing.
+		 * @param null|string name
+		 */
+		public function setPreviewThemeName($name) {
+			session_start();
+			if ($name)
+				$_SESSION['previewTheme'] = $name;
+			else
+				unset($_SESSION['previewTheme']);
+			session_write_close();
+		}
+
+		/**
 		 * Returns the name of the theme effectively being used
 		 * (configured or previewed)
 		 * @return string
