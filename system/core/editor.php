@@ -151,13 +151,9 @@
 
                 wym._iframe.contentDocument.addEventListener('paste', (event) => {
                     const pasteContent = (event.clipboardData || window.clipboardData).getData('text');
-                    const form = document.createElement('FORM');
                     const textarea = document.createElement('TEXTAREA');
                     textarea.value = pasteContent;
-                    //wym.dialog('Paste', );
-
                     wym.paste(textarea.value);
-
                     event.preventDefault(); // prevent default browser behaviour (double pasting)
                 });
 
