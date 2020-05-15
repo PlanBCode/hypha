@@ -34,7 +34,7 @@
 		 */
 		public function __construct(HyphaRequest $hyphaRequest) {
 			$this->hyphaRequest = $hyphaRequest;
-			$this->session = new HyphaSession();
+			$this->session = new HyphaSession($hyphaRequest);
 			$userid = $this->session->get('hyphaLogin');
 			if ($userid)
 				$this->hyphaUser = hypha_getUserById($userid);
