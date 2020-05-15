@@ -19,6 +19,9 @@
 		/** @var null|string */
 		private $csrfToken;
 
+		/** @var HyphaSession */
+		private $session;
+
 		/**
 		 * Collection of various data files to be used in this
 		 * request.
@@ -31,8 +34,12 @@
 		 */
 		public function __construct(HyphaRequest $hyphaRequest) {
 			$this->hyphaRequest = $hyphaRequest;
-			$user = isset($_SESSION['hyphaLogin']) ? hypha_getUserById($_SESSION['hyphaLogin']) : false;
-			$this->hyphaUser = $user ?: null;
+			$this->session = new HyphaSession();
+			$userid = $this->session->get('hyphaLogin');
+			if ($userid)
+				$this->hyphaUser = hypha_getUserById($userid);
+			else
+				$this->hyphaUser = null;
 			$this->csrfToken = isset($_COOKIE['hyphaCsrfToken']) ? $_COOKIE['hyphaCsrfToken'] : null;
 
 			$theme = $this->getThemeName();
@@ -211,7 +218,8 @@
 		 * @return null|string
 		 */
 		public function getPreviewThemeName() {
-			return isset($_SESSION['previewTheme']) ? $_SESSION['previewTheme'] : null;
+			$sess = $this->getSession();
+			return $sess->get('previewTheme', null);
 		}
 
 		/**
@@ -220,12 +228,13 @@
 		 * @param null|string name
 		 */
 		public function setPreviewThemeName($name) {
-			session_start();
+			$sess = $this->getSession();
+			$sess->lockAndReload();
 			if ($name)
-				$_SESSION['previewTheme'] = $name;
+				$sess->set('previewTheme', $name);
 			else
-				unset($_SESSION['previewTheme']);
-			session_write_close();
+				$sess->remove('previewTheme');
+			$sess->writeAndUnlock();
 		}
 
 		/**
@@ -239,5 +248,12 @@
 				$theme = hypha_getNormalTheme();
 			}
 			return $theme;
+		}
+
+		/**
+		 * Returns the current session.
+		 */
+		public function getSession() {
+			return $this->session;
 		}
 	}

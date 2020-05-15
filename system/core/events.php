@@ -400,12 +400,13 @@
 		returned unmodified).
 	*/
 	function preserveNotifications($url) {
-		global $hyphaNotificationList;
+		global $hyphaNotificationList, $O_O;
 		if (count($hyphaNotificationList)) {
 			$id = uniqid();
-			session_start();
-			$_SESSION['notifications'][$id] = $hyphaNotificationList;
-			session_write_close();
+			$sess = $O_O->getSession();
+			$sess->lockAndReload();
+			$sess->set('notifications_' . $id, $hyphaNotificationList);
+			$sess->writeAndUnlock();
 			if (strpos($url, '?') === false)
 				$url .= '?notify=' . rawurlencode($id);
 			else
@@ -424,7 +425,7 @@
 	registerPostProcessingFunction('addNotifier');
 	$GLOBALS['hyphaNotificationList'] = array();
 	function addNotifier($html) {
-		global $hyphaNotificationList;
+		global $hyphaNotificationList, $O_O;
 
 		// Show any notifications from before a redirect. The
 		// notifications themselves are stored in the session
@@ -433,15 +434,16 @@
 		// parameter to prevent showing a notification in the
 		// wrong browser window.
 		if (isset($_GET['notify'])) {
-			$notify = $_GET['notify'];
-			session_start();
-			if (isset($_SESSION['notifications']) && isset($_SESSION['notifications'][$notify])) {
-				$notifications = $_SESSION['notifications'][$notify];
-				$hyphaNotificationList = array_merge($notifications, $hyphaNotificationList);
+			$id = $_GET['notify'];
+			$sess = $O_O->getSession();
+			$sess->lockAndReload();
+			$notifications = $sess->get('notifications_' . $id, null);
 
-				unset($_SESSION['notifications'][$notify]);
+			if ($notifications !== null) {
+				$hyphaNotificationList = array_merge($notifications, $hyphaNotificationList);
+				$sess->remove('notifications_' . $id);
 			}
-			session_write_close();
+			$sess->writeAndUnlock();
 		}
 
 
@@ -521,11 +523,13 @@
 		in the next request.
 	*/
 	function preserveDumps() {
-		global $hyphaDumpList;
+		global $hyphaDumpList, $O_O;
+
 		if (count($hyphaDumpList)) {
-			session_start();
-			$_SESSION['dumps'] = $hyphaDumpList;
-			session_write_close();
+			$sess = $O_O->getSession();
+			$sess->lockAndReload();
+			$sess->set('dumps', $hyphaDumpList);
+			$sess->writeAndUnlock();
 			$hyphaDumpList = [];
 		}
 	}
@@ -539,15 +543,16 @@
 	registerPostProcessingFunction('addDumps');
 	$GLOBALS['hyphaDumpList'] = [];
 	function addDumps($html) {
-		global $hyphaDumpList;
+		global $hyphaDumpList, $O_O;
 
-		session_start();
-		if (isset($_SESSION['dumps'])) {
-			$hyphaDumpList = array_merge($_SESSION['dumps'], $hyphaDumpList);
-
-			unset($_SESSION['dumps']);
+		$sess = $O_O->getSession();
+		$sess->lockAndReload();
+		if ($sess->get('dumps', null) !== null) {
+			$dumps = $sess->get('dumps');
+			$hyphaDumpList = array_merge($dumps, $hyphaDumpList);
+			$sess->remove('dumps');
 		}
-		session_write_close();
+		$sess->writeAndUnlock();
 
 		if (count($hyphaDumpList)) {
 			foreach ($hyphaDumpList as $vars) {
