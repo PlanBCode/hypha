@@ -546,13 +546,17 @@
 		global $hyphaDumpList, $O_O;
 
 		$sess = $O_O->getSession();
-		$sess->lockAndReload();
+		// Check for dumps first, if present, reload with a lock
+		// The first check prevents reloading when not needed,
+		// the reload prevents dumping things that were already
+		// dumped.
 		if ($sess->get('dumps', null) !== null) {
-			$dumps = $sess->get('dumps');
+			$sess->lockAndReload();
+			$dumps = $sess->get('dumps', []);
 			$hyphaDumpList = array_merge($dumps, $hyphaDumpList);
 			$sess->remove('dumps');
+			$sess->writeAndUnlock();
 		}
-		$sess->writeAndUnlock();
 
 		if (count($hyphaDumpList)) {
 			foreach ($hyphaDumpList as $vars) {
