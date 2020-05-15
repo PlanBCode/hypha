@@ -79,9 +79,8 @@
 
 	$hyphaHtml = new HTMLDocument(Hypha::$data->html);
 	$hyphaHtml->initForBrowser($hyphaUrl);
-	$pathToTheme = 'data/themes/' . Hypha::$data->theme;
 	$hyphaHtml->linkStyle('system/assets/hypha-core.css');
-	$hyphaHtml->linkStyle($pathToTheme . '/hypha.css');
+	$hyphaHtml->linkStyle(Hypha::$data->css->getFilename());
 	$hyphaHtml->linkScript('system/assets/jquery-1.7.1.min.js');
 	$hyphaHtml->linkScript('system/assets/help.js');
 	$hyphaHtml->setTitle(hypha_getTitle());
