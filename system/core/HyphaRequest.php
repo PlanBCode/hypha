@@ -148,7 +148,7 @@
 			// Apache 2.4+ has REQUEST_SCHEME
 			if (array_key_exists('REQUEST_SCHEME', $_SERVER))
 				return $_SERVER['REQUEST_SCHEME'];
-			if (array_key_exists('HTTPS', $_SERVER) && $_SERVER['HTTPS'] == 'on')
+			if ($this->isSecure())
 				return 'https';
 			return 'http';
 		}
@@ -159,6 +159,10 @@
 
 		public function getPort() {
 			return $_SERVER['SERVER_PORT'];
+		}
+
+		public function isSecure() {
+			return array_key_exists('HTTPS', $_SERVER) && $_SERVER['HTTPS'] === 'on';
 		}
 
 		/**
