@@ -422,9 +422,7 @@
 				}
 				foreach ($errors as $error) notify('error', $error);
 				if (empty($errors)) {
-					session_start();
-					$_SESSION['previewTheme'] = $_POST['editTheme'];
-					session_write_close();
+					$this->O_O->setPreviewThemeName($_POST['editTheme']);
 					notify('success', __('preview-theme-set-successful'));
 				}
 			}
@@ -432,19 +430,18 @@
 		}
 
 		function cancelPreviewTheme($argument) {
-			if (isAdmin() && isset($_SESSION['previewTheme'])) {
-				session_start();
-				unset($_SESSION['previewTheme']);
-				session_write_close();
+			if (isAdmin() && $this->O_O->getPreviewThemeName()) {
+				$this->O_O->setPreviewThemeName(null);
 			}
 			return 'reload';
 		}
 
 		function applyPreviewTheme($argument) {
-			if (isAdmin() && isset($_SESSION['previewTheme'])) {
+			$preview = $this->O_O->getPreviewThemeName();
+			if (isAdmin() && $preview) {
 				global $hyphaUrl, $hyphaXml;
 				$hyphaXml->lockAndReload();
-				hypha_setTheme($_SESSION['previewTheme']);
+				hypha_setTheme($preview);
 				$hyphaXml->saveAndUnlock();
 				$this->cancelPreviewTheme($argument);
 			}
