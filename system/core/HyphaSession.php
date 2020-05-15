@@ -9,12 +9,16 @@
 		var $locked = false;
 
 		public function __construct() {
-			// Load the session and close it immediately (there does not
-			// seem to be any way to do this without also writing out the
-			// session file with PHP < 5.6). This prevents the session file
-			// from staying locked throughout the entire request and
-			// prevents serving multiple requests within the same session.
+			// Load the session
 			session_start();
+
+			// And close it immediately again to
+			// unlock and allow other requests in
+			// the same session to also open it. This
+			// intentionally writes the session (rather than
+			// using e.g. session_abort() to just close it),
+			// to make sure that the session is kept alive
+			// and not expires while it is being used.
 			session_write_close();
 		}
 
