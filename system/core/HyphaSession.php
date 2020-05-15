@@ -39,6 +39,20 @@
 				// Load the session
 				session_start();
 
+				// If loading the session failed, clear
+				// out the session id. Otherwise, it
+				// could keep failing e.g. in case the
+				// permissions on an existing session
+				// are changed. In this case, even
+				// regeneration_session_id seems to
+				// refuse. Unsetting the cookie forces a
+				// new session to be started.
+				// In PHP7.1, we could look at the
+				// session_start return value instead.
+				if (session_status() != PHP_SESSION_ACTIVE) {
+					unset($_COOKIE[session_name()]);
+				}
+
 				// And close it immediately again to
 				// unlock and allow other requests in
 				// the same session to also open it. This
