@@ -17,8 +17,10 @@
 	registerCommandCallback('login', 'login');
 	function login() {
 		global $O_O;
-		$user = hypha_getUserByName($_POST['loginUsername']);
-		if ($user && $user->getAttribute('rights') != 'exmember' && verifyPassword($_POST['loginPassword'], $user->getAttribute('password'))) {
+		$username = $O_O->getRequest()->getPostValue('loginUsername');
+		$password = $O_O->getRequest()->getPostValue('loginPassword');
+		$user = hypha_getUserByName($username);
+		if ($user && $user->getAttribute('rights') != 'exmember' && verifyPassword($password, $user->getAttribute('password'))) {
 			session_start();
 			// Use a brand new session id for extra security
 			session_regenerate_id();
