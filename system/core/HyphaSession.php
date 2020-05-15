@@ -108,14 +108,14 @@
 		 * stored into the session, to prevent session fixation
 		 * attacks.
 		 *
-		 * This does not change the existing session and keeps
-		 * existing session data.
+		 * This deletes the existing session from disk, but
+		 * keeps the existing session's data.
 		 *
 		 * Must be called while the session is locked.
 		 */
 		public function changeSessionId() {
 			if (!$this->locked)
 				throw new LogicException('Cannot change session id, session not locked');
-			session_regenerate_id();
+			session_regenerate_id(/* delete old session */ true);
 		}
 	}
