@@ -9,6 +9,12 @@
 		var $locked = false;
 
 		public function __construct($request) {
+			if (ini_get('session.auto_start'))
+				throw new LogicException("session.autostart must be disabled");
+
+			if (session_status() == PHP_SESSION_ACTIVE)
+				throw new LogicException("session must not be started before calling HyphaSession");
+
 			// Store the session token in a cookie with a
 			// custom name, limited to our root path
 			// (prevents sharing the session with other PHP
