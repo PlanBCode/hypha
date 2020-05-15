@@ -20,6 +20,13 @@
 		private $csrfToken;
 
 		/**
+		 * Collection of various data files to be used in this
+		 * request.
+		 * @var StdClass
+		 */
+		public $data;
+
+		/**
 		 * @param HyphaRequest $hyphaRequest
 		 */
 		public function __construct(HyphaRequest $hyphaRequest) {
@@ -27,6 +34,13 @@
 			$user = isset($_SESSION['hyphaLogin']) ? hypha_getUserById($_SESSION['hyphaLogin']) : false;
 			$this->hyphaUser = $user ?: null;
 			$this->csrfToken = isset($_COOKIE['hyphaCsrfToken']) ? $_COOKIE['hyphaCsrfToken'] : null;
+
+			$theme = $this->getThemeName();
+			$this->data = new StdClass();
+			$this->data->themeHtml = new HyphaFile('data/themes/' . $theme . '/hypha.html');
+			$this->data->themeCss = new HyphaFile('data/themes/' . $theme . '/hypha.css');
+			$this->data->digest = new HyphaFile('data/digest');
+			$this->data->stats = new HyphaFile('data/hypha.stats');
 		}
 
 		/**
@@ -189,5 +203,27 @@
 
 		public function getRootPath() {
 			return dirname(dirname(__DIR__));
+		}
+
+		/**
+		 * Returns the name of the theme being previewed, or
+		 * null if none.
+		 * @return null|string
+		 */
+		public function getPreviewThemeName() {
+			return isset($_SESSION['previewTheme']) ? $_SESSION['previewTheme'] : null;
+		}
+
+		/**
+		 * Returns the name of the theme effectively being used
+		 * (configured or previewed)
+		 * @return string
+		 */
+		public function getThemeName() {
+			$theme = $this->getPreviewThemeName();
+			if (null === $theme) {
+				$theme = hypha_getNormalTheme();
+			}
+			return $theme;
 		}
 	}

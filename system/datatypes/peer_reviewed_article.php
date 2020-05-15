@@ -290,7 +290,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		// Sharing links
 		$shareDiv = $this->html->create('<div class="share-links">')->appendTo($main);
 		$linkToPage = $this->constructFullPath($this->pagename);
-		$themeImgPath = 'data/themes/' . Hypha::$data->theme . '/images';
+		$themeImgPath = 'data/themes/' . $this->O_O->getThemeName() . '/images';
 
 		// Email
 		$subject = __('share-email-subject', ['domain' => hypha_getTitle(), 'title' => $this->getTitle()]);

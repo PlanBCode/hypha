@@ -42,23 +42,6 @@
 	$hyphaXml->loadFromFile('data/hypha.xml');
 
 	/*
-		Class: Hypha
-
-		This class contains some global values for the Hypha system. It is
-		never instantiated, it just collects static variables and methods.
-	*/
-	class Hypha {
-		public static $data;
-	}
-
-	Hypha::$data = new StdClass();
-	Hypha::$data->theme = hypha_getAffectiveTheme();
-	Hypha::$data->css = new HyphaFile('data/themes/' . Hypha::$data->theme . '/hypha.css');
-	Hypha::$data->html = new HyphaFile('data/themes/' . Hypha::$data->theme . '/hypha.html');
-	Hypha::$data->digest = new HyphaFile('data/digest');
-	Hypha::$data->stats = new HyphaFile('data/hypha.stats');
-
-	/*
 		Function: hypha_getEmail
 		returns hypha email attribute
 	*/
@@ -251,26 +234,6 @@
 	}
 
 	/*
-		Function: hypha_getPreviewTheme
-		returns preview theme set session, of false is not set.
-	*/
-	function hypha_getPreviewTheme() {
-		return isset($_SESSION['previewTheme']) ? $_SESSION['previewTheme'] : false;
-	}
-
-	/*
-		Function: hypha_getAffectiveTheme
-		returns theme, if preview was set, the preview theme otherwise the normal.
-	*/
-	function hypha_getAffectiveTheme() {
-		$theme = hypha_getPreviewTheme();
-		if (false === $theme) {
-			$theme = hypha_getNormalTheme();
-		}
-		return $theme;
-	}
-
-	/*
 		Function: hypha_setTheme
 		sets hypha theme attribute
 
@@ -310,7 +273,8 @@
 		returns hypha base html file contents
 	*/
 	function hypha_getHtml() {
-		return Hypha::$data->html->read();
+		global $O_O;
+		return $O_O->data->themeHtml->read();
 	}
 
 	/*
@@ -321,7 +285,8 @@
 		$contents - html file contents
 	*/
 	function hypha_setHtml($contents) {
-		Hypha::$data->html->writeWithLock($contents);
+		global $O_O;
+		$O_O->data->themeHtml->writeWithLock($contents);
 	}
 
 	/*
@@ -329,7 +294,8 @@
 		returns hypha base css file contents
 	*/
 	function hypha_getCss() {
-		return Hypha::$data->css->read();
+		global $O_O;
+		return $O_O->data->themeCss->read();
 	}
 
 	/*
@@ -340,7 +306,8 @@
 		$contents - css file contents
 	*/
 	function hypha_setCss($contents) {
-		Hypha::$data->css->writeWithLock($contents);
+		global $O_O;
+		$O_O->data->themeCss->writeWithLock($contents);
 	}
 
 	/*
@@ -693,9 +660,9 @@
 		$bodyElement->attr('class', implode(' ', array_filter($classes)));
 	}
 
-	function hypha_setPreviewPanel($hyphaPage) {
-		$previewTheme = hypha_getPreviewTheme();
-		if (false !== $previewTheme) {
+	function hypha_setPreviewPanel($O_O, $hyphaPage) {
+		$previewTheme = $O_O->getPreviewThemeName();
+		if (null !== $previewTheme) {
 			/** @var \DOMWrap\NodeList $bodyElement */
 			$bodyElement = $hyphaPage->html->find('body');
 			$panel = '<div class="preview_panel" style="position:fixed; bottom:0; background-color: rgba(0, 0, 0, 0.8);">';
@@ -749,8 +716,9 @@
 		returns hypha digest file contents, and empties it
 	*/
 	function hypha_getAndClearDigest() {
-		$contents = Hypha::$data->digest->lockAndRead();
-		Hypha::$data->digest->writeAndUnlock('');
+		global $O_O;
+		$contents = $O_O->data->digest->lockAndRead();
+		$O_O->data->digest->writeAndUnlock('');
 		return $contents;
 	}
 
@@ -759,8 +727,9 @@
 		Adds contents to the hypha digest file.
 	*/
 	function hypha_addDigest($contents) {
-		$old = Hypha::$data->digest->lockAndRead();
-		Hypha::$data->digest->writeAndUnlock($old . $contents);
+		global $O_O;
+		$old = $O_O->data->digest->lockAndRead();
+		$O_O->data->digest->writeAndUnlock($old . $contents);
 	}
 
 	/*
@@ -768,7 +737,8 @@
 		returns hypha stats for the given timestamp
 	*/
 	function hypha_getStats($timestamp) {
-		$contents = Hypha::$data->stats->read();
+		global $O_O;
+		$contents = $O_O->data->stats->read();
 		if (!$contents)
 			return 0;
 		$stats = json_decode($contents, true);
@@ -782,7 +752,8 @@
 		Increment the page view counter for the given timestamp
 	*/
 	function hypha_incrementStats($timestamp) {
-		$contents = Hypha::$data->stats->lockAndRead();
+		global $O_O;
+		$contents = $O_O->data->stats->lockAndRead();
 		if (!$contents)
 			$stats = Array();
 		else
@@ -792,7 +763,7 @@
 			$stats[$timestamp] = 0;
 
 		$stats[$timestamp]++;
-		Hypha::$data->stats->writeAndUnlock(json_encode($stats));
+		$O_O->data->stats->writeAndUnlock(json_encode($stats));
 	}
 
 	/*

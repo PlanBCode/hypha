@@ -77,10 +77,10 @@
 		Website data is loaded, see chapter about <Base> functions. The HTMLDocument $hyphaHtml is loaded with the website default layout.
 	*/
 
-	$hyphaHtml = new HTMLDocument(Hypha::$data->html);
+	$hyphaHtml = new HTMLDocument($O_O->data->themeHtml);
 	$hyphaHtml->initForBrowser($hyphaUrl);
 	$hyphaHtml->linkStyle('system/assets/hypha-core.css');
-	$hyphaHtml->linkStyle(Hypha::$data->css->getFilename());
+	$hyphaHtml->linkStyle($O_O->data->themeCss->getFilename());
 	$hyphaHtml->linkScript('system/assets/jquery-1.7.1.min.js');
 	$hyphaHtml->linkScript('system/assets/help.js');
 	$hyphaHtml->setTitle(hypha_getTitle());
@@ -155,7 +155,7 @@
 //	if (!$O_O->isUser()) registerPostProcessingFunction('obfuscateEmail');
 
 	if ($hyphaPage) hypha_setBodyClass($hyphaRequest, $hyphaPage);
-	if ($hyphaPage) hypha_setPreviewPanel($hyphaPage);
+	if ($hyphaPage) hypha_setPreviewPanel($O_O, $hyphaPage);
 
 	// Add the default form. This does not happen earlier, since
 	// appending makes a copy of the form, so now we can be sure

@@ -308,15 +308,15 @@
 			if (isAdmin()) {
 				$this->html->writeToElement('pageCommands', makeButton(__('cancel'), makeAction('settings', '', '')));
                 ob_start();
-				if (Hypha::$data->theme === 'default') {
+				if ($this->O_O->getThemeName() === 'default') {
 					global $hyphaUrl;
-					$this->html->writeToElement('pagename', __('view-html-of-theme', ['theme' => Hypha::$data->theme]));
+					$this->html->writeToElement('pagename', __('view-html-of-theme', ['theme' => $this->O_O->getThemeName()]));
 					$this->html->writeToElement('main', __('cannot-edit-default-theme-explanation', ['link' => $hyphaUrl.'settings/theme']));
 ?>
 <blockquote><pre><code><?=htmlspecialchars(hypha_getHtml());?></code></pre></blockquote>
 <?php
 				} else {
-					$this->html->writeToElement('pagename', __('edit-html-of-theme', ['theme' => Hypha::$data->theme]));
+					$this->html->writeToElement('pagename', __('edit-html-of-theme', ['theme' => $this->O_O->getThemeName()]));
 					$this->html->writeToElement('pageCommands', makeButton(__('save'), makeAction('settings', 'settingsSaveMarkup', '')));
 ?>
 <table class="section">
@@ -360,7 +360,7 @@
 				echo '<div class="theme-options">' . "\n";
 				foreach ($themes as $theme) {
 					$value = htmlspecialchars($theme);
-					echo '<div class="theme-option"><input type="radio" id="'.$value.'" name="srcTheme" value="'.$value.'"' . (Hypha::$data->theme === $theme ? ' checked' : '') . '><label for="'.$value.'">'.$theme.'</label></div>' . "\n";
+					echo '<div class="theme-option"><input type="radio" id="'.$value.'" name="srcTheme" value="'.$value.'"' . ($this->O_O->getThemeName() === $theme ? ' checked' : '') . '><label for="'.$value.'">'.$theme.'</label></div>' . "\n";
 				}
 				echo '</div>' . "\n";
 				echo '<div class="new-theme-name"><input type="text" name="dstTheme" placeholder="'.__('new-theme-name').'"></div>';
@@ -509,15 +509,15 @@
 			if (isAdmin()) {
 				$this->html->writeToElement('pageCommands', makeButton(__('cancel'), makeAction('settings', '', '')));
 				ob_start();
-				if (Hypha::$data->theme === 'default') {
+				if ($this->O_O->getThemeName() === 'default') {
 					global $hyphaUrl;
-					$this->html->writeToElement('pagename', __('view-css-of-theme', ['theme' => Hypha::$data->theme]));
+					$this->html->writeToElement('pagename', __('view-css-of-theme', ['theme' => $this->O_O->getThemeName()]));
 					$this->html->writeToElement('main', __('cannot-edit-default-theme-explanation', ['link' => $hyphaUrl.'settings/theme']));
 ?>
 <blockquote><pre><code><?=hypha_getCss();?></code></pre></blockquote>
 <?php
 				} else {
-					$this->html->writeToElement('pagename', __('edit-css-of-theme', ['theme' => Hypha::$data->theme]));
+					$this->html->writeToElement('pagename', __('edit-css-of-theme', ['theme' => $this->O_O->getThemeName()]));
 					$this->html->writeToElement('pageCommands', makeButton(__('save'), makeAction('settings', 'settingsSaveStyles', '')));
 ?>
 <textarea class="section" name="editCss" id="editCss" cols="100%" rows="18" wrap="off"><?=hypha_getCss();?></textarea>
