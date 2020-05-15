@@ -121,9 +121,9 @@
 	// Load page and execute the posted command. This
 	// is tried twice, since some commands need to run before
 	// loading the page, and some commands need to run after.
-	executePostedCommand(); // Might redirect and exit
+	executePostedCommand($O_O); // Might redirect and exit
 	loadPage($O_O);
-	executePostedCommand(); // Might redirect and exit
+	executePostedCommand($O_O); // Might redirect and exit
 
 	/*
 		Group: Stage 6 - Load page and process query
