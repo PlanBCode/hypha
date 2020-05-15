@@ -590,6 +590,15 @@
 		}
 
 		/*
+			Function: getFilename
+
+			Returns the filename that this object represents.
+		 */
+		function getFilename() {
+			return $this->filename;
+		}
+
+		/*
 			Function: lock
 
 			Open the file and take an exclusive lock. If the
