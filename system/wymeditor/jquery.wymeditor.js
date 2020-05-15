@@ -1507,6 +1507,7 @@ WYMeditor.editor.prototype.dialog = function (
         // it's own class or id for the form).
         jQuery("form.wym_dialog_submit", dialog).submit(function () {
             dialogObject.submitHandler.call(wym, wDialog);
+            return false;
         });
     }
 

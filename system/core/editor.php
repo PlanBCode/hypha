@@ -26,7 +26,7 @@
 		$language = $O_O->getContentLanguage();
 
 		$wymeditorSources = [
-			$rootUrl.'system/wymeditor/jquery.wymeditor.min.js',
+			$rootUrl.'system/wymeditor/jquery.wymeditor.js',
 			$rootUrl.'system/wymeditor/lang/'.$language.'.js',
 			$rootUrl.'system/wymeditor/skins/default/skin.js',
 			$rootUrl.'system/wymeditor/plugins/jquery.iframe-post-form.js',
@@ -149,7 +149,20 @@
 					this.isFocusSet = true;
 				}
 
-				// initiate the "image_upload" plugin
+                wym._iframe.contentDocument.addEventListener('paste', (event) => {
+                    const pasteContent = (event.clipboardData || window.clipboardData).getData('text');
+                    const form = document.createElement('FORM');
+                    const textarea = document.createElement('TEXTAREA');
+                    textarea.value = pasteContent;
+                    //wym.dialog('Paste', );
+
+                    wym.paste(textarea.value);
+
+                    event.preventDefault(); // prevent default browser behaviour (double pasting)
+                });
+
+
+                // initiate the "image_upload" plugin
 				wym.image_upload();
 
 				// initiate the "site_links" plugin
