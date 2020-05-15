@@ -9,17 +9,22 @@
 		var $locked = false;
 
 		public function __construct() {
-			// Load the session
-			session_start();
+			// Only load the session when an id cookie is
+			// present, to prevent creating a session unless
+			// it is needed
+			if (isset($_COOKIE[session_name()])) {
+				// Load the session
+				session_start();
 
-			// And close it immediately again to
-			// unlock and allow other requests in
-			// the same session to also open it. This
-			// intentionally writes the session (rather than
-			// using e.g. session_abort() to just close it),
-			// to make sure that the session is kept alive
-			// and not expires while it is being used.
-			session_write_close();
+				// And close it immediately again to
+				// unlock and allow other requests in
+				// the same session to also open it. This
+				// intentionally writes the session (rather than
+				// using e.g. session_abort() to just close it),
+				// to make sure that the session is kept alive
+				// and not expires while it is being used.
+				session_write_close();
+			}
 		}
 
 		/**
