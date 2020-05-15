@@ -120,6 +120,49 @@
 			return $this->dictionary;
 		}
 
+		/*
+			Function: getOrGenerateCsrfToken
+
+			Returns the CsrfToken to be used for all
+			subsequent POST requests. If there is no token
+			yet, it will be generated automatically.
+		*/
+		public function getOrGenerateCsrfToken() {
+			if (!isset($_SESSION['hyphaCsrfToken'])) {
+				session_start();
+				$this->regenerateCsrfToken();
+				session_write_close();
+			}
+
+			return $_SESSION['hyphaCsrfToken'];
+		}
+
+		/*
+			Function: regenerateCsrfToken
+
+			Regenerate the CSRF token. Should be called when a new
+			session starts, such as during login. Should be called
+			while the session is already open (e.g. between
+			session_start() and session_write_close()).
+		*/
+		public function regenerateCsrfToken() {
+			$_SESSION['hyphaCsrfToken'] = bin2hex(openssl_random_pseudo_bytes(8));
+		}
+
+		/*
+			Function: csrfValid
+
+			Returns whether the request is a POST request
+			that contains a valid CSRF token in the request
+			parameters. When this returns false, a POST
+			request should not be processed.
+		*/
+		public function validCsrfToken() {
+			$received = $this->getRequest()->getPostValue('csrfToken');
+			$expected = $this->getOrGenerateCsrfToken();
+			return $received === $expected;
+		}
+
 		/**
 		 * @return HyphaRequest
 		 */

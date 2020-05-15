@@ -256,38 +256,17 @@
 		return '<input type="button" class="button" value="'.$label.'" onclick="hypha(\''.$langPageView.'\', \''.$command.'\', \''.$argument.'\');" />';
 	}
 
-	function getCsrfToken() {
-		if (!isset($_SESSION['hyphaCsrfToken'])) {
-			session_start();
-			regenerateCsrfToken();
-			session_write_close();
-		}
-
-		return $_SESSION['hyphaCsrfToken'];
-	}
-
-	/*
-		Function: regenerateCsrfToken
-
-		Regenerate the CSRF token. Should be called when a new
-		session starts, such as during login. Should be called
-		while the session is already open (e.g. between
-		session_start() and session_write_close()).
-	*/
-	function regenerateCsrfToken() {
-		$_SESSION['hyphaCsrfToken'] = bin2hex(openssl_random_pseudo_bytes(8));
-	}
-
 	// Automatically insert the CSRF token into all forms in the
 	// generated document
 	registerPostProcessingFunction('injectCsrf');
 	function injectCsrf(HTMLDocument $html) {
+		global $O_O;
 		$forms = $html->find('form');
 		foreach ($forms as $form) {
 			// if form does not have a csrf field, inject csrf field.
 			if ($form->find('input[name=csrfToken]')->count() === 0) {
 				$form->append($input = $html->create('<input name="csrfToken" type="hidden"'));
-				$input->setAttr('value', getCsrfToken());
+				$input->setAttr('value', $O_O->getOrGenerateCsrfToken());
 			}
 		}
 	}
@@ -299,7 +278,7 @@
 
 		$command = $request->getPostValue('command');
 		if (!$processed && $command) {
-			if ($request->getPostValue('csrfToken') != getCsrfToken()) {
+			if (!$O_O->validCsrfToken()) {
 				notify('error', __('csrf-error'));
 				$processed = true;
 				return;
