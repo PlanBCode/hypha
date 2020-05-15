@@ -294,17 +294,19 @@
 
 	// execute posted commands
 	function executePostedCommand() {
-		if(isset($_POST['command'])) {
+		static $processed = false;
+
+		if(!$processed && isset($_POST['command'])) {
 			if (!isset($_POST['csrfToken']) || $_POST['csrfToken'] != getCsrfToken()) {
 				notify('error', __('csrf-error'));
-				unset($_POST['command']);
+				$processed = true;
 				return;
 			}
 
 			$result = processCommand($_POST['command'], isset($_POST['argument']) ? $_POST['argument'] : null);
 			if ($result !== false) {
 				// Command was handled
-				unset($_POST['command']);
+				$processed = true;
 				processCommandResult($result);
 			}
 		}
