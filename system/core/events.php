@@ -549,11 +549,9 @@
 		}
 		session_write_close();
 
-		if (count($hyphaDumpList)) {
-			foreach ($hyphaDumpList as $vars) {
-				foreach ($vars as &$value) $value = json_encode($value);
-				call_user_func_array([$html, 'writeScript'], ['console.log(' . implode(', ', $vars) . ');']);
-			}
+		foreach ($hyphaDumpList as $vars) {
+			$vars = array_map('json_encode', $vars);
+			$html->writeScript('console.log(' . implode(', ', $vars) . ');');
 		}
 	}
 
