@@ -550,7 +550,6 @@
 		session_write_close();
 
 		foreach ($hyphaDumpList as $vars) {
-			$vars = array_map('json_encode', $vars);
 			$html->writeScript('console.log(' . implode(', ', $vars) . ');');
 		}
 	}
@@ -575,6 +574,8 @@
 		$line = $caller['line'];
 		array_unshift($vars, $file . ':' . $line);
 
-		// adds the variables to the $hyphaDumpList for later processing
-		$hyphaDumpList[] = $vars;
+		// serialize now, rather than in addDumps, to capture
+		// the current state of objects (rather than the state
+		// at the end of the request).
+		$hyphaDumpList[] = array_map('json_encode', $vars);
 	}
