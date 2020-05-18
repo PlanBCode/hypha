@@ -148,7 +148,7 @@
 	function reregister() {
 		html = '<table class="section">';
 		html+= '<tr><th><?=__('name-or-email')?></th><td><input name="searchLogin" id="searchLogin" type="text" size="10" /></td></tr>';
-		html+= '<tr><td></td><td><input type="submit" name="submit" value="<?=__('submit')?>" onclick="hypha(\'<?=$currentUrlPath?>\', \'reregister\', document.getElementById(\'searchLogin\').value, $(this).closest(\'form\'));" /><input type="button" name="cancel" value="<?=__('cancel')?>" onclick="showLogin();" /></td></tr>';
+		html+= '<tr><td></td><td><input type="submit" name="submit" value="<?=__('submit')?>" onclick="hypha(\'<?=$currentUrlPath?>\', \'reregister\', document.getElementById(\'searchLogin\').value, $(this).closest(\'form\'));" /><input type="button" name="cancel" value="<?=__('cancel')?>" onclick="login();" /></td></tr>';
 		html+= '</table>';
 		document.getElementById('popup').innerHTML = html;
 		document.getElementById('popup').style.display = 'block';
