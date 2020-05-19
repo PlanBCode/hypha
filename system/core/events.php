@@ -550,7 +550,7 @@
 		session_write_close();
 
 		foreach ($hyphaDumpList as $vars) {
-			$html->writeScript('console.log(' . implode(', ', $vars) . ');');
+			$html->writeScript('console.log(' . implode(', ', $vars) . ");\n");
 		}
 	}
 
