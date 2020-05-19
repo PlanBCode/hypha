@@ -593,7 +593,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		$this->xml->lockAndReload();
 
 		// store discussion and comment
-		$discussionContainer = $this->xml->find($type);
+		$discussionContainer = $this->xml->find($type)->first();
 		$discussion = $this->addDiscussion($discussionContainer, $form, $dataFieldSuffix);
 		$comment = $this->addDiscussionComment($discussion, $form, $dataFieldSuffix);
 		$this->xml->saveAndUnlock();
@@ -899,7 +899,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	 * @param string dataFieldSuffix
 	 * @return HyphaDomElement
 	 */
-	private function addDiscussion(NodeList $discussionContainer, WymHTMLForm $form, $dataFieldSuffix) {
+	private function addDiscussion(HyphaDomElement $discussionContainer, WymHTMLForm $form, $dataFieldSuffix) {
 		$this->xml->requireLock();
 
 		/** @var HyphaDomElement $discussion */
