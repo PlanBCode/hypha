@@ -147,7 +147,9 @@
 		$_cmds[] = makeLink(__('settings'), makeAction('settings', '', ''), 'settings');
 		$_cmds[] = makeLink(__('logout'), makeAction($hyphaRequest->getRelativeUrlPath(false),'logout',''), 'logout');
 	}
-	$hyphaHtml->writeToElement('hyphaCommands', implode('', $_cmds));
+	// A class is used by default, but also look for the
+	// #hyphaCommands id which was used in earlier versions.
+	$hyphaHtml->find('.hyphaCommands, #hyphaCommands')->html(implode('', $_cmds));
 	if ($O_O->isUser()) $hyphaHtml->writeToElement('hyphaCommands', '<br/><div id="loggedIn">'.__('logged-in-as').' `'.$O_O->getUser()->getAttribute('username').'`'.asterisk(isAdmin()).'</div>');
 
 	// obfuscate email addresses to strangers. It's ok to send readable addresses to logged in members. This also prevents conflicts in the editor.
