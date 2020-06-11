@@ -168,7 +168,7 @@
 					<td></td>
 					<td>
 						<input type="button" class="button" value="[[cancel]]" onclick="document.getElementById('popup').style.display='none';" />
-						<input type="submit" id="newPageSubmit" class="button editButton" value="[[create]]" [[submit-disabled]] onclick="hypha([[content-language-js]] + document.getElementById('newPagename').value + '/edit', 'newPage', document.getElementById('newPagename').value, $(this).closest('form'));" />
+						<input type="submit" id="newPageSubmit" class="button editButton" value="[[create]]" [[submit-disabled]] onclick="hypha([[content-language-js]] + '/' + document.getElementById('newPagename').value + '/edit', 'newPage', document.getElementById('newPagename').value, $(this).closest('form'));" />
 					</td>
 				</tr>
 			</table>
