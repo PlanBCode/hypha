@@ -392,6 +392,7 @@ jQuery.extend(WYMeditor, {
     // Containers that we allow at the root of the document (as a direct child
     // of the body tag)
     ROOT_CONTAINERS : [
+        "macro",
         "blockquote",
         "div",
         "h1",
@@ -419,6 +420,7 @@ jQuery.extend(WYMeditor, {
 
     // All block (as opposed to inline) tags
     BLOCKS : [
+        "macro",
         "address",
         "blockquote",
         "dd",
@@ -461,6 +463,7 @@ jQuery.extend(WYMeditor, {
     // Elements that are not containers. They don't generally have any child
     // nodes.
     NON_CONTAINING_ELEMENTS : [
+        "macro",
         "br",
         "col",
         "hr",
@@ -19286,7 +19289,7 @@ WYMeditor.XhtmlSaxListener = function() {
         "object", "ol", "optgroup", "option", "p", "param", "pre", "q",
         "samp", "script", "select", "small", "span", "strong", "style",
         "sub", "sup", "table", "tbody", "td", "textarea", "tfoot", "th",
-        "thead", "title", "tr", "tt", "ul", "var", "extends"];
+        "thead", "title", "tr", "tt", "ul", "var", "extends", "macro"];
 
 
     this.inline_tags = ["br", "col", "hr", "img", "input"];
@@ -20420,7 +20423,15 @@ WYMeditor.XhtmlValidator = {
         },
         "38":"tt",
         "39":"ul",
-        "40":"var"
+        "40":"var",
+        "macro":
+        {
+            "attributes":
+            {
+                /* Allow any attribute */
+                "0": "/.*/"
+            }
+        }
     },
 
     // Temporary skiped attributes
