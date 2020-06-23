@@ -704,10 +704,14 @@
 		make it a relative to $hyphaUrl.
 	*/
 	function hypha_make_relative($url) {
-		global $hyphaUrl;
-		$len = strlen($hyphaUrl);
-		if (substr($url, 0, $len) == $hyphaUrl)
-			$url = substr($url, $len);
+		global $O_O;
+
+		// Handle urls like https://mydomain.tld/path/en/pagename
+		$remove = $O_O->getRequest()->getRootUrl();
+		$len = strlen($remove);
+		if (substr($url, 0, $len) == $remove)
+			return substr($url, $len);
+
 		return $url;
 	}
 
