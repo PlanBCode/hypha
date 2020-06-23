@@ -50,6 +50,8 @@
 
 		public function getSortDateTime() {
 			$version = getCurrentVersionNode($this->xml);
+			if (!$version)
+				return null;
 			$timestamp = ltrim($version->getId(), "t");
 			return new DateTime("@" . $timestamp);
 		}
