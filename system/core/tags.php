@@ -12,7 +12,7 @@
 			return ($node ? new HyphaTag($node) : null);
 		}
 
-		static function findPagesWithTags(HyphaTag $tag = null, array $pageTypes = [], bool $includePrivate = false, $skip = 0, $limit = 0) {
+		static function findPagesWithTags(HyphaTag $tag = null, array $pageTypes = [], bool $includePrivate = false, array $languages = [], $skip = 0, $limit = 0) {
 			/** @var HyphaDomElement $hyphaXml */
 			global $hyphaXml;
 
@@ -46,7 +46,15 @@
 				$tagFilters = '[child::tag[@id=' . xpath_encode($tag->getId()) . ']]';
 
 			}
-			$xpath = "hypha/pageList/page${pageFilters}{$tagFilters}${positionFilters}";
+
+			$langFilters = '';
+			if ($languages) {
+				$filterFunc = function($lang) { return "@id=" . xpath_encode($lang); };
+				$attrFilters = array_map($filterFunc, $languages);
+				$langFilters = '[child::language[' . implode(' or ', $attrFilters) . ']]';
+			}
+
+			$xpath = "hypha/pageList/page${pageFilters}{$tagFilters}${langFilters}${positionFilters}";
 			$pages = $hyphaXml->findXPath($xpath);
 
 			return $pages;
