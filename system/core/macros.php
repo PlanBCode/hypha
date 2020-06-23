@@ -51,6 +51,22 @@ abstract class HyphaMacro {
 	 * inserted new content elsewhere).
 	 */
 	abstract public function invoke();
+
+	/**
+	 * Helper that copies common attributes from the macro_tag to
+	 * the given element.
+	 *
+	 * Currently copies `id` and `class`, more could be added in the
+	 * future. The `class` attribute is merged, other attributes are
+	 * replaced.
+	 */
+	protected function copyAttributesTo(HyphaDomElement $to) {
+		$from = $this->macro_tag;
+		if ($from->hasAttribute('id'))
+			$to->setAttribute('id', $from->getAttribute('id'));
+		if ($from->hasAttribute('class'))
+			$to->addClass($from->getAttribute('class'));
+	}
 }
 
 /**

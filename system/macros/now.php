@@ -19,6 +19,7 @@ class NowMacro extends HyphaMacro {
 
 		$span = $this->doc->createElement('span');
 		$span->text(date($format));
+		$this->copyAttributesTo($span);
 		return $span;
 	}
 }
