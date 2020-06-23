@@ -12,7 +12,7 @@
 			return ($node ? new HyphaTag($node) : null);
 		}
 
-		static function findPagesWithTags(HyphaTag $tag, array $pageTypes=[], bool $includePrivate=false, $skip=0, $limit=0) {
+		static function findPagesWithTags(HyphaTag $tag = null, array $pageTypes = [], bool $includePrivate = false, $skip = 0, $limit = 0) {
 			/** @var HyphaDomElement $hyphaXml */
 			global $hyphaXml;
 
@@ -41,8 +41,12 @@
 				$positionFilters .= '[position() < ' . ($limit + 1) . ']';
 			}
 
-			$tagFilter = '@id=' . xpath_encode($tag->getId());
-			$xpath = "hypha/pageList/page${pageFilters}[child::tag[${tagFilter}]]${positionFilters}";
+			$tagFilters = '';
+			if ($tag) {
+				$tagFilters = '[child::tag[@id=' . xpath_encode($tag->getId()) . ']]';
+
+			}
+			$xpath = "hypha/pageList/page${pageFilters}{$tagFilters}${positionFilters}";
 			$pages = $hyphaXml->findXPath($xpath);
 
 			return $pages;
