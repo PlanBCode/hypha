@@ -712,6 +712,12 @@
 		if (substr($url, 0, $len) == $remove)
 			return substr($url, $len);
 
+		// Handle urls like /path/en/pagename
+		$remove = $O_O->getRequest()->getRootUrlPath();
+		$len = strlen($remove);
+		if (substr($url, 0, $len) == $remove)
+			return substr($url, $len);
+
 		return $url;
 	}
 
