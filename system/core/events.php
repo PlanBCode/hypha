@@ -256,55 +256,38 @@
 		return '<input type="button" class="button" value="'.$label.'" onclick="hypha(\''.$langPageView.'\', \''.$command.'\', \''.$argument.'\');" />';
 	}
 
-	function getCsrfToken() {
-		if (!isset($_SESSION['hyphaCsrfToken'])) {
-			session_start();
-			regenerateCsrfToken();
-			session_write_close();
-		}
-
-		return $_SESSION['hyphaCsrfToken'];
-	}
-
-	/*
-		Function: regenerateCsrfToken
-
-		Regenerate the CSRF token. Should be called when a new
-		session starts, such as during login. Should be called
-		while the session is already open (e.g. between
-		session_start() and session_write_close()).
-	*/
-	function regenerateCsrfToken() {
-		$_SESSION['hyphaCsrfToken'] = bin2hex(openssl_random_pseudo_bytes(8));
-	}
-
 	// Automatically insert the CSRF token into all forms in the
 	// generated document
 	registerPostProcessingFunction('injectCsrf');
 	function injectCsrf(HTMLDocument $html) {
+		global $O_O;
 		$forms = $html->find('form');
 		foreach ($forms as $form) {
 			// if form does not have a csrf field, inject csrf field.
 			if ($form->find('input[name=csrfToken]')->count() === 0) {
 				$form->append($input = $html->create('<input name="csrfToken" type="hidden"'));
-				$input->setAttr('value', getCsrfToken());
+				$input->setAttr('value', $O_O->getOrGenerateCsrfToken());
 			}
 		}
 	}
 
 	// execute posted commands
-	function executePostedCommand() {
-		if(isset($_POST['command'])) {
-			if (!isset($_POST['csrfToken']) || $_POST['csrfToken'] != getCsrfToken()) {
+	function executePostedCommand($O_O) {
+		static $processed = false;
+		$request = $O_O->getRequest();
+
+		$command = $request->getPostValue('command');
+		if (!$processed && $command) {
+			if (!$O_O->validCsrfToken()) {
 				notify('error', __('csrf-error'));
-				unset($_POST['command']);
+				$processed = true;
 				return;
 			}
 
-			$result = processCommand($_POST['command'], isset($_POST['argument']) ? $_POST['argument'] : null);
+			$result = processCommand($command, $request->getPostValue('argument', null));
 			if ($result !== false) {
 				// Command was handled
-				unset($_POST['command']);
+				$processed = true;
 				processCommandResult($result);
 			}
 		}

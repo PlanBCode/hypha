@@ -134,11 +134,21 @@
 			return sprintf('%s://%s%s', $scheme, $host, $this->rootUrlPath);
 		}
 
+		/**
+		 * Returns the path component of the root url, i.e. the
+		 * part after the hostname. This always starts and ends
+		 * with a slash (which might be the same when running
+		 * in the root of the domain).
+		 */
+		public function getRootUrlPath() {
+			return $this->rootUrlPath;
+		}
+
 		public function getScheme() {
 			// Apache 2.4+ has REQUEST_SCHEME
 			if (array_key_exists('REQUEST_SCHEME', $_SERVER))
 				return $_SERVER['REQUEST_SCHEME'];
-			if (array_key_exists('HTTPS', $_SERVER) && $_SERVER['HTTPS'] == 'on')
+			if ($this->isSecure())
 				return 'https';
 			return 'http';
 		}
@@ -149,6 +159,10 @@
 
 		public function getPort() {
 			return $_SERVER['SERVER_PORT'];
+		}
+
+		public function isSecure() {
+			return array_key_exists('HTTPS', $_SERVER) && $_SERVER['HTTPS'] === 'on';
 		}
 
 		/**
