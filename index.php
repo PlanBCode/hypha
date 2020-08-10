@@ -21,14 +21,6 @@
 		- *email obfuscation* Email addresses are obfuscated to prevent spambots from harvesting published email addresses. This function is actually registered later on once all core scripts are loaded. See below...
 	*/
 
-	// Load the session and close it immediately (there does not
-	// seem to be any way to do this without also writing out the
-	// session file with PHP < 5.6). This prevents the session file
-	// from staying locked throughout the entire request and
-	// prevents serving multiple requests within the same session.
-	session_start();
-	session_write_close();
-
 	$DEBUG = file_exists('DEBUG');
 	ini_set('display_errors', $DEBUG ? true : false);
 
@@ -77,11 +69,10 @@
 		Website data is loaded, see chapter about <Base> functions. The HTMLDocument $hyphaHtml is loaded with the website default layout.
 	*/
 
-	$hyphaHtml = new HTMLDocument(Hypha::$data->html);
+	$hyphaHtml = new HTMLDocument($O_O->data->themeHtml);
 	$hyphaHtml->initForBrowser($hyphaUrl);
-	$pathToTheme = 'data/themes/' . Hypha::$data->theme;
 	$hyphaHtml->linkStyle('system/assets/hypha-core.css');
-	$hyphaHtml->linkStyle($pathToTheme . '/hypha.css');
+	$hyphaHtml->linkStyle($O_O->data->themeCss->getFilename());
 	$hyphaHtml->linkScript('system/assets/jquery-1.7.1.min.js');
 	$hyphaHtml->linkScript('system/assets/help.js');
 	$hyphaHtml->setTitle(hypha_getTitle());
@@ -156,7 +147,7 @@
 //	if (!$O_O->isUser()) registerPostProcessingFunction('obfuscateEmail');
 
 	if ($hyphaPage) hypha_setBodyClass($hyphaRequest, $hyphaPage);
-	if ($hyphaPage) hypha_setPreviewPanel($hyphaPage);
+	if ($hyphaPage) hypha_setPreviewPanel($O_O, $hyphaPage);
 
 	// Add the default form. This does not happen earlier, since
 	// appending makes a copy of the form, so now we can be sure

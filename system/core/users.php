@@ -17,21 +17,22 @@
 	registerCommandCallback('login', 'login');
 	function login() {
 		global $O_O;
-		$user = hypha_getUserByName($_POST['loginUsername']);
-		if ($user && $user->getAttribute('rights') != 'exmember' && verifyPassword($_POST['loginPassword'], $user->getAttribute('password'))) {
-			session_start();
+		$username = $O_O->getRequest()->getPostValue('loginUsername');
+		$password = $O_O->getRequest()->getPostValue('loginPassword');
+		$user = hypha_getUserByName($username);
+		$sess = $O_O->getSession();
+		$sess->lockAndReload();
+		if ($user && $user->getAttribute('rights') != 'exmember' && verifyPassword($password, $user->getAttribute('password'))) {
 			// Use a brand new session id for extra security
-			session_regenerate_id();
-			$_SESSION['hyphaLogin'] = $user->getAttribute('id');
+			$sess->changeSessionId();
+			$sess->set('hyphaLogin', $user->getAttribute('id'));
 			$O_O->regenerateCsrfToken();
-			session_write_close();
 		}
 		else {
-			session_start();
-			unset($_SESSION['hyphaLogin']);
-			session_write_close();
+			$sess->remove('hyphaLogin');
 			notify('error', __('login-failed').'. <a href="javascript:reregister();">'.__('reregister').'</a>');
 		}
+		$sess->writeAndUnlock();
 		return 'reload';
 	}
 
@@ -58,9 +59,10 @@
 			if ($page) $hyphaQuery = $language.'/'.$page->getAttribute('name');
 			else $hyphaQuery = hypha_getDefaultLanguage().'/'.hypha_getDefaultPage();
 		}
-		session_start();
-		unset($_SESSION['hyphaLogin']);
-		session_write_close();
+		$sess = $O_O->getSession();
+		$sess->lockAndReload();
+		$sess->remove('hyphaLogin');
+		$sess->writeAndUnlock();
 		return ['redirect', $O_O->getRequest()->getRootUrl() . $hyphaQuery];
 	}
 
