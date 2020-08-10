@@ -6,9 +6,14 @@
 	 * $_SESSION.
 	 */
 	class HyphaSession {
+		private static $created = false;
 		var $locked = false;
 
-		public function __construct($request) {
+		public function __construct(HyphaRequest $request) {
+			if (self::$created)
+				throw new LogicException("HyphaSession can only be instantiated once");
+			self::$created = true;
+
 			if (ini_get('session.auto_start'))
 				throw new LogicException("session.autostart must be disabled");
 
