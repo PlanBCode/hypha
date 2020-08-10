@@ -107,9 +107,11 @@
 		Parameters:
 		$label - anchor text
 		$action - javascript action
+		$class - optional CSS class
 	*/
-	function makeLink($label, $action) {
-		return '<a href="javascript:'.$action.'">'.$label.'</a>';
+	function makeLink($label, $action, $class = null) {
+		$classattr = ($class ? " class=".$class : "");
+		return '<a'.$classattr.' href="javascript:'.$action.'">'.$label.'</a>';
 	}
 
 	/*

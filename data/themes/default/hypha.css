@@ -171,24 +171,24 @@ a.nopagelink {
  padding: 10px;
 }
 
-#hyphaCommands {
+.hyphaCommands {
  text-align: right;
  width: 100%;
 }
 
-#hyphaCommands a {
+.hyphaCommands a {
  background:#ddd;
  padding: 5px 10px;
  display: inline-block;
  text-decoration: none;
 }
 
-#hyphaCommands a:hover {
+.hyphaCommands a:hover {
  background: #aaa;
  color: #fff;
 }
 
-#hyphaCommands .menu-item {
+.hyphaCommands .menu-item {
  padding-right: 10px;
 }
 

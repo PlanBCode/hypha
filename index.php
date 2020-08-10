@@ -136,18 +136,20 @@
 	registerPostProcessingFunction('dewikify');
 
 	// add hypha commands and navigation
-	$_cmds[] = '<a href="index/'.$hyphaLanguage.'">'.__('index').'</a>';
+	$_cmds[] = '<a class="index" href="index/'.$hyphaLanguage.'">'.__('index').'</a>';
 	if (!$O_O->isUser()) {
 		addLoginRoutine($hyphaHtml);
-		$_cmds[] = '<a href="javascript:login();">'.__('login').'</a>';
+		$_cmds[] = '<a class="login" href="javascript:login();">'.__('login').'</a>';
 	}
 	else {
 		addNewPageRoutine($hyphaHtml, $hyphaRequest->getRelativeUrlPathParts(false), hypha_getDataTypes());
-		$_cmds[] = makeLink(__('new-page'), 'newPage();');
-		$_cmds[] = makeLink(__('settings'), makeAction('settings', '', ''));
-		$_cmds[] = makeLink(__('logout'), makeAction($hyphaRequest->getRelativeUrlPath(false),'logout',''));
+		$_cmds[] = makeLink(__('new-page'), 'newPage();', 'newPage');
+		$_cmds[] = makeLink(__('settings'), makeAction('settings', '', ''), 'settings');
+		$_cmds[] = makeLink(__('logout'), makeAction($hyphaRequest->getRelativeUrlPath(false),'logout',''), 'logout');
 	}
-	$hyphaHtml->writeToElement('hyphaCommands', implode('', $_cmds));
+	// A class is used by default, but also look for the
+	// #hyphaCommands id which was used in earlier versions.
+	$hyphaHtml->find('.hyphaCommands, #hyphaCommands')->html(implode('', $_cmds));
 	if ($O_O->isUser()) $hyphaHtml->writeToElement('hyphaCommands', '<br/><div id="loggedIn">'.__('logged-in-as').' `'.$O_O->getUser()->getAttribute('username').'`'.asterisk(isAdmin()).'</div>');
 
 	// obfuscate email addresses to strangers. It's ok to send readable addresses to logged in members. This also prevents conflicts in the editor.
