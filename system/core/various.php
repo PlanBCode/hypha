@@ -147,3 +147,15 @@
 		// Let the CssSelector library (within php-dom-wrapper) do the hard work
 		return Symfony\Component\CssSelector\XPath\Translator::getXpathLiteral($value);
 	}
+
+	/*
+		Function: is_iterable
+
+		Implementation of PHP's builtin is_iterable for PHP < 7.1.
+		Taken from https://www.php.net/manual/en/function.is-iterable.php#122574
+	*/
+	if (!function_exists('is_iterable')) {
+	    function is_iterable($obj) {
+		return is_array($obj) || (is_object($obj) && ($obj instanceof \Traversable));
+	    }
+	}

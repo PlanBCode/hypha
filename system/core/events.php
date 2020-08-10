@@ -558,12 +558,62 @@
 			$sess->writeAndUnlock();
 		}
 
-		if (count($hyphaDumpList)) {
-			foreach ($hyphaDumpList as $vars) {
-				foreach ($vars as &$value) $value = json_encode($value);
-				call_user_func_array([$html, 'writeScript'], ['console.log(' . implode(', ', $vars) . ');']);
-			}
+		foreach ($hyphaDumpList as $vars) {
+			$html->writeScript('console.log(' . implode(', ', $vars) . ");\n");
 		}
+	}
+
+	/*
+		Function: convertForDump
+
+		Converts a value to a javascript expression to be used
+		when dumping variables. Works similarly to json_encode,
+		but can also produce more complex javascript expressions
+		(that execute code) rather than just a literal JSON
+		expression.
+	*/
+	function convertForDump ($var, $depth = 10) {
+		if ($depth == 0)
+			return json_encode("dump: max depth reached");
+
+		// Empty arrays are considered non-associative
+		if (is_array($var) && count($var) == 0)
+			return '[]';
+
+		// Keys all numeric and sequential? Non-associative array
+		if (is_array($var) && array_keys($var) === range(0, count($var) - 1)) {
+			foreach ($var as $val)
+				$elems[] = convertForDump($val, $depth - 1);
+			return '[' . implode(",", $elems) . ']';
+		}
+
+		// All other arrays are associative
+		if (is_array($var)) {
+			$elems = [];
+			foreach ($var as $key => $val)
+				$elems[] = json_encode($key) . ':' . convertForDump($val, $depth - 1);
+			return '{' . implode(",", $elems) . '}';
+		}
+
+		// Anything else that is iterable, dump as array, but
+		// show classname too.
+		if (is_iterable($var)) {
+			return convertForDump([
+				'class' => get_class($var),
+				'elements' => iterator_to_array($var),
+			], $depth);
+		}
+
+		// Serialize DomNodes and parse in Javascript to get a
+		// native and easily explorable DomNode in the console
+		if ($var instanceof DomNode) {
+			$xml = $var->ownerDocument->saveXML($var);
+			return '(new DOMParser()).parseFromString(' . json_encode($xml) . ', "text/xml").documentElement';
+		}
+
+		// Defer everything else (strings, integers, other
+		// objects) to json_encode.
+		return json_encode($var);
 	}
 
 	/*
@@ -586,6 +636,8 @@
 		$line = $caller['line'];
 		array_unshift($vars, $file . ':' . $line);
 
-		// adds the variables to the $hyphaDumpList for later processing
-		$hyphaDumpList[] = $vars;
+		// serialize now, rather than in addDumps, to capture
+		// the current state of objects (rather than the state
+		// at the end of the request).
+		$hyphaDumpList[] = array_map('convertForDump', $vars);
 	}
