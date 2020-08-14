@@ -238,7 +238,7 @@
 		"festival-edited-contribution" => " heeft festivalbijdrage aangepast: ",
 		"festival-added-contribution" => " heeft een festivalbijdrage toegevoegd: ",
 		"festival-signed-up-for" => " heeft zich ingeschreven voor ",
-		"festival-failed-to-pay-for" => " kon niet belaten voor ",
+		"festival-failed-to-pay-for" => " kon niet betalen voor ",
 		"festival-payed-for" => " heeft betaald voor ",
 
 		// festival - notify & messages
