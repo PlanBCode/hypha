@@ -786,8 +786,11 @@ EOF;
 				$html.= "<table class=\"festivalTimetable\">";
 
 				// output row of invisible images to force a more or less regular time grid
+				// of 5 minute intervals (12 per hour)
 				$html.= "<tr><td></td>";
-				for ($c = 12*substr($daybegin,0,2); $c < 12*substr($dayend,0,2); $c++) $html.= '<td style="min-width: 10px;"></td>';
+				$hourstart = intval(substr($daybegin,0,2));
+				$hourend = intval(substr($dayend,0,2));
+				for ($c = 12*$hourstart; $c < 12*$hourend; $c++) $html.= '<td style="min-width: 10px;"></td>';
 				$html.= '</tr>';
 
 				// iterate over all locations
@@ -821,7 +824,7 @@ EOF;
 						// every 6 rows output time grid
 						if ($line%6==0) {
 							$html.= '<tr><th><div style="text-align:right;">'.__('time').'</div><div style="text-align:left;">'.__('location').'</div></th>';
-							for ($c = substr($daybegin,0,2); $c < substr($dayend,0,2); $c++) {
+							for ($c = $hourstart; $c < $hourend; $c++) {
 								$html.= '<th class="timeGridOdd" colspan="6">'.$c.'</th>';
 								$html.= '<th class="timeGridEven" colspan="6"></th>';
 							}
@@ -859,8 +862,8 @@ EOF;
 		}
 
 		function timetocols($t1, $t2) {
-			$c1=12*substr($t1,0,2) + substr($t1,3,2)/5;
-			$c2=12*substr($t2,0,2) + substr($t2,3,2)/5;
+			$c1=12*intval(substr($t1,0,2)) + intval(substr($t1,3,2))/5;
+			$c2=12*intval(substr($t2,0,2)) + intval(substr($t2,3,2))/5;
 			$c = $c2 - $c1;
 			return str_repeat("0", 3-strlen($c)).$c;
 		}
