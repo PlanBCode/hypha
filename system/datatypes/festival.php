@@ -803,7 +803,7 @@ EOF;
 						$events = $contribution->getElementsByTagName('event');
 						foreach($events as $event) {
 							if ($event->getAttribute('day') == $day->getId() && $event->getAttribute('location') == $location->getId())
-								$locevents[] = $this->timetocols($daybegin, $event->getAttribute('begin')).'|'.$this->timetocols($daybegin, $event->getAttribute('end')).'|'.$contribution->getAttribute('artist').'|'.$contribution->getId().'|'.$contribution->getAttribute('title');
+								$locevents[] = [$this->timetocols($daybegin, $event->getAttribute('begin')), $this->timetocols($daybegin, $event->getAttribute('end')), $contribution->getAttribute('artist'), $contribution->getId(), $contribution->getAttribute('title')];
 						}
 					}
 
@@ -813,10 +813,10 @@ EOF;
 						$endOfLastTimeSlot = 0;
 						$p=0;
 						while($p<count($locevents)) {
-							$timeslot = explode('|',$locevents[$p]);
+							$timeslot = $locevents[$p];
 							if ($timeslot[0]>=$endOfLastTimeSlot) {
 								$endOfLastTimeSlot = $timeslot[1];
-								$row[] = implode('|',$timeslot);
+								$row[] = $timeslot;
 								array_splice($locevents, $p, 1);
 							}
 							else $p++;
@@ -838,7 +838,7 @@ EOF;
 						$t = $daybegin;
 						$t = 0;
 						for ($r=0; $r<count($row); $r++) {
-							$timeslot = explode('|', $row[$r]);
+							$timeslot = $row[$r];
 							$id = "a".$d.'_'.$l.'_'.$r;
 							if ($timeslot[0] - $t) $html.= '<td class="'.($line%2 ? 'tableRowOdd' : 'tableRowEven').'" colspan="'.($timeslot[0] - $t).'"></td>';
 							//$html.= '<td id="'.$id.'" class="hover tableAct '.($line%2 ? 'tableRowOddAct' : 'tableRowEvenAct').'" colspan="'.($timeslot[1] - $timeslot[0]).'" onmouseover="showhide(\''.$id.'\',-120,0,\'act\',\''.$timeslot[3].'\');" onmouseout="showhide();">'.$timeslot[2];
@@ -864,8 +864,7 @@ EOF;
 		function timetocols($t1, $t2) {
 			$c1=12*intval(substr($t1,0,2)) + intval(substr($t1,3,2))/5;
 			$c2=12*intval(substr($t2,0,2)) + intval(substr($t2,3,2))/5;
-			$c = $c2 - $c1;
-			return str_repeat("0", 3-strlen($c)).$c;
+			return $c2 - $c1;
 		}
 
 		/**
