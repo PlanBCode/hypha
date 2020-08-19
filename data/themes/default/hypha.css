@@ -862,6 +862,57 @@ textarea{
 .festivalTimetable .tableRowHeadingEven {
 	background-color:#bbb;
 }
+
+.festivalForm th {
+	text-align: right;
+}
+
+.festivalForm input, .festivalForm select, .festivalForm textarea {
+	width: 400px;
+}
+
+.festivalForm textarea {
+	height: 100px;
+}
+
+.contribution h2 {
+	clear: left;
+}
+
+/* Include #main to override #main img */
+#main .contribution img {
+	float: left;
+	border: 0px;
+	margin-right: 10px;
+}
+
+.contribution .event {
+	clear: left;
+}
+
+.contribution .date {
+	font-weight: bold;
+}
+
+.contribution .time-and-place {
+	margin-left: 1em;
+}
+
+.contribution .website {
+	clear: left;
+}
+
+table.contributions .description,
+table.contributions .notes {
+    padding-left: 50px;
+}
+
+/* Include #main to override #main img */
+#main table.contributions .description img {
+    float: left;
+    margin: 5px 10px 0 0;
+}
+
 body.type_peer_reviewed_article .input-wrapper.field_type_editor:not(.field_name_text) .wym_iframe iframe {
 	height: 150px;
 }
