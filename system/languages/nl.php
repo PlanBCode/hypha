@@ -248,7 +248,7 @@
 		"festival-contribution-added" => "Je bijdrage is toegevoegd aan de lineup.",
 		"festival-contribution-modified" => "Je bijdrage is aangepast.",
 		"festival-complete-by-paying" => "Voltooi je registratie door te betalen m.b.v. onderstaande knop.",
-		"festival-signup-for" => "Signup for ",
+		"festival-signup-for" => "Inschrijven voor ",
 		"festival-pay-for" => "Betaal voor ",
 		"festival-lineup-for" => "Lineup voor ",
 		"festival-timetable-for" => "Blokkenschema voor ",
