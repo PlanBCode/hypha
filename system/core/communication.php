@@ -91,9 +91,7 @@
 		setInnerHtml($body, preg_replace('/\b([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4})\b/ie', "'<span class=\"obfuscate\">'.strrev('$1').'</span>'", getInnerHtml($body)));
 
 		// add a javascript function to undo these operations on the client side
-		ob_start();
-?>
-	<script>
+		$js = <<<'EOD'
 	function unobfuscateEmail(elem) {
 		// reverse visible name
 		elem.innerHTML = elem.innerHTML.replace(/(<span class="obfuscate">(.*?)<\/span>)/g, function(str, span, email) {return email.split('').reverse().join('')});
@@ -102,9 +100,8 @@
 		// reverse the href mailto attribute
 		elem.innerHTML = elem.innerHTML.replace(/([\'|\"]mailto:([A-Za-z0-9\._%\+-@]+?)[\'|\"])/g, function(str, href, email) {return 'mailto:'+email.split('').reverse().join('')});
 	}
-	</script>
-<?php
-		$html->writeScript(ob_get_clean());
+EOD;
+		$html->writeScript($js);
 
 		// invoke the unobfuscateEmail routine only after the document is fully loaded. To avoid jQuery onload when it's not strictly needed we deploy a <script> element at the end of the HTML document
 		$html->writeToElement('main', '<script>unobfuscateEmail(document.body);</script>');
