@@ -1,5 +1,3 @@
-php_flag short_open_tag on
-php_flag display_errors on
 RewriteEngine On
 
 # Pass system and data urls through index.php, so it can do access control
