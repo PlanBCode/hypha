@@ -676,7 +676,7 @@ EOF;
 		function buildContribution($contribution) {
 			global $hyphaUrl, $hyphaContentLanguage;
 			$html = '<div class="infoact">';
-			// artist and title
+			// name and title
 			$id = $contribution->getAttribute('xml:id');
 			$url = $hyphaUrl . $hyphaContentLanguage . '/' . $this->pagename . '/lineup#' . $id;
 			$editurl = $hyphaContentLanguage .'/'.$this->pagename.'/contribute/'.$contribution->getAttribute('xml:id');
@@ -803,7 +803,7 @@ EOF;
 						$events = $contribution->getElementsByTagName('event');
 						foreach($events as $event) {
 							if ($event->getAttribute('day') == $day->getId() && $event->getAttribute('location') == $location->getId())
-								$locevents[] = [$this->timetocols($daybegin, $event->getAttribute('begin')), $this->timetocols($daybegin, $event->getAttribute('end')), $contribution->getAttribute('artist'), $contribution->getId(), $contribution->getAttribute('title')];
+								$locevents[] = [$this->timetocols($daybegin, $event->getAttribute('begin')), $this->timetocols($daybegin, $event->getAttribute('end')), $contribution->getAttribute('name'), $contribution->getId(), $contribution->getAttribute('title')];
 						}
 					}
 
