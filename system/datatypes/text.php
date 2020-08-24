@@ -8,7 +8,7 @@
 */
 	class textpage extends HyphaDatatypePage {
 		/** @var Xml */
-		public $xml;
+		protected $xml;
 
 		const FIELD_NAME_PAGE_NAME = 'textPagename';
 		const FIELD_NAME_LANGUAGE = 'textLanguage';
@@ -53,7 +53,7 @@
 			return new DateTime("@" . $timestamp);
 		}
 
-		private function defaultView(HyphaRequest $request) {
+		protected function defaultView(HyphaRequest $request) {
 			// setup language and tag list for the selected page
 			$this->html->writeToElement('langList', hypha_indexLanguages($this->pageListNode, $this->language));
 
@@ -90,7 +90,7 @@
 		 *
 		 * @return WymHTMLForm
 		 */
-		private function createEditForm(array $values = []) {
+		protected function createEditForm(array $values = []) {
 			$html = <<<EOF
 				<div class="section">
 					<label for="[[field-name-title]]">[[title]]</label>
@@ -113,7 +113,7 @@ EOF;
 			return new WymHTMLForm($html, $values);
 		}
 
-		private function editView(HyphaRequest $request) {
+		protected function editView(HyphaRequest $request) {
 			if (!isUser()) {
 				notify('error', __('login-to-perform-action'));
 
@@ -131,7 +131,7 @@ EOF;
 			return $this->editViewRender($request, $form);
 		}
 
-		private function editViewRender(HyphaRequest $request, HTMLForm $form) {
+		protected function editViewRender(HyphaRequest $request, HTMLForm $form) {
 			// update the form dom so that error can be displayed, if there are any
 			$form->updateDom();
 
@@ -144,7 +144,7 @@ EOF;
 			return null;
 		}
 
-		private function editAction(HyphaRequest $request) {
+		protected function editAction(HyphaRequest $request) {
 			if (!isUser()) {
 				notify('error', __('login-to-preform-action'));
 
@@ -177,7 +177,7 @@ EOF;
 			return ['redirect', $this->constructFullPath($pagename)];
 		}
 
-		private function translateView(HyphaRequest $request) {
+		protected function translateView(HyphaRequest $request) {
 			if (!isUser()) {
 				notify('error', __('login-to-preform-action'));
 
@@ -195,7 +195,7 @@ EOF;
 			return $this->translateViewRender($request, $form);
 		}
 
-		private function translateViewRender(HyphaRequest $request, HTMLForm $form) {
+		protected function translateViewRender(HyphaRequest $request, HTMLForm $form) {
 			$form->updateDom();
 
 			$this->html->find('#main')->append($form);
@@ -208,7 +208,7 @@ EOF;
 			return null;
 		}
 
-		private function translateAction(HyphaRequest $request) {
+		protected function translateAction(HyphaRequest $request) {
 			if (!isUser()) {
 				notify('error', __('login-to-preform-action'));
 
@@ -242,7 +242,7 @@ EOF;
 			return ['redirect', $this->constructFullPath($pagename, $language)];
 		}
 
-		private function revertAction(HyphaRequest $request) {
+		protected function revertAction(HyphaRequest $request) {
 			if (!isUser()) {
 				notify('error', __('login-to-preform-action'));
 
@@ -261,7 +261,7 @@ EOF;
 			return ['redirect', $this->constructFullPath($this->pagename)];
 		}
 
-		private function deleteAction(HyphaRequest $request) {
+		protected function deleteAction(HyphaRequest $request) {
 			if (!isAdmin()) return notify('error', __('login-as-admin-to-delete'));
 
 			$this->deletePage();
@@ -274,7 +274,7 @@ EOF;
 		 * @param array $values
 		 * @return WymHTMLForm
 		 */
-		private function createTranslationForm(array $values = []) {
+		protected function createTranslationForm(array $values = []) {
 			$selectedLanguage = isset($values[self::FIELD_NAME_LANGUAGE]) ? $values[self::FIELD_NAME_LANGUAGE] : null;
 			$optionListLanguage = Language::getLanguageOptionList($selectedLanguage, $this->language);
 			$html = <<<EOF
@@ -303,7 +303,7 @@ EOF;
 			return new WymHTMLForm($html, $values);
 		}
 
-		private function savePage($content, $pagename = null, $language = null, $privateFlag = null) {
+		protected function savePage($content, $pagename = null, $language = null, $privateFlag = null) {
 			$updateHyphaXml = false;
 			foreach (['pagename', 'language', 'privateFlag'] as $argument) {
 				if (null === $$argument) {
