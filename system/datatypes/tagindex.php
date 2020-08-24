@@ -12,7 +12,7 @@
 			return $this->tagIndexView($request);
 		}
 
-		public function tagIndexView(HyphaRequest $request) {
+		protected function tagIndexView(HyphaRequest $request) {
 			$lang = $request->getArg(0);
 			// TODO: This urldecode should really be done by
 			// HyphaRequest (#274)
@@ -44,7 +44,7 @@
 			$main->append($pagesList);
 		}
 
-		private function sortPages($pages) {
+		protected function sortPages($pages) {
 			// TODO: This should cache sort dates
 			$compare = function($a, $b) {
 				$aDate = $a->getSortDateTime();
@@ -56,7 +56,7 @@
 			return $pages;
 		}
 
-		private function getPages(HyphaTag $tag, $includePrivate = false) {
+		protected function getPages(HyphaTag $tag, $includePrivate = false) {
 			$pageTypes = []; // All pagetypes
 			$pageNodes = HyphaTags::findPagesWithTags($tag, $pageTypes, $includePrivate);
 			$pages = [];
@@ -66,7 +66,7 @@
 			return $pages;
 		}
 
-		private function renderPages($pages) {
+		protected function renderPages($pages) {
 			/** @var HyphaDomElement $ul */
 			$ul = $this->html->createElement('ul');
 			$ul->addClass('tagindex');
@@ -77,7 +77,7 @@
 			return $ul;
 		}
 
-		private function renderPage(HyphaDatatypePage $page) {
+		protected function renderPage(HyphaDatatypePage $page) {
 			$li = $this->html->createElement('li');
 			$li->addClass('tagindex-item');
 			$li->addClass('type_' . get_class($page));
