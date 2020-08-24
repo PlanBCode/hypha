@@ -563,7 +563,7 @@ EOF;
 			$this->html->find('#pagename')->text(__('festival-pay-for') . $this->getConfig(self::CONFIG_ID_TITLE));
 			$main = $this->html->find('#main');
 			$message = __('festival-complete-by-paying');
-			$button = $this->makeActionButton(__('pay'), join('/',$request->getArgs()), self::CMD_PAY);
+			$button = $this->makeActionButton(__('pay'), join('/', $request->getArgs()), self::CMD_PAY);
 			$main->append($message);
 			$main->append($button);
 		}
