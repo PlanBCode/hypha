@@ -260,7 +260,7 @@
 				$row->addCell($contribution->getAttribute(self::ATTR_CONTRIBUTION_CATEGORY));
 				$row->addCell($contribution->getAttribute(self::ATTR_CONTRIBUTION_WEBSITE));
 
-				$button = $this->makeActionButton(__('edit'), $this->pagename . '/' . self::PATH_CONTRIBUTE . '/'.$contribution->getId());
+				$button = $this->makeActionButton(__('edit'), self::PATH_CONTRIBUTE . '/'.$contribution->getId());
 				$row->addCell()->append($button);
 
 				$description = $contribution->getOrCreate(self::TAG_CONTRIBUTION_DESCRIPTION)->text();
