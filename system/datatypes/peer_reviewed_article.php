@@ -15,7 +15,7 @@ use DOMWrap\NodeList;
 // TODO [LRM]: add version control on peer_reviewed_article
 class peer_reviewed_article extends HyphaDatatypePage {
 	/** @var Xml */
-	private $xml;
+	protected $xml;
 
 	const FIELD_NAME_USER = 'user';
 	const FIELD_NAME_CREATED_AT = 'created_at';
@@ -89,7 +89,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	const CMD_DISCUSSION_CLOSED = 'discussion_closed';
 	const CMD_COMMENT = 'comment';
 
-	private $statusMtx = [
+	protected $statusMtx = [
 		self::STATUS_NEWLY_CREATED => [],
 		self::STATUS_DRAFT => [self::STATUS_REVIEW => ['label' => 'art-start-review', 'cmd' => self::CMD_STATUS_CHANGE_REVIEW]],
 		self::STATUS_REVIEW => [self::STATUS_APPROVED => ['label' => 'art-approve']],
@@ -168,7 +168,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	/**
 	 * Checks if the status is new and if so builds the structure and sets the status to draft.
 	 */
-	private function ensureStructure() {
+	protected function ensureStructure() {
 		$status = $this->getStatus();
 
 		if (self::STATUS_NEWLY_CREATED !== $status) {
@@ -202,7 +202,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		};
 		$build($this->xml->documentElement, $dataStructure);
 
-		// force private flag
+		// force protected flag
 		if (!$this->privateFlag) {
 			global $hyphaXml;
 			$hyphaXml->lockAndReload();
@@ -232,7 +232,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	 * @param HyphaRequest $request
 	 * @return null
 	 */
-	public function defaultView(HyphaRequest $request) {
+	protected function defaultView(HyphaRequest $request) {
 		$status = $this->getStatus();
 
 		// add buttons for registered users
@@ -354,7 +354,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		return null;
 	}
 
-	public function appendAuthorAndTimestamp($container, $article) {
+	protected function appendAuthorAndTimestamp($container, $article) {
 		$doc = $container->document();
 
 		$author = $article->getAttribute(self::FIELD_NAME_AUTHOR);
@@ -392,7 +392,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	 * @param HyphaRequest $request
 	 * @return array
 	 */
-	public function deleteAction(HyphaRequest $request) {
+	protected function deleteAction(HyphaRequest $request) {
 		if (!isAdmin()) {
 			notify('error', __('admin-rights-needed-to-perform-action'));
 			return null;
@@ -410,7 +410,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	 * @param HyphaRequest $request
 	 * @return array|null
 	 */
-	public function editView(HyphaRequest $request) {
+	protected function editView(HyphaRequest $request) {
 		if (!isUser()) {
 			notify('error', __('login-to-perform-action'));
 			return ['redirect', $this->constructFullPath($this->pagename)];
@@ -438,7 +438,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	 * @param WymHTMLForm $form
 	 * @return null
 	 */
-	private function editViewRender(HyphaRequest $request, WymHTMLForm $form) {
+	protected function editViewRender(HyphaRequest $request, WymHTMLForm $form) {
 		// update the form dom so that error can be displayed, if there are any
 		$form->updateDom();
 
@@ -464,7 +464,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	 * @param HyphaRequest $request
 	 * @return array|null
 	 */
-	public function editAction(HyphaRequest $request) {
+	protected function editAction(HyphaRequest $request) {
 		if (!isUser()) {
 			notify('error', __('login-to-perform-action'));
 			return ['redirect', $this->constructFullPath($this->pagename)];
@@ -502,7 +502,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	 * @param string $newStatus
 	 * @return array
 	 */
-	public function statusChangeAction(HyphaRequest $request, $newStatus) {
+	protected function statusChangeAction(HyphaRequest $request, $newStatus) {
 		if (!isUser()) {
 			notify('error', __('login-to-perform-action'));
 			return ['redirect', $this->constructFullPath($this->pagename)];
@@ -524,7 +524,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	 * @param HyphaRequest $request
 	 * @return array
 	 */
-	public function approveAction(HyphaRequest $request) {
+	protected function approveAction(HyphaRequest $request) {
 		if (!isUser()) {
 			notify('error', __('login-to-perform-action'));
 			return ['redirect', $this->constructFullPath($this->pagename)];
@@ -561,7 +561,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	 * @param HyphaRequest $request
 	 * @return array|null
 	 */
-	public function discussionAction(HyphaRequest $request) {
+	protected function discussionAction(HyphaRequest $request) {
 		$type = $request->getArg(1);
 		if ($type === null) {
 			notify('error', __('missing-arguments'));
@@ -619,7 +619,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	 * @param null|HyphaDomElement $discussion
 	 * @return null
 	 */
-	private function discussionRender(HyphaRequest $request, WymHTMLForm $form, $type, HyphaDomElement $discussion = null) {
+	protected function discussionRender(HyphaRequest $request, WymHTMLForm $form, $type, HyphaDomElement $discussion = null) {
 		// update the form dom so that error can be displayed, if there are any
 		$form->updateDom();
 
@@ -634,7 +634,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		return null;
 	}
 
-	private function makeDiscussionActionButton($type, HyphaDomElement $discussion = null) {
+	protected function makeDiscussionActionButton($type, HyphaDomElement $discussion = null) {
 		$new = $discussion === null;
 		$review = self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER === $type;
 
@@ -657,7 +657,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	 * @param HyphaRequest $request
 	 * @return array|null
 	 */
-	public function discussionCommentAction(HyphaRequest $request) {
+	protected function discussionCommentAction(HyphaRequest $request) {
 		$discussionId = $request->getArg(1);
 
 		$this->xml->lockAndReload();
@@ -707,7 +707,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	 * @param HyphaRequest $request
 	 * @return array|null
 	 */
-	public function discussionClosedAction(HyphaRequest $request) {
+	protected function discussionClosedAction(HyphaRequest $request) {
 		$this->xml->lockAndReload();
 
 		/** @var HyphaDomElement $discussion */
@@ -757,7 +757,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	 * @param HyphaRequest $request
 	 * @return array|null
 	 */
-	public function commentConfirmAction(HyphaRequest $request) {
+	protected function commentConfirmAction(HyphaRequest $request) {
 		$code = isset($_GET['code']) ? $_GET['code'] : null;
 		if (null == $code) {
 			notify('error', __('missing-arguments'));
@@ -818,7 +818,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	 * @param HyphaRequest $request
 	 * @return array|null
 	 */
-	private function unsubscribeAction(HyphaRequest $request) {
+	protected function unsubscribeAction(HyphaRequest $request) {
 		$code = isset($_GET['code']) ? $_GET['code'] : null;
 		if (null == $code) {
 			notify('error', __('missing-arguments'));
@@ -860,7 +860,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	 * @param string $newStatus
 	 * @return bool
 	 */
-	private function updateToNewStatus($newStatus) {
+	protected function updateToNewStatus($newStatus) {
 		$currentStatus = $this->getStatus();
 		if (!isset($this->statusMtx[$currentStatus]) || !isset($this->statusMtx[$currentStatus][$newStatus])) {
 			notify('error', __('art-unsupported-status-change'));
@@ -876,7 +876,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		}
 		$this->xml->saveAndUnlock();
 
-		// remove private flag
+		// remove protected flag
 		if ($newStatus === self::STATUS_PUBLISHED && $this->privateFlag) {
 			global $hyphaXml;
 			$hyphaXml->lockAndReload();
@@ -899,7 +899,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	 * @param string dataFieldSuffix
 	 * @return HyphaDomElement
 	 */
-	private function addDiscussion(HyphaDomElement $discussionContainer, WymHTMLForm $form, $dataFieldSuffix) {
+	protected function addDiscussion(HyphaDomElement $discussionContainer, WymHTMLForm $form, $dataFieldSuffix) {
 		$this->xml->requireLock();
 
 		/** @var HyphaDomElement $discussion */
@@ -931,7 +931,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	 * @param string dataFieldSuffix
 	 * @return HyphaDomElement
 	 */
-	private function addDiscussionComment(HyphaDomElement $discussion, WymHTMLForm $form, $dataFieldSuffix) {
+	protected function addDiscussionComment(HyphaDomElement $discussion, WymHTMLForm $form, $dataFieldSuffix) {
 		$this->xml->requireLock();
 
 		/** @var HyphaDomElement $comment */
@@ -1001,7 +1001,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	 *
 	 * @return HyphaDomElement
 	 */
-	private function createApprovesDomElement() {
+	protected function createApprovesDomElement() {
 		/** @var HyphaDomElement $approvesDomElement */
 		$approvesDomElement = $this->html->createElement('div');
 		$approvesDomElement->attr('class', 'approves');
@@ -1033,7 +1033,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	 * @param string $type
 	 * @return HyphaDomElement
 	 */
-	private function createDiscussionsDomElement($type) {
+	protected function createDiscussionsDomElement($type) {
 		/** @var HyphaDomElement $discussionsDomElement */
 		$discussionsDomElement = $this->html->createElement('div');
 		$review = self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER === $type;
@@ -1168,7 +1168,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	 * @param array $values
 	 * @return WymHTMLForm
 	 */
-	private function createEditForm(array $values = []) {
+	protected function createEditForm(array $values = []) {
 		$html = <<<EOF
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
 				<div class="input-wrapper field_type_text field_name_[[field-name-title]]">
@@ -1233,7 +1233,7 @@ EOF;
 	 * @param null|HyphaDomElement $discussion
 	 * @return WymHTMLForm
 	 */
-	private function createCommentForm($type, array $values = [], HyphaDomElement $discussion = null) {
+	protected function createCommentForm($type, array $values = [], HyphaDomElement $discussion = null) {
 		$new = $discussion === null;
 
 		$review = self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER === $type;
@@ -1302,7 +1302,7 @@ EOF;
 	 * @param null|HyphaDomElement $discussion
 	 * @return string
 	 */
-	private function constructDiscussionFieldSuffix($type, HyphaDomElement $discussion = null) {
+	protected function constructDiscussionFieldSuffix($type, HyphaDomElement $discussion = null) {
 		return $discussion === null ? '/new_' . $type : '/' . $discussion->getId();
 	}
 
@@ -1312,7 +1312,7 @@ EOF;
 	 * @param int $length
 	 * @return string
 	 */
-	private function constructCode($length = 16) {
+	protected function constructCode($length = 16) {
 		try {
 			if (function_exists('random_bytes')) {
 				return bin2hex(random_bytes($length));
@@ -1328,7 +1328,7 @@ EOF;
 	/**
 	 * Sends "status has changed" mail to all users.
 	 */
-	private function sendStatusChangeMail() {
+	protected function sendStatusChangeMail() {
 		$newStatus = $this->getStatus();
 		if (in_array($newStatus, [self::STATUS_NEWLY_CREATED, self::STATUS_DRAFT])) {
 			return;
@@ -1368,7 +1368,7 @@ EOF;
 	 *
 	 * @param HyphaDomElement $comment
 	 */
-	private function sendCommentConfirmMail(HyphaDomElement $comment) {
+	protected function sendCommentConfirmMail(HyphaDomElement $comment) {
 		$code = $comment->getAttribute(self::FIELD_NAME_DISCUSSION_COMMENT_CONFIRM_CODE);
 		$commentBody = $comment->textContent;
 
@@ -1392,7 +1392,7 @@ EOF;
 	 *
 	 * @param HyphaDomElement $comment
 	 */
-	private function sendNewCommentMail(HyphaDomElement $comment) {
+	protected function sendNewCommentMail(HyphaDomElement $comment) {
 		// send newly created comment to all users
 		$title = $this->getTitle();
 		$linkToPage = $this->constructFullPath($this->pagename);
@@ -1440,7 +1440,7 @@ EOF;
 	 * @param HyphaDomElement $comment
 	 * @return HyphaDomElement[]
 	 */
-	private function getSubscribers(HyphaDomElement $comment) {
+	protected function getSubscribers(HyphaDomElement $comment) {
 		/** @var HyphaDomElement $discussion */
 		$discussion = $comment->parent();
 
@@ -1462,7 +1462,7 @@ EOF;
 	 *
 	 * @param HyphaDomElement $discussion
 	 */
-	private function sendBlockingDiscussionMail(HyphaDomElement $discussion) {
+	protected function sendBlockingDiscussionMail(HyphaDomElement $discussion) {
 		$title = $this->getTitle();
 		$author = $this->O_O->getUser()->getAttribute('fullname');
 		$linkToPage = $this->constructFullPath($this->pagename);
@@ -1484,7 +1484,7 @@ EOF;
 	/**
 	 * Sends "block has been resolved" mail to all users.
 	 */
-	private function sendResolvedBlockingDiscussionMail() {
+	protected function sendResolvedBlockingDiscussionMail() {
 		$title = $this->getTitle();
 		$author = $this->O_O->getUser()->getAttribute('fullname');
 		$linkToPage = $this->constructFullPath($this->pagename);
@@ -1506,7 +1506,7 @@ EOF;
 	 * @param string $subject
 	 * @param string $message
 	 */
-	private function sendMail($receivers, $subject, $message) {
+	protected function sendMail($receivers, $subject, $message) {
 		$style = 'body {margin-top:10px; margin-left: 10px; font-size:10pt; font-family: Sans; color:black; background-color:white;}';
 		sendMail($receivers, hypha_getTitle() . ': '. $subject, $message, hypha_getEmail(), hypha_getTitle(), $style);
 	}
@@ -1542,7 +1542,7 @@ EOF;
 	 *
 	 * @return string
 	 */
-	private function getStatus() {
+	protected function getStatus() {
 		/** @var HyphaDomElement $article */
 		$article = $this->xml->find(self::FIELD_NAME_ARTICLE)->first();
 		if ($article instanceof HyphaDomElement) {
@@ -1562,7 +1562,7 @@ EOF;
 	 *
 	 * @return bool
 	 */
-	private function canBeSetAsApproved() {
+	protected function canBeSetAsApproved() {
 		/** @var HyphaDomElement $discussions */
 		$discussions = $this->xml->find(self::FIELD_NAME_DISCUSSION_CONTAINER);
 		/** @var NodeList $blockingDiscussions */
@@ -1587,7 +1587,7 @@ EOF;
 	 * @param string $userId
 	 * @return bool
 	 */
-	private function hasUserApproved($userId) {
+	protected function hasUserApproved($userId) {
 		/** @var HyphaDomElement $approves */
 		$approves = $this->xml->find(self::FIELD_NAME_APPROVE_CONTAINER);
 		/** @var NodeList $approveCollection */
@@ -1602,7 +1602,7 @@ EOF;
 	 * @param HyphaDomElement $comment
 	 * @return string
 	 */
-	private function getCommentCommenter(HyphaDomElement $comment) {
+	protected function getCommentCommenter(HyphaDomElement $comment) {
 		$userId = $comment->getAttribute(self::FIELD_NAME_USER);
 		if ($userId) {
 			$user = hypha_getUserById($userId);
@@ -1619,7 +1619,7 @@ EOF;
 	 * @param null|string|array $argument
 	 * @return string
 	 */
-	private function makeActionButton($label, $path = null, $command = null, $argument = null) {
+	protected function makeActionButton($label, $path = null, $command = null, $argument = null) {
 		if (is_array($argument)) {
 			$argument = json_encode($argument);
 		}
@@ -1635,7 +1635,7 @@ EOF;
 	 * @param null|string $language
 	 * @return string
 	 */
-	private function constructFullPath($path, $language = null) {
+	protected function constructFullPath($path, $language = null) {
 		global $hyphaUrl;
 		$language = null == $language ? $this->language : $language;
 		$path = '' == $path ? '' : '/' . $path;

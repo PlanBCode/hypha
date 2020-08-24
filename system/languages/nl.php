@@ -234,9 +234,24 @@
 		// festival
 		"datatype.name.festivalpage" => "festival pagina",
 
+		// festival - form fields
+		"festival-field-festival-title" => "Festivaltitel",
+		"festival-field-name" => "Naam",
+		"festival-field-email" => "Email-adres",
+		"festival-field-phone" => "Telefoonnummer",
+		"festival-field-amount" => "Inschrijfgeld (€)",
+		"festival-field-contribution-name" => "Naam van organisator / presentator",
+		"festival-field-contribution-description" => "Korte omschrijving",
+		"festival-field-contribution-title" => "Titel",
+		"festival-field-contribution-image" => "Afbeelding",
+		"festival-field-contribution-website" => "Link naar website",
+		"festival-field-contribution-category" => "Categorie",
+		"festival-field-contribution-notes" => "Opmerkingen voor de organisatie",
+
 		// festival - digest
-		"festival-edited-contribution" => " heeft festivalbijdrage aangepast: ",
-		"festival-added-contribution" => " heeft een festivalbijdrage toegevoegd: ",
+		"festival-edited-contribution" => "[[name]] heeft festivalbijdrage aangepast: [[contribution]]",
+		"festival-added-contribution" => "[[name]] heeft een festivalbijdrage toegevoegd: [[contribution]]",
+		"festival-digest-edit-contribution" => "Bijdrage wijzigen",
 		"festival-signed-up-for" => " heeft zich ingeschreven voor ",
 		"festival-failed-to-pay-for" => " kon niet betalen voor ",
 		"festival-payed-for" => " heeft betaald voor ",
@@ -247,12 +262,25 @@
 		"festival-contribution-added" => "Je bijdrage is toegevoegd aan de lineup.",
 		"festival-contribution-modified" => "Je bijdrage is aangepast.",
 		"festival-complete-by-paying" => "Voltooi je registratie door te betalen m.b.v. onderstaande knop.",
-		"festival-signup-for" => "Signup for ",
+		"festival-signup-for" => "Inschrijven voor ",
 		"festival-pay-for" => "Betaal voor ",
 		"festival-lineup-for" => "Lineup voor ",
 		"festival-timetable-for" => "Blokkenschema voor ",
 		"festival-contribute-to" => "Draag bij aan ",
 		"festival-invalid-or-no-key" => "Geen of een ongeldige pagina-id",
+		"festival-settings-saved" => "Instellingen succesvol opgeslagen.",
+
+		// Festival - confirmation e-mails
+		"festival-payment-failed-subject" => '[[festival-title]]: Betaling mislukt, inschrijving niet compleet',
+		"festival-payment-failed-body" => '<p>Er was een probleem bij het verwerken van je betaling (de betaling is verlopen, geannuleerd of mislukt). Totdat je de betaling alsnog voldoet, blijft je inschrijving incompleet.</p><p>Om het betalingsproces op nieuw te doorlopen, klik op <a href="[[paylink]]">deze link</a>.</p>',
+		"festival-confirm-registration-subject" => '[[festival-title]]: Bevestiging nodig voor inschrijving',
+		"festival-confirm-registration-body" => '<p>Je inschrijving was succesvol ontvangen. Om je e-mailadres te bevestigen en de inschrijving compleet te maken, klik op <a href="[[confirmlink]]">deze link</a>.</p>',
+		"festival-payment-succesful-subject" => '[[festival-title]]: Betaling ontvangen, inschrijving compleet',
+		"festival-payment-succesful-body" => '<p>Je betaling voor [[festival-title]] is succesvol verwerkt, dus je inschrijving is nu compleet. Als je wil bijdragen aan het evenement, kun je je bijdrage opgeven met <a href="[[contributelink]]">deze link</a>. Je kunt meerdere bijdragen toevoegen door het formulier meerdere keren in te vullen.</p>',
+		"festival-registration-confirmed-subject" => '[[festival-title]]: E-mailadres bevestigd, inschrijving compleet',
+		"festival-registration-confirmed-body" => '<p>Je inschrijving voor [[festival-title]] was succesvol verwerkt en is nu compleet. Als je wil bijdragen aan het evenement, kun je je bijdrage opgeven met <a href="[[contributelink]]">deze link</a>. Je kunt meerdere bijdragen toevoegen door het formulier meerdere keren in te vullen.</p>',
+		"festival-contribution-added-subject" => '[[festival-title]]: Bijdrage "[[title]]" toegevoegd',
+		"festival-contribution-added-body" => '<p>Je bijdrage "[[title]]" is toegevoegd en wordt nu in de lineup weergegeven.</p><p>Om je bijdrage te wijzigen, gebruik <a href="[[editlink]]">deze link</a>.</p>',
 
 		// festival - buttons & links
 		"festival-modify" => "wijzigen",

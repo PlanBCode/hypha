@@ -14,7 +14,7 @@ use DOMWrap\NodeList;
 
 class mailinglist extends HyphaDatatypePage {
 	/** @var Xml */
-	private $xml;
+	protected $xml;
 
 	const FIELD_NAME_ADDRESSES_CONTAINER = 'addresses';
 	const FIELD_NAME_MAILINGS_CONTAINER = 'mailings';
@@ -82,7 +82,7 @@ class mailinglist extends HyphaDatatypePage {
 	/**
 	 * @return HyphaDomElement|DOMElement
 	 */
-	private function getDoc() {
+	protected function getDoc() {
 		return $this->xml->documentElement;
 	}
 
@@ -133,7 +133,7 @@ class mailinglist extends HyphaDatatypePage {
 	/**
 	 * Checks if the status is new and if so builds the structure and sets the status to draft.
 	 */
-	private function ensureStructure() {
+	protected function ensureStructure() {
 		$dataStructure = [
 			self::FIELD_NAME_DESCRIPTION => [],
 			self::FIELD_NAME_ADDRESSES_CONTAINER => [],
@@ -159,14 +159,14 @@ class mailinglist extends HyphaDatatypePage {
 	 * @param HyphaRequest $request
 	 * @return string|null
 	 */
-	private function defaultView(HyphaRequest $request) {
+	protected function defaultView(HyphaRequest $request) {
 		// create form
 		$form = $this->createSubscribeForm();
 
 		return $this->defaultViewRender($request, $form);
 	}
 
-	private function defaultViewRender(HyphaRequest $request, WymHTMLForm $form) {
+	protected function defaultViewRender(HyphaRequest $request, WymHTMLForm $form) {
 		// add edit button for registered users
 		if (isUser()) {
 			/** @var HyphaDomElement $commands */
@@ -212,7 +212,7 @@ class mailinglist extends HyphaDatatypePage {
 	 * @param HyphaRequest $request
 	 * @return array
 	 */
-	private function deleteAction(HyphaRequest $request) {
+	protected function deleteAction(HyphaRequest $request) {
 		if (!isAdmin()) {
 			notify('error', __(isUser() ? 'admin-rights-needed-to-perform-action' : 'login-to-perform-action'));
 			return null;
@@ -230,7 +230,7 @@ class mailinglist extends HyphaDatatypePage {
 	 * @param HyphaRequest $request
 	 * @return array|null
 	 */
-	private function editView(HyphaRequest $request) {
+	protected function editView(HyphaRequest $request) {
 		if (!isUser()) {
 			notify('error', __('login-to-perform-action'));
 
@@ -253,7 +253,7 @@ class mailinglist extends HyphaDatatypePage {
 		return $this->editViewRender($request, $form);
 	}
 
-	private function editViewRender(HyphaRequest $request, HTMLForm $form) {
+	protected function editViewRender(HyphaRequest $request, HTMLForm $form) {
 		// update the form dom so that values and errors can be displayed
 		$form->updateDom();
 
@@ -275,7 +275,7 @@ class mailinglist extends HyphaDatatypePage {
 	 * @param HyphaRequest $request
 	 * @return array|null
 	 */
-	private function editAction(HyphaRequest $request) {
+	protected function editAction(HyphaRequest $request) {
 		if (!isUser()) {
 			notify('error', __('login-to-perform-action'));
 
@@ -319,7 +319,7 @@ class mailinglist extends HyphaDatatypePage {
 	 * @param HyphaRequest $request
 	 * @return string|null
 	 */
-	private function subscribeAction(HyphaRequest $request) {
+	protected function subscribeAction(HyphaRequest $request) {
 		// create form
 		$form = $this->createSubscribeForm($request->getPostData());
 
@@ -383,7 +383,7 @@ class mailinglist extends HyphaDatatypePage {
 	 * @param string $email
 	 * @return void
 	 */
-	private function sendConfirmationMail($code, $email) {
+	protected function sendConfirmationMail($code, $email) {
 		$confirmUrl = $this->path(self::PATH_CONFIRM_CODE, ['code' => $code]);
 		$confirmLink = '<a href="' . htmlspecialchars($confirmUrl) . '">' . __('ml-please-confirm-email') . '</a>';
 		$welcomeText = $this->getDoc()->get(self::FIELD_NAME_EMAIL_WELCOME_TEXT)->getHtml();
@@ -392,7 +392,7 @@ class mailinglist extends HyphaDatatypePage {
 		return $this->sendMail($subject, $welcomeText, [$email]);
 	}
 
-	private function confirmEmailAction(HyphaRequest $request) {
+	protected function confirmEmailAction(HyphaRequest $request) {
 		$code = isset($_GET['code']) ? $_GET['code'] : null;
 		if (null == $code) {
 			notify('error', __('missing-arguments'));
@@ -422,7 +422,7 @@ class mailinglist extends HyphaDatatypePage {
 		return ['redirect', $this->path()];
 	}
 
-	private function unsubscribeAction(HyphaRequest $request) {
+	protected function unsubscribeAction(HyphaRequest $request) {
 		$code = isset($_GET['code']) ? $_GET['code'] : null;
 		if (null == $code) {
 			notify('error', __('missing-arguments'));
@@ -449,7 +449,7 @@ class mailinglist extends HyphaDatatypePage {
 	 * @param HyphaRequest $request
 	 * @return array|null
 	 */
-	private function unsubscribeByAdminAction(HyphaRequest $request) {
+	protected function unsubscribeByAdminAction(HyphaRequest $request) {
 		if (!isAdmin()) {
 			notify('error', __(isUser() ? 'admin-rights-needed-to-perform-action' : 'login-to-perform-action'));
 			return ['redirect', $this->path()];
@@ -478,7 +478,7 @@ class mailinglist extends HyphaDatatypePage {
 	 * @param string $xpath
 	 * @throws Exception
 	 */
-	private function unsubscribe($xpath) {
+	protected function unsubscribe($xpath) {
 		$this->xml->lockAndReload();
 
 		$address = $this->findAddresses($xpath)->first();
@@ -507,7 +507,7 @@ class mailinglist extends HyphaDatatypePage {
 	 * @param HyphaRequest $request
 	 * @return null|array
 	 */
-	private function remindAction(HyphaRequest $request) {
+	protected function remindAction(HyphaRequest $request) {
 		if (!isAdmin()) {
 			notify('error', __(isUser() ? 'admin-rights-needed-to-perform-action' : 'login-to-perform-action'));
 			return ['redirect', $this->path()];
@@ -556,7 +556,7 @@ class mailinglist extends HyphaDatatypePage {
 	 * @param HyphaRequest $request
 	 * @return null|array
 	 */
-	private function deleteAddressAction(HyphaRequest $request) {
+	protected function deleteAddressAction(HyphaRequest $request) {
 		if (!isAdmin()) {
 			notify('error', __(isUser() ? 'admin-rights-needed-to-perform-action' : 'login-to-perform-action'));
 			return ['redirect', $this->path()];
@@ -599,7 +599,7 @@ class mailinglist extends HyphaDatatypePage {
 	 * @param HyphaRequest $request
 	 * @return array|null
 	 */
-	private function addressesView(HyphaRequest $request) {
+	protected function addressesView(HyphaRequest $request) {
 		if (!isUser()) {
 			notify('error', __('login-to-perform-action'));
 			return ['redirect', $this->path()];
@@ -654,7 +654,7 @@ class mailinglist extends HyphaDatatypePage {
 	 * @return null
 	 * @throws Exception
 	 */
-	private function mailingView(HyphaRequest $request) {
+	protected function mailingView(HyphaRequest $request) {
 		$mailingId = $request->getArg(1);
 
 		// check if given id was correct
@@ -719,7 +719,7 @@ class mailinglist extends HyphaDatatypePage {
 	 * @param HyphaRequest $request
 	 * @return array|null|void
 	 */
-	private function mailingNewView(HyphaRequest $request) {
+	protected function mailingNewView(HyphaRequest $request) {
 		if (!isUser()) {
 			notify('error', __('login-to-perform-action'));
 			return null;
@@ -731,7 +731,7 @@ class mailinglist extends HyphaDatatypePage {
 		return $this->mailingFormViewRender($form, '', self::PATH_MAILS_NEW);
 	}
 
-	private function mailingFormViewRender(WymHTMLForm $form, $cancelPath, $submitPath) {
+	protected function mailingFormViewRender(WymHTMLForm $form, $cancelPath, $submitPath) {
 		// update the form dom so that values and errors can be displayed
 		$form->updateDom();
 
@@ -749,7 +749,7 @@ class mailinglist extends HyphaDatatypePage {
 	 * @param HyphaRequest $request
 	 * @return array|null|void
 	 */
-	private function mailingNewAction(HyphaRequest $request) {
+	protected function mailingNewAction(HyphaRequest $request) {
 		if (!isUser()) {
 			notify('error', __('login-to-perform-action'));
 			return null;
@@ -790,7 +790,7 @@ class mailinglist extends HyphaDatatypePage {
 	 * @param HyphaRequest $request
 	 * @return string|array|null
 	 */
-	private function mailingEditView(HyphaRequest $request) {
+	protected function mailingEditView(HyphaRequest $request) {
 		if (!isUser()) {
 			notify('error', __('login-to-perform-action'));
 
@@ -833,7 +833,7 @@ class mailinglist extends HyphaDatatypePage {
 	 * @param HyphaRequest $request
 	 * @return string|array|null
 	 */
-	private function mailingEditAction(HyphaRequest $request) {
+	protected function mailingEditAction(HyphaRequest $request) {
 		// throw error if edit is requested without client logged in
 		if (!isUser()) {
 			notify('error', __('login-to-edit'));
@@ -887,7 +887,7 @@ class mailinglist extends HyphaDatatypePage {
 	 * @param array $values
 	 * @return WymHTMLForm
 	 */
-	private function createSubscribeForm(array $values = []) {
+	protected function createSubscribeForm(array $values = []) {
 		$html = <<<EOF
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
 				<label for="[[field-name-email]]">[[email]]</label>: <input type="text" id="[[field-name-email]]" name="[[field-name-email]]" placeholder="[[email]]" />
@@ -908,7 +908,7 @@ EOF;
 	 * @param array $values
 	 * @return WymHTMLForm
 	 */
-	private function createEditForm(array $values = []) {
+	protected function createEditForm(array $values = []) {
 		$html = <<<EOF
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
 				<strong><label for="[[field-name-page-name]]">[[title]]</label></strong> <input type="text" id="[[field-name-page-name]]" name="[[field-name-page-name]]" />
@@ -949,7 +949,7 @@ EOF;
 	 *
 	 * @return WymHTMLForm
 	 */
-	private function createMailingForm(array $values = []) {
+	protected function createMailingForm(array $values = []) {
 		$html = <<<EOF
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
 				<label for="[[field-name-subject]]"> [[subject]] </label> <input type="text" id="[[field-name-subject]]" name="[[field-name-subject]]" />
@@ -984,7 +984,7 @@ EOF;
 	 * @throws Exception
 	 * @return null
 	 */
-	private function mailingSendAction(HyphaRequest $request) {
+	protected function mailingSendAction(HyphaRequest $request) {
 		if (!$this->hasSender()) {
 			notify('error', __('ml-no-sender'));
 			return null;
@@ -1049,7 +1049,7 @@ EOF;
 		return 'reload';
 	}
 
-	private function mailingSendTestAction(HyphaRequest $request) {
+	protected function mailingSendTestAction(HyphaRequest $request) {
 		if (!$this->hasSender()) {
 			notify('error', __('ml-no-sender'));
 			return null;
@@ -1087,7 +1087,7 @@ EOF;
 	/**
 	 * @return bool
 	 */
-	private function hasSender() {
+	protected function hasSender() {
 		$senderData = $this->getSenderData();
 
 		return '' != $senderData['name'] && '' != $senderData['email'];
@@ -1096,7 +1096,7 @@ EOF;
 	/**
 	 * @return array
 	 */
-	private function getSenderData() {
+	protected function getSenderData() {
 		$senderData = [
 			'name' => $this->getDoc()->getAttribute('sender-name'),
 			'email' => $this->getDoc()->getAttribute('sender-email'),
@@ -1115,7 +1115,7 @@ EOF;
 	 * @param int $length
 	 * @return string
 	 */
-	private function constructCode($length = 16) {
+	protected function constructCode($length = 16) {
 		try {
 			if (function_exists('random_bytes')) {
 				return bin2hex(random_bytes($length));
@@ -1129,7 +1129,7 @@ EOF;
 		return bin2hex(openssl_random_pseudo_bytes($length));
 	}
 
-	private function savePage($pagename = null, $language = null, $privateFlag = null) {
+	protected function savePage($pagename = null, $language = null, $privateFlag = null) {
 		$updateHyphaXml = false;
 		foreach (['pagename', 'language', 'privateFlag'] as $argument) {
 			if (null === $$argument) {
@@ -1155,7 +1155,7 @@ EOF;
 	 *
 	 * @param NodeList $container
 	 */
-	private function appendMailingsList(NodeList $container) {
+	protected function appendMailingsList(NodeList $container) {
 		/** @var HyphaDomElement $mailingsContainer */
 		$mailingsContainer = $this->getDoc()->get(self::FIELD_NAME_MAILINGS_CONTAINER);
 		if (isUser()) {
@@ -1207,7 +1207,7 @@ EOF;
 	 * @param string $xpath
 	 * @return NodeList
 	 */
-	private function findAddresses($xpath) {
+	protected function findAddresses($xpath) {
 		/** @var HyphaDomElement $addressesContainer */
 		$addressesContainer = $this->getDoc()->get(self::FIELD_NAME_ADDRESSES_CONTAINER);
 
@@ -1223,12 +1223,12 @@ EOF;
 	 * @param array $vars An associative array with variables to substitute.
 	 * @return string
 	 */
-	private function path($path = null, $vars = []) {
+	protected function path($path = null, $vars = []) {
 		$path = $path ? '/' . $this->substituteSpecial($path, $vars) : '';
 		return $this->constructFullPath($this->pagename . $path);
 	}
 
-	private function substituteSpecial($string, $vars) {
+	protected function substituteSpecial($string, $vars) {
 		foreach ($vars as $key => &$val) $val = htmlspecialchars($val);
 		return hypha_substitute($string, $vars);
 	}
@@ -1241,7 +1241,7 @@ EOF;
 	 * @param null|string $argument
 	 * @return string
 	 */
-	private function makeActionButton($label, $path = null, $command = null, $argument = null) {
+	protected function makeActionButton($label, $path = null, $command = null, $argument = null) {
 		$path = $this->language . '/' . $this->pagename . ($path ? '/' . $path : '');
 		$_action = makeAction($path, ($command ? $command : ''), ($argument ? $argument : ''));
 
@@ -1254,7 +1254,7 @@ EOF;
 	 * @param null|string $language
 	 * @return string
 	 */
-	private function constructFullPath($path, $language = null) {
+	protected function constructFullPath($path, $language = null) {
 		global $hyphaUrl;
 		$language = null == $language ? $this->language : $language;
 		$path = '' == $path ? '' : '/' . $path;
@@ -1269,7 +1269,7 @@ EOF;
 	 * @param null|string $senderEmail
 	 * @param null|string $senderName
 	 */
-	private function sendMail($subject, $message, array $receivers, $senderEmail = null, $senderName = null) {
+	protected function sendMail($subject, $message, array $receivers, $senderEmail = null, $senderName = null) {
 		$style = 'body {margin-top:10px; margin-left: 10px; font-size:10pt; font-family: Sans; color:black; background-color:white;}';
 		foreach ($receivers as $receiver) {
 			sendMail($receiver, $subject, $message, $senderEmail, $senderName, $style);

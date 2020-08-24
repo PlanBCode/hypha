@@ -234,9 +234,24 @@
 		// festival
 		"datatype.name.festivalpage" => "festival page",
 
+		// festival - form fields
+		"festival-field-festival-title" => "Festival title",
+		"festival-field-name" => "Name",
+		"festival-field-email" => "Email address",
+		"festival-field-phone" => "Phone number",
+		"festival-field-amount" => "Registration Fee (€)",
+		"festival-field-contribution-name" => "Organiser / presenter name",
+		"festival-field-contribution-description" => "Short description",
+		"festival-field-contribution-title" => "Title",
+		"festival-field-contribution-image" => "Image",
+		"festival-field-contribution-website" => "Link to website",
+		"festival-field-contribution-category" => "Category",
+		"festival-field-contribution-notes" => "Notes for the organizers",
+
 		// festival - digest
-		"festival-edited-contribution" => " edited contribution: ",
-		"festival-added-contribution" => " added contribution: ",
+		"festival-edited-contribution" => "[[name]] edited contribution: [[contribution]]",
+		"festival-added-contribution" => "[[name]] added contribution: [[contribution]]",
+		"festival-digest-edit-contribution" => "Edit contribution",
 		"festival-signed-up-for" => " signed up for ",
 		"festival-failed-to-pay-for" => " failed to pay for ",
 		"festival-payed-for" => " paid for ",
@@ -258,6 +273,19 @@
 		"festival-invalid-or-no-key" => "Invalid or no key given",
 		"festival-email-confirmed-successfully" => "Email address confirmed successfully.",
 		"festival-email-already-confirmed" => "Email address was already confirmed.",
+		"festival-settings-saved" => "Settings saved succesfully.",
+
+		// Festival - confirmation e-mails
+		"festival-payment-failed-subject" => '[[festival-title]]: Payment failed, registration incomplete',
+		"festival-payment-failed-body" => '<p>There was a problem with processing your payment (the payment expired, was cancelled or failed). Until your complete the payment, your registration will remain incomplete.</p><p>To restart the payment process, click <a href="[[paylink]]">this link</a>.</p>',
+		"festival-confirm-registration-subject" => '[[festival-title]]: Confirmation needed to complete registration',
+		"festival-confirm-registration-body" => '<p>Your registration was received succesfully. To confirm your e-mail address and complete the registration, click <a href="[[confirmlink]]">this link</a>.</p>',
+		"festival-payment-succesful-subject" => '[[festival-title]]: Payment received, registration complete',
+		"festival-payment-succesful-body" => '<p>Your payment for [[festival-title]] was succesfully processed, so your registration is now complete. If you want to contribute to the event, you can register your contribution using <a href="[[contributelink]]">this link</a>. You can register multiple contributions by filling in the form multiple times.</p>',
+		"festival-registration-confirmed-subject" => '[[festival-title]]: Email confirmed, registration complete',
+		"festival-registration-confirmed-body" => '<p>Your registration for [[festival-title]] was succesfully processed and is now complete. If you want to contribute to the event, you can register your contribution using <a href="[[contributelink]]">this link</a>. You can register multiple contributions by filling in the form multiple times.</p>',
+		"festival-contribution-added-subject" => '[[festival-title]]: Added contribution "[[title]]"',
+		"festival-contribution-added-body" => '<p>Your contribution "[[title]]" has been added and is now shown on the lineup.</p><p>To edit your contribution, use <a href="[[editlink]]">this link</a>.</p>',
 
 		// festival - buttons & links
 		"festival-modify" => "modify",

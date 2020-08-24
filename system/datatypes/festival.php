@@ -1,6 +1,6 @@
 <?php
 /*
-        Module: festival
+	Module: festival
 
 	Collects various festival-related features, like signup and
 	timetables.
@@ -8,93 +8,140 @@
 
 /*
 	Class: festivalpage
-*/
+ */
 	class festivalpage extends HyphaDatatypePage {
+		protected $xml;
+
+		const FIELD_NAME_AMOUNT = 'amount';
+		const FIELD_NAME_CATEGORY = 'category';
+		const FIELD_NAME_DESCRIPTION = 'description';
+		const FIELD_NAME_EMAIL = 'email';
+		const FIELD_NAME_IMAGE = 'image';
+		const FIELD_NAME_IMAGE_UPLOAD = 'image_upload';
+		const FIELD_NAME_NAME = 'name';
+		const FIELD_NAME_NOTES = 'notes';
+		const FIELD_NAME_PHONE = 'phone';
+		const FIELD_NAME_TITLE = 'title';
+		const FIELD_NAME_WEBSITE = 'website';
+
+		const PATH_CONFIRMATION_NEEDED = 'confirmation-needed';
+		const PATH_CONFIRM = 'confirm';
+		const PATH_CONTRIBUTE = 'contribute';
+		const PATH_CONTRIBUTIONS = 'contributions';
+		const PATH_LINEUP = 'lineup';
+		const PATH_PARTICIPANTS = 'participants';
+		const PATH_PAYMENTHOOK = 'paymenthook';
+		const PATH_PAY = 'pay';
+		const PATH_SETTINGS = 'settings';
+		const PATH_SIGNUP = 'signup';
+		const PATH_TIMETABLE = 'timetable';
+
+		const CMD_DELETE = 'delete';
+		const CMD_PAY = 'pay';
+		const CMD_SAVE = 'save';
+		const CMD_SIGNUP = 'signup';
+
+		const CONFIG_TAG = 'config';
+		const CONFIG_TAG_FORM = 'form';
+		const CONFIG_TAG_DAYS = 'config';
+		const CONFIG_TAG_LOCATIONS = 'config';
+		const CONFIG_ID_TITLE = 'festival-title';
+		const CONFIG_ID_SIGNUP_FORM = 'signup-form';
+		const CONFIG_ID_CONTRIBUTION_FORM = 'contribution-form';
+		const CONFIG_ID_DAYS = 'days';
+		const CONFIG_ID_LOCATIONS = 'locations';
+		const CONFIG_ATTR_VALUE = 'value';
+
+		const TAG_PARTICIPANTS_CONTAINER = 'participants';
+		const TAG_PARTICIPANT = 'participant';
+		const TAG_CONTRIBUTION_CONTAINER = 'contributions';
+		const TAG_CONTRIBUTION = 'contribution';
+
+		// Applies to both contribution and participant
+		const ATTR_KEY = 'key';
+
+		const ATTR_CONTRIBUTION_CATEGORY = 'category';
+		const ATTR_CONTRIBUTION_IMAGE = 'image';
+		const ATTR_CONTRIBUTION_KEY = self::ATTR_KEY;
+		const ATTR_CONTRIBUTION_NAME = 'name';
+		const ATTR_CONTRIBUTION_PARTICIPANT = 'participant';
+		const ATTR_CONTRIBUTION_TITLE = 'title';
+		const ATTR_CONTRIBUTION_WEBSITE = 'website';
+		const TAG_CONTRIBUTION_DESCRIPTION = 'description';
+		const TAG_CONTRIBUTION_NOTES = 'notes';
+		const TAG_CONTRIBUTION_EVENT = 'event';
+
+		const ATTR_PARTICIPANT_EMAIL_CONFIRMED = 'email-confirmed';
+		const ATTR_PARTICIPANT_EMAIL = 'email';
+		const ATTR_PARTICIPANT_KEY = self::ATTR_KEY;
+		const ATTR_PARTICIPANT_NAME = 'name';
+		const ATTR_PARTICIPANT_PAYMENT_AMOUNT = 'payment-amount';
+		const ATTR_PARTICIPANT_PAYMENT_DESCRIPTION = 'payment-description';
+		const ATTR_PARTICIPANT_PAYMENT_ID = 'payment-id';
+		const ATTR_PARTICIPANT_PAYMENT_STATUS = 'payment-status';
+		const ATTR_PARTICIPANT_PAYMENT_TIMESTAMP = 'payment-timestamp';
+		const ATTR_PARTICIPANT_PHONE = 'phone';
+
+		const ATTR_EVENT_DAY = 'day';
+		const ATTR_EVENT_LOCATION = 'location';
+		const ATTR_EVENT_BEGIN = 'begin';
+		const ATTR_EVENT_END = 'end';
+
+		const ATTR_DAY_DISPLAY = 'display';
+		const ATTR_DAY_BEGIN = 'begin';
+		const ATTR_DAY_END = 'end';
+		const ATTR_LOCATION_DISPLAY = 'display';
+
 		public function __construct($pageListNode, RequestContext $O_O) {
 			parent::__construct($pageListNode, $O_O);
 			$this->xml = new Xml('festival', Xml::multiLingualOn, Xml::versionsOff);
 			$this->xml->loadFromFile('data/pages/'.$pageListNode->getAttribute('id'));
-
-			registerCommandCallback('save', Array($this, 'handleSaveSettings'));
-			registerCommandCallback('signup', Array($this, 'handleSignup'));
-			registerCommandCallback('contribute', Array($this, 'handleContribute'));
-			registerCommandCallback('pay', Array($this, 'handlePay'));
-			registerCommandCallback('delete', Array($this, 'handleDelete'));
 		}
 
 		public static function getDatatypeName() {
 			return __('datatype.name.festivalpage');
 		}
 
-		function process(HyphaRequest $request) {
-			if (isUser() && !in_array($this->getArg(0), ['edit'])) {
+		public function process(HyphaRequest $request) {
+			$this->html->writeToElement('pagename', showPagename($this->pagename) . ' ' . asterisk($this->privateFlag));
+
+			if (isUser() && !in_array($request->getView(), [self::PATH_SETTINGS])) {
 				$commands = $this->html->find('#pageCommands');
-
-				$action = makeAction($this->language . '/' . $this->pagename . '/edit', '', '');
-				$button = makeButton(__('settings'), $action);
-				$commands->append($button);
-
-				$action = makeAction($this->language . '/' . $this->pagename . '/signup', '', '');
-				$button = makeButton(__('festival-signup'), $action);
-				$commands->append($button);
-
-				$action = makeAction($this->language . '/' . $this->pagename . '/contribute', '', '');
-				$button = makeButton(__('festival-contribute'), $action);
-				$commands->append($button);
-
-				$action = makeAction($this->language . '/' . $this->pagename . '/participants', '', '');
-				$button = makeButton(__('festival-participants'), $action);
-				$commands->append($button);
-
-				$action = makeAction($this->language . '/' . $this->pagename . '/contributions', '', '');
-				$button = makeButton(__('festival-contributions'), $action);
-				$commands->append($button);
-
-				$action = makeAction($this->language . '/' . $this->pagename . '/lineup', '', '');
-				$button = makeButton(__('festival-lineup'), $action);
-				$commands->append($button);
-
-				$action = makeAction($this->language . '/' . $this->pagename . '/timetable', '', '');
-				$button = makeButton(__('festival-timetable'), $action);
-				$commands->append($button);
+				$commands->append($this->makeActionButton(__('settings'), self::PATH_SETTINGS));
+				$commands->append($this->makeActionButton(__('festival-signup'), self::PATH_SIGNUP));
+				$commands->append($this->makeActionButton(__('festival-contribute'), self::PATH_CONTRIBUTE));
+				$commands->append($this->makeActionButton(__('festival-participants'), self::PATH_PARTICIPANTS));
+				$commands->append($this->makeActionButton(__('festival-contributions'), self::PATH_CONTRIBUTIONS));
+				$commands->append($this->makeActionButton(__('festival-lineup'), self::PATH_LINEUP));
+				$commands->append($this->makeActionButton(__('festival-timetable'), self::PATH_TIMETABLE));
 
 				if (isAdmin()) {
 					$action = 'if(confirm(\'' . __('sure-to-delete') . '\'))' . makeAction($this->language . '/' . $this->pagename, 'delete', '');
-					$button = makeButton(__('delete'), $action);
-					$commands->append($button);
+					$commands->append(makeButton(__('delete'), $action));
 				}
 			}
 
-			switch ($this->getArg(0)) {
-			/*
-				case 'translate':
-					return $this->translate();
-			*/
-				case 'edit':
-					return $this->showSettings();
-				case 'participants':
-					return $this->showParticipants();
-				case 'contributions':
-					return $this->showContributions();
-
-				case 'signup':
-					return $this->showSignup();
-				case 'confirm':
-					return $this->showConfirm();
-				case 'confirmation-needed':
-					return $this->showConfirmationNeeded();
-				case 'pay':
-					return $this->showPay();
-				case 'paymenthook':
-					return $this->handlePaymentHook();
-				case 'contribute':
-					return $this->showContribute();
-				default:
-				case 'lineup':
-					return $this->showLineup();
-				case 'timetable':
-					return $this->showTimetable();
+			switch ([$request->getView(), $request->getCommand()]) {
+				case [null,                           null]:             return $this->lineupView($request);
+				case [null,                           self::CMD_DELETE]: return $this->deleteAction($request);
+				case [self::PATH_CONFIRMATION_NEEDED, null]:             return $this->confirmationNeededView($request);
+				case [self::PATH_CONFIRM,             null]:             return $this->confirmView($request);
+				case [self::PATH_CONTRIBUTE,          null]:             return $this->contributeView($request);
+				case [self::PATH_CONTRIBUTE,          self::CMD_SAVE]:   return $this->contributionSaveAction($request);
+				case [self::PATH_CONTRIBUTIONS,       null]:             return $this->contributionsView($request);
+				case [self::PATH_LINEUP,              null]:             return $this->lineupView($request);
+				case [self::PATH_PARTICIPANTS,        null]:             return $this->participantsView($request);
+				case [self::PATH_PAYMENTHOOK,         null]:             return $this->paymenthookView($request);
+				case [self::PATH_PAY,                 null]:             return $this->payView($request);
+				case [self::PATH_PAY,                 self::CMD_PAY]:    return $this->payAction($request);
+				case [self::PATH_SETTINGS,            null]:             return $this->settingsView($request);
+				case [self::PATH_SETTINGS,            self::CMD_SAVE]:   return $this->settingsSaveAction($request);
+				case [self::PATH_SIGNUP,              null]:             return $this->signupView($request);
+				case [self::PATH_SIGNUP,              self::CMD_SIGNUP]: return $this->signupAction($request);
+				case [self::PATH_TIMETABLE,           null]:             return $this->timetableView($request);
 			}
+
+			return '404';
 		}
 
 		public function getSortDateTime() {
@@ -108,7 +155,7 @@
 		 * attribute from it. If no attribute is given, the
 		 * "value" attribute is returned.
 		 */
-		function getConfig($id, $attribute = 'value') {
+		protected function getConfig($id, $attribute = self::CONFIG_ATTR_VALUE) {
 			$config = $this->getConfigElement($id);
 			if (!$config)
 				return '';
@@ -123,11 +170,11 @@
 		 * it is created using the given tagname. Otherwise,
 		 * null is returned.
 		 */
-		function getConfigElement($id, $tagname = null) {
+		protected function getConfigElement($id, $tagname = null) {
 			$elem = $this->xml->getElementById($id);
 			if (!$elem && $tagname) {
 				$elem = $this->xml->createElement($tagname);
-				$elem->setAttribute('xml:id', $id);
+				$elem->setId($id);
 				$this->xml->documentElement->appendChild($elem);
 			}
 			return $elem;
@@ -140,20 +187,15 @@
 		 * is set. If the tag does not exist, it is created,
 		 * using the given tagname.
 		 */
-		function setConfig($id, $value, $tagname = 'config', $attribute = 'value') {
+		protected function setConfig($id, $value, $tagname = self::CONFIG_TAG, $attribute = self::CONFIG_ATTR_VALUE) {
 			$config = $this->getConfigElement($id, $tagname);
 			return $config->setAttribute($attribute, $value);
-		}
-
-		function array_set_if_unset(&$array, $key, $default) {
-			if (!array_key_exists($key, $array))
-				$array[$key] = $default;
 		}
 
 		/**
 		 * Show the admin display with registrations.
 		 */
-		function showParticipants() {
+		protected function participantsView(HyphaRequest $request) {
 			if (!isUser()) return notify('error', __('login-to-edit'));
 
 			$stats = [];
@@ -162,22 +204,24 @@
 			$table = new HTMLTable();
 			$this->html->find('#main')->appendChild($table);
 			$table->addHeaderRow()->addCells([__('name'), __('email'), __('phone'), __('price'), __('festival-participant-status')]);
-			foreach ($this->xml->documentElement->getOrCreate('participants')->children() as $participant) {
-				$payamount = $participant->getAttribute('payment-amount');
+			foreach ($this->xml->documentElement->getOrCreate(self::TAG_PARTICIPANTS_CONTAINER)->children() as $participant) {
+				$payamount = $participant->getAttribute(self::ATTR_PARTICIPANT_PAYMENT_AMOUNT);
 				if ($payamount)
-					$status = $participant->getAttribute('payment-status');
+					$status = $participant->getAttribute(self::ATTR_PARTICIPANT_PAYMENT_STATUS);
 				else
-					$status = $participant->getAttribute('email-confirmed') ? 'confirmed' : 'unconfirmed';
+					$status = $participant->getAttribute(self::ATTR_PARTICIPANT_EMAIL_CONFIRMED) ? 'confirmed' : 'unconfirmed';
 
 				$row = $table->addRow();
-				$row->addCell($participant->getAttribute('name'));
-				$row->addCell($participant->getAttribute('email'));
-				$row->addCell($participant->getAttribute('phone'));
+				$row->addCell($participant->getAttribute(self::ATTR_PARTICIPANT_NAME));
+				$row->addCell($participant->getAttribute(self::ATTR_PARTICIPANT_EMAIL));
+				$row->addCell($participant->getAttribute(self::ATTR_PARTICIPANT_PHONE));
 				$row->addCell($payamount ? '€' . $payamount : '-');
 				$row->addCell($status);
 
 				$totalcount += 1;
-				$this->array_set_if_unset($stats, $status, ['paysum' => 0, 'count' => 0]);
+				if (!array_key_exists($status, $stats))
+						$stats[$status] = ['paysum' => 0, 'count' => 0];
+
 				$stats[$status]['count'] += 1;
 				if ($payamount) {
 					$stats[$status]['paysum'] += $payamount;
@@ -196,133 +240,193 @@
 			$row = $table->addRow();
 			$row->addCell(__('total'));
 			$row->addCell($totalcount);
+			return null;
 		}
 
 		/**
 		 * Show the admin display with contributions.
 		 */
-		function showContributions() {
+		protected function contributionsView(HyphaRequest $request) {
+			// TODO: Styling
 			if (!isUser()) return notify('error', __('login-to-edit'));
 			$table = new HTMLTable();
 			$this->html->find('#main')->appendChild($table);
+			$table->addClass('contributions');
 			$table->addHeaderRow()->addCells([__('name'), __('title'), __('category'), __('website')]);
-			foreach ($this->xml->documentElement->getOrCreate('contributions')->children() as $contribution) {
+			foreach ($this->xml->documentElement->getOrCreate(self::TAG_CONTRIBUTION_CONTAINER)->children() as $contribution) {
 				$row = $table->addRow();
-				$row->addCell($contribution->getAttribute('name'));
-				$row->addCell($contribution->getAttribute('title'));
-				$row->addCell($contribution->getAttribute('category'));
-				$row->addCell($contribution->getAttribute('website'));
+				$row->addCell($contribution->getAttribute(self::ATTR_CONTRIBUTION_NAME));
+				$row->addCell($contribution->getAttribute(self::ATTR_CONTRIBUTION_TITLE));
+				$row->addCell($contribution->getAttribute(self::ATTR_CONTRIBUTION_CATEGORY));
+				$row->addCell($contribution->getAttribute(self::ATTR_CONTRIBUTION_WEBSITE));
 
-				$action = makeAction($this->language.'/'.$this->pagename.'/contribute/'.$contribution->getAttribute('xml:id'), '', '');
-				$button = makeButton(__('edit'), $action);
+				$button = $this->makeActionButton(__('edit'), $this->pagename . '/' . self::PATH_CONTRIBUTE . '/'.$contribution->getId());
 				$row->addCell()->append($button);
 
-
-				$description = $contribution->getOrCreate('description')->text();
-				$imgfilename = $contribution->getAttribute('image');
+				$description = $contribution->getOrCreate(self::TAG_CONTRIBUTION_DESCRIPTION)->text();
+				$imgfilename = $contribution->getAttribute(self::ATTR_CONTRIBUTION_IMAGE);
 				if ($description || $imgfilename) {
 					$cell = $table->addRow()->addCell(__('description') . ': ' . $description);
 					$cell->setAttribute('colspan', 5);
-					$cell->setAttribute('style', 'padding-left: 50px;');
+					$cell->addClass('description');
 					if ($imgfilename) {
 						$imgtag = $this->html->createElement('img');
 						$cell->insertBefore($imgtag, $cell->firstChild);
-						$image = new HyphaImage($contribution->getAttribute('image'));
+						$image = new HyphaImage($contribution->getAttribute(self::ATTR_CONTRIBUTION_IMAGE));
 						$imgtag->setAttribute('src', $image->getUrl(50, 50));
-						$imgtag->setAttribute('style', 'float: left; margin: 5px 10px 0 0;');
 					}
 				}
-				$notes = $contribution->getOrCreate('notes')->text();
+				$notes = $contribution->getOrCreate(self::TAG_CONTRIBUTION_NOTES)->text();
 				if ($notes) {
 					$cell = $table->addRow()->addCell(__('notes') . ': ' . $notes);
 					$cell->setAttribute('colspan', 5);
-					$cell->setAttribute('style', 'padding-left: 50px;');
+					$cell->addClass('notes');
 				}
 			}
+			return null;
 		}
 
-
-		function getSettingsForm() {
-$html = <<<'EOF'
-<table>
-	<tr><td><label for="festival-title">Festival title</label> *</td><td><input id="festival-title" name="festival-title"/></td></tr>
-</table>
+		/**
+		 * @return HTMLForm
+		 */
+		protected function createSettingsForm(array $values=[]) {
+			$html = <<<EOF
+				<table>
+					<tr>
+						<td><label for="[[field-name-title]]">[[title]]</label></td>
+						<td><input id="[[field-name-title]]" name="[[field-name-title]]"/></td>
+					</tr>
+				</table>
 EOF;
-			return new HTMLForm($html);
+			$vars = [
+				'title' => __('festival-field-festival-title'),
+				'field-name-title' => self::FIELD_NAME_TITLE,
+			];
+
+			$html = hypha_substitute($html, $vars);
+
+			return new HTMLForm($html, $values);
 		}
 
-		function showSettings($form = null) {
+		protected function settingsView(HyphaRequest $request) {
 			if (!isUser()) return notify('error', __('login-to-edit'));
 
-			if (!$form) {
-				$form = $this->getSettingsForm();
-				$form->setData([
-					'festival-title' => $this->getConfig('festival-title'),
-				]);
-			}
+			// create form
+			$formData = [
+				self::FIELD_NAME_TITLE => $this->getConfig(self::CONFIG_ID_TITLE),
+			];
 
+			$form = $this->createSettingsForm($formData);
+			return $this->settingsViewRender($request, $form);
+		}
+
+		function settingsViewRender($request, $form) {
+			// Update the form to include the data
 			$form->updateDom();
+
 			$this->html->find('#main')->append($form);
 
-			// show 'cancel' button
-			$action = makeAction($this->language.'/'.$this->pagename, '', '');
-			$button = makeButton(__('cancel'), $action);
-			$this->html->writeToElement('pageCommands', $button);
-
-			// show 'save' button
-			$action = makeAction($this->language.'/'.$this->pagename, 'save', '');
-			$button = makeButton(__('save'), $action);
-			$this->html->writeToElement('pageCommands', $button);
+			$commands = $this->html->find('#pageCommands');
+			$commands->append($this->makeActionButton(__('save'), self::PATH_SETTINGS, self::CMD_SAVE));
+			$commands->append($this->makeActionButton(__('cancel'), ''));
+			return null;
 		}
 
-		function handleSaveSettings($arg) {
-			global $hyphaPage;
-
+		protected function settingsSaveAction(HyphaRequest $request) {
 			if (!isUser()) return notify('error', __('login-to-edit'));
-			$form = $this->getSettingsForm();
-			$form->setData($_POST);
-			$form->validateRequiredField('festival-title');
 
-			if ($form->errors) {
-				// HACK: Prevent index.php from
-				// rendering the page normally, since we
-				// already rendered it. There should be
-				// a better way to achive this.
-				$hyphaPage = false;
-				return $this->showSettings($form);
-			}
+			// create form
+			$form = $this->createSettingsForm($request->getPostData());
+
+			$form->validateRequiredField(self::FIELD_NAME_TITLE);
+
+			// process form if it was posted
+			if (!empty($form->errors))
+				return $this->settingsViewRender($request, $form);
+
 			$this->xml->lockAndReload();
-			$this->setConfig('festival-title', $form->dataFor('festival-title'));
+			$this->setConfig(self::CONFIG_ID_TITLE, $form->dataFor(self::FIELD_NAME_TITLE));
 			$this->xml->saveAndUnlock();
-			return 'reload';
+
+			notify('success', ucfirst(__('festival-settings-saved')));
+			return ['redirect', $this->constructFullPath($this->pagename)];
 		}
 
-		function handleDelete() {
-			// throw error if delete is requested without admin logged in
+		protected function deleteAction(HyphaRequest $request) {
 			if (!isAdmin()) return notify('error', __('login-as-admin-to-delete'));
-
-			global $hyphaUrl;
 
 			$this->deletePage();
 
 			notify('success', ucfirst(__('page-successfully-deleted')));
-			return ['redirect', $hyphaUrl];
+			return ['redirect', $request->getRootUrl()];
+		}
+
+		/**
+		 * Create a signup form, based on the one configured.
+		 */
+		private function createSignupForm(array $values = []) {
+			$html = $this->getConfigElement(self::CONFIG_ID_SIGNUP_FORM, self::CONFIG_TAG_FORM)->children();
+
+			if ($html->count() == 0) {
+				$html = <<<EOF
+					<table class="festivalForm">
+						<tr>
+							<th><label for="[[field-name-name]]">[[name]]</label></th>
+							<td><input type="text" name="[[field-name-name]]"></td>
+							<td>*</td>
+						</tr>
+						<tr>
+							<th><label for="[[field-name-email]]">[[email]]</label></th>
+							<td><input type="text" name="[[field-name-email]]"></td>
+							<td>*</td>
+						</tr>
+						<tr>
+							<th><label for="[[field-name-phone]]">[[phone]]</label></th>
+							<td><input type="text" name="[[field-name-phone]]"></td>
+							<td></td>
+						</tr>
+						<tr>
+							<th><label for="[[field-name-amount]]">[[amount]]</label></th>
+							<td><input type="text" name="[[field-name-amount]]"></td>
+							<td></td>
+						</tr>
+					</table>
+EOF;
+				$vars = [
+					'name' => __('festival-field-name'),
+					'field-name-name' => self::FIELD_NAME_NAME,
+					'email' => __('festival-field-email'),
+					'field-name-email' => self::FIELD_NAME_EMAIL,
+					'phone' => __('festival-field-phone'),
+					'field-name-phone' => self::FIELD_NAME_PHONE,
+					'amount' => __('festival-field-amount'),
+					'field-name-amount' => self::FIELD_NAME_AMOUNT,
+				];
+
+				$html = hypha_substitute($html, $vars);
+			}
+
+			return new HTMLForm($html, $values);
 		}
 
 		/**
 		 * The signup form. Here's where the fun starts.
 		 */
-		function showSignup($form = null) {
-			if (!$form)
-				$form = new HTMLForm($this->getConfigElement('signup-form')->children());
+		protected function signupView(HyphaRequest $request) {
+			$form = $this->createSignupForm();
+			return $this->signupViewRender($request, $form);
+		}
 
-			$this->html->find('#pagename')->text(__('festival-signup-for') . $this->getConfig('festival-title'));
-			$main = $this->html->find('#main');
-			$main->append($form);
+		protected function signupViewRender(HyphaRequest $request, HTMLForm $form) {
+			$form->updateDom();
 
-			$action = makeAction($this->language.'/'.$this->pagename, 'signup', '');
-			$button = makeButton(__('signup'), $action);
-			$main->append($button);
+			$this->html->find('#main')->append($form);
+			$this->html->find('#pagename')->text(__('festival-signup-for') . $this->getConfig(self::CONFIG_ID_TITLE));
+
+			$commands = $this->html->find('#pageEndCommands');
+			$commands->append($this->makeActionButton(__('signup'), self::PATH_SIGNUP, self::CMD_SIGNUP));
+
+			return null;
 		}
 
 		/**
@@ -330,54 +434,50 @@ EOF;
 		 * /contribute, depending on whether there is something to
 		 * pay.
 		 */
-		function handleSignup($arg) {
-			global $hyphaUrl, $hyphaContentLanguage, $hyphaPage;
-			$form = new HTMLForm($this->getConfigElement('signup-form')->children());
-			$form->setData($_POST);
-			$form->validateRequiredField('name');
-			$form->validateRequiredField('email');
-			$form->validateEmailField('email');
-			$form->validateMoneyField('amount');
-			if ($form->errors) {
-				// HACK: Prevent index.php from
-				// rendering the page normally, since we
-				// already rendered it. There should be
-				// a better way to achieve this.
-				$hyphaPage = false;
-				// Reshow the form with submitted values
-				// and errors
-				$form->updateDom();
-				return $this->showSignup($form);
-			}
+		protected function signupAction(HyphaRequest $request) {
+			// create form
+			$form = $this->createSignupForm($request->getPostData());
+
+			$form->validateRequiredField(self::FIELD_NAME_NAME);
+			$form->validateRequiredField(self::FIELD_NAME_EMAIL);
+			$form->validateEmailField(self::FIELD_NAME_EMAIL);
+			$form->validateMoneyField(self::FIELD_NAME_AMOUNT);
+
+			if (!empty($form->errors))
+				return $this->signupViewRender($request, $form);
 
 			$this->xml->lockAndReload();
 
-			$participant = $this->xml->createElement('participant');
+			$participant = $this->xml->createElement(self::TAG_PARTICIPANT);
 			$participant->generateId();
-			$participant->setAttribute('name', $form->dataFor('name'));
-			$participant->setAttribute('email', $form->dataFor('email'));
-			$participant->setAttribute('phone', $form->dataFor('phone'));
-			$participant->setAttribute('key', bin2hex(openssl_random_pseudo_bytes(8)));
-			$this->xml->documentElement->getOrCreate('participants')->append($participant);
-			if ((float)$form->dataFor('amount', 0) > 0)
-				$this->setupPayment($participant, $form->dataFor('amount', 0));
+			$participant->setAttribute(self::ATTR_PARTICIPANT_NAME, $form->dataFor(self::FIELD_NAME_NAME));
+			$participant->setAttribute(self::ATTR_PARTICIPANT_EMAIL, $form->dataFor(self::FIELD_NAME_EMAIL));
+			$participant->setAttribute(self::ATTR_PARTICIPANT_PHONE, $form->dataFor(self::FIELD_NAME_PHONE));
+			$participant->setAttribute(self::ATTR_PARTICIPANT_KEY, bin2hex(openssl_random_pseudo_bytes(8)));
+			$this->xml->documentElement->getOrCreate(self::TAG_PARTICIPANTS_CONTAINER)->append($participant);
+			if ((float)$form->dataFor(self::FIELD_NAME_AMOUNT, 0) > 0)
+				$this->setupPayment($participant, $form->dataFor(self::FIELD_NAME_AMOUNT, 0));
 			$this->xml->saveAndUnlock();
 
-			notify('success', __('festival-successful-signup-for') . $this->getConfig('festival-title'));
-			$contribute_url = $hyphaUrl . $hyphaContentLanguage . '/' . $this->pagename . '/contribute/' . $participant->getAttribute('xml:id') . '/' . $participant->getAttribute('key');
-			$digest = htmlspecialchars($participant->getAttribute('name') . __('festival-signed-up-for') . $this->getConfig('festival-title'));
-			$digest .= ' (<a href="' . $contribute_url . '">Add contribution</a>)';
+			notify('success', __('festival-successful-signup-for') . $this->getConfig(self::CONFIG_ID_TITLE));
+			$contribute_url = $this->constructFullPath($this->pagename . '/' . self::PATH_CONTRIBUTE . '/' . $participant->getId() . '/' . $participant->getAttribute(self::ATTR_PARTICIPANT_KEY));
+			$digest = htmlspecialchars($participant->getAttribute(self::ATTR_PARTICIPANT_NAME) . __('festival-signed-up-for') . $this->getConfig(self::CONFIG_ID_TITLE));
+			$digest .= ' (<a href="' . htmlspecialchars($contribute_url) . '">Add contribution</a>)';
 			writeToDigest($digest, 'festival-registration');
 
-			if ((float)$form->dataFor('amount', 0) > 0) {
-				$next_url = $hyphaUrl . $hyphaContentLanguage . '/' . $this->pagename . '/pay/' . $participant->getAttribute('xml:id') . '/' . $participant->getAttribute('key');
+			if ((float)$form->dataFor(self::FIELD_NAME_AMOUNT, 0) > 0) {
+				$next_url = $this->constructFullPath($this->pagename . '/' . self::PATH_PAY . '/' . $participant->getId() . '/' . $participant->getAttribute(self::ATTR_PARTICIPANT_KEY));
 			} else {
-				$next_url = $hyphaUrl . $hyphaContentLanguage . '/' . $this->pagename . '/confirmation-needed';
+				$next_url = $this->constructFullPath($this->pagename . '/confirmation-needed');
 
 				// Send email
-				$confirm_url = $hyphaUrl . $hyphaContentLanguage . '/' . $this->pagename . '/confirm/' . $participant->getAttribute('xml:id') . '/' . $participant->getAttribute('key');
-				$append = '<p><a href="'.htmlspecialchars($confirm_url).'">'.__('festival-confirm-email') . '</a></p>';
-				$this->sendMail($participant->getAttribute('email'), 'mail-confirm-email', $append);
+				$confirm_url = $this->constructFullPath($this->pagename . '/' . self::PATH_CONFIRM . '/' . $participant->getId() . '/' . $participant->getAttribute(self::ATTR_PARTICIPANT_KEY));
+				$vars = [
+					'festival-title' => $this->getConfig(self::CONFIG_ID_TITLE),
+					'confirmlink' => $confirm_url,
+				];
+				$rcpt = $participant->getAttribute(self::ATTR_PARTICIPANT_EMAIL);
+				$this->sendMail($rcpt, 'festival-confirm-registration', $vars);
 			}
 			return ['redirect', $next_url];
 		}
@@ -386,46 +486,49 @@ EOF;
 		 * For unpaid registrations, show a message that
 		 * confirmation is needed.
 		 */
-		function showConfirmationNeeded() {
+		protected function confirmationNeededView(HyphaRequest $request) {
 			$this->html->find('#pagename')->text(__('festival-confirmation-needed'));
 			$main = $this->html->find('#main');
 			$message = __('festival-complete-by-confirming');
 			$main->append($message);
+			return null;
 		}
 
 		/**
 		 * For unpaid registrations, this link needs to be
 		 * clicked to confirm the registration.
 		 */
-		function showConfirm() {
-			global $hyphaUrl, $hyphaContentLanguage;
-
+		protected function confirmView(HyphaRequest $request) {
 			$this->xml->lockAndReload();
-			$participant = $this->checkKeyArguments(['participant']);
+			$participant = $this->checkKeyArguments($request, [self::TAG_PARTICIPANT]);
 			if (!$participant) {
 				$this->xml->unlock();
-				return;
+				return '404';
 			}
-			$contribute_url = $hyphaUrl . $hyphaContentLanguage . '/' . $this->pagename . '/contribute/' . $participant->getAttribute('xml:id') . '/' . $participant->getAttribute('key');
+			$contribute_url = $this->constructFullPath($this->pagename . '/' . self::PATH_CONTRIBUTE . '/' . $participant->getId() . '/' . $participant->getAttribute(self::ATTR_PARTICIPANT_KEY));
 
-			if ($participant->getAttribute('email-confirmed')) {
+			if ($participant->getAttribute(self::ATTR_PARTICIPANT_EMAIL_CONFIRMED)) {
 				$this->xml->unlock();
 				notify('success', __('festival-email-already-confirmed'));
 			} else {
 				notify('success', __('festival-email-confirmed-successfully'));
 
 				// Mark e-mail as confirmed
-				$participant->setAttribute('email-confirmed', '1');
+				$participant->setAttribute(self::ATTR_PARTICIPANT_EMAIL_CONFIRMED, '1');
 				$this->xml->saveAndUnlock();
 
 				// Note in digest
-				$digest = htmlspecialchars($participant->getAttribute('name') . __('festival-confirmed-for') . $this->getConfig('festival-title'));
+				$digest = htmlspecialchars($participant->getAttribute(self::ATTR_PARTICIPANT_NAME) . __('festival-confirmed-for') . $this->getConfig(self::CONFIG_ID_TITLE));
 				$digest .= ' (<a href="' . $contribute_url . '">Add contribution</a>)';
 				writeToDigest($digest, 'festival-confirmation');
 
-				// Send e-mail
-				$append = '<p><a href="'.htmlspecialchars($contribute_url).'">'.__('festival-contribute') . '</a></p>';
-				$this->sendMail($participant->getAttribute('email'), 'mail-signed-up-free', $append);
+				// Send email
+				$vars = [
+					'festival-title' => $this->getConfig(self::CONFIG_ID_TITLE),
+					'contributelink' => $contribute_url,
+				];
+				$rcpt = $participant->getAttribute(self::ATTR_PARTICIPANT_EMAIL);
+				$this->sendMail($rcpt, 'festival-registration-confirmed', $vars);
 			}
 
 			// Redirect to contribution page
@@ -438,32 +541,29 @@ EOF;
 		 * is already complete, this redirects to the
 		 * /contribute page.
 		 */
-		function showPay() {
-			global $hyphaUrl, $hyphaContentLanguage;
-
+		protected function payView(HyphaRequest $request) {
 			$this->xml->lockAndReload();
-			$participant = $this->checkKeyArguments(['participant']);
+			$participant = $this->checkKeyArguments($request, [self::TAG_PARTICIPANT]);
 			if (!$participant) {
 				$this->xml->unlock();
-				return;
+				return null;
 			}
 
 			// Check the status of the payment
 			$this->checkPayment($participant);
 			$this->xml->saveAndUnlock();
 
-			if ($participant->getAttribute('payment-timestamp')) {
-				$url = $hyphaUrl . $hyphaContentLanguage . '/' . $this->pagename . '/contribute/' . $participant->getAttribute('xml:id') . '/' . $participant->getAttribute('key');
+			if ($participant->getAttribute(self::ATTR_PARTICIPANT_PAYMENT_TIMESTAMP)) {
+				$url = $this->constructFullPath($this->pagename . '/' . self::PATH_CONTRIBUTE . '/' . $participant->getId() . '/' . $participant->getAttribute(self::ATTR_PARTICIPANT_KEY));
 				notify('success', __('festival-successful-payment'));
 				return ['redirect', $url];
 			}
 
 			// Render the page
-			$this->html->find('#pagename')->text(__('festival-pay-for') . $this->getConfig('festival-title'));
+			$this->html->find('#pagename')->text(__('festival-pay-for') . $this->getConfig(self::CONFIG_ID_TITLE));
 			$main = $this->html->find('#main');
 			$message = __('festival-complete-by-paying');
-			$action = makeAction($this->language.'/'.$this->pagename.'/'.join('/',$this->args), 'pay', '');
-			$button = makeButton(__('pay'), $action);
+			$button = $this->makeActionButton(__('pay'), join('/',$request->getArgs()), self::CMD_PAY);
 			$main->append($message);
 			$main->append($button);
 		}
@@ -474,13 +574,12 @@ EOF;
 		 * the payment was already completed, then it redirects
 		 * to the /contribute page.
 		 */
-		function handlePay() {
-			global $hyphaUrl, $hyphaContentLanguage;
+		protected function payAction(HyphaRequest $request) {
 			$this->xml->lockAndReload();
-			$participant = $this->checkKeyArguments(['participant']);
+			$participant = $this->checkKeyArguments($request, [self::TAG_PARTICIPANT]);
 			if(!$participant) {
 				$this->xml->unlock();
-				return;
+				return null;
 			}
 
 			// Check the status of the payment, and create a
@@ -492,21 +591,27 @@ EOF;
 			// contribute page. Otherwise, redirect to
 			// payment provider.
 			if (!$url)
-				$url = $hyphaUrl . $hyphaContentLanguage . '/' . $this->pagename . '/contribute/' . $participant->getAttribute('xml:id') . '/' . $participant->getAttribute('key');
+				$url = $this->constructFullPath($this->pagename . '/' . self::PATH_CONTRIBUTE . '/' . $participant->getId() . '/' . $participant->getAttribute(self::ATTR_PARTICIPANT_KEY));
 
 			return ['redirect', $url];
 		}
 
-		function handlePaymentHook() {
+		protected function paymenthookView(HyphaRequest $request) {
 			$this->xml->lockAndReload();
-			$participant = $this->checkKeyArguments(['participant']);
+			$participant = $this->checkKeyArguments($request, [self::TAG_PARTICIPANT]);
 			if(!$participant) {
+				// We need to return 403 to prevent
+				// rewrites by the payment provider.
+				// TODO: 403 in a more generic place?
 				http_response_code(403);
 				writeToDigest('Invalid participant id or key in payment hook: ' . $_SERVER['REQUEST_URI'] . '?' . $_SERVER['QUERY_STRING'], 'error');
 				exit;
 			}
 
-			if($participant->getAttribute('payment-id') != $_REQUEST['id']) {
+			if($participant->getAttribute(self::ATTR_PARTICIPANT_PAYMENT_ID) != $_REQUEST['id']) {
+				// We need to return 403 to prevent
+				// rewrites by the payment provider.
+				// TODO: 403 in a more generic place?
 				http_response_code(403);
 				writeToDigest('Invalid payment id in payment hook: ' . $_SERVER['REQUEST_URI'] . '?' . $_SERVER['QUERY_STRING'], 'error');
 				exit;
@@ -521,126 +626,221 @@ EOF;
 			exit;
 		}
 
+		private function createContributionForm(array $values = []) {
+			$html = $this->getConfigElement(self::CONFIG_ID_CONTRIBUTION_FORM, self::CONFIG_TAG_FORM)->children();
+
+			if ($html->count() == 0) {
+				$html = <<<EOF
+					<table class="festivalForm">
+						<tr>
+							<th><label for="[[field-name-name]]">[[name]]</label></th>
+							<td><input type="text" name="[[field-name-name]]"/></td>
+							<td>*</td>
+						</tr>
+						<tr>
+							<th><label for="[[field-name-title]]">[[title]]</label></th>
+							<td><input type="text" name="[[field-name-title]]"/></td>
+							<td>*</td>
+						</tr>
+						<tr>
+							<th><label for="[[field-name-description]]">[[description]]</label></th>
+							<td><textarea name="[[field-name-description]]"></textarea></td>
+							<td/>
+						</tr>
+							<tr><th><label for="[[field-name-image]]">[[image]]</label></th>
+							<td>
+								<input type="hidden" name="[[field-name-image]]"/>
+								<img data-preview-for="[[field-name-image]]"/><br/>
+								<input type="file" name="[[field-name-image-upload]]"/>
+							</td>
+							<td/>
+						</tr>
+						<tr>
+							<th><label for="[[field-name-website]]">[[website]]</label></th>
+							<td><input type="text" name="[[field-name-website]]"/></td>
+							<td/>
+						</tr>
+						<tr>
+							<th><label for="[[field-name-category]]">[[category]]</label></th>
+							<td><select name="[[field-name-category]]">
+								<option disabled="disabled" selected="selected">select</option>
+								<option value="lecture">Lecture</option>
+								<option value="workshop">Workshop</option>
+								<option value="demonstration">Demonstration</option>
+								<option value="hackathon">Hackathon</option>
+								<option value="other">Other</option>
+							</select></td>
+							<td>*</td>
+						</tr>
+						<tr>
+							<th><label for="[[field-name-notes]]">[[notes]]</label></th>
+							<td><textarea name="[[field-name-notes]]"></textarea></td>
+							<td/>
+						</tr>
+					</table>
+EOF;
+				$vars = [
+					'name' => __('festival-field-contribution-name'),
+					'field-name-name' => self::FIELD_NAME_NAME,
+					'title' => __('festival-field-contribution-title'),
+					'field-name-title' => self::FIELD_NAME_TITLE,
+					'description' => __('festival-field-contribution-description'),
+					'field-name-description' => self::FIELD_NAME_DESCRIPTION,
+					'image' => __('festival-field-contribution-image'),
+					'field-name-image' => self::FIELD_NAME_IMAGE,
+					'field-name-image-upload' => self::FIELD_NAME_IMAGE_UPLOAD,
+					'website' => __('festival-field-contribution-website'),
+					'field-name-website' => self::FIELD_NAME_WEBSITE,
+					'category' => __('festival-field-contribution-category'),
+					'field-name-category' => self::FIELD_NAME_CATEGORY,
+					'notes' => __('festival-field-contribution-notes'),
+					'field-name-notes' => self::FIELD_NAME_NOTES,
+
+				];
+
+				$html = hypha_substitute($html, $vars);
+			}
+
+			return new HTMLForm($html, $values);
+		}
+
 		/**
 		 * Show the contribution form.
 		 */
-		function showContribute($form = null, $editing = false) {
-			$obj = $this->checkKeyArguments(['contribution', 'participant'], true);
+		protected function contributeView(HyphaRequest $request) {
+			$obj = $this->checkKeyArguments($request, [self::TAG_CONTRIBUTION, self::TAG_PARTICIPANT], true);
 			if (!$obj)
-				return;
-			$editing = ($obj->tagName == 'contribution');
+				return '404';
 
-			if (!$form) {
-				$form = new HTMLForm($this->getConfigElement('contribution-form')->children());
-				if ($editing) {
-					$form->setData($obj);
-					$form->updateDom();
-				}
+			# If a contribution id is in the url, we're
+			# editing that contribution. If a participant id
+			# was passed, we are creating a new contribution.
+			$editing = ($obj->tagName == self::TAG_CONTRIBUTION);
+
+			$form = $this->createContributionForm();
+			if ($editing) {
+				// create form
+				$description = $obj->get(self::TAG_CONTRIBUTION_DESCRIPTION);
+				$notes = $obj->get(self::TAG_CONTRIBUTION_NOTES);
+				$formData = [
+					self::FIELD_NAME_NAME => $obj->getAttr(self::ATTR_CONTRIBUTION_NAME),
+					self::FIELD_NAME_TITLE => $obj->getAttr(self::ATTR_CONTRIBUTION_TITLE),
+					self::FIELD_NAME_CATEGORY => $obj->getAttr(self::ATTR_CONTRIBUTION_CATEGORY),
+					self::FIELD_NAME_IMAGE => $obj->getAttr(self::ATTR_CONTRIBUTION_IMAGE),
+					self::FIELD_NAME_WEBSITE => $obj->getAttr(self::ATTR_CONTRIBUTION_WEBSITE),
+					self::FIELD_NAME_DESCRIPTION => $description ? $description->text() : null,
+					self::FIELD_NAME_NOTES => $notes ? $notes->text() : null,
+				];
+
+				$form->setData($formData);
 			}
+			return $this->contributeViewRender($request, $form, $editing);
+		}
 
-			$this->html->find('#pagename')->text(__('festival-contribute-to') . $this->getConfig('festival-title'));
-			$main = $this->html->find('#main');
-			$main->append($form);
+		protected function contributeViewrender(HyphaRequest $request, HTMLForm $form, $editing) {
+			// Update the form to include any data
+			$form->updateDom();
 
-			$action = makeAction($this->language.'/'.$this->pagename.'/'.join('/',$this->args), 'contribute', '');
-			if ($editing)
-				$button = makeButton(__('festival-modify'), $action);
-			else
-				$button = makeButton(__('festival-contribute'), $action);
-			$main->append($button);
+			$this->html->find('#pagename')->text(__('festival-contribute-to') . $this->getConfig(self::CONFIG_ID_TITLE));
+			$this->html->find('#main')->append($form);
+
+			$commands = $this->html->find('#pageEndCommands');
+			$title = $editing ? __('festival-modify') : __('festival-contribute');
+			$commands->append($this->makeActionButton($title, join('/',$request->getArgs()), self::CMD_SAVE));
+			return null;
 		}
 
 		/**
 		 * Handle the contribution form.
 		 */
-		function handleContribute() {
-			global $hyphaUrl, $hyphaContentLanguage, $hyphaPage, $hyphaUser;
+		protected function contributionSaveAction(HyphaRequest $request) {
 			$this->xml->lockAndReload();
 
-			$obj = $this->checkKeyArguments(['contribution', 'participant'], true);
+			$obj = $this->checkKeyArguments($request, [self::TAG_CONTRIBUTION, self::TAG_PARTICIPANT], true);
 			if (!$obj)
-				return;
-			$errors = array();
+				return null;
 
-			$form = new HTMLForm($this->getConfigElement('contribution-form')->children());
-			$form->setData($_POST);
-			$form->validateRequiredField('name');
-			$form->validateRequiredField('title');
-			$form->validateRequiredField('category');
+			# If a contribution id is in the url, we're
+			# editing that contribution. If a participant id
+			# was passed, we are creating a new contribution.
+			$editing = ($obj->tagName == self::TAG_CONTRIBUTION);
+
+			$form = $this->createContributionForm($request->getPostData());
+
+			$form->validateRequiredField(self::FIELD_NAME_NAME);
+			$form->validateRequiredField(self::FIELD_NAME_TITLE);
+			$form->validateRequiredField(self::FIELD_NAME_CATEGORY);
 			if (array_key_exists('image_upload', $_FILES))
-				$form->handleImageUpload('image', $_FILES['image_upload']);
+				$form->handleImageUpload(self::FIELD_NAME_IMAGE, $_FILES['image_upload']);
 
-			if ($form->errors) {
+			if (!empty($form->errors)) {
 				$this->xml->unlock();
-				// HACK: Prevent index.php from
-				// rendering the page normally, since we
-				// already rendered it. There should be
-				// a better way to achive this.
-				$hyphaPage = false;
-				// Reshow the form with submitted values
-				// and errors
-				$form->updateDom();
-				return $this->showContribute($form);
+				return $this->contributeViewRender($request, $form, $editing);
 			}
 
 			// get contribution element or create new contribution element
-			if ($obj->tagName == 'contribution') {
+			if ($obj->tagName == self::TAG_CONTRIBUTION) {
 				$contribution = $obj;
-				$editing = true;
 			} else {
-				$contribution = $this->xml->createElement('contribution');
+				$contribution = $this->xml->createElement(self::TAG_CONTRIBUTION);
 				$contribution->generateId();
-				$contribution->setAttribute('key', bin2hex(openssl_random_pseudo_bytes(8)));
-				if ($obj ->tagName == 'participant')
-					$contribution->setAttribute('participant', $obj->getAttribute('xml:id'));
+				$contribution->setAttribute(self::ATTR_CONTRIBUTION_KEY, bin2hex(openssl_random_pseudo_bytes(8)));
+				if ($obj ->tagName == self::TAG_PARTICIPANT)
+					$contribution->setAttribute(self::ATTR_CONTRIBUTION_PARTICIPANT, $obj->getId());
 
-				$this->xml->documentElement->getOrCreate('contributions')->appendChild($contribution);
-				$editing = false;
+				$this->xml->documentElement->getOrCreate(self::TAG_CONTRIBUTION_CONTAINER)->appendChild($contribution);
 			}
 
 			// set attributes
-			$contribution->setAttribute('name', $form->dataFor('name'));
-			$contribution->setAttribute('title', $form->dataFor('title'));
-			$contribution->setAttribute('category', $form->dataFor('category'));
-			$contribution->setAttribute('image', $form->dataFor('image'));
+			$contribution->setAttribute(self::ATTR_CONTRIBUTION_NAME, $form->dataFor(self::FIELD_NAME_NAME));
+			$contribution->setAttribute(self::ATTR_CONTRIBUTION_TITLE, $form->dataFor(self::FIELD_NAME_TITLE));
+			$contribution->setAttribute(self::ATTR_CONTRIBUTION_CATEGORY, $form->dataFor(self::FIELD_NAME_CATEGORY));
+			$contribution->setAttribute(self::ATTR_CONTRIBUTION_IMAGE, $form->dataFor(self::FIELD_NAME_IMAGE));
+			$contribution->setAttribute(self::ATTR_CONTRIBUTION_WEBSITE, $form->dataFor(self::FIELD_NAME_WEBSITE));
 
-			$description = $contribution->getOrCreate('description');
-			$description->setText($form->dataFor('description', ''));
+			$description = $contribution->getOrCreate(self::TAG_CONTRIBUTION_DESCRIPTION);
+			$description->setText($form->dataFor(self::FIELD_NAME_DESCRIPTION, ''));
 
-			$contribution->setAttribute('website', $form->dataFor('website'));
-
-			$notes = $contribution->getOrCreate('notes');
-			$notes->setText($form->dataFor('notes', ''));
+			$notes = $contribution->getOrCreate(self::TAG_CONTRIBUTION_NOTES);
+			$notes->setText($form->dataFor(self::FIELD_NAME_NOTES, ''));
 
 			$this->xml->saveAndUnlock();
-			$edit_url = $hyphaUrl . $hyphaContentLanguage . '/' . $this->pagename . '/contribute/' . $contribution->getAttribute('xml:id') . '/' . $contribution->getAttribute('key');
+			$edit_url = $this->constructFullPath($this->pagename . '/' . self::PATH_CONTRIBUTE . '/' . $contribution->getId() . '/' . $contribution->getAttribute(self::ATTR_CONTRIBUTION_KEY));
 
 			if (isUser()) {
-				$name = htmlspecialchars(getNameForUser());
-				$email = $hyphaUser->getAttribute('email');
-			} else if ($participant_id = $contribution->getAttribute('participant')) {
-				$participant = $this->xml->getElementById($participant_id);
-				$name = htmlspecialchars($participant->getAttribute('name'));
-				$email = $participant->getAttribute('email');
+				$user = $this->O_O->getUser();
+				$name = getNameForUser($user);
+				$email = $user->getAttribute('email');
+			} else if ($obj ->tagName == self::TAG_PARTICIPANT) {
+				$name = $obj->getAttribute(self::ATTR_PARTICIPANT_NAME);
+				$email = $obj->getAttribute(self::ATTR_PARTICIPANT_EMAIL);
 			} else {
 				$name = __('anonymous');
 				$email = false;
 			}
 
-			$digest = $name;
+			$vars = [
+				'name' => htmlspecialchars($name),
+				'contribution'=> htmlspecialchars($contribution->getAttribute(self::ATTR_CONTRIBUTION_TITLE) . ' - ' . $contribution->getAttribute(self::ATTR_CONTRIBUTION_NAME)),
+			];
 			if ($editing)
-				$digest .= __('festival-edited-contribution');
+				$digest = __('festival-edited-contribution', $vars);
 			else
-				$digest .= __('festival-added-contribution');
+				$digest = __('festival-added-contribution', $vars);
 
-			$digest .= $contribution->getAttribute('title') . ' - ' . $contribution->getAttribute('name');
-			$digest .= ' (<a href="' . $edit_url . '">Edit contribution</a>)';
+			$digest .= ' (<a href="' . $edit_url . '">' . __('festival-digest-edit-contribution') . '</a>)';
 			writeToDigest($digest, 'festival-contribution');
 
 			if (!$editing && $email) {
-				$edit_url = $hyphaUrl . $hyphaContentLanguage . '/' . $this->pagename . '/contribute/' . $contribution->getAttribute('xml:id') . '/' . $contribution->getAttribute('key');
-				$append = '<p><a href="'.htmlspecialchars($edit_url).'">'.__('festival-edit-contribution') . '</a></p>';
-				$this->sendMail($email, 'mail-added-contribution', $append);
+				$edit_url = $this->constructFullPath($this->pagename . '/' . self::PATH_CONTRIBUTE . '/' . $contribution->getId() . '/' . $contribution->getAttribute(self::ATTR_CONTRIBUTION_KEY));
+
+				// Send email
+				$vars = [
+					'festival-title' => $this->getConfig(self::CONFIG_ID_TITLE),
+					'title' => $contribution->getAttribute(self::ATTR_CONTRIBUTION_TITLE),
+					'editlink' => $edit_url,
+				];
+				$this->sendMail($email, 'festival-contribution-added', $vars);
 			}
 
 			if ($editing)
@@ -648,20 +848,19 @@ EOF;
 			else
 				notify('success', __('festival-contribution-added'));
 
-			$lineup_url = $hyphaUrl . $hyphaContentLanguage . '/' . $this->pagename . '/lineup';
+			$lineup_url = $this->constructFullPath($this->pagename . '/lineup');
 			return ['redirect', $lineup_url];
 		}
 
 
-		function showLineup() {
-			global $hyphaHtml;
+		protected function lineupView(HyphaRequest $request) {
 			$html = '';
-			$contributions = $this->xml->documentElement->getOrCreate('contributions')->children();
+			$contributions = $this->xml->documentElement->getOrCreate(self::TAG_CONTRIBUTION_CONTAINER)->children();
 			foreach($contributions as $contribution) {
 				$html.= $this->buildContribution($contribution);
 				$html.= '<div class="hbar"></div>';
 			}
-			$this->html->find('#pagename')->text(__('festival-lineup-for') . $this->getConfig('festival-title'));
+			$this->html->find('#pagename')->text(__('festival-lineup-for') . $this->getConfig(self::CONFIG_ID_TITLE));
 			$this->html->find('#main')->html($html);
 		}
 
@@ -669,105 +868,84 @@ EOF;
 		 * Build the HTML for a single contribution in the
 		 * lineup.
 		 */
-		function buildContribution($contribution) {
-			global $hyphaUrl, $hyphaContentLanguage;
-			$html = '<div class="infoact">';
+		protected function buildContribution($contribution) {
+			$html = '<div class="contribution">';
 			// artist and title
-			$id = $contribution->getAttribute('xml:id');
-			$url = $hyphaUrl . $hyphaContentLanguage . '/' . $this->pagename . '/lineup#' . $id;
-			$editurl = $hyphaContentLanguage .'/'.$this->pagename.'/contribute/'.$contribution->getAttribute('xml:id');
+			$id = $contribution->getId();
+			$url = $this->constructFullPath($this->pagename . '/lineup#' . $id);
+			$editurl = $this->constructFullPath($this->pagename.'/' . self::PATH_CONTRIBUTE . '/'.$contribution->getId());
 
 			$title = '';
-			if ($contribution->getAttribute('category'))
-				$title .= $contribution->getAttribute('category') . ': ';
-			if ($contribution->getAttribute('name'))
-				$title .= $contribution->getAttribute('name');
-			if ($contribution->getAttribute('name') && $contribution->getAttribute('title'))
+			if ($contribution->getAttribute(self::ATTR_CONTRIBUTION_CATEGORY))
+				$title .= $contribution->getAttribute(self::ATTR_CONTRIBUTION_CATEGORY) . ': ';
+			if ($contribution->getAttribute(self::ATTR_CONTRIBUTION_NAME))
+				$title .= $contribution->getAttribute(self::ATTR_CONTRIBUTION_NAME);
+			if ($contribution->getAttribute(self::ATTR_CONTRIBUTION_NAME) && $contribution->getAttribute(self::ATTR_CONTRIBUTION_TITLE))
 				$title .= ' - ';
-			if ($contribution->getAttribute('title'))
-				$title .= $contribution->getAttribute('title');
+			if ($contribution->getAttribute(self::ATTR_CONTRIBUTION_TITLE))
+				$title .= $contribution->getAttribute(self::ATTR_CONTRIBUTION_TITLE);
 
-			$html.= '<a id="'.$id.'" href="'.$url.'" style="font-size:15pt; font-weight:bold; clear:left;">'.$title.'</a>';
+			$html.= '<h2 id="'.htmlspecialchars($id).'"><a href="'.htmlspecialchars($url).'">'.htmlspecialchars($title).'</a>';
 			if (isUser())
 				$html.= ' (<a class="edit" href="'.$editurl.'">'.__('festival-edit-contribution').'</a>)';
-			$html.= '<p/>';
+			$html.= '</h2>';
+
 			// image and description
-			$image_filename = $contribution->getAttribute('image');
+			$image_filename = $contribution->getAttribute(self::ATTR_CONTRIBUTION_IMAGE);
 			if ($image_filename) {
 				$img_width = 150;
 				$img_height = 150;
 				$image = new HyphaImage($image_filename);
-				$html.= '<a href="'.$image->getUrl().'"><img style="float:left; border:0px; margin-right:10px;" src="'.$image->getUrl($img_width, $img_height).'"/></a>';
+				$html.= '<a href="'.htmlspecialchars($image->getUrl()).'"><img src="'.htmlspecialchars($image->getUrl($img_width, $img_height)).'"/></a>';
 			}
-			$description = $contribution->getElementsByTagName('description')->Item(0);
+			$description = $contribution->getElementsByTagName(self::TAG_CONTRIBUTION_DESCRIPTION)->Item(0);
 			if ($description) $html.= nl2br(htmlspecialchars($description->text()));
-			$html.= '<p style="clear:left;"/>';
-			// icons
-			$html.= '<div style="float:right; padding-top:5px; padding-left:5px;">';
-			foreach($contribution->getElementsByTagName('icon') as $icon) {
-				$html.= '<a href="'.$icon->getAttribute('website').'"><img style="border:0px;" src="images/'.$icon->getAttribute('source').'"/></a>';
-			}
-			$html.= '</div>';
 
-			$days = $this->getConfigElement('days', 'config')->children();
-			$locations = $this->getConfigElement('locations', 'config')->children();
+			$days = $this->getConfigElement(self::CONFIG_ID_DAYS, self::CONFIG_TAG_DAYS)->children();
+			$locations = $this->getConfigElement(self::CONFIG_ID_LOCATIONS, self::CONFIG_TAG_LOCATIONS)->children();
 			foreach($days as $day) {
 				$timesHtml = '';
-				foreach($contribution->getElementsByTagName('event') as $event) {
-					if ($event->getAttribute('day') == $day->getId()) {
-						if ($event->getAttribute('begin')) {
-							$timesHtml .= '&#160;&#160;&#160;'.$event->getAttribute('begin').'-'.$event->getAttribute('end');
-							foreach($locations as $location) if ($location->getId() == $event->getAttribute('location')) {
-								$timesHtml.= ', '.$location->getAttribute('display');
+				foreach($contribution->getElementsByTagName(self::TAG_CONTRIBUTION_EVENT) as $event) {
+					if ($event->getAttribute(self::ATTR_EVENT_DAY) == $day->getId()) {
+						if ($event->getAttribute(self::ATTR_EVENT_BEGIN)) {
+							$timesHtml .= '<div class="time-and-place">'.htmlspecialchars($event->getAttribute(self::ATTR_EVENT_BEGIN).'-'.$event->getAttribute(self::ATTR_EVENT_END));
+							foreach($locations as $location) if ($location->getId() == $event->getAttribute(self::ATTR_EVENT_LOCATION)) {
+								$timesHtml.= ', '.htmlspecialchars($location->getAttribute(self::ATTR_LOCATION_DISPLAY));
 							}
-							$timesHtml.='<br/>';
+							$timesHtml .= '</div>';
 						}
 					}
 				}
-				if ($timesHtml) $html.= '<b>'.$day->getAttribute('display').'</b><br/>'.$timesHtml;
+				if ($timesHtml) $html.= '<div class="event"><div class="date">'.htmlspecialchars($day->getAttribute(self::ATTR_DAY_DISPLAY)).'</div>'.$timesHtml;
 			}
-			// price and duration
-			if ($contribution->hasAttribute('price') || $contribution->hasAttribute('duration')) {
-				$price = $contribution->hasAttribute('price') && $contribution->getAttribute('price') ? __('price').': '.$contribution->getAttribute('price') : '';
-				$duration = $contribution->hasAttribute('duration') && $contribution->getAttribute('duration') ? $contribution->getAttribute('duration') : '';
-				$html.= '<b>'.$price.($price && $duration ? ' | ' : '').$duration.'</b><br/>';
-			}
-			$website = htmlspecialchars($contribution->getAttribute('website'));
+			$website = htmlspecialchars($contribution->getAttribute(self::ATTR_CONTRIBUTION_WEBSITE));
 			if ($website)
-				$html.= "<a href=\"$website\">$website</a>";
-			// additional urls
-			foreach($contribution->getElementsByTagName('contact') as $contact) {
-				if ($contact->hasAttribute('website') && $contact->getAttribute('website')) $html.= '<a style="text-decoration: none;color:#d2691e;" href="'.$contact->getAttribute('website').'">'.$contact->getAttribute('website').'</a>';
-			}
+				$html.= "<div class=\"website\"><a href=\"$website\">$website</a></div>";
 			$html.= '</div>';
-			$html.= '<p style="clear:right;"/>';
 
 			return $html;
 		}
 
-		function showTimetable() {
-			global $hyphaHtml, $hyphaContentLanguage, $hyphaUrl;
-
+		protected function timetableView(HyphaRequest $request) {
 			// Make a list of all days, and per day all
 			// locations and the begin and end time.
-			$contributions = $this->xml->documentElement->getOrCreate('contributions')->children();
-			$days = $this->getConfigElement('days', 'config')->children();
-			$locations = $this->getConfigElement('locations', 'config')->children();
+			$contributions = $this->xml->documentElement->getOrCreate(self::TAG_CONTRIBUTION_CONTAINER)->children();
+			$days = $this->getConfigElement(self::CONFIG_ID_DAYS, self::CONFIG_TAG_DAYS)->children();
+			$locations = $this->getConfigElement(self::CONFIG_ID_LOCATIONS, self::CONFIG_TAG_LOCATIONS)->children();
 
 			// iterate over all dates
 			$html = '';
 			$d = 0;
 			foreach($days as $day) {
-				// TODO: If begin and end not set, autodetect?
-				$daybegin = $day->getAttribute('begin');
-				$dayend = $day->getAttribute('end');
+				$daybegin = $day->getAttribute(self::ATTR_DAY_BEGIN);
+				$dayend = $day->getAttribute(self::ATTR_DAY_END);
 
 				foreach($contributions as $contribution) {
-					$events = $contribution->getElementsByTagName('event');
+					$events = $contribution->getElementsByTagName(self::TAG_CONTRIBUTION_EVENT);
 					foreach($events as $event) {
-						$eventday = $event->getAttribute('day');
-						$eventbegin = $event->getAttribute('begin');
-						$eventend = $event->getAttribute('end');
+						$eventday = $event->getAttribute(self::ATTR_EVENT_DAY);
+						$eventbegin = $event->getAttribute(self::ATTR_EVENT_BEGIN);
+						$eventend = $event->getAttribute(self::ATTR_EVENT_END);
 						if ($eventbegin && $eventend && $eventday == $day->getId()) {
 							if (!$daybegin || $eventbegin < $daybegin)
 								$daybegin = $eventbegin;
@@ -778,12 +956,15 @@ EOF;
 				}
 
 				// output date header
-				$html.= '<br/><br/><h1>'.$day->getAttribute('display').'</h1><br/>';
+				$html.= '<br/><br/><h1>'.$day->getAttribute(self::ATTR_DAY_DISPLAY).'</h1><br/>';
 				$html.= "<table class=\"festivalTimetable\">";
 
 				// output row of invisible images to force a more or less regular time grid
+				// of 5 minute intervals (12 per hour)
 				$html.= "<tr><td></td>";
-				for ($c = 12*substr($daybegin,0,2); $c < 12*substr($dayend,0,2); $c++) $html.= '<td style="min-width: 10px;"></td>';
+				$hourstart = intval(substr($daybegin,0,2));
+				$hourend = intval(substr($dayend,0,2));
+				for ($c = 12*$hourstart; $c < 12*$hourend; $c++) $html.= '<td style="min-width: 10px;"></td>';
 				$html.= '</tr>';
 
 				// iterate over all locations
@@ -793,10 +974,16 @@ EOF;
 					// generate a list of events for the given date and location
 					$locevents = [];
 					foreach($contributions as $contribution) {
-						$events = $contribution->getElementsByTagName('event');
+						$events = $contribution->getElementsByTagName(self::TAG_CONTRIBUTION_EVENT);
 						foreach($events as $event) {
-							if ($event->getAttribute('day') == $day->getId() && $event->getAttribute('location') == $location->getId())
-								$locevents[] = $this->timetocols($daybegin, $event->getAttribute('begin')).'|'.$this->timetocols($daybegin, $event->getAttribute('end')).'|'.$contribution->getAttribute('artist').'|'.$contribution->getId().'|'.$contribution->getAttribute('title');
+							if ($event->getAttribute(self::ATTR_EVENT_DAY) == $day->getId() && $event->getAttribute(self::ATTR_EVENT_LOCATION) == $location->getId())
+								$locevents[] = [
+									$this->timetocols($daybegin, $event->getAttribute(self::ATTR_EVENT_BEGIN)),
+									$this->timetocols($daybegin, $event->getAttribute(self::ATTR_EVENT_END)),
+									$contribution->getAttribute(self::ATTR_CONTRIBUTION_NAME),
+									$contribution->getId(),
+									$contribution->getAttribute(self::ATTR_CONTRIBUTION_TITLE),
+								];
 						}
 					}
 
@@ -806,10 +993,10 @@ EOF;
 						$endOfLastTimeSlot = 0;
 						$p=0;
 						while($p<count($locevents)) {
-							$timeslot = explode('|',$locevents[$p]);
+							$timeslot = $locevents[$p];
 							if ($timeslot[0]>=$endOfLastTimeSlot) {
 								$endOfLastTimeSlot = $timeslot[1];
-								$row[] = implode('|',$timeslot);
+								$row[] = $timeslot;
 								array_splice($locevents, $p, 1);
 							}
 							else $p++;
@@ -817,7 +1004,7 @@ EOF;
 						// every 6 rows output time grid
 						if ($line%6==0) {
 							$html.= '<tr><th><div style="text-align:right;">'.__('time').'</div><div style="text-align:left;">'.__('location').'</div></th>';
-							for ($c = substr($daybegin,0,2); $c < substr($dayend,0,2); $c++) {
+							for ($c = $hourstart; $c < $hourend; $c++) {
 								$html.= '<th class="timeGridOdd" colspan="6">'.$c.'</th>';
 								$html.= '<th class="timeGridEven" colspan="6"></th>';
 							}
@@ -826,16 +1013,13 @@ EOF;
 						// output events
 						$id = 'a'.$d.'_'.$l;
 						$html.= '<tr class="'.($line%2 ? 'tableRowOdd' : 'tableRowEven').'">';
-						$html.= '<td id="'.$id.'" class="hover tableRowHeading '.($line%2 ? 'tableRowHeadingOdd' : 'tableRowHeadingEven').'" >'.$location->getAttribute('display').'</td>';
-						//$html.= '<td id="'.$id.'" class="hover tableRowHeading '.($line%2 ? 'tableRowHeadingOdd' : 'tableRowHeadingEven').'" onmouseover="showhide(\''.$id.'\',100,-10,\'location\',\''.$location->getAttribute('id').'\');" onmouseout="showhide();">'.$location->getAttribute('name').'</td>';
-						$t = $daybegin;
+						$html.= '<td id="'.$id.'" class="hover tableRowHeading '.($line%2 ? 'tableRowHeadingOdd' : 'tableRowHeadingEven').'" >'.$location->getAttribute(self::ATTR_LOCATION_DISPLAY).'</td>';
 						$t = 0;
 						for ($r=0; $r<count($row); $r++) {
-							$timeslot = explode('|', $row[$r]);
+							$timeslot = $row[$r];
 							$id = "a".$d.'_'.$l.'_'.$r;
 							if ($timeslot[0] - $t) $html.= '<td class="'.($line%2 ? 'tableRowOdd' : 'tableRowEven').'" colspan="'.($timeslot[0] - $t).'"></td>';
-							//$html.= '<td id="'.$id.'" class="hover tableAct '.($line%2 ? 'tableRowOddAct' : 'tableRowEvenAct').'" colspan="'.($timeslot[1] - $timeslot[0]).'" onmouseover="showhide(\''.$id.'\',-120,0,\'act\',\''.$timeslot[3].'\');" onmouseout="showhide();">'.$timeslot[2];
-							$lineup_url = $hyphaUrl . $hyphaContentLanguage . '/' . $this->pagename . '/lineup';
+							$lineup_url = $this->constructFullPath($this->pagename . '/lineup');
 							$html.= '<td id="'.$id.'" class="hover tableAct '.($line%2 ? 'tableRowOddAct' : 'tableRowEvenAct').'" colspan="'.($timeslot[1] - $timeslot[0]).'"><a href="'.htmlspecialchars($lineup_url).'#'.htmlspecialchars($timeslot[3]).'">'.htmlspecialchars($timeslot[2]);
 							if ($timeslot[2] && $timeslot[4]) $html.= ' - ';
 							$html.= '<i>'.$timeslot[4].'</i></a></td>';
@@ -850,15 +1034,14 @@ EOF;
 				$html.= '</table>';
 				$d++;
 			}
-			$this->html->find('#pagename')->text(__('festival-timetable-for') . $this->getConfig('festival-title'));
+			$this->html->find('#pagename')->text(__('festival-timetable-for') . $this->getConfig(self::CONFIG_ID_TITLE));
 			$this->html->find('#main')->html($html);
 		}
 
-		function timetocols($t1, $t2) {
-			$c1=12*substr($t1,0,2) + substr($t1,3,2)/5;
-			$c2=12*substr($t2,0,2) + substr($t2,3,2)/5;
-			$c = $c2 - $c1;
-			return str_repeat("0", 3-strlen($c)).$c;
+		protected function timetocols($t1, $t2) {
+			$c1=12*intval(substr($t1,0,2)) + intval(substr($t1,3,2))/5;
+			$c2=12*intval(substr($t2,0,2)) + intval(substr($t2,3,2))/5;
+			return $c2 - $c1;
 		}
 
 		/**
@@ -866,10 +1049,10 @@ EOF;
 		 * participant and create an initial payment.
 		 * Should be called with the XML lock held.
 		 */
-		function setupPayment($participant, $amount) {
+		protected function setupPayment($participant, $amount) {
 			$participant->ownerDocument->requireLock();
-			$participant->setAttribute('payment-description', $this->getConfig('festival-title') . ' - ' . $participant->getAttribute('name'));
-			$participant->setAttribute('payment-amount', $amount);
+			$participant->setAttribute(self::ATTR_PARTICIPANT_PAYMENT_DESCRIPTION, $this->getConfig(self::CONFIG_ID_TITLE) . ' - ' . $participant->getAttribute(self::ATTR_PARTICIPANT_NAME));
+			$participant->setAttribute(self::ATTR_PARTICIPANT_PAYMENT_AMOUNT, $amount);
 			// Create a payment right away. This ensures
 			// that even if the user never clicks the
 			// payment button, this payment will expire and
@@ -884,11 +1067,10 @@ EOF;
 		 * its status.
 		 * Should be called with the XML lock held.
 		 */
-		function createPayment($participant) {
-			global $hyphaUrl, $hyphaContentLanguage;
+		protected function createPayment($participant) {
 			$participant->ownerDocument->requireLock();
-			$complete_url = $hyphaUrl . $hyphaContentLanguage . '/' . $this->pagename . '/pay/' . $participant->getAttribute('xml:id') . '/' . $participant->getAttribute('key');
-			$hook_url = $hyphaUrl . $hyphaContentLanguage . '/' . $this->pagename . '/paymenthook/' . $participant->getAttribute('xml:id') . '/' . $participant->getAttribute('key');
+			$complete_url = $this->constructFullPath($this->pagename . '/' . self::PATH_PAY . '/' . $participant->getId() . '/' . $participant->getAttribute(self::ATTR_PARTICIPANT_KEY));
+			$hook_url = $this->constructFullPath($this->pagename . '/' . self::PATH_PAYMENTHOOK . '/' . $participant->getId() . '/' . $participant->getAttribute(self::ATTR_PARTICIPANT_KEY));
 
 			// load Mollie script
 			require_once('system/Mollie/API/Autoloader.php');
@@ -897,14 +1079,14 @@ EOF;
 
 			// create payment
 			$payment = $mollie->payments->create([
-				"amount"       => $participant->getAttribute('payment-amount'),
-				"description"  => $participant->getAttribute('payment-description'),
+				"amount"       => $participant->getAttribute(self::ATTR_PARTICIPANT_PAYMENT_AMOUNT),
+				"description"  => $participant->getAttribute(self::ATTR_PARTICIPANT_PAYMENT_DESCRIPTION),
 				"redirectUrl"  => $complete_url,
 				"webhookUrl"   => $hook_url,
 			]);
 
-			$participant->setAttribute('payment-id', $payment->id);
-			$participant->setAttribute('payment-status', $payment->status);
+			$participant->setAttribute(self::ATTR_PARTICIPANT_PAYMENT_ID, $payment->id);
+			$participant->setAttribute(self::ATTR_PARTICIPANT_PAYMENT_STATUS, $payment->status);
 
 			return $payment;
 		}
@@ -914,32 +1096,31 @@ EOF;
 		 * sending out any mails or digests as needed.
 		 *
 		 * When the payment is complete (successful or
-		 * unsuccessful), NULL is returned. If the payment is
+		 * unsuccessful), null is returned. If the payment is
 		 * still open, the url to redirect to is returned.
 		 *
 		 * When create_new is true, a new payment is created if
 		 * the existing one is not paid but no longer opened
 		 * (e.g. expired, failed or cancelled). In this case, a
-		 * NULL return value means the payment was successful.
+		 * null return value means the payment was successful.
 		 *
 		 * Should be called with the XML lock held.
 		 */
-		function checkPayment($participant, $create_new = false) {
+		protected function checkPayment($participant, $create_new = false) {
 			// load Mollie script
 			require_once('system/Mollie/API/Autoloader.php');
 			$mollie = new Mollie_API_Client;
 			$mollie->setApiKey($this->getConfig('mollie-key'));
-			$changed = false;
 
 			$this->xml->requireLock();
-			$payment = $mollie->payments->get($participant->getAttribute('payment-id'));
+			$payment = $mollie->payments->get($participant->getAttribute(self::ATTR_PARTICIPANT_PAYMENT_ID));
 
 			// If the status changed, process the change. If
 			// $create_new is true, do not send any "failed"
 			// e-mails, which would only be confusing when
 			// the user is about to start a new payment
 			// attempt.
-			if ($participant->getAttribute('payment-status') != $payment->status)
+			if ($participant->getAttribute(self::ATTR_PARTICIPANT_PAYMENT_STATUS) != $payment->status)
 				$this->processPaymentChange($participant, $payment, !$create_new);
 
 			// If the payment is not complete and not open,
@@ -951,7 +1132,7 @@ EOF;
 			if ($payment->isOpen())
 				return $payment->getPaymentUrl();
 			else
-				return NULL;
+				return null;
 		}
 
 		/**
@@ -962,28 +1143,31 @@ EOF;
 		 * failed payment, but a note is still added to the
 		 * digest.
 		 */
-		function processPaymentChange($participant, $payment, $mail_failed) {
-			global $hyphaUrl, $hyphaContentLanguage;
-			$participant->setAttribute('payment-status', $payment->status);
+		protected function processPaymentChange($participant, $payment, $mail_failed) {
+			$participant->setAttribute(self::ATTR_PARTICIPANT_PAYMENT_STATUS, $payment->status);
 			if ($payment->isPaid()) {
-				if (!$participant->getAttribute('payment-timestamp')) {
-					$participant->setAttribute('payment-timestamp', $payment->paidDatetime);
+				if (!$participant->getAttribute(self::ATTR_PARTICIPANT_PAYMENT_TIMESTAMP)) {
+					$participant->setAttribute(self::ATTR_PARTICIPANT_PAYMENT_TIMESTAMP, $payment->paidDatetime);
 
 					// Send email
-					$contribute_url = $hyphaUrl . $hyphaContentLanguage . '/' . $this->pagename . '/contribute/' . $participant->getAttribute('xml:id') . '/' . $participant->getAttribute('key');
-					$append = '<p><a href="'.htmlspecialchars($contribute_url).'">'.__('festival-contribute') . '</a></p>';
-					$this->sendMail($participant->getAttribute('email'), 'mail-signed-up-payed', $append);
+					$contribute_url = $this->constructFullPath($this->pagename . '/' . self::PATH_CONTRIBUTE . '/' . $participant->getId() . '/' . $participant->getAttribute(self::ATTR_PARTICIPANT_KEY));
+					$vars = [
+						'festival-title' => $this->getConfig(self::CONFIG_ID_TITLE),
+						'contributelink' => $contribute_url,
+					];
+					$rcpt = $participant->getAttribute(self::ATTR_PARTICIPANT_EMAIL);
+					$this->sendMail($rcpt, 'festival-payment-succesful', $vars);
 
 					// Add to digest
-					$digest = htmlspecialchars($participant->getAttribute('name') . __('festival-payed-for') . $this->getConfig('festival-title'));
-					$digest .= ' (€' . $participant->getAttribute('payment-amount') . ')';
+					$digest = htmlspecialchars($participant->getAttribute(self::ATTR_PARTICIPANT_NAME) . __('festival-payed-for') . $this->getConfig(self::CONFIG_ID_TITLE));
+					$digest .= ' (€' . $participant->getAttribute(self::ATTR_PARTICIPANT_PAYMENT_AMOUNT) . ')';
 					$digest .= ' (<a href="' . $contribute_url . '">Add contribution</a>)';
 					writeToDigest($digest, 'festival-payment');
 				}
 
 				// Payment complete, no payment url to
 				// redirect to
-				return NULL;
+				return null;
 			}
 
 			$error_statuses = [
@@ -993,23 +1177,26 @@ EOF;
 			];
 			if (in_array($payment->status, $error_statuses)) {
 				if ($mail_failed) {
-					$pay_url = $hyphaUrl . $hyphaContentLanguage . '/' . $this->pagename . '/pay/' . $participant->getAttribute('xml:id') . '/' . $participant->getAttribute('key');
-					$append = '<p><a href="'.htmlspecialchars($pay_url).'">'.__('festival-restart-payment') . '</a></p>';
-					$this->sendMail($participant->getAttribute('email'), 'mail-payment-failed', $append);
+					$pay_url = $this->constructFullPath($this->pagename . '/' . self::PATH_PAY . '/' . $participant->getId() . '/' . $participant->getAttribute(self::ATTR_PARTICIPANT_KEY));
+					$vars = [
+						'festival-title' => $this->getConfig(self::CONFIG_ID_TITLE),
+						'paylink' => $pay_url,
+					];
+					$rcpt = $participant->getAttribute(self::ATTR_PARTICIPANT_EMAIL);
+					$this->sendMail($rcpt, 'festival-payment-failed', $vars);
 				}
-				$digest = htmlspecialchars($participant->getAttribute('name') . __('festival-failed-to-pay-for') . $this->getConfig('festival-title') . ' (' . $payment->status . ')');
+				$digest = htmlspecialchars($participant->getAttribute(self::ATTR_PARTICIPANT_NAME) . __('festival-failed-to-pay-for') . $this->getConfig(self::CONFIG_ID_TITLE) . ' (' . $payment->status . ')');
 				writeToDigest($digest, 'error');
 			}
 		}
 
 		/**
-		 * Retrieve the given mail from the config and send it,
-		 * appending the given bit of HTML.
+		 * Retrieve the given mail from the translations and send it,
+		 * interpolating the given variables.
 		 */
-		function sendMail($to, $id, $append) {
-			$elem = $this->getConfigElement($id);
-			$body = $elem->html() . $append;
-			$subject = $elem->getAttribute('subject');
+		protected function sendMail($to, $id, $vars) {
+			$subject = __($id . '-subject', $vars);
+			$body = __($id . '-body', $vars);
 
 			return sendMail($to, $subject, $body);
 		}
@@ -1028,23 +1215,52 @@ EOF;
 		 * even if the key is not present. If no id is present
 		 * either, the user object itself will be returned.
 		 */
-		function checkKeyArguments($tags, $allow_user = false) {
-			global $hyphaUser;
-			$id = $this->getArg(1);
+		protected function checkKeyArguments(HyphaRequest $request, array $tags, $allow_user = false) {
+			$id = $request->getArg(1);
 			if ($id) {
 				$obj = $this->xml->getElementById($id);
 				if ($obj && in_array($obj->tagName, $tags)) {
-					$key = $this->getArg(2);
-					if (!$key && $allow_user && isUser() ||
-					    $key && $obj->getAttribute('key') == $key) {
+					$key = $request->getArg(2);
+					if (!$key && $allow_user && $this->O_O->isUser() ||
+					    $key && $obj->getAttribute(self::ATTR_KEY) == $key) {
 						return $obj;
 					}
 				}
-			} else if ($allow_user && isUser()) {
-				return $hyphaUser;
+			} else if ($allow_user && $this->O_O->isUser()) {
+				return $this->O_O->getUser();
 			}
 			notify('error', __('invalid-or-no-key'));
 			return false;
 		}
 
+		/**
+		 * @todo [LRM]: move so it can be used throughout Hypha
+		 * @param string $label
+		 * @param null|string $path
+		 * @param null|string $command
+		 * @param null|string $argument
+		 *
+		 * @return string
+		 */
+		protected function makeActionButton($label, $path = null, $command = null, $argument = null) {
+			$path = $this->language . '/' . $this->pagename . ($path ? '/' . $path : '');
+			$_action = makeAction($path, ($command ? $command : ''), ($argument ? $argument : ''));
+
+			return makeButton(__($label), $_action);
+		}
+
+		/**
+		 * @todo [LRM]: move so it can be used throughout Hypha
+		 * @param string $path
+		 * @param null|string $language
+		 *
+		 * @return string
+		 */
+		protected function constructFullPath($path, $language = null) {
+			$rootUrl = $this->O_O->getRequest()->getRootUrl();
+			$language = null == $language ? $this->language : $language;
+			$path = '' == $path ? '' : '/' . $path;
+
+			return $rootUrl . $language . $path;
+		}
 	}
