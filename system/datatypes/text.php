@@ -64,7 +64,7 @@
 			// setup addition widgets when client is logged in
 			if (isUser()) {
 				// show a drop down list of revisions
-				$this->html->writeToElement('versionList', versionSelector($this));
+				$this->html->writeToElement('versionList', versionSelector($this, $this->xml));
 
 				// if a revision is selected, show a 'revert' command button
 				if ($version) {

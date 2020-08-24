@@ -608,13 +608,13 @@ EOF;
 		Parameters:
 		page - page node from hypha pagelist
 	*/
-	function versionSelector($page) {
-		if ($page->xml->hasVersions()) {
+	function versionSelector($page, $xml) {
+		if ($xml->hasVersions()) {
 			$_action = makeAction($page->language.'/'.$page->pagename, '', 'version');
 			$html = __('version').': '.'<select class="version" name="version" onchange="'.$_action.'">';
 
 			$history = array();
-			foreach($page->xml->getElementById($page->language)->getElementsByTagName('version') as $v) {
+			foreach($xml->getElementById($page->language)->getElementsByTagName('version') as $v) {
 				$timeStamp = $v->getAttribute('xml:id');
 				$history[$timeStamp] = date('j-m-y, H:i', ltrim($timeStamp, 't')).', '.$v->getAttribute('author');
 			}
