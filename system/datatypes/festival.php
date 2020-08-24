@@ -10,7 +10,7 @@
 	Class: festivalpage
  */
 	class festivalpage extends HyphaDatatypePage {
-		public $xml;
+		protected $xml;
 
 		const FIELD_NAME_AMOUNT = 'amount';
 		const FIELD_NAME_CATEGORY = 'category';
@@ -102,7 +102,7 @@
 			return __('datatype.name.festivalpage');
 		}
 
-		function process(HyphaRequest $request) {
+		public function process(HyphaRequest $request) {
 			$this->html->writeToElement('pagename', showPagename($this->pagename) . ' ' . asterisk($this->privateFlag));
 
 			if (isUser() && !in_array($request->getView(), [self::PATH_SETTINGS])) {
@@ -155,7 +155,7 @@
 		 * attribute from it. If no attribute is given, the
 		 * "value" attribute is returned.
 		 */
-		function getConfig($id, $attribute = self::CONFIG_ATTR_VALUE) {
+		protected function getConfig($id, $attribute = self::CONFIG_ATTR_VALUE) {
 			$config = $this->getConfigElement($id);
 			if (!$config)
 				return '';
@@ -170,7 +170,7 @@
 		 * it is created using the given tagname. Otherwise,
 		 * null is returned.
 		 */
-		function getConfigElement($id, $tagname = null) {
+		protected function getConfigElement($id, $tagname = null) {
 			$elem = $this->xml->getElementById($id);
 			if (!$elem && $tagname) {
 				$elem = $this->xml->createElement($tagname);
@@ -187,7 +187,7 @@
 		 * is set. If the tag does not exist, it is created,
 		 * using the given tagname.
 		 */
-		function setConfig($id, $value, $tagname = self::CONFIG_TAG, $attribute = self::CONFIG_ATTR_VALUE) {
+		protected function setConfig($id, $value, $tagname = self::CONFIG_TAG, $attribute = self::CONFIG_ATTR_VALUE) {
 			$config = $this->getConfigElement($id, $tagname);
 			return $config->setAttribute($attribute, $value);
 		}
@@ -195,7 +195,7 @@
 		/**
 		 * Show the admin display with registrations.
 		 */
-		function participantsView(HyphaRequest $request) {
+		protected function participantsView(HyphaRequest $request) {
 			if (!isUser()) return notify('error', __('login-to-edit'));
 
 			$stats = [];
@@ -246,7 +246,7 @@
 		/**
 		 * Show the admin display with contributions.
 		 */
-		function contributionsView(HyphaRequest $request) {
+		protected function contributionsView(HyphaRequest $request) {
 			// TODO: Styling
 			if (!isUser()) return notify('error', __('login-to-edit'));
 			$table = new HTMLTable();
@@ -289,7 +289,7 @@
 		/**
 		 * @return HTMLForm
 		 */
-		function createSettingsForm(array $values=[]) {
+		protected function createSettingsForm(array $values=[]) {
 			$html = <<<EOF
 				<table>
 					<tr>
@@ -308,7 +308,7 @@ EOF;
 			return new HTMLForm($html, $values);
 		}
 
-		function settingsView(HyphaRequest $request) {
+		protected function settingsView(HyphaRequest $request) {
 			if (!isUser()) return notify('error', __('login-to-edit'));
 
 			// create form
@@ -332,7 +332,7 @@ EOF;
 			return null;
 		}
 
-		function settingsSaveAction(HyphaRequest $request) {
+		protected function settingsSaveAction(HyphaRequest $request) {
 			if (!isUser()) return notify('error', __('login-to-edit'));
 
 			// create form
@@ -352,7 +352,7 @@ EOF;
 			return ['redirect', $this->constructFullPath($this->pagename)];
 		}
 
-		function deleteAction(HyphaRequest $request) {
+		protected function deleteAction(HyphaRequest $request) {
 			if (!isAdmin()) return notify('error', __('login-as-admin-to-delete'));
 
 			$this->deletePage();
@@ -412,12 +412,12 @@ EOF;
 		/**
 		 * The signup form. Here's where the fun starts.
 		 */
-		function signupView(HyphaRequest $request) {
+		protected function signupView(HyphaRequest $request) {
 			$form = $this->createSignupForm();
 			return $this->signupViewRender($request, $form);
 		}
 
-		function signupViewRender(HyphaRequest $request, HTMLForm $form) {
+		protected function signupViewRender(HyphaRequest $request, HTMLForm $form) {
 			$form->updateDom();
 
 			$this->html->find('#main')->append($form);
@@ -434,7 +434,7 @@ EOF;
 		 * /contribute, depending on whether there is something to
 		 * pay.
 		 */
-		function signupAction(HyphaRequest $request) {
+		protected function signupAction(HyphaRequest $request) {
 			// create form
 			$form = $this->createSignupForm($request->getPostData());
 
@@ -486,7 +486,7 @@ EOF;
 		 * For unpaid registrations, show a message that
 		 * confirmation is needed.
 		 */
-		function confirmationNeededView(HyphaRequest $request) {
+		protected function confirmationNeededView(HyphaRequest $request) {
 			$this->html->find('#pagename')->text(__('festival-confirmation-needed'));
 			$main = $this->html->find('#main');
 			$message = __('festival-complete-by-confirming');
@@ -498,7 +498,7 @@ EOF;
 		 * For unpaid registrations, this link needs to be
 		 * clicked to confirm the registration.
 		 */
-		function confirmView(HyphaRequest $request) {
+		protected function confirmView(HyphaRequest $request) {
 			$this->xml->lockAndReload();
 			$participant = $this->checkKeyArguments($request, [self::TAG_PARTICIPANT]);
 			if (!$participant) {
@@ -541,7 +541,7 @@ EOF;
 		 * is already complete, this redirects to the
 		 * /contribute page.
 		 */
-		function payView(HyphaRequest $request) {
+		protected function payView(HyphaRequest $request) {
 			$this->xml->lockAndReload();
 			$participant = $this->checkKeyArguments($request, [self::TAG_PARTICIPANT]);
 			if (!$participant) {
@@ -574,7 +574,7 @@ EOF;
 		 * the payment was already completed, then it redirects
 		 * to the /contribute page.
 		 */
-		function payAction(HyphaRequest $request) {
+		protected function payAction(HyphaRequest $request) {
 			$this->xml->lockAndReload();
 			$participant = $this->checkKeyArguments($request, [self::TAG_PARTICIPANT]);
 			if(!$participant) {
@@ -596,7 +596,7 @@ EOF;
 			return ['redirect', $url];
 		}
 
-		function paymenthookView(HyphaRequest $request) {
+		protected function paymenthookView(HyphaRequest $request) {
 			$this->xml->lockAndReload();
 			$participant = $this->checkKeyArguments($request, [self::TAG_PARTICIPANT]);
 			if(!$participant) {
@@ -707,7 +707,7 @@ EOF;
 		/**
 		 * Show the contribution form.
 		 */
-		function contributeView(HyphaRequest $request) {
+		protected function contributeView(HyphaRequest $request) {
 			$obj = $this->checkKeyArguments($request, [self::TAG_CONTRIBUTION, self::TAG_PARTICIPANT], true);
 			if (!$obj)
 				return '404';
@@ -737,7 +737,7 @@ EOF;
 			return $this->contributeViewRender($request, $form, $editing);
 		}
 
-		function contributeViewrender(HyphaRequest $request, HTMLForm $form, $editing) {
+		protected function contributeViewrender(HyphaRequest $request, HTMLForm $form, $editing) {
 			// Update the form to include any data
 			$form->updateDom();
 
@@ -753,7 +753,7 @@ EOF;
 		/**
 		 * Handle the contribution form.
 		 */
-		function contributionSaveAction(HyphaRequest $request) {
+		protected function contributionSaveAction(HyphaRequest $request) {
 			$this->xml->lockAndReload();
 
 			$obj = $this->checkKeyArguments($request, [self::TAG_CONTRIBUTION, self::TAG_PARTICIPANT], true);
@@ -853,7 +853,7 @@ EOF;
 		}
 
 
-		function lineupView(HyphaRequest $request) {
+		protected function lineupView(HyphaRequest $request) {
 			$html = '';
 			$contributions = $this->xml->documentElement->getOrCreate(self::TAG_CONTRIBUTION_CONTAINER)->children();
 			foreach($contributions as $contribution) {
@@ -868,7 +868,7 @@ EOF;
 		 * Build the HTML for a single contribution in the
 		 * lineup.
 		 */
-		function buildContribution($contribution) {
+		protected function buildContribution($contribution) {
 			$html = '<div class="contribution">';
 			// artist and title
 			$id = $contribution->getId();
@@ -926,7 +926,7 @@ EOF;
 			return $html;
 		}
 
-		function timetableView(HyphaRequest $request) {
+		protected function timetableView(HyphaRequest $request) {
 			// Make a list of all days, and per day all
 			// locations and the begin and end time.
 			$contributions = $this->xml->documentElement->getOrCreate(self::TAG_CONTRIBUTION_CONTAINER)->children();
@@ -1038,7 +1038,7 @@ EOF;
 			$this->html->find('#main')->html($html);
 		}
 
-		function timetocols($t1, $t2) {
+		protected function timetocols($t1, $t2) {
 			$c1=12*intval(substr($t1,0,2)) + intval(substr($t1,3,2))/5;
 			$c2=12*intval(substr($t2,0,2)) + intval(substr($t2,3,2))/5;
 			return $c2 - $c1;
@@ -1049,7 +1049,7 @@ EOF;
 		 * participant and create an initial payment.
 		 * Should be called with the XML lock held.
 		 */
-		function setupPayment($participant, $amount) {
+		protected function setupPayment($participant, $amount) {
 			$participant->ownerDocument->requireLock();
 			$participant->setAttribute(self::ATTR_PARTICIPANT_PAYMENT_DESCRIPTION, $this->getConfig(self::CONFIG_ID_TITLE) . ' - ' . $participant->getAttribute(self::ATTR_PARTICIPANT_NAME));
 			$participant->setAttribute(self::ATTR_PARTICIPANT_PAYMENT_AMOUNT, $amount);
@@ -1067,7 +1067,7 @@ EOF;
 		 * its status.
 		 * Should be called with the XML lock held.
 		 */
-		function createPayment($participant) {
+		protected function createPayment($participant) {
 			$participant->ownerDocument->requireLock();
 			$complete_url = $this->constructFullPath($this->pagename . '/' . self::PATH_PAY . '/' . $participant->getId() . '/' . $participant->getAttribute(self::ATTR_PARTICIPANT_KEY));
 			$hook_url = $this->constructFullPath($this->pagename . '/' . self::PATH_PAYMENTHOOK . '/' . $participant->getId() . '/' . $participant->getAttribute(self::ATTR_PARTICIPANT_KEY));
@@ -1106,7 +1106,7 @@ EOF;
 		 *
 		 * Should be called with the XML lock held.
 		 */
-		function checkPayment($participant, $create_new = false) {
+		protected function checkPayment($participant, $create_new = false) {
 			// load Mollie script
 			require_once('system/Mollie/API/Autoloader.php');
 			$mollie = new Mollie_API_Client;
@@ -1143,7 +1143,7 @@ EOF;
 		 * failed payment, but a note is still added to the
 		 * digest.
 		 */
-		function processPaymentChange($participant, $payment, $mail_failed) {
+		protected function processPaymentChange($participant, $payment, $mail_failed) {
 			$participant->setAttribute(self::ATTR_PARTICIPANT_PAYMENT_STATUS, $payment->status);
 			if ($payment->isPaid()) {
 				if (!$participant->getAttribute(self::ATTR_PARTICIPANT_PAYMENT_TIMESTAMP)) {
@@ -1194,7 +1194,7 @@ EOF;
 		 * Retrieve the given mail from the translations and send it,
 		 * interpolating the given variables.
 		 */
-		function sendMail($to, $id, $vars) {
+		protected function sendMail($to, $id, $vars) {
 			$subject = __($id . '-subject', $vars);
 			$body = __($id . '-body', $vars);
 
@@ -1215,7 +1215,7 @@ EOF;
 		 * even if the key is not present. If no id is present
 		 * either, the user object itself will be returned.
 		 */
-		function checkKeyArguments(HyphaRequest $request, array $tags, $allow_user = false) {
+		protected function checkKeyArguments(HyphaRequest $request, array $tags, $allow_user = false) {
 			$id = $request->getArg(1);
 			if ($id) {
 				$obj = $this->xml->getElementById($id);
