@@ -77,7 +77,7 @@
 		 * If an error occurs a translated error message is
 		 * returned.
 		 */
-		static function importUploadedImage($fileinfo, $max_size = 4194304 /* 4M */ ) {
+		public static function importUploadedImage($fileinfo, $max_size = 4194304 /* 4M */ ) {
 			if ($fileinfo['size'] > $max_size) return __('file-too-big-must-be-less-than', ['upload-max-filesize' => $max_size . 'bytes']);
 
 			switch ($fileinfo['error']) {
