@@ -115,7 +115,6 @@
 			// fopen. This ensure that the file is actually
 			// created by us, ruling out any race
 			// conditions.
-			$attempts = 0;
 			do {
 				$image = new HyphaImage(uniqid() . '.' . $extension);
 				$filename = $image->getPath();
