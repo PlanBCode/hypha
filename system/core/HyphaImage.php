@@ -100,26 +100,26 @@
 			switch ($imginfo[2]) {
 				case IMAGETYPE_JPEG:
 					$extension = "jpg";
-					$image = imagecreatefromjpeg($fileinfo['tmp_name']);
+					$testImage = imagecreatefromjpeg($fileinfo['tmp_name']);
 					break;
 				case IMAGETYPE_PNG:
 					$extension = "png";
-					$image = imagecreatefrompng($fileinfo['tmp_name']);
+					$testImage = imagecreatefrompng($fileinfo['tmp_name']);
 					break;
 				case IMAGETYPE_GIF:
 					$extension = "gif";
-					$image = imagecreatefromgif($fileinfo['tmp_name']);
+					$testImage = imagecreatefromgif($fileinfo['tmp_name']);
 					break;
 				case IMAGETYPE_BMP:
 					$extension = "bmp";
-					$image = imagecreatefromwbmp($fileinfo['tmp_name']);
+					$testImage = imagecreatefromwbmp($fileinfo['tmp_name']);
 					break;
 				default:
 					return __('image-type-must-be-one-of', ['allowed-filetypes' => 'jpg, png, gif, bmp']);
 			}
-			if ($image === false)
+			if ($testImage === false)
 				return __('failed-to-process-image') . error_get_last();
-			imagedestroy($image);
+			imagedestroy($testImage);
 
 			// Generate a filename and create the file using
 			// fopen. This ensure that the file is actually
