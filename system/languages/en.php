@@ -188,6 +188,8 @@
 		"image-type-must-be-one-of" => "Image type must be one of: [[allowed-filetypes]]",
 		"error-uploading-file" => "Error uploading file: [[error]]",
 		"file-too-big-must-be-less-than" => "File is too big, it must be less than [[upload-max-filesize]]",
+		"file-bigger-than-field-max-size" => "The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form",
+		"file-partially-uploaded" => "The uploaded file was only partially uploaded",
 		"anonymous" => "anonymous",
 		"back" => "back",
 		"read" => "read",

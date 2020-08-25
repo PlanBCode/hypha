@@ -188,6 +188,8 @@
 		"image-type-must-be-one-of" => "Afbeelding moet één van de volgende bestandstypen zijn: [[allowed-filetypes]]",
 		"error-uploading-file" => "Uploaden bestand mislukt: [[error]]",
 		"file-too-big-must-be-less-than" => "Bestand is te groot, moet kleiner zijn dan [[upload-max-filesize]]",
+		"file-bigger-than-field-max-size" => "Het bestand is groter dan de MAX_FILE_SIZE die in het HTML formulier aangegeven staat",
+		"file-partially-uploaded" => "The bestand is enkel maar voor een deel geüpload",
 		"anonymous" => "anoniem",
 		"back" => "terug",
 		"read" => "lezen",

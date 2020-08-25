@@ -79,8 +79,19 @@
 		 */
 		static function importUploadedImage($fileinfo, $max_size = 4194304 /* 4M */ ) {
 			if ($fileinfo['size'] > $max_size) return __('file-too-big-must-be-less-than', ['upload-max-filesize' => $max_size . 'bytes']);
-			if ($fileinfo['error'] == UPLOAD_ERR_INI_SIZE) return __('file-too-big-must-be-less-than', ['upload-max-filesize' => ini_get('upload_max_filesize')]);
-			if ($fileinfo['error']) return __('error-uploading-file', ['error' => $fileinfo["error"]]);
+
+			switch ($fileinfo['error']) {
+				case UPLOAD_ERR_INI_SIZE:
+					return __('file-too-big-must-be-less-than', ['upload-max-filesize' => ini_get('upload_max_filesize')]);
+				case UPLOAD_ERR_FORM_SIZE:
+					return __('file-bigger-than-field-max-size');
+				case UPLOAD_ERR_PARTIAL:
+					return __('file-partially-uploaded');
+				case UPLOAD_ERR_OK:
+					break;
+				default:
+					return __('error-uploading-file', ['error' => $fileinfo['error']]);
+			}
 
 			// Check it's a valid image file
 			$imginfo = getimagesize($fileinfo['tmp_name']);
