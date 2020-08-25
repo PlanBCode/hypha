@@ -900,9 +900,9 @@
 		 * returned.
 		 */
 		static function importUploadedImage($fileinfo, $max_size = 4194304 /* 4M */ ) {
-			if ($fileinfo['size'] > $max_size) return __('file-too-big-must-be-less-than') . $max_size . 'bytes';
-			if ($fileinfo['error'] == UPLOAD_ERR_INI_SIZE) return __('file-too-big-must-be-less-than') . ini_get('upload_max_filesize');
-			if ($fileinfo['error']) return __('error-uploading-file') . $fileinfo["error"];
+			if ($fileinfo['size'] > $max_size) return __('file-too-big-must-be-less-than', ['upload-max-filesize' => $max_size . 'bytes']);
+			if ($fileinfo['error'] == UPLOAD_ERR_INI_SIZE) return __('file-too-big-must-be-less-than', ['upload-max-filesize' => ini_get('upload_max_filesize')]);
+			if ($fileinfo['error']) return __('error-uploading-file', ['error' => $fileinfo["error"]]);
 
 			// Check it's a valid image file
 			$imginfo = getimagesize($fileinfo['tmp_name']);
@@ -916,7 +916,7 @@
 					$image = imagecreatefrompng($fileinfo['tmp_name']);
 					break;
 				default:
-					return __('image-type-must-be-one-of') . 'jpg, png';
+					return __('image-type-must-be-one-of', ['allowed-filetypes' => 'jpg, png']);
 			}
 			if ($image === false)
 				return __('failed-to-process-image') . error_get_last();
