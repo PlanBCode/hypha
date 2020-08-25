@@ -98,7 +98,7 @@
 			switch ($imginfo[2]) {
 				case IMAGETYPE_JPEG:
 					$extension = "jpg";
-					$image = @imagecreatefromjpeg($fileinfo['tmp_name']);
+					$image = imagecreatefromjpeg($fileinfo['tmp_name']);
 					break;
 				case IMAGETYPE_PNG:
 					$extension = "png";
