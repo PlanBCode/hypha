@@ -24,6 +24,7 @@
 		const FIELD_NAME_TITLE = 'title';
 		const FIELD_NAME_WEBSITE = 'website';
 
+		const PATH_ABOUT = 'about';
 		const PATH_CONFIRMATION_NEEDED = 'confirmation-needed';
 		const PATH_CONFIRM = 'confirm';
 		const PATH_CONTRIBUTE = 'contribute';
@@ -45,6 +46,7 @@
 		const CONFIG_TAG_FORM = 'form';
 		const CONFIG_TAG_DAYS = 'config';
 		const CONFIG_TAG_LOCATIONS = 'config';
+		const CONFIG_ID_ABOUT = 'about';
 		const CONFIG_ID_TITLE = 'festival-title';
 		const CONFIG_ID_SIGNUP_FORM = 'signup-form';
 		const CONFIG_ID_CONTRIBUTION_FORM = 'contribution-form';
@@ -107,6 +109,7 @@
 
 			if (isUser() && !in_array($request->getView(), [self::PATH_SETTINGS])) {
 				$commands = $this->html->find('#pageCommands');
+				$commands->append($this->makeActionButton(__('about'), self::PATH_ABOUT));
 				$commands->append($this->makeActionButton(__('settings'), self::PATH_SETTINGS));
 				$commands->append($this->makeActionButton(__('festival-signup'), self::PATH_SIGNUP));
 				$commands->append($this->makeActionButton(__('festival-contribute'), self::PATH_CONTRIBUTE));
@@ -124,6 +127,7 @@
 			switch ([$request->getView(), $request->getCommand()]) {
 				case [null,                           null]:             return $this->lineupView($request);
 				case [null,                           self::CMD_DELETE]: return $this->deleteAction($request);
+				case [self::PATH_ABOUT,               null]:             return $this->aboutView($request);
 				case [self::PATH_CONFIRMATION_NEEDED, null]:             return $this->confirmationNeededView($request);
 				case [self::PATH_CONFIRM,             null]:             return $this->confirmView($request);
 				case [self::PATH_CONTRIBUTE,          null]:             return $this->contributeView($request);
@@ -852,6 +856,12 @@ EOF;
 			return ['redirect', $lineup_url];
 		}
 
+		protected function aboutView() {
+			$this->html->find('#pagename')->text($this->getConfig('festival-title'));
+			$content = $this->getConfigElement(self::CONFIG_ID_ABOUT);
+			if ($content)
+				$this->html->find('#main')->append($content->children());
+		}
 
 		protected function lineupView(HyphaRequest $request) {
 			$html = '';

@@ -283,6 +283,7 @@
 		"festival-contribution-added-body" => '<p>Je bijdrage "[[title]]" is toegevoegd en wordt nu in de lineup weergegeven.</p><p>Om je bijdrage te wijzigen, gebruik <a href="[[editlink]]">deze link</a>.</p>',
 
 		// festival - buttons & links
+		"festival-about" => "info",
 		"festival-modify" => "wijzigen",
 		"festival-contribute" => "bijdragen",
 		"festival-edit-contribution" => "wijzig bijdrage",
