@@ -164,16 +164,17 @@
 		public function process(HyphaRequest $request) {
 			$this->html->writeToElement('pagename', showPagename($this->pagename) . ' ' . asterisk($this->privateFlag));
 
+			$commands = $this->html->find('#pageCommands');
+			$commands->append($this->makeActionButton(__('about'), self::PATH_ABOUT));
+			$commands->append($this->makeActionButton(__('festival-signup'), self::PATH_SIGNUP));
+			$commands->append($this->makeActionButton(__('festival-lineup'), self::PATH_LINEUP));
+			$commands->append($this->makeActionButton(__('festival-timetable'), self::PATH_TIMETABLE));
+
 			if (isUser() && !in_array($request->getView(), [self::PATH_SETTINGS])) {
-				$commands = $this->html->find('#pageCommands');
-				$commands->append($this->makeActionButton(__('about'), self::PATH_ABOUT));
 				$commands->append($this->makeActionButton(__('settings'), self::PATH_SETTINGS));
-				$commands->append($this->makeActionButton(__('festival-signup'), self::PATH_SIGNUP));
 				$commands->append($this->makeActionButton(__('festival-contribute'), self::PATH_CONTRIBUTE));
 				$commands->append($this->makeActionButton(__('festival-participants'), self::PATH_PARTICIPANTS));
 				$commands->append($this->makeActionButton(__('festival-contributions'), self::PATH_CONTRIBUTIONS));
-				$commands->append($this->makeActionButton(__('festival-lineup'), self::PATH_LINEUP));
-				$commands->append($this->makeActionButton(__('festival-timetable'), self::PATH_TIMETABLE));
 
 				if (isAdmin()) {
 					$action = 'if(confirm(\'' . __('sure-to-delete') . '\'))' . makeAction($this->language . '/' . $this->pagename, 'delete', '');
