@@ -52,6 +52,8 @@
 		const CONFIG_ID_CONTRIBUTION_FORM = 'contribution-form';
 		const CONFIG_ID_DAYS = 'days';
 		const CONFIG_ID_LOCATIONS = 'locations';
+		const CONFIG_ID_LINEUP_HEADER = 'lineup-header';
+		const CONFIG_ID_TIMETABLE_HEADER = 'timetable-header';
 		const CONFIG_ATTR_VALUE = 'value';
 
 		const TAG_PARTICIPANTS_CONTAINER = 'participants';
@@ -865,6 +867,9 @@ EOF;
 
 		protected function lineupView(HyphaRequest $request) {
 			$html = '';
+			$header = $this->getConfigElement(self::CONFIG_ID_LINEUP_HEADER);
+			if ($header)
+				$html .= '<div class="header">' . $header->html() . '</div>';
 			$contributions = $this->xml->documentElement->getOrCreate(self::TAG_CONTRIBUTION_CONTAINER)->children();
 			foreach($contributions as $contribution) {
 				$html.= $this->buildContribution($contribution);
@@ -943,8 +948,11 @@ EOF;
 			$days = $this->getConfigElement(self::CONFIG_ID_DAYS, self::CONFIG_TAG_DAYS)->children();
 			$locations = $this->getConfigElement(self::CONFIG_ID_LOCATIONS, self::CONFIG_TAG_LOCATIONS)->children();
 
-			// iterate over all dates
 			$html = '';
+			$header = $this->getConfigElement(self::CONFIG_ID_TIMETABLE_HEADER);
+			if ($header)
+				$html .= '<div class="header">' . $header->html() . '</div>';
+			// iterate over all dates
 			$d = 0;
 			foreach($days as $day) {
 				$daybegin = $day->getAttribute(self::ATTR_DAY_BEGIN);
