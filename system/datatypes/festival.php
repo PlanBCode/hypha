@@ -848,7 +848,7 @@ EOF;
 			else
 				notify('success', __('festival-contribution-added'));
 
-			$lineup_url = $this->constructFullPath($this->pagename . '/lineup');
+			$lineup_url = $this->constructFullPath($this->pagename . '/' . self::PATH_LINEUP);
 			return ['redirect', $lineup_url];
 		}
 
@@ -872,7 +872,7 @@ EOF;
 			$html = '<div class="contribution">';
 			// artist and title
 			$id = $contribution->getId();
-			$url = $this->constructFullPath($this->pagename . '/lineup#' . $id);
+			$url = $this->constructFullPath($this->pagename . '/' . self::PATH_LINEUP . '#' . $id);
 			$editurl = $this->constructFullPath($this->pagename.'/' . self::PATH_CONTRIBUTE . '/'.$contribution->getId());
 
 			$title = '';
