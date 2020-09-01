@@ -395,7 +395,7 @@ EOF;
 		 * Create a signup form, based on the one configured.
 		 */
 		private function createSignupForm(array $values = []) {
-			$html = $this->getConfigElement(self::CONFIG_ID_SIGNUP_FORM, self::CONFIG_TAG_FORM)->children();
+			$html = $this->getConfigElement(self::CONFIG_ID_SIGNUP_FORM, self::CONFIG_TAG_FORM, $this->language)->children();
 
 			if ($html->count() == 0) {
 				$html = <<<EOF
@@ -448,6 +448,7 @@ EOF;
 		}
 
 		protected function signupViewRender(HyphaRequest $request, HTMLForm $form) {
+			$this->html->find('#langList')->append(hypha_indexLanguages($this->pageListNode, $this->language, join('/', $request->getArgs())));
 			$form->updateDom();
 
 			$this->html->find('#main')->append($form);
@@ -657,7 +658,7 @@ EOF;
 		}
 
 		private function createContributionForm(array $values = []) {
-			$html = $this->getConfigElement(self::CONFIG_ID_CONTRIBUTION_FORM, self::CONFIG_TAG_FORM)->children();
+			$html = $this->getConfigElement(self::CONFIG_ID_CONTRIBUTION_FORM, self::CONFIG_TAG_FORM, $this->language)->children();
 
 			if ($html->count() == 0) {
 				$html = <<<EOF
@@ -768,6 +769,8 @@ EOF;
 		}
 
 		protected function contributeViewrender(HyphaRequest $request, HTMLForm $form, $editing) {
+			$this->html->find('#langList')->append(hypha_indexLanguages($this->pageListNode, $this->language, join('/', $request->getArgs())));
+
 			// Update the form to include any data
 			$form->updateDom();
 
