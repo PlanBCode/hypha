@@ -895,8 +895,10 @@ EOF;
 		}
 
 		protected function aboutView() {
+			$this->html->find('#langList')->append(hypha_indexLanguages($this->pageListNode, $this->language, self::PATH_ABOUT));
+
 			$this->html->find('#pagename')->text($this->getConfig('festival-title'));
-			$content = $this->getConfigElement(self::CONFIG_ID_ABOUT);
+			$content = $this->getConfigElement(self::CONFIG_ID_ABOUT, null, $this->language);
 			if ($content)
 				$this->html->find('#main')->append($content->children());
 		}
