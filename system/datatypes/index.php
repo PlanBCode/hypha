@@ -12,7 +12,7 @@
 		}
 
 		public function process(HyphaRequest $request) {
-			$this->html->writeToElement('langList', hypha_indexLanguages('', ''));
+			$this->html->writeToElement('langList', hypha_indexLanguages('', $request->getArg(0)));
 			switch ([$request->getView(), $request->getCommand()]) {
 				case [self::PATH_IMAGES,        null]:   return $this->imageIndexView($request);
 				case [self::PATH_FILES,         null]:   return $this->fileIndexView($request);
