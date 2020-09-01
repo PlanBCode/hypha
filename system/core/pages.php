@@ -103,6 +103,18 @@
 			$this->renderSingleLine($container);
 		}
 
+		/**
+		 * Returns a list of language codes this page is
+		 * translated in, based on the languages listed in
+		 * hypha.xml.
+		 */
+		public function getLanguages() {
+			$result = [];
+			foreach($this->pageListNode->getElementsByTagName('language') as $lang)
+				$result[] = $lang->getAttribute('id');
+			return $result;
+		}
+
 		/*
 		 * Returns a date typically used for sorting these pages
 		 * (i.e. the publish date or last update date).
