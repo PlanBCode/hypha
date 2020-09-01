@@ -45,6 +45,7 @@
 		const CONFIG_TAG = 'config';
 		const CONFIG_TAG_FORM = 'form';
 		const CONFIG_TAG_DAYS = 'config';
+		const CONFIG_TAG_LANGUAGE = 'language';
 		const CONFIG_TAG_LOCATIONS = 'config';
 		const CONFIG_ID_ABOUT = 'about';
 		const CONFIG_ID_TITLE = 'festival-title';
@@ -95,6 +96,8 @@
 		const ATTR_DAY_BEGIN = 'begin';
 		const ATTR_DAY_END = 'end';
 		const ATTR_LOCATION_DISPLAY = 'display';
+
+		const ATTR_LANGUAGE_ID = 'id';
 
 		public function __construct($pageListNode, RequestContext $O_O) {
 			parent::__construct($pageListNode, $O_O);
@@ -172,18 +175,39 @@
 		 * Retrieve the XML element with the given id and return
 		 * it.
 		 *
+		 * If a language is given, return a language subtag with
+		 * the given id, or if it does not exist, any other
+		 * language subtag.
+		 *
 		 * If the element does not exist and a tagname is given,
 		 * it is created using the given tagname. Otherwise,
 		 * null is returned.
 		 */
-		protected function getConfigElement($id, $tagname = null) {
+		protected function getConfigElement($id, $tagname = null, $language = null) {
 			$elem = $this->xml->getElementById($id);
 			if (!$elem && $tagname) {
 				$elem = $this->xml->createElement($tagname);
 				$elem->setId($id);
 				$this->xml->documentElement->appendChild($elem);
 			}
-			return $elem;
+
+			if ($language) {
+				$firstlang = null;
+				foreach ($elem->find(self::CONFIG_TAG_LANGUAGE) as $lang) {
+					if ($firstlang === null)
+						$firstlang = $lang;
+					if ($lang->getAttribute(self::ATTR_LANGUAGE_ID) == $language)
+						return $lang;
+				}
+				if ($firstlang === null && $tagname) {
+					$firstlang = $this->xml->createElement(self::CONFIG_TAG_LANGUAGE);
+					$firstlang->setAttribute(self::ATTR_LANGUAGE_ID, $language);
+					$elem->appendChild($firstlang);
+				}
+				return $firstlang;
+			} else {
+				return $elem;
+			}
 		}
 
 		/**
