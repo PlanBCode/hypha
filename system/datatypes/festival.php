@@ -104,7 +104,58 @@
 			parent::__construct($pageListNode, $O_O);
 			$this->xml = new Xml('festival', Xml::multiLingualOn, Xml::versionsOff);
 			$this->xml->loadFromFile('data/pages/'.$pageListNode->getAttribute('id'));
+
+			$this->migrate();
 		}
+
+		public function migrate() {
+			if ($this->xml->documentElement->getAttribute('migrated'))
+				return;
+			$this->xml->lockAndReload();
+
+			// Make sure day ids are valid ids (starting
+			// with a letter).
+			foreach ($this->getConfigElement(self::CONFIG_ID_DAYS, self::CONFIG_TAG_DAYS)->children() as $day)
+				$day->setId('day' . $day->getId());
+
+			foreach ($this->xml->find(self::TAG_CONTRIBUTION_EVENT) as $event)
+				$event->setAttribute(self::ATTR_EVENT_DAY, 'day' . $event->getAttribute(self::ATTR_EVENT_DAY));
+
+			// Duplicate the header
+			$header = $this->getConfigElement('header');
+			if ($header) {
+				$this->getConfigElement(self::CONFIG_ID_LINEUP_HEADER, self::CONFIG_TAG)->append($header->html());
+				$this->getConfigElement(self::CONFIG_ID_TIMETABLE_HEADER, self::CONFIG_TAG)->append($header->html());
+				$header->remove();
+			}
+
+			// Make stuff translated
+			foreach ($this->xml->find(self::TAG_CONTRIBUTION) as $c) {
+				$lang = $this->xml->createElement(self::TAG_CONTRIBUTION_LANGUAGE);
+				$lang->setAttribute(self::ATTR_LANGUAGE_ID, 'nl');
+				$c->append($lang);
+				foreach ([self::ATTR_CONTRIBUTION_IMAGE, self::ATTR_CONTRIBUTION_NAME, self::ATTR_CONTRIBUTION_TITLE, self::ATTR_CONTRIBUTION_WEBSITE, self::ATTR_CONTRIBUTION_CATEGORY] as $attr) {
+					$lang->setAttribute($attr, $c->getAttribute($attr));
+					$c->removeAttribute($attr);
+				}
+				$lang->append($c->get(self::TAG_CONTRIBUTION_DESCRIPTION));
+			}
+
+			foreach ([self::CONFIG_ID_CONTRIBUTION_FORM, self::CONFIG_ID_SIGNUP_FORM, self::CONFIG_ID_LINEUP_HEADER, self::CONFIG_ID_TIMETABLE_HEADER, self::CONFIG_ID_ABOUT] as $id) {
+				$c = $this->getConfigElement($id);
+				if ($c) {
+					$lang = $this->xml->createElement(self::CONFIG_TAG_LANGUAGE);
+					$lang->setAttribute(self::ATTR_LANGUAGE_ID, 'nl');
+					$lang->append($c->children());
+					$c->append($lang);
+				}
+			}
+
+
+			$this->xml->documentElement->setAttribute('migrated', 1);
+			$this->xml->saveAndUnlock();
+		}
+
 
 		public static function getDatatypeName() {
 			return __('datatype.name.festivalpage');
