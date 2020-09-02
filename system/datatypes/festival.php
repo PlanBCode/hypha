@@ -959,7 +959,7 @@ EOF;
 			$this->html->find('#langList')->append(hypha_indexLanguages($this->pageListNode, $this->language, self::PATH_LINEUP));
 
 			$html = '';
-			$header = $this->getConfigElement(self::CONFIG_ID_LINEUP_HEADER);
+			$header = $this->getConfigElement(self::CONFIG_ID_LINEUP_HEADER, null, $this->language);
 			if ($header)
 				$html .= '<div class="header">' . $header->html() . '</div>';
 			foreach($this->getContributions() as $contribution) {
@@ -1042,7 +1042,7 @@ EOF;
 			$locations = $this->getConfigElement(self::CONFIG_ID_LOCATIONS, self::CONFIG_TAG_LOCATIONS)->children();
 
 			$html = '';
-			$header = $this->getConfigElement(self::CONFIG_ID_TIMETABLE_HEADER);
+			$header = $this->getConfigElement(self::CONFIG_ID_TIMETABLE_HEADER, null, $this->language);
 			if ($header)
 				$html .= '<div class="header">' . $header->html() . '</div>';
 			// iterate over all dates
