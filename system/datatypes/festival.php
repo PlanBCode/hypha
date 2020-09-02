@@ -916,7 +916,7 @@ EOF;
 						}
 					}
 				}
-				if ($timesHtml) $html.= '<div class="event"><div class="date">'.htmlspecialchars($day->getAttribute(self::ATTR_DAY_DISPLAY)).'</div>'.$timesHtml;
+				if ($timesHtml) $html.= '<div class="event"><div class="date">'.htmlspecialchars($day->getAttribute(self::ATTR_DAY_DISPLAY)).'</div>'.$timesHtml.'</div>';
 			}
 			$website = htmlspecialchars($contribution->getAttribute(self::ATTR_CONTRIBUTION_WEBSITE));
 			if ($website)
