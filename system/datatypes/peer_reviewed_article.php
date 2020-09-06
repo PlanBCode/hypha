@@ -57,6 +57,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	const FIELD_NAME_AUTHOR = 'author';
 	const FIELD_NAME_STATUS = 'status';
 	const FIELD_NAME_EXCERPT = 'excerpt';
+	const FIELD_NAME_FEATURED_IMAGE = 'featured_image';
 	const FIELD_NAME_METHOD = 'method';
 
 	const STATUS_NEWLY_CREATED = 'newly created';
@@ -160,10 +161,25 @@ class peer_reviewed_article extends HyphaDatatypePage {
 
 		$article = $this->xml->find(self::FIELD_NAME_ARTICLE);
 		$this->appendAuthorAndTimestamp($container, $article);
-		$excerpt_div = $doc->createElement('div');
-		$excerpt_div->addClass('excerpt');
-		$excerpt_div->append($this->getExcerpt());
-		$excerpt_div->appendTo($container);
+		$this->renderExcerptBody($container);
+	}
+
+	public function renderExcerptBody(HyphaDomElement $container) {
+		$doc = $container->document();
+		/** @var HyphaDomElement $excerpt */
+		$excerpt = $doc->createElement('div')->appendTo($container);
+		$excerpt->addClass('excerpt');
+
+		$featuredImageSrc = $this->xml->documentElement->getOrCreate(self::FIELD_NAME_FEATURED_IMAGE)->text();
+		if ($featuredImageSrc) {
+			$featured_image = $doc->createElement('img')->appendTo($excerpt);
+			$featured_image->addClass('featured_image');
+			$featured_image->setAttribute('src', (new HyphaImage($featuredImageSrc))->getUrl());
+		}
+
+		$excerptBody = $doc->createElement('div')->appendTo($excerpt);
+		$excerptBody->addClass('excerpt_body');
+		$excerptBody->append($this->getExcerpt()->children());
 	}
 
 	/**
@@ -185,6 +201,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 				self::FIELD_NAME_CONTEXT => [
 					self::FIELD_NAME_TITLE => [],
 					self::FIELD_NAME_EXCERPT => [],
+					self::FIELD_NAME_FEATURED_IMAGE => [],
 					self::FIELD_NAME_METHOD => [],
 				],
 			],
@@ -275,7 +292,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		$content = $this->xml->find(self::FIELD_NAME_CONTENT);
 
 		/** @var HyphaDomElement $main */
-		$main = $this->html->find('#main');
+		$main = $this->html->find('#main')->first();
 
 		/** @var HyphaDomElement $discussions */
 		$discussions = $this->xml->find(self::FIELD_NAME_DISCUSSION_PUBLIC_CONTAINER);
@@ -312,14 +329,8 @@ class peer_reviewed_article extends HyphaDatatypePage {
 
 		$this->appendAuthorAndTimestamp($main, $article);
 
-		if (isUser()) {
-			$excerpt = $this->xml->find(self::FIELD_NAME_EXCERPT)->children();
-			/** @var HyphaDomElement $div */
-			$div = $this->html->createElement('div');
-			$div->setAttribute('class', 'excerpt');
-			$div->append($excerpt);
-			$main->append($div);
-		}
+		if (isUser())
+			$this->renderExcerptBody($main);
 
 		$text = $content->find(self::FIELD_NAME_TEXT)->children();
 		/** @var HyphaDomElement $div */
@@ -430,6 +441,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 			self::FIELD_NAME_AUTHOR => $this->xml->find(self::FIELD_NAME_ARTICLE)->getAttribute(self::FIELD_NAME_AUTHOR),
 			self::FIELD_NAME_TEXT => $this->xml->find(self::FIELD_NAME_TEXT)->children(),
 			self::FIELD_NAME_EXCERPT => $this->xml->find(self::FIELD_NAME_EXCERPT)->children(),
+			self::FIELD_NAME_FEATURED_IMAGE => $this->xml->documentElement->getOrCreate(self::FIELD_NAME_FEATURED_IMAGE)->text(),
 			self::FIELD_NAME_METHOD => $this->xml->find(self::FIELD_NAME_METHOD)->children(),
 			self::FIELD_NAME_SOURCES => $this->xml->find(self::FIELD_NAME_SOURCES)->children(),
 		];
@@ -478,8 +490,14 @@ class peer_reviewed_article extends HyphaDatatypePage {
 			return ['redirect', $this->constructFullPath($this->pagename)];
 		}
 
+		$formData = $request->getPostData();
+
 		// create form
-		$form = $this->createEditForm($request->getPostData());
+		$form = $this->createEditForm($formData);
+
+		if (array_key_exists(self::FIELD_NAME_FEATURED_IMAGE, $_FILES) && $_FILES[self::FIELD_NAME_FEATURED_IMAGE]['size'] > 0) {
+			$form->handleImageUpload(self::FIELD_NAME_FEATURED_IMAGE, $_FILES[self::FIELD_NAME_FEATURED_IMAGE]);
+		}
 
 		// process form if there are no errors
 		if (!empty($form->errors)) {
@@ -496,6 +514,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		$this->xml->find(self::FIELD_NAME_EXCERPT)->setHtml($form->dataFor(self::FIELD_NAME_EXCERPT));
 		$this->xml->find(self::FIELD_NAME_METHOD)->setHtml($form->dataFor(self::FIELD_NAME_METHOD));
 		$this->xml->find(self::FIELD_NAME_SOURCES)->setHtml($form->dataFor(self::FIELD_NAME_SOURCES));
+		$this->xml->documentElement->getOrCreate(self::FIELD_NAME_FEATURED_IMAGE)->setText($form->dataFor(self::FIELD_NAME_FEATURED_IMAGE));
 
 		$this->xml->saveAndUnlock();
 
@@ -1194,6 +1213,13 @@ class peer_reviewed_article extends HyphaDatatypePage {
 				</div>
 			</div>
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
+				<div class="input-wrapper field_type_editor field_name_[[field-name-featured-image]]">
+					<img data-preview-for="[[field-name-featured-image]]">
+					<strong><label for="[[field-name-featured-image]]">[[featured-image]]</label></strong><br>
+					<input type="file" id="[[field-name-featured-image]]" name="[[field-name-featured-image]]" accept="image/png,image/jpeg,image/jpg,image/gif,image/bmp" />
+				</div>
+			</div>
+			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
 				<div class="input-wrapper field_type_editor field_name_[[field-name-text]]">
 					<strong><label for="[[field-name-text]]">[[text]]</label></strong>[[info-button-text]]<br><editor name="[[field-name-text]]"></editor>
 				</div>
@@ -1217,6 +1243,10 @@ EOF;
 			'field-name-author' => self::FIELD_NAME_AUTHOR,
 			'excerpt' => __('art-excerpt'),
 			'field-name-excerpt' => self::FIELD_NAME_EXCERPT,
+
+			'featured-image' => __('art-featured-image'),
+			'field-name-featured-image' => self::FIELD_NAME_FEATURED_IMAGE,
+
 			'info-button-excerpt' => makeInfoButton('help-art-excerpt'),
 			'text' => __('art-article'),
 			'field-name-text' => self::FIELD_NAME_TEXT,
