@@ -1015,6 +1015,30 @@ body.type_peer_reviewed_article .input-wrapper.field_type_editor:not(.field_name
     content: 'i';
 }
 
+.hyphaRemoveButton {
+    background-color: #f00;
+    border: 2px solid #f00;
+    color: #fff;
+    cursor: pointer;
+    display: inline-block;
+    font-family: Arial;
+    font-weight: bold;
+    top: -15px;
+    right: -15px;
+    font-size: 15px;
+    line-height: 14px;
+    width: 15px;
+    height: 15px;
+    margin-left: 3px;
+    margin-right: 3px;
+    border-radius: 50%;
+    text-align: center;
+}
+.hyphaRemoveButton:hover {
+    background-color: #fff;
+    color: #f00;
+}
+
 .new-comment textarea{
 	width: 100%;
 	height: 100px;
@@ -1073,4 +1097,9 @@ body.type_peer_reviewed_article .input-wrapper.field_type_editor:not(.field_name
 .tagindex-item > a {
     text-decoration: none;
     color: inherit;
+}
+
+[data-preview-for] {
+ max-width: 150px;
+ max-height: 150px;
 }

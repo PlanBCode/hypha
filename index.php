@@ -75,6 +75,7 @@
 	$hyphaHtml->linkStyle($O_O->data->themeCss->getFilename());
 	$hyphaHtml->linkScript('system/assets/jquery-1.7.1.min.js');
 	$hyphaHtml->linkScript('system/assets/help.js');
+	$hyphaHtml->linkScript('system/assets/hypha-preview-image-file-field.js');
 	$hyphaHtml->setTitle(hypha_getTitle());
 	$hyphaHtml->writeToElement('header', hypha_getHeader());
 	$hyphaHtml->writeToElement('footer', hypha_getFooter());
