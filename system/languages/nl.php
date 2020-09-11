@@ -255,6 +255,7 @@
 		"festival-signed-up-for" => " heeft zich ingeschreven voor ",
 		"festival-failed-to-pay-for" => " kon niet betalen voor ",
 		"festival-payed-for" => " heeft betaald voor ",
+		"festival-confirmed-for" => " heeft email bevestigd voor ",
 
 		// festival - notify & messages
 		"festival-successful-signup-for" => "Je bent ingeschreven voor ",
