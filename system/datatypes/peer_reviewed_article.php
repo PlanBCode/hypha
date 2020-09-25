@@ -19,6 +19,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 
 	const FIELD_NAME_USER = 'user';
 	const FIELD_NAME_CREATED_AT = 'created_at';
+	const FIELD_NAME_CREATED_BY = 'created_by';
 	const FIELD_NAME_UPDATED_AT = 'updated_at';
 	const FIELD_NAME_PUBLISHED_AT = 'published_at';
 
@@ -212,12 +213,15 @@ class peer_reviewed_article extends HyphaDatatypePage {
 			$hyphaXml->saveAndUnlock();
 		}
 
+		$user = $this->O_O->getUser();
+
 		// set initial status, author, timestamps and title
 		/** @var HyphaDomElement $article */
 		$article = $this->xml->find(self::FIELD_NAME_ARTICLE);
 		$article->setAttribute(self::FIELD_NAME_STATUS, self::STATUS_DRAFT);
-		$article->setAttribute(self::FIELD_NAME_AUTHOR, $this->O_O->getUser()->getAttribute('fullname'));
+		$article->setAttribute(self::FIELD_NAME_AUTHOR, $user->getAttribute('fullname'));
 		$article->setAttribute(self::FIELD_NAME_CREATED_AT, 't' . time());
+		$article->setAttribute(self::FIELD_NAME_CREATED_BY, $user->getAttribute('id'));
 		$article->setAttribute(self::FIELD_NAME_UPDATED_AT, 't' . time());
 		$article->setAttribute(self::FIELD_NAME_PUBLISHED_AT, '');
 		/** @var HyphaDomElement $title */
