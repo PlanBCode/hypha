@@ -54,13 +54,16 @@
 		$messageHtml .= '</html>' . "\r\n";
 
 		$error = array();
+
+		$mailSubject = getEncodedSubject($subject);
+
 		foreach (explode(',', $receivers) as $receiver) {
 			$validEmail = filter_var($receiver, FILTER_VALIDATE_EMAIL);
 			if (!$DEBUG && !$validEmail) {
 				$error[] = $receiver;
 				continue;
 			}
-			$success = mail($receiver, $subject, $messageHtml, $headers, '-f '.$senderEmail);
+			$success = mail($receiver, $mailSubject, $messageHtml, $headers, '-f '.$senderEmail);
 			if (!$success) {
 				$error[] = $receiver;
 			}
@@ -71,6 +74,30 @@
 		}
 
 		return '';
+	}
+
+	/**
+	 * Make sure the subject is ASCII-clean
+	 *
+	 * Some e-mail providers reject e-mail messages with non-ASCII characters in the subject.
+	 * See issue https://github.com/PlanBCode/hypha/issues/202
+	 * source: https://stackoverflow.com/a/54688095/740048
+	 *
+	 * @param string $subject
+	 *
+	 * @return string Encoded subject
+	 */
+	function getEncodedSubject($subject) {
+		if (!preg_match('/[^\x20-\x7e]/', $subject)) {
+			// ascii-only subject, return as-is
+			return $subject;
+		}
+		// subject is non-ascii, needs encoding
+		$encoded = quoted_printable_encode($subject);
+		$prefix = '=?UTF-8?q?';
+		$suffix = '?=';
+
+		return $prefix . str_replace("=\r\n", $suffix . "\r\n  " . $prefix, $encoded) . $suffix;
 	}
 
 	/*
