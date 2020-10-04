@@ -54,13 +54,20 @@
 		$messageHtml .= '</html>' . "\r\n";
 
 		$error = array();
+
+		// Some e-mail providers reject e-mail messages with non-ASCII characters in the subjects.
+		// See issue https://github.com/PlanBCode/hypha/issues/202
+		// This ensures safe subject.
+		// https://stackoverflow.com/a/20806227/8478143
+		$mailSubject = '=?UTF-8?B?'.base64_encode($subject).'?=';
+
 		foreach (explode(',', $receivers) as $receiver) {
 			$validEmail = filter_var($receiver, FILTER_VALIDATE_EMAIL);
 			if (!$DEBUG && !$validEmail) {
 				$error[] = $receiver;
 				continue;
 			}
-			$success = mail($receiver, $subject, $messageHtml, $headers, '-f '.$senderEmail);
+			$success = mail($receiver, $mailSubject, $messageHtml, $headers, '-f '.$senderEmail);
 			if (!$success) {
 				$error[] = $receiver;
 			}
