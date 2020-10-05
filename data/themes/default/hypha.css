@@ -525,6 +525,10 @@ img {
  height: auto;
 }
 
+#main figure .title + .attribution:before {
+    content: " - ";
+}
+
 #main img.left {
  float: left;
  margin: 0 13px 10px 0;

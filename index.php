@@ -125,6 +125,7 @@
 	if ($hyphaPage) processCommandResult($hyphaPage->process($O_O->getRequest()));
 
 	registerPostProcessingFunction('dewikify');
+	registerPostProcessingFunction('add_captions_to_all_images');
 
 	// add hypha commands and navigation
 	$_cmds[] = '<a class="index" href="index/'.$hyphaLanguage.'">'.__('index').'</a>';
