@@ -27,7 +27,9 @@ WYMeditor.editor.prototype.image_upload = function() {
 	var orig = d.initialize;
 	d.initialize = function(wDialog) {
 		orig.call(this, wDialog);
-		var doc = wDialog.document;
+		var wym = this,
+			doc = wDialog.document,
+			options = wym._options;
 
 		var oldSubmitLabel = jQuery("form#image_upload_form .submit", doc).val();
 		// WYMEditor automatically locks onto any form here, so remove the binding.
@@ -43,8 +45,8 @@ WYMeditor.editor.prototype.image_upload = function() {
 				if (response.error){
 					alert(response.error);
 				} else {
-					jQuery(".wym_src", doc).val(response.thumbUrl);
-					jQuery(".wym_alt", doc).val(response.original_filename);
+					jQuery(options.srcSelector, doc).val(response.thumbUrl);
+					jQuery(options.altSelector, doc).val(response.original_filename);
 				}
 				jQuery("form#image_upload_form .submit", doc).val(oldSubmitLabel);
 			}
