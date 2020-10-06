@@ -19,6 +19,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 
 	const FIELD_NAME_USER = 'user';
 	const FIELD_NAME_CREATED_AT = 'created_at';
+	const FIELD_NAME_CREATED_BY = 'created_by';
 	const FIELD_NAME_UPDATED_AT = 'updated_at';
 	const FIELD_NAME_PUBLISHED_AT = 'published_at';
 
@@ -212,12 +213,15 @@ class peer_reviewed_article extends HyphaDatatypePage {
 			$hyphaXml->saveAndUnlock();
 		}
 
+		$user = $this->O_O->getUser();
+
 		// set initial status, author, timestamps and title
 		/** @var HyphaDomElement $article */
 		$article = $this->xml->find(self::FIELD_NAME_ARTICLE);
 		$article->setAttribute(self::FIELD_NAME_STATUS, self::STATUS_DRAFT);
-		$article->setAttribute(self::FIELD_NAME_AUTHOR, $this->O_O->getUser()->getAttribute('fullname'));
+		$article->setAttribute(self::FIELD_NAME_AUTHOR, $user->getAttribute('fullname'));
 		$article->setAttribute(self::FIELD_NAME_CREATED_AT, 't' . time());
+		$article->setAttribute(self::FIELD_NAME_CREATED_BY, $user->getAttribute('id'));
 		$article->setAttribute(self::FIELD_NAME_UPDATED_AT, 't' . time());
 		$article->setAttribute(self::FIELD_NAME_PUBLISHED_AT, '');
 		/** @var HyphaDomElement $title */
@@ -237,6 +241,8 @@ class peer_reviewed_article extends HyphaDatatypePage {
 
 		// add buttons for registered users
 		if (isUser()) {
+			$userId = $this->O_O->getUser()->getAttribute('id');
+
 			/** @var HyphaDomElement $commands */
 			$commands = $this->html->find('#pageCommands');
 			/** @var HyphaDomElement $commandsAtEnd */
@@ -245,12 +251,14 @@ class peer_reviewed_article extends HyphaDatatypePage {
 
 			// the status change from review to approved is done automatically
 			if (self::STATUS_REVIEW === $status) {
-				$userId = $this->O_O->getUser()->getAttribute('id');
 				if (!$this->hasUserApproved($userId)) {
 					$commandsAtEnd->append($this->makeActionButton(__('art-approve'), null, self::CMD_APPROVE));
 				}
 			} else {
 				foreach ($this->statusMtx[$status] as $newStatus => $option) {
+					if (self::STATUS_APPROVED === $status && $option['cmd'] === self::CMD_STATUS_CHANGE_PUBLISHED && !$this->hasUserCreated($userId) && !isAdmin()) {
+						continue;
+					}
 					$commands->append($this->makeActionButton(__($option['label']), null, $option['cmd']));
 				}
 			}
@@ -1594,6 +1602,18 @@ EOF;
 		$xpath = './/' . self::FIELD_NAME_APPROVE . '[@' . self::FIELD_NAME_USER . '="' . $userId . '"]';
 		$approveCollection = $approves->findXPath($xpath);
 		return $approveCollection->count() >= 1;
+	}
+
+	/**
+	 * Indication whether or not the given user created the article.
+	 *
+	 * @param string $userId
+	 * @return bool
+	 */
+	protected function hasUserCreated($userId) {
+		$article = $this->xml->find(self::FIELD_NAME_ARTICLE);
+		$createdBy = $article->getAttribute(self::FIELD_NAME_CREATED_BY);
+		return $createdBy === $userId;
 	}
 
 	/**
