@@ -149,6 +149,13 @@
 					this.isFocusSet = true;
 				}
 
+				// listens to the paste event to strip superfluous code
+				wym._iframe.contentDocument.addEventListener('paste', (event) => {
+					event.preventDefault(); // prevent default browser behaviour (double pasting)
+					let pasteContent = (event.clipboardData || window.clipboardData).getData('text');
+					wym.paste(pasteContent);
+				});
+
 				// initiate the "image_upload" plugin
 				wym.image_upload();
 
