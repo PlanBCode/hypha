@@ -262,15 +262,16 @@ a.nopagelink {
  font-weight: bold;
 }
 
-.language: last-child{
+.language {
+ padding: 3px;
+}
+
+.language:last-child{
  margin-right: 0px;
 }
 
 .language a{
- padding: 5px;
  text-decoration: none;
- margin: 0 5px;
- display: inline-block;
 }
 
 .language a:hover{
