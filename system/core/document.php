@@ -279,6 +279,8 @@
 		public $errors;
 		/** The fields found in this form. Maps field name to an array of DOM elements with that name. */
 		public $fields;
+		/** The file fields found in this form. Maps field name to the DOM element. */
+		public $file_fields;
 		/** The labels for each field. Maps field name to the label. */
 		public $labels;
 		/** The preview images in the form. Maps field name to the img element. */
@@ -303,6 +305,7 @@
 			$this->data = $data;
 			$this->errors = [];
 			$this->fields = [];
+			$this->file_fields = [];
 			$this->labels = [];
 			$this->image_previews = [];
 
@@ -352,8 +355,12 @@
 						$this->image_previews[$name] = $elem;
 				} else {
 					$name = self::getNameAttr($elem, 'name');
-					if ($name)
+					if ($name) {
 						$this->fields[$name][] = $elem;
+						if ($elem->tagName === 'input' && $elem->getAttribute('type') === 'file') {
+							$this->file_fields[$name] = $elem;
+						}
+					}
 				}
 			}
 		}
@@ -404,6 +411,11 @@
 					foreach($elems as $elem)
 						$this->updateFormField($elem, $value);
 				}
+			}
+
+			// create file shadow value fields
+			foreach ($this->file_fields as $name => $elem) {
+				$this->addFileShadowValueField($elem, $this->dataFor($name));
 			}
 
 			foreach($this->image_previews as $name => $elem) {
@@ -459,6 +471,15 @@
 			}
 		}
 
+		protected function addFileShadowValueField($field, $value) {
+			$name = $field->getAttribute('name');
+			$newField = $field->document()->createElement('input');
+			$newField->setAttribute('type', 'hidden');
+			$newField->setAttribute('value', $value);
+			$newField->setAttribute('name', 'file_shadow_' . $name);
+			$newField->setAttribute('data-file-shadow-value-for', $name);
+			$field->after($newField);
+		}
 
 		protected function updateImagePreview($field, $value) {
 			if ($value) {
@@ -482,6 +503,13 @@
 		}
 
 		public function dataFor($name, $default = null) {
+			if (array_key_exists($name, $this->file_fields)) {
+				if (is_array($this->data) && array_key_exists($name, $this->data) && $this->data[$name]) {
+					return $this->data[$name];
+				}
+				return $this->dataFor('file_shadow_' . $name, $default);
+			}
+
 			if (is_array($this->data)) {
 				if (array_key_exists($name, $this->data))
 					return $this->data[$name];

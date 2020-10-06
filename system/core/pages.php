@@ -302,7 +302,7 @@ EOF;
 			case HyphaRequest::HYPHA_SYSTEM_PAGE_UPLOAD:
 				if ($args[0]=='image') {
 					$return = null;
-					if(!$_FILES['uploadedfile']) $response = __('too-big-file').ini_get('upload_max_filesize');
+					if(!$_FILES['uploadedfile']) $response = __('too-big-file', ['upload-max-filesize' => ini_get('upload_max_filesize')]);
 					else {
 						$ext = strtolower(substr(strrchr($_FILES['uploadedfile']['name'], '.'), 1));
 						@$size = getimagesize($_FILES['uploadedfile']['tmp_name']);
