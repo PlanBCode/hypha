@@ -5,11 +5,12 @@
  * criteria.
  *
  * Parameters:
- *  - tag:
- *    The label of a tag, only pages with this tag will be shown.  Can
- *    be prefixed with a language (e.g. tag="en/taglabel") to select a
- *    tag from another language, otherwise the current content language
- *    is used to find the tag.
+ *  - tags:
+ *    A comma separated list of tags, only items with one of these tags
+ *    will be shown. Each item is the label of a tag, optionally
+ *    prefixed with a language (e.g. tag="en/taglabel") to select a tag
+ *    from another language, otherwise the current content language is
+ *    used to find the tag.
  *  - pagetypes:
  *    A comma separated list of pagetypes, only pages with these types
  *    will be shown.
@@ -86,19 +87,22 @@ class PagelistMacro extends HyphaMacro {
 
 	private function getPages() {
 		// Allow filtering by tag
-		$tagattr = $this->macro_tag->getAttribute("tag");
-		$tag = null;
-		if ($tagattr) {
-			$split = explode('/', $tagattr, 2);
-			if (count($split) == 1) {
-				$lang = $this->O_O->getContentLanguage();
-				$label = $split[0];
-			} else {
-				list($lang, $label) = $split;
+		$tagsattr = $this->macro_tag->getAttribute("tags");
+		$tags = [];
+		if ($tagsattr) {
+			foreach (explode(',', $tagsattr) as $single) {
+				$split = explode('/', $single, 2);
+				if (count($split) == 1) {
+					$lang = $this->O_O->getContentLanguage();
+					$label = $split[0];
+				} else {
+					list($lang, $label) = $split;
+				}
+				$tag = HyphaTags::findTagByLabel($lang, $label);
+				if (!$tag)
+					throw new UnexpectedValueException("Invalid tag in language $lang: $label");
+				$tags[] = $tag;
 			}
-			$tag = HyphaTags::findTagByLabel($lang, $label);
-			if (!$tag)
-				throw new UnexpectedValueException("Invalid tag in language $lang: $label");
 		}
 
 		// Include private pages only when logged in and enabled
@@ -134,7 +138,7 @@ class PagelistMacro extends HyphaMacro {
 		}
 
 		$pageNodes = hypha_findPages([
-			'tags' => [$tag],
+			'tags' => $tags,
 			'page_types' => $pageTypes,
 			'include_private' => $includePrivate,
 			'languages' => $languages,
