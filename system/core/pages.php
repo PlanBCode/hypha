@@ -725,6 +725,12 @@ EOF;
 			$attrFilters = array_map($filterFunc, $tags);
 			$tagFilters .= "[child::tag[" . implode(" or ", $attrFilters) . "]]";
 		}
+		$excludeTags = array_key_exists('exclude_tags', $filters) ? $filters['exclude_tags'] : null;
+		if ($excludeTags) {
+			$filterFunc = function($tag) { return "@id=" . xpath_encode($tag->getId()); };
+			$attrFilters = array_map($filterFunc, $excludeTags);
+			$tagFilters .= "[not(child::tag[" . implode(" or ", $attrFilters) . "])]";
+		}
 
 		$langFilters = '';
 		$languages = array_key_exists('languages', $filters) ? $filters['languages'] : null;
