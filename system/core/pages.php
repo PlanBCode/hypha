@@ -95,6 +95,7 @@
 		public function renderSingleLine(HyphaDomElement $container) {
 			$h2 = $container->document()->createElement('h2');
 			$h2->setText($this->getTitle());
+			$h2->addClass('title');
 			$h2->appendTo($container);
 		}
 

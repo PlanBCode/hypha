@@ -188,6 +188,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	public function renderExcerpt(HyphaDomElement $container) {
 		$doc = $container->document();
 		$h2 = $doc->createElement('h2')->setText($this->getTitle());
+		$h2->addClass('title');
 		$h2->appendTo($container);
 
 		$article = $this->xml->find(self::FIELD_NAME_ARTICLE);
