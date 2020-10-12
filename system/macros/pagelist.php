@@ -11,6 +11,10 @@
  *    prefixed with a language (e.g. tag="en/taglabel") to select a tag
  *    from another language, otherwise the current content language is
  *    used to find the tag.
+ *  - exclude_tags:
+ *    A comma separated list of tags, only items without any of these
+ *    tags will be shown. Syntax is the same as the "tags" attribute. If
+ *    an item matches both tags and exclude_tags, it is excluded.
  *  - pagetypes:
  *    A comma separated list of pagetypes, only pages with these types
  *    will be shown.
@@ -85,9 +89,7 @@ class PagelistMacro extends HyphaMacro {
 		return $pages;
 	}
 
-	private function getPages() {
-		// Allow filtering by tag
-		$tagsattr = $this->macro_tag->getAttribute("tags");
+	private function lookupTags($tagsattr) {
 		$tags = [];
 		if ($tagsattr) {
 			foreach (explode(',', $tagsattr) as $single) {
@@ -104,6 +106,16 @@ class PagelistMacro extends HyphaMacro {
 				$tags[] = $tag;
 			}
 		}
+		return $tags;
+	}
+
+	private function getPages() {
+		// Allow filtering by tag
+		$tagsattr = $this->macro_tag->getAttribute("tags");
+		$tags = self::lookupTags($tagsattr);
+
+		$excludeTagsattr = $this->macro_tag->getAttribute("exclude-tags");
+		$excludeTags = $this->lookupTags($excludeTagsattr);
 
 		// Include private pages only when logged in and enabled
 		// TODO: Better checking of option values (and maybe
@@ -139,6 +151,7 @@ class PagelistMacro extends HyphaMacro {
 
 		$pageNodes = hypha_findPages([
 			'tags' => $tags,
+			'exclude_tags' => $excludeTags,
 			'page_types' => $pageTypes,
 			'include_private' => $includePrivate,
 			'languages' => $languages,
