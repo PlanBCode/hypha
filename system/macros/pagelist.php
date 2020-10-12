@@ -133,7 +133,12 @@ class PagelistMacro extends HyphaMacro {
 			}
 		}
 
-		$pageNodes = hypha_findPages($tag, $pageTypes, $includePrivate, $languages);
+		$pageNodes = hypha_findPages([
+			'tag' => $tag,
+			'page_types' => $pageTypes,
+			'include_private' => $includePrivate,
+			'languages' => $languages,
+		]);
 		$pages = [];
 		foreach ($pageNodes as $node) {
 			$pages[] = createPageInstance($this->O_O, $node);

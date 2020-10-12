@@ -682,16 +682,21 @@ EOF;
 		return 'Subject: "' . htmlspecialchars($subject) . '" not found';
 	}
 
-	function hypha_findPages(HyphaTag $tag = null, array $pageTypes = [], bool $includePrivate = false, array $languages = [], $skip = 0, $limit = 0) {
+	function hypha_findPages($filters) {
 		/** @var HyphaDomElement $hyphaXml */
 		global $hyphaXml;
 
 		$pageFilters = '';
+
+		$pageTypes = array_key_exists('page_types', $filters) ? $filters['page_types'] : null;
 		if ($pageTypes) {
+			$pageTypes = $filters['page_types'];
 			$filterFunc = function($type) { return "@type=" . xpath_encode($type); };
 			$attrFilters = array_map($filterFunc, $pageTypes);
 			$pageFilters .= "[" . implode(" or ", $attrFilters) . "]";
 		}
+
+		$includePrivate = array_key_exists('include_private', $filters) ? $filters['include_private'] : false;
 		if ($includePrivate !== true) {
 			$pageFilters .= "[@private='off']";
 		}
@@ -700,6 +705,8 @@ EOF;
 		// without sorting, but xpath 1.0 does not seem
 		// to support sorting.
 		$positionFilters = '';
+		$skip = array_key_exists('skip', $filters) ? $filters['skip'] : 0;
+		$limit = array_key_exists('limit', $filters) ? $filters['limit'] : 0;
 		if ($skip > 0) {
 			// Note: position() is 1-based
 			$positionFilters .= '[position() >= ' . ($skip + 1) . ']';
@@ -712,12 +719,14 @@ EOF;
 		}
 
 		$tagFilters = '';
+		$tag = array_key_exists('tag', $filters) ? $filters['tag'] : null;
 		if ($tag) {
 			$tagFilters = '[child::tag[@id=' . xpath_encode($tag->getId()) . ']]';
 
 		}
 
 		$langFilters = '';
+		$languages = array_key_exists('languages', $filters) ? $filters['languages'] : null;
 		if ($languages) {
 			$filterFunc = function($lang) { return "@id=" . xpath_encode($lang); };
 			$attrFilters = array_map($filterFunc, $languages);
