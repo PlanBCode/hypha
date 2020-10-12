@@ -58,7 +58,7 @@
 
 		protected function getPages(HyphaTag $tag, $includePrivate = false) {
 			$pageTypes = []; // All pagetypes
-			$pageNodes = HyphaTags::findPagesWithTags($tag, $pageTypes, $includePrivate);
+			$pageNodes = hypha_findPages($tag, $pageTypes, $includePrivate);
 			$pages = [];
 			foreach ($pageNodes as $node) {
 				$pages[] = createPageInstance($this->O_O, $node);

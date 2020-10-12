@@ -12,54 +12,6 @@
 			return ($node ? new HyphaTag($node) : null);
 		}
 
-		static function findPagesWithTags(HyphaTag $tag = null, array $pageTypes = [], bool $includePrivate = false, array $languages = [], $skip = 0, $limit = 0) {
-			/** @var HyphaDomElement $hyphaXml */
-			global $hyphaXml;
-
-			$pageFilters = '';
-			if ($pageTypes) {
-				$filterFunc = function($type) { return "@type=" . xpath_encode($type); };
-				$attrFilters = array_map($filterFunc, $pageTypes);
-				$pageFilters .= "[" . implode(" or ", $attrFilters) . "]";
-			}
-			if ($includePrivate !== true) {
-				$pageFilters .= "[@private='off']";
-			}
-
-			// TODO: skip and limit might not be useful
-			// without sorting, but xpath 1.0 does not seem
-			// to support sorting.
-			$positionFilters = '';
-			if ($skip > 0) {
-				// Note: position() is 1-based
-				$positionFilters .= '[position() >= ' . ($skip + 1) . ']';
-			}
-			if ($limit > 0) {
-				// This refers to the position *after*
-				// applying skip, because it is in a
-				// different [] predicate block.
-				$positionFilters .= '[position() < ' . ($limit + 1) . ']';
-			}
-
-			$tagFilters = '';
-			if ($tag) {
-				$tagFilters = '[child::tag[@id=' . xpath_encode($tag->getId()) . ']]';
-
-			}
-
-			$langFilters = '';
-			if ($languages) {
-				$filterFunc = function($lang) { return "@id=" . xpath_encode($lang); };
-				$attrFilters = array_map($filterFunc, $languages);
-				$langFilters = '[child::language[' . implode(' or ', $attrFilters) . ']]';
-			}
-
-			$xpath = "hypha/pageList/page${pageFilters}{$tagFilters}${langFilters}${positionFilters}";
-			$pages = $hyphaXml->findXPath($xpath);
-
-			return $pages;
-		}
-
 		/**
 		 * Return the tags assigned to the given page list node
 		 *
