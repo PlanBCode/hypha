@@ -59,7 +59,7 @@
 		protected function getPages(HyphaTag $tag, $includePrivate = false) {
 			$pageTypes = []; // All pagetypes
 			$pageNodes = hypha_findPages([
-				'tag' => $tag, 
+				'tags' => [$tag],
 				'page_types' => $pageTypes,
 				'include_private' => $includePrivate,
 			]);

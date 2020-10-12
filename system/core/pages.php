@@ -719,10 +719,11 @@ EOF;
 		}
 
 		$tagFilters = '';
-		$tag = array_key_exists('tag', $filters) ? $filters['tag'] : null;
-		if ($tag) {
-			$tagFilters = '[child::tag[@id=' . xpath_encode($tag->getId()) . ']]';
-
+		$tags = array_key_exists('tags', $filters) ? $filters['tags'] : null;
+		if ($tags) {
+			$filterFunc = function($tag) { return "@id=" . xpath_encode($tag->getId()); };
+			$attrFilters = array_map($filterFunc, $tags);
+			$tagFilters .= "[child::tag[" . implode(" or ", $attrFilters) . "]]";
 		}
 
 		$langFilters = '';
