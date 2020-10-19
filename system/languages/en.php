@@ -459,6 +459,7 @@
 		"art-featured-image" => "featured image",
 		"art-article" => "article",
 		"art-invalid-code" => "invalid code",
+		"art-excerpt-preview" => "preview of excerpt",
 
 		"art-start-review" => "start review",
 		"art-approve(s)" => "approve(s)",

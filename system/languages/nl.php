@@ -454,6 +454,7 @@
 		"art-featured-image" => "afbeelding bij uittreksel",
 		"art-article" => "artikel",
 		"art-invalid-code" => "ongeldige code",
+		"art-excerpt-preview" => "voorbeeld van uitreksel",
 
 		"art-start-review" => "start beoordeling",
 		"art-approve(s)" => "beoordeling(en)",

@@ -687,6 +687,18 @@ input {
  content: '\00a0';
 }
 
+.type_peer_reviewed_article .excerpt-preview {
+ border: 1px solid grey;
+ background: #f2f2f2;
+ padding: 0 0.8em;
+}
+
+.type_peer_reviewed_article .excerpt-preview .prefix {
+ font-style: italic;
+ text-align: center;
+ display: block;
+}
+
 .review-comment-wrapper {
  background: #FFFFE0;
  border-bottom: 3px solid var(--bordercolor);

@@ -353,8 +353,11 @@ class peer_reviewed_article extends HyphaDatatypePage {
 
 		$this->appendAuthorAndTimestamp($main, $article);
 
-		if (isUser())
-			$this->renderExcerptBody($main);
+		if (isUser()) {
+			$preview = $this->html->createElement('div')->addClass('excerpt-preview')->appendTo($main);
+			$this->html->createElement('span')->addClass('prefix')->setText(__('art-excerpt-preview'))->appendTo($preview);
+			$this->renderExcerptBody($preview);
+		}
 
 		$text = $content->find(self::FIELD_NAME_TEXT)->children();
 		/** @var HyphaDomElement $div */
