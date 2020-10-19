@@ -29,7 +29,6 @@
 			// accessible to scripts).
 			session_name('hyphaSession');
 			ini_set('session.cookie_path', $request->getRootUrlPath());
-			ini_set('session.cookie_secure', $request->isSecure());
 			ini_set('session.cookie_httponly', true);
 			// This enables browser protections against CSRF
 			// attacks by omitting this cookie from all
