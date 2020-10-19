@@ -42,6 +42,7 @@
 				case [self::PATH_EDIT,      self::CMD_SAVE]:      return $this->editAction($request);
 				case [self::PATH_TRANSLATE, null]:                return $this->translateView($request);
 				case [self::PATH_TRANSLATE, self::CMD_TRANSLATE]: return $this->translateAction($request);
+				case [self::PATH_REVERT,    self::CMD_REVERT]:    return $this->revertAction($request);
 			}
 
 			return '404';
