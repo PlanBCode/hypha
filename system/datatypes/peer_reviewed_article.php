@@ -567,6 +567,10 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		$success = $this->updateToNewStatus($newStatus);
 		if ($success) {
 			notify('success', ucfirst(__('art-successfully-updated')));
+		} else {
+			// Should not normally happen (e.g. the button
+			// for this change should not exist).
+			notify('error', __('art-unsupported-status-change'));
 		}
 
 		return ['redirect', $this->constructFullPath($this->pagename)];
@@ -1082,7 +1086,6 @@ EOF;
 	protected function updateToNewStatus($newStatus) {
 		$currentStatus = $this->getStatus();
 		if (!isset($this->statusMtx[$currentStatus]) || !isset($this->statusMtx[$currentStatus][$newStatus])) {
-			notify('error', __('art-unsupported-status-change'));
 			return false;
 		}
 
