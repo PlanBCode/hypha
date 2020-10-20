@@ -1,11 +1,10 @@
 <?php
-	/*
-		Function: __
-		Returns a string from the selected dictionary.
-
-		Parameters:
-		$msgid - identifier used as a key to fetch the corresponding string from the dictionary.
-	*/
+	/**
+	 * Returns a string from the selected dictionary.
+	 * @param string $msgid identifier used as a key to fetch the corresponding string from the dictionary.
+	 * @param null|array $args arguments to be interpolated into translated string
+	 * @return string
+	 */
 	function __($msgid, $args = null) {
 		return Language::translate($msgid, $args);
 	}
