@@ -111,6 +111,8 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		'other',
 	];
 
+	const APPROVES_NEEDED = 3;
+
 	protected $statusMtx = [
 		self::STATUS_NEWLY_CREATED => [],
 		self::STATUS_DRAFT => [self::STATUS_REVIEW => ['label' => 'art-start-review', 'cmd' => self::CMD_STATUS_CHANGE_REVIEW]],
@@ -1867,7 +1869,7 @@ EOF;
 		}
 
 		$approveCount = $this->xml->find(self::FIELD_NAME_APPROVE_CONTAINER)->children()->count();
-		if ($approveCount < 3) {
+		if ($approveCount < self::APPROVES_NEEDED) {
 			return false;
 		}
 
