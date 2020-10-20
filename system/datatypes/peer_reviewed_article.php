@@ -294,7 +294,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 					$commandsAtEnd->append($this->makeActionButton(__('art-approve'), null, self::CMD_APPROVE));
 				}
 			} else {
-				foreach ($this->statusMtx[$status] as $newStatus => $option) {
+				foreach ($this->statusMtx[$status] as $option) {
 					if (self::STATUS_APPROVED === $status && $option['cmd'] === self::CMD_STATUS_CHANGE_PUBLISHED && !$this->hasUserCreated($userId) && !isAdmin()) {
 						continue;
 					}
