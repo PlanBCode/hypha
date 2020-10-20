@@ -47,6 +47,25 @@
 
 			return $pages;
 		}
+
+		/**
+		 * Return the tags assigned to the given page list node
+		 *
+		 * @return list<HyphaTag>
+		 */
+		static function tagsForPageListNode(HyphaDomElement $pageListNode) {
+			$idFilters = [];
+			foreach ($pageListNode->findXPath('./tag/@id') as $idAttr)
+				$idFilters[] = '@xml:id=' . xpath_encode($idAttr->value);
+			$tags = [];
+			if (!empty($idFilters)) {
+				$path = '/hypha/tagList/tag[' . implode(" or ", $idFilters) . "]";
+
+				foreach ($pageListNode->document()->findXPath($path) as $tagNode)
+					$tags[$tagNode->getId()] = new HyphaTag($tagNode);
+			}
+			return $tags;
+		}
 	}
 
 	class HyphaTag {
