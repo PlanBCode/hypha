@@ -699,6 +699,40 @@ input {
  display: block;
 }
 
+.type_peer_reviewed_article .review-start-checklist > ul {
+ padding-left: 0;
+ margin-top: 0;
+}
+
+.type_peer_reviewed_article .review-start-checklist > h2 {
+ margin-bottom: 0;
+}
+.type_peer_reviewed_article .review-start-checklist > .prefix {
+ font-style: italic;
+}
+
+.type_peer_reviewed_article .review-start-checklist li {
+ list-style-type: none;
+}
+
+.type_peer_reviewed_article .review-start-checklist ul .failed:before {
+ content: "\2612";
+ padding-right: 0.1em;
+ color: red;
+}
+
+.type_peer_reviewed_article .review-start-checklist ul .passed:before {
+ content: "\2611";
+ padding-right: 0.1em;
+ color: green;
+}
+
+.type_peer_reviewed_article .review-start-checklist ul .recommended:before {
+ content: "\2610";
+ padding-right: 0.1em;
+ color: orange;
+}
+
 .review-comment-wrapper {
  background: #FFFFE0;
  border-bottom: 3px solid var(--bordercolor);
