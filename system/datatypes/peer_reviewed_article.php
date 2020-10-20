@@ -2046,22 +2046,11 @@ EOF;
 	 * @return bool
 	 */
 	protected function canBeSetAsApproved() {
-		/** @var HyphaDomElement $discussions */
-		$discussions = $this->xml->find(self::FIELD_NAME_DISCUSSION_CONTAINER);
-		/** @var NodeList $blockingDiscussions */
-		$xpath = './/' . self::FIELD_NAME_DISCUSSION . '[@' . self::FIELD_NAME_DISCUSSION_BLOCKING . '="1" and @' . self::FIELD_NAME_DISCUSSION_BLOCK_RESOLVED . '!="1"]';
-		$blockingDiscussions = $discussions->findXPath($xpath);
-		$blockingDiscussionsCount = $blockingDiscussions->count();
-		if ($blockingDiscussionsCount > 0) {
-			return false;
-		}
+		list($_checkStatus, $checks) = $this->runChecks();
 
-		$approveCount = $this->xml->find(self::FIELD_NAME_APPROVE_CONTAINER)->children()->count();
-		if ($approveCount < self::APPROVES_NEEDED) {
-			return false;
-		}
-
-		return $this->getStatus() === self::STATUS_REVIEW;
+		return $this->getStatus() === self::STATUS_REVIEW &&
+		       $checks['has-approvals']['passed'] &&
+		       $checks['has-no-blocks']['passed'];
 	}
 
 	/**
