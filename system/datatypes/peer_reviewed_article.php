@@ -126,11 +126,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		return __('datatype.name.peer_reviewed_article');
 	}
 
-	/**
-	 * @param DOMElement $pageListNode
-	 * @param RequestContext $O_O
-	 */
-	public function __construct(DomElement $pageListNode, RequestContext $O_O) {
+	public function __construct(HyphaDomElement $pageListNode, RequestContext $O_O) {
 		parent::__construct($pageListNode, $O_O);
 		$this->xml = new Xml('peer_reviewed_article', Xml::multiLingualOff, Xml::versionsOff);
 		$this->xml->loadFromFile('data/pages/' . $pageListNode->getAttribute('id'));
