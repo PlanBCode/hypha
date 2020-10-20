@@ -744,7 +744,12 @@ class peer_reviewed_article extends HyphaDatatypePage {
 			return ['redirect', $this->constructFullPath($this->pagename)];
 		}
 
-		$success = $this->updateToNewStatus($newStatus);
+		list($checkStatus, $_checks) = $this->runChecks();
+		if ($checkStatus === self::CHECK_STATUS_FAILED) {
+			$success = false;
+		} else {
+			$success = $this->updateToNewStatus($newStatus);
+		}
 		if ($success) {
 			notify('success', ucfirst(__('art-successfully-updated')));
 		} else {
