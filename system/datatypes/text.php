@@ -52,8 +52,7 @@
 			$version = getCurrentVersionNode($this->xml);
 			if (!$version)
 				return null;
-			$timestamp = ltrim($version->getId(), "t");
-			return new DateTime("@" . $timestamp);
+			return timestampToDateTime($version->getId());
 		}
 
 		protected function defaultView(HyphaRequest $request) {

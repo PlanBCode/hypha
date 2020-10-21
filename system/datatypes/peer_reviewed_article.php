@@ -181,8 +181,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		// except articles created before the field existed.
 		if (!$value)
 			$value = $article->getAttribute(self::FIELD_NAME_CREATED_AT);
-		$timestamp = ltrim($value, "t");
-		return new DateTime("@" . $timestamp);
+		return timestampToDateTime($value);
 	}
 
 	public function renderExcerpt(HyphaDomElement $container) {
