@@ -67,6 +67,30 @@ abstract class HyphaMacro {
 		if ($from->hasAttribute('class'))
 			$to->addClass($from->getAttribute('class'));
 	}
+
+	/**
+	 * Gets the attribute with the given name from the macro tag and
+	 * converts it to DateTime object using the given format (as
+	 * defined in DateTime::createFromFormat). If the attribute is
+	 * not present, the given default is returned. If the value is
+	 * invalid, an UnexpectedValueException is raised, using the
+	 * given errorFormat to indicate the expected format to the
+	 * user.
+	 *
+	 * @param string $name The name of the attribute to get
+	 * @return DateTime | null
+	 */
+	protected function getDateTimeAttribute($name, $format, $errorFormat, $default = null) {
+		if (!$this->macro_tag->hasAttribute($name))
+			return $default;
+
+		$value = $this->macro_tag->getAttribute($name);
+		$datetime = DateTime::createFromFormat($format, $value);
+
+		if ($datetime === false)
+			throw new UnexpectedValueException("Invalid $name: $value. Should be in $errorFormat format.");
+		return $datetime;
+	}
 }
 
 /**
