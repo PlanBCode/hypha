@@ -25,6 +25,12 @@
  *    When set to "yes" and when a user is logged in, private pages are
  *    included. Otherwise (including when omitted), only public pages
  *    are shown.
+ *  - date-from:
+ *    Only show pages with a (sort) date on or after the given date.
+ *    Given date should be in YYYY-MM-DD format.
+ *  - date-until:
+ *    Only show pages with a (sort) date on or before the given date.
+ *    Given date should be in YYYY-MM-DD format.
  *  - sort:
  *    The sort order. Can be one of "date" or "title". Can be prefixed
  *    by - to reverse sort order (e.g. sort="-date" to sort by
@@ -156,9 +162,27 @@ class PagelistMacro extends HyphaMacro {
 			'include_private' => $includePrivate,
 			'languages' => $languages,
 		]);
+
+		// These use ! to set the time part to midnight (in the
+		// default timezone), rather than using the current
+		// time.
+		$dateFrom = $this->getDateTimeAttribute('date-from', '!Y-m-d', 'YYYY-MM-DD');
+		$dateUntil = $this->getDateTimeAttribute('date-until', '!Y-m-d', 'YYYY-MM-DD');
+		// Make sure that timestamps *on* the given date compare
+		// less (so we don't have to clear the time part of all
+		// sort dates).
+		if ($dateUntil) $dateUntil->modify('tomorrow');
+
 		$pages = [];
 		foreach ($pageNodes as $node) {
-			$pages[] = createPageInstance($this->O_O, $node);
+			$page = createPageInstance($this->O_O, $node);
+			if ($dateFrom || $dateUntil) {
+				$datetime = $page->getSortDateTime();
+				if (!$datetime || ($dateFrom && $datetime < $dateFrom) || ($dateUntil && $datetime >= $dateUntil)) {
+					continue;
+				}
+			}
+			$pages[] = $page;
 		}
 		return $pages;
 	}
