@@ -496,6 +496,24 @@
 			}
 		}
 
+		/**
+		 * Find the given form field, or raise an exception if
+		 * not found exactly once.
+		 *
+		 * @param string $name The field name
+		 * @param string $tagName The tagname of the field to look up
+		 * @return HyphaDomElement The found element
+		 */
+		public function findField($name, $tagName) {
+			$found = $this->root->findXPath('.//'.$tagName.'[@name='. xpath_encode($name).']');
+			if ($found->count() < 1)
+				throw new LogicException("Form field \"$name\" not found");
+			else if ($found->count() > 1)
+				throw new LogicException("Form field \"$name\" found multiple times");
+
+			return $found->first();
+		}
+
 		public function labelFor($name) {
 			if (array_key_exists($name, $this->labels))
 				return $this->labels[$name];
