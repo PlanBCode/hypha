@@ -258,7 +258,7 @@
 		/**
 		 * Returns a request argument
 		 *
-		 * @param string $key
+		 * @param string|int $key
 		 * @param null|mixed $default
 		 *
 		 * @return null|mixed
