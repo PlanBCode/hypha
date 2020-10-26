@@ -514,6 +514,28 @@
 			return $found->first();
 		}
 
+		/**
+		 * Add an option element to the given field (as returned
+		 * by findField), using the given parameters.
+		 *
+		 * @param HyphaDomElement $field
+		 * @param string $value
+		 * @param string $content
+		 * @param array $attributes
+		 *
+		 * @return HyphaDomElement The created option element
+		 */
+		public function addOptionToSelect(HyphaDomElement $field, $value, $content, array $attributes = []) {
+			$doc =  $this->root->document();
+			$option = $doc->createElement('option')->appendTo($field);
+			$option->setAttribute('value', $value);
+			$option->setText($content);
+			foreach ($attributes as $name => $value) {
+				$option->setAttribute($name, $value);
+			}
+			return $option;
+		}
+
 		public function labelFor($name) {
 			if (array_key_exists($name, $this->labels))
 				return $this->labels[$name];
