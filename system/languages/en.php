@@ -414,6 +414,28 @@
 		"art-cancel" => "cancel",
 		"art-save" => "save",
 
+		// peer_reviewed_article - moderation
+		"art-moderate-comment" => "moderate this comment",
+		"art-moderate-modify" => "modify moderation",
+		"art-moderate-hide-comment" => "hide this comment",
+		"art-moderate-change-reason" => "change moderation reason",
+		"art-unmoderate-comment" => "remove moderation",
+		"art-comment-to-moderate" => "Comment to moderate",
+		"art-comment-is-hidden" => "This comment is hidden",
+		"art-moderate-show-comment" => "show comment",
+		"art-moderate-reason" => "reason for moderation",
+		"art-moderate-reason-select" => "select reason...",
+		"art-moderate-reason-inappropriate" => "inappropriate language",
+		"art-moderate-reason-violation" => "violates policy",
+		"art-moderate-reason-offtopic" => "off-topic",
+		"art-moderate-reason-duplicate" => "duplicate",
+		"art-moderate-reason-spam" => "spam",
+		"art-moderate-reason-other" => "for other reasons",
+
+		// peer_reviewed_article - digest
+		"art-digest-comment-hidden" => "[[moderator]] has hidden a comment (from [[commenter]] on [[title]], reason: [[reason]])",
+		"art-digest-comment-unmoderated" => "[[moderator]] unmoderated comment from [[commenter]] on [[title]]",
+
 		// peer_reviewed_article
 		"art-by" => "by",
 		"art-at" => "at",

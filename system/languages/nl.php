@@ -409,6 +409,28 @@
 		"art-cancel" => "afbreken",
 		"art-save" => "opslaan",
 
+		// peer_reviewed_article - moderation
+		"art-moderate-comment" => "deze reactie modereren",
+		"art-moderate-modify" => "moderatie aanpassen",
+		"art-moderate-hide-comment" => "deze reactie verbergen",
+		"art-moderate-change-reason" => "reden voor moderatie wijzigen",
+		"art-unmoderate-comment" => "moderatie opheffen",
+		"art-comment-to-moderate" => "Reactie om te modereren",
+		"art-comment-is-hidden" => "Deze reactie is verborgen",
+		"art-moderate-show-comment" => "reactie weergeven",
+		"art-moderate-reason" => "reden voor moderatie",
+		"art-moderate-reason-select" => "selecteer reden...",
+		"art-moderate-reason-inappropriate" => "ongepast taalgebruik",
+		"art-moderate-reason-violation" => "niet in overeenstemming met de regels",
+		"art-moderate-reason-offtopic" => "off-topic",
+		"art-moderate-reason-duplicate" => "duplicaat",
+		"art-moderate-reason-spam" => "spam",
+		"art-moderate-reason-other" => "om overige redenen",
+
+		// peer_reviewed_article - digest
+		"art-digest-comment-hidden" => "[[moderator]] heeft een reactie verborgen (reactie van [[commenter]] op [[title]], reden: [[reason]])",
+		"art-digest-comment-unmoderated" => "[[moderator]] heeft de moderatie opgeheven voor reactie van [[commenter]] op [[title]]",
+
 		// peer_reviewed_article
 		"art-by" => "door",
 		"art-at" => "om",
