@@ -1055,6 +1055,31 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	}
 
 	/**
+	 * Render a single comment.
+	 *
+	 * @param HyphaDomElement $comment
+	 * @param bool $review
+	 * @param bool $firstAndBlocking
+	 * @param bool $resolved
+	 * @return DomNodeList
+	 */
+	protected function createCommentDomElement(HyphaDomElement $comment, $review = false, $firstAndBlocking = false, $resolved = false) {
+		$createdAt = date('j-m-y, H:i', ltrim($comment->getAttribute(self::FIELD_NAME_CREATED_AT), 't'));
+		$committerName = $this->getCommentCommenter($comment);
+		$commentHtml = nl2br(htmlspecialchars($comment->getText()));
+		$commentHtml .= '<p>' . __('art-by') . ' <strong>' . htmlspecialchars($committerName) . '</strong> ' . __('art-at') . ' ' . htmlspecialchars($createdAt);
+		if (!$review && isUser()) {
+			$committerEmail = $comment->getAttribute(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL);
+			$commentHtml .= ' <span> | ' . __('art-email') . ': <a href="mailto:' . htmlspecialchars($committerEmail) . '">' . htmlspecialchars($committerEmail) . '</a></span>';
+		}
+		if ($firstAndBlocking) {
+			$commentHtml .= ' | ' . ($resolved ? __('art-is-resolved') : __('art-is-blocking'));
+		}
+		$commentHtml .= '</p>';
+		return $this->html->create($commentHtml);
+	}
+
+	/**
 	 * Creates discussions HTML DOM element.
 	 *
 	 * @param string $type
@@ -1099,21 +1124,14 @@ class peer_reviewed_article extends HyphaDatatypePage {
 				if (!$review && (bool)$comment->getAttribute(self::FIELD_NAME_DISCUSSION_COMMENT_PENDING)) {
 					continue;
 				}
-				$createdAt = date('j-m-y, H:i', ltrim($comment->getAttribute(self::FIELD_NAME_CREATED_AT), 't'));
-				$committerName = $this->getCommentCommenter($comment);
-				$commentHtml = nl2br(htmlspecialchars($comment->getText()));
-				$commentHtml .= '<p>' . __('art-by') . ' <strong>' . htmlspecialchars($committerName) . '</strong> ' . __('art-at') . ' ' . htmlspecialchars($createdAt);
-				if (!$review && isUser()) {
-					$committerEmail = $comment->getAttribute(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL);
-					$commentHtml .= ' <span> | ' . __('art-email') . ': <a href="mailto:' . htmlspecialchars($committerEmail) . '">' . htmlspecialchars($committerEmail) . '</a></span>';
-				}
+
+				$li = $this->html->createElement('li')->appendTo($commentList);
+				$commentHtml = $this->createCommentDomElement($comment, $review, $firstComment && $blocking, $resolved);
+				$li->append($commentHtml);
+
 				if ($firstComment) {
-					if ($blocking) {
-						$commentHtml .= ' | ' . ($resolved ? __('art-is-resolved') : __('art-is-blocking'));
-					}
+					$li->addClass("first-comment");
 				}
-				$commentHtml .= '</p>';
-				$commentList->append('<li ' . ($firstComment ? 'class="first-comment"' : '') . '>' . $commentHtml . '</li>');
 				$firstComment = false;
 			}
 
