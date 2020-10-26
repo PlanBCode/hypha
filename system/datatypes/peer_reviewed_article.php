@@ -362,12 +362,12 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		}
 
 		if (isUser() && self::STATUS_DRAFT !== $status) {
-			$main->append($this->createDiscussionsDomElement('review'));
+			$main->append($this->createDiscussionsDomElement(self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER));
 			$main->append($this->createApprovesDomElement());
 		}
 
 		if (self::STATUS_PUBLISHED === $status) {
-			$main->append($this->createDiscussionsDomElement('public'));
+			$main->append($this->createDiscussionsDomElement(self::FIELD_NAME_DISCUSSION_PUBLIC_CONTAINER));
 		}
 
 		return null;
