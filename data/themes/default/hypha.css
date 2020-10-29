@@ -744,11 +744,14 @@ input {
  overflow: auto;
 }
 
-.public-comment-wrapper .moderated-placeholder {
+.public-comment-wrapper summary.moderated-placeholder {
  /* Hide expand/collapse triangle */
  list-style: none;
- font-style: italic;
  cursor: pointer;
+}
+
+.public-comment-wrapper .moderated-placeholder {
+ font-style: italic;
 }
 
 .public-comment-wrapper .show-moderated {

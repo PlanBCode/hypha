@@ -71,6 +71,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	const STATUS_RETRACTED = 'retracted';
 
 	const MODERATION_STATUS_HIDDEN = 'hidden';
+	const MODERATION_STATUS_DELETED = 'deleted';
 
 	const SUBSCRIBER_STATUS_PENDING = 'pending';
 	const SUBSCRIBER_STATUS_CONFIRMED = 'confirmed';
@@ -98,6 +99,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	const CMD_DISCUSSION_CLOSED = 'discussion_closed';
 	const CMD_COMMENT = 'comment';
 	const CMD_COMMENT_MODERATE_HIDE = 'hide';
+	const CMD_COMMENT_MODERATE_DELETE = 'delete';
 	const CMD_COMMENT_UNMODERATE = 'unmoderate';
 
 	const MODERATE_REASONS = [
@@ -154,6 +156,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 			case [self::PATH_DISCUSSIONS, self::CMD_DISCUSSION_CLOSED]:       return $this->discussionClosedAction($request);
 			case [self::PATH_COMMENTS,    null]:                              return $this->commentModerateView($request);
 			case [self::PATH_COMMENTS,    self::CMD_COMMENT_MODERATE_HIDE]:   return $this->commentModerateAction($request);
+			case [self::PATH_COMMENTS,    self::CMD_COMMENT_MODERATE_DELETE]: return $this->commentModerateAction($request);
 			case [self::PATH_COMMENTS,    self::CMD_COMMENT_UNMODERATE]:      return $this->commentModerateAction($request);
 			case [self::PATH_COMMENT,     null]:                              return $this->commentConfirmAction($request);
 			case [self::PATH_UNSUBSCRIBE, null]:                              return $this->unsubscribeAction($request);
@@ -861,6 +864,7 @@ EOF;
 		// update the form dom so that error can be displayed, if there are any
 		$form->updateDom();
 		$hidden = $comment->getAttribute(self::FIELD_NAME_DISCUSSION_MODERATION_STATUS) === self::MODERATION_STATUS_HIDDEN;
+		$deleted = $comment->getAttribute(self::FIELD_NAME_DISCUSSION_MODERATION_STATUS) === self::MODERATION_STATUS_DELETED;
 
 		$main = $this->html->find('#main')->first();
 		$commentDiv = $this->html->createElement('div')->appendTo($main);
@@ -870,6 +874,8 @@ EOF;
 		$prefix->addClass('prefix');
 		if ($hidden) {
 			$prefix->setText(__('art-comment-is-hidden'));
+		} else if ($deleted) {
+			$prefix->setText(__('art-comment-is-deleted'));
 		} else {
 			$prefix->setText(__('art-comment-to-moderate'));
 		}
@@ -882,10 +888,17 @@ EOF;
 		$commands->append($this->makeActionButton(__('cancel')));
 
 		$path = str_replace('{id}', $comment->getId(), self::PATH_COMMENTS_MODERATE);
-		$hide_title = $hidden ? __('art-moderate-change-reason') : __('art-moderate-hide-comment');
-		$commands->append($this->makeActionButton($hide_title, $path, self::CMD_COMMENT_MODERATE_HIDE ));
+		// Show a hide button, but only if not already deleted,
+		// since that is confusing (and you can still unmoderate
+		// and then hide).
+		if (!$deleted) {
+			$hide_title = $hidden ? __('art-moderate-change-reason') : __('art-moderate-hide-comment');
+			$commands->append($this->makeActionButton($hide_title, $path, self::CMD_COMMENT_MODERATE_HIDE ));
+		}
+		$delete_title = $deleted ? __('art-moderate-change-reason') : __('art-moderate-delete-comment');
+		$commands->append($this->makeActionButton($delete_title, $path, self::CMD_COMMENT_MODERATE_DELETE ));
 
-		if ($hidden) {
+		if ($hidden || $deleted) {
 			$commands->append($this->makeActionButton(__('art-unmoderate-comment'), $path, self::CMD_COMMENT_UNMODERATE ));
 		}
 
@@ -932,11 +945,18 @@ EOF;
 			}
 
 			$reason = $form->dataFor(self::FIELD_NAME_MODERATE_REASON);
+			$digestArgs['reason'] = $reason;
+
+			if ($request->getCommand() === self::CMD_COMMENT_MODERATE_HIDE) {
+				$status = self::MODERATION_STATUS_HIDDEN;
+				writeToDigest(__('art-digest-comment-hidden', $digestArgs), 'comment moderation');
+			} else {
+				$status = self::MODERATION_STATUS_DELETED;
+				writeToDigest(__('art-digest-comment-deleted', $digestArgs), 'comment moderation');
+			}
 
 			$comment->setAttribute(self::FIELD_NAME_DISCUSSION_MODERATION_REASON, $reason);
-			$comment->setAttribute(self::FIELD_NAME_DISCUSSION_MODERATION_STATUS, self::MODERATION_STATUS_HIDDEN);
-			$digestArgs['reason'] = $reason;
-			writeToDigest(__('art-digest-comment-hidden', $digestArgs), 'comment moderation');
+			$comment->setAttribute(self::FIELD_NAME_DISCUSSION_MODERATION_STATUS, $status);
 		}
 
 		$this->xml->saveAndUnlock();
@@ -1295,14 +1315,24 @@ EOF;
 				$li = $this->html->createElement('li')->appendTo($commentList);
 				$commentHtml = $this->createCommentDomElement($comment, $review, $firstComment && $blocking, $resolved);
 				$hidden = $comment->getAttribute(self::FIELD_NAME_DISCUSSION_MODERATION_STATUS) === self::MODERATION_STATUS_HIDDEN;
-				if ($hidden) {
-					$li->addClass('hidden');
-					$details = $this->html->createElement('details')->appendTo($li);
-					$placeholder = $this->html->createElement('summary')->appendTo($details);
+				$deleted = $comment->getAttribute(self::FIELD_NAME_DISCUSSION_MODERATION_STATUS) === self::MODERATION_STATUS_DELETED;
+				if ($hidden || $deleted) {
+					if ($deleted) {
+						$li->addClass('deleted');
+						$placeholder = $this->html->createElement('div')->appendTo($li);
+					} else {
+						$li->addClass('hidden');
+						$details = $this->html->createElement('details')->appendTo($li);
+						$placeholder = $this->html->createElement('summary')->appendTo($details);
+						$commentHtml->appendTo($details);
+					}
 					$placeholder->addClass('moderated-placeholder');
-					$commentHtml->appendTo($details);
 					$statusSpan = $this->html->createElement('span')->appendTo($placeholder);
-					$statusSpan->setText(__('art-comment-is-hidden'));
+					if ($deleted) {
+						$statusSpan->setText(__('art-comment-is-deleted'));
+					} else {
+						$statusSpan->setText(__('art-comment-is-hidden'));
+					}
 					$statusSpan->addClass('moderate-status');
 					$moderateReason = $comment->getAttribute(self::FIELD_NAME_DISCUSSION_MODERATION_REASON);
 					if ($moderateReason) {
@@ -1310,9 +1340,11 @@ EOF;
 						$reasonSpan->addClass('moderate-reason');
 						$reasonSpan->setText(' (' . $moderateReason . ')');
 					}
-					$showSpan = $this->html->createElement('span')->appendTo($placeholder);
-					$showSpan->setText(__('art-moderate-show-comment'));
-					$showSpan->addClass('show-moderated');
+					if (!$deleted) {
+						$showSpan = $this->html->createElement('span')->appendTo($placeholder);
+						$showSpan->setText(__('art-moderate-show-comment'));
+						$showSpan->addClass('show-moderated');
+					}
 				} else {
 					$li->append($commentHtml);
 				}
@@ -1326,7 +1358,7 @@ EOF;
 					$moderate->addClass('moderate-link');
 					$path = $this->pagename . '/' . str_replace('{id}', $comment->getId(), self::PATH_COMMENTS_MODERATE);
 					$moderate->setAttribute('href', $this->constructFullPath($path));
-					if ($hidden) {
+					if ($hidden || $deleted) {
 						$moderate->setText(__('art-moderate-modify'));
 						$placeholder->append($moderate);
 					} else {

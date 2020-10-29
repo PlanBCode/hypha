@@ -418,10 +418,12 @@
 		"art-moderate-comment" => "moderate this comment",
 		"art-moderate-modify" => "modify moderation",
 		"art-moderate-hide-comment" => "hide this comment",
+		"art-moderate-delete-comment" => "delete this comment",
 		"art-moderate-change-reason" => "change moderation reason",
 		"art-unmoderate-comment" => "remove moderation",
 		"art-comment-to-moderate" => "Comment to moderate",
 		"art-comment-is-hidden" => "This comment is hidden",
+		"art-comment-is-deleted" => "This comment is deleted",
 		"art-moderate-show-comment" => "show comment",
 		"art-moderate-reason" => "reason for moderation",
 		"art-moderate-reason-select" => "select reason...",
@@ -434,6 +436,7 @@
 
 		// peer_reviewed_article - digest
 		"art-digest-comment-hidden" => "[[moderator]] has hidden a comment (from [[commenter]] on [[title]], reason: [[reason]])",
+		"art-digest-comment-deleted" => "[[moderator]] has deleted a comment (from [[commenter]] on [[title]], reason: [[reason]])",
 		"art-digest-comment-unmoderated" => "[[moderator]] unmoderated comment from [[commenter]] on [[title]]",
 
 		// peer_reviewed_article
