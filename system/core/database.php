@@ -253,6 +253,27 @@
 		function get($tag) {
 			return $this->find($tag, 'child::')->first();
 		}
+
+		/**
+		 * Checks whether this node has any text content
+		 * (counting only whitespace or only html tags as no
+		 * content).
+		 * @return bool
+		 */
+		function hasTextContent() {
+			return trim($this->getText()) !== "";
+		}
+
+		/**
+		 * Checks whether this node has any content (either
+		 * text, or commonly used replaced elements like iframe
+		 * or img).
+		 * @return bool
+		 */
+		function hasContent() {
+			$xpath = "(//img | //iframe | //video | //embed)[1]";
+			return $this->hasTextContent() || $this->findXPath($xpath)->count() > 0;
+		}
 	}
 
 	/*
