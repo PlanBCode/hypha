@@ -69,6 +69,8 @@ class mailinglist extends HyphaDatatypePage {
 	const ADDRESS_STATUS_CONFIRMED = 'confirmed';
 	const ADDRESS_STATUS_UNSUBSCRIBED = 'unsubscribed';
 
+	const TIME_LIMIT_PER_MAIL = 30;
+
 	public function __construct(HyphaDomElement $pageListNode, RequestContext $O_O) {
 		parent::__construct($pageListNode, $O_O);
 		$this->xml = new Xml('mailinglist', Xml::multiLingualOn, Xml::versionsOff);
@@ -1019,6 +1021,7 @@ EOF;
 		$linkToMailing = $this->path(self::PATH_MAILS_VIEW_ID, ['id' => $mailingId]);
 		/** @var HyphaDomElement $receiver */
 		foreach ($receivers as $receiver) {
+			set_time_limit(self::TIME_LIMIT_PER_MAIL);
 			$email = $receiver->getAttribute('email');
 			$code = $receiver->getAttribute('unsubscribe-code');
 			// include email for server record purposes
