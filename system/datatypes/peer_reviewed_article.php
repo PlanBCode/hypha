@@ -46,6 +46,8 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	const FIELD_NAME_DISCUSSION_SUBSCRIBER_UNSUBSCRIBE_CODE = 'subscriber_unsubscribe_code';
 	const FIELD_NAME_DISCUSSION_CLOSED_BY = 'closed_by';
 	const FIELD_NAME_DISCUSSION_CLOSED_AT = 'closed_at';
+	const FIELD_NAME_DISCUSSION_MODERATION_STATUS = 'moderation-status';
+	const FIELD_NAME_DISCUSSION_MODERATION_REASON = 'moderation-reason';
 	const FIELD_NAME_APPROVE_CONTAINER = 'approves';
 	const FIELD_NAME_APPROVE = 'approve';
 	const FIELD_NAME_ARTICLE = 'article';
@@ -59,6 +61,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	const FIELD_NAME_EXCERPT = 'excerpt';
 	const FIELD_NAME_FEATURED_IMAGE = 'featured_image';
 	const FIELD_NAME_METHOD = 'method';
+	const FIELD_NAME_MODERATE_REASON = 'reason';
 
 	const STATUS_NEWLY_CREATED = 'newly created';
 	const STATUS_DRAFT = 'draft';
@@ -66,6 +69,9 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	const STATUS_APPROVED = 'approved';
 	const STATUS_PUBLISHED = 'published';
 	const STATUS_RETRACTED = 'retracted';
+
+	const MODERATION_STATUS_HIDDEN = 'hidden';
+	const MODERATION_STATUS_DELETED = 'deleted';
 
 	const SUBSCRIBER_STATUS_PENDING = 'pending';
 	const SUBSCRIBER_STATUS_CONFIRMED = 'confirmed';
@@ -76,6 +82,8 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	const PATH_DISCUSSIONS_TYPE = 'discussions/{type}'; // TODO [LRM]: use hypha_substitute
 	const PATH_DISCUSSIONS_CLOSED = 'discussions/{id}/closed'; // TODO [LRM]: use hypha_substitute
 	const PATH_DISCUSSIONS_COMMENT = 'discussions/{id}/comment'; // TODO [LRM]: use hypha_substitute
+	const PATH_COMMENTS = 'comments';
+	const PATH_COMMENTS_MODERATE = 'comments/{id}/moderate'; // TODO [LRM]: use hypha_substitute
 	const PATH_COMMENT = 'comment';
 	const PATH_DISCUSSIONS_COMMENT_CONFIRM = 'comment/{id}/confirm?code={code}'; // TODO [LRM]: use hypha_substitute
 	const PATH_UNSUBSCRIBE = 'unsubscribe';
@@ -90,6 +98,18 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	const CMD_DISCUSSION_STARTED = 'discussion_started';
 	const CMD_DISCUSSION_CLOSED = 'discussion_closed';
 	const CMD_COMMENT = 'comment';
+	const CMD_COMMENT_MODERATE_HIDE = 'hide';
+	const CMD_COMMENT_MODERATE_DELETE = 'delete';
+	const CMD_COMMENT_UNMODERATE = 'unmoderate';
+
+	const MODERATE_REASONS = [
+		'inappropriate',
+		'violation',
+		'offtopic',
+		'duplicate',
+		'spam',
+		'other',
+	];
 
 	protected $statusMtx = [
 		self::STATUS_NEWLY_CREATED => [],
@@ -134,6 +154,10 @@ class peer_reviewed_article extends HyphaDatatypePage {
 			case [self::PATH_DISCUSSIONS, self::CMD_DISCUSSION_STARTED]:      return $this->discussionAction($request);
 			case [self::PATH_DISCUSSIONS, self::CMD_COMMENT]:                 return $this->discussionCommentAction($request);
 			case [self::PATH_DISCUSSIONS, self::CMD_DISCUSSION_CLOSED]:       return $this->discussionClosedAction($request);
+			case [self::PATH_COMMENTS,    null]:                              return $this->commentModerateView($request);
+			case [self::PATH_COMMENTS,    self::CMD_COMMENT_MODERATE_HIDE]:   return $this->commentModerateAction($request);
+			case [self::PATH_COMMENTS,    self::CMD_COMMENT_MODERATE_DELETE]: return $this->commentModerateAction($request);
+			case [self::PATH_COMMENTS,    self::CMD_COMMENT_UNMODERATE]:      return $this->commentModerateAction($request);
 			case [self::PATH_COMMENT,     null]:                              return $this->commentConfirmAction($request);
 			case [self::PATH_UNSUBSCRIBE, null]:                              return $this->unsubscribeAction($request);
 		}
@@ -362,12 +386,12 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		}
 
 		if (isUser() && self::STATUS_DRAFT !== $status) {
-			$main->append($this->createDiscussionsDomElement('review'));
+			$main->append($this->createDiscussionsDomElement(self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER));
 			$main->append($this->createApprovesDomElement());
 		}
 
 		if (self::STATUS_PUBLISHED === $status) {
-			$main->append($this->createDiscussionsDomElement('public'));
+			$main->append($this->createDiscussionsDomElement(self::FIELD_NAME_DISCUSSION_PUBLIC_CONTAINER));
 		}
 
 		return null;
@@ -779,6 +803,169 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	}
 
 	/**
+	 * Constructs the WymHTMLForm for the comment form.
+	 *
+	 * @param HyphaDomElement $comment
+	 * @param array $values
+	 * @return HTMLForm
+	 */
+	protected function createCommentModerateForm(HyphaDomElement $comment, array $values = []) {
+		$html = <<<EOF
+			<div>
+				<strong><label for="[[field-name-reason]]">[[reason]]</label></strong>
+				<br/>
+				<input type="text" name="[[field-name-reason]]" id="[[field-name-reason]]"></input>
+			</div>
+EOF;
+
+		$vars = [
+			'reason' => __('art-moderate-reason'),
+			'field-name-reason' => self::FIELD_NAME_MODERATE_REASON,
+		];
+
+		$html = hypha_substitute($html, $vars);
+		return new HTMLForm($html, $values);
+	}
+
+	/**
+	 * Allows editing the moderation status of a public comment.
+	 *
+	 * @param HyphaRequest $request
+	 * @return array|null
+	 */
+	protected function commentModerateView(HyphaRequest $request) {
+		if (!$this->O_O->isUser()) {
+			notify('error', __('login-to-perform-action'));
+			return ['redirect', $this->constructFullPath($this->pagename)];
+		}
+
+		/** @var HyphaDomElement|null $comment */
+		$commentId = $request->getArg(1);
+		$comment = $this->xml->document()->getElementById($commentId);
+		if (!$comment instanceof HyphaDomElement || $comment->tagName !== self::FIELD_NAME_DISCUSSION_COMMENT) {
+			$this->xml->unlock();
+			notify('error', __('not-found')); // 404
+		}
+
+		$values = [
+			self::FIELD_NAME_MODERATE_REASON => $comment->getAttribute(self::FIELD_NAME_DISCUSSION_MODERATION_REASON),
+		];
+		$form = $this->createCommentModerateForm($comment, $values);
+
+		return $this->commentModerateViewRender($request, $form, $comment);
+	}
+
+	/**
+	 * Appends moderate form to #main and adds buttons
+	 *
+	 * @return null
+	 */
+	protected function commentModerateViewRender(HyphaRequest $request, HTMLForm $form, HyphaDomElement $comment) {
+		// update the form dom so that error can be displayed, if there are any
+		$form->updateDom();
+		$hidden = $comment->getAttribute(self::FIELD_NAME_DISCUSSION_MODERATION_STATUS) === self::MODERATION_STATUS_HIDDEN;
+		$deleted = $comment->getAttribute(self::FIELD_NAME_DISCUSSION_MODERATION_STATUS) === self::MODERATION_STATUS_DELETED;
+
+		$main = $this->html->find('#main')->first();
+		$commentDiv = $this->html->createElement('div')->appendTo($main);
+		$commentDiv->addClass('moderation-comment');
+
+		$prefix = $this->html->createElement('span')->appendTo($commentDiv);
+		$prefix->addClass('prefix');
+		if ($hidden) {
+			$prefix->setText(__('art-comment-is-hidden'));
+		} else if ($deleted) {
+			$prefix->setText(__('art-comment-is-deleted'));
+		} else {
+			$prefix->setText(__('art-comment-to-moderate'));
+		}
+
+		$this->createCommentDomElement($comment)->appendTo($commentDiv);
+
+		$main->append($form);
+
+		$commands = $this->html->find('#pageEndCommands');
+		$commands->append($this->makeActionButton(__('cancel')));
+
+		$path = str_replace('{id}', $comment->getId(), self::PATH_COMMENTS_MODERATE);
+		// Show a hide button, but only if not already deleted,
+		// since that is confusing (and you can still unmoderate
+		// and then hide).
+		if (!$deleted) {
+			$hide_title = $hidden ? __('art-moderate-change-reason') : __('art-moderate-hide-comment');
+			$commands->append($this->makeActionButton($hide_title, $path, self::CMD_COMMENT_MODERATE_HIDE ));
+		}
+		$delete_title = $deleted ? __('art-moderate-change-reason') : __('art-moderate-delete-comment');
+		$commands->append($this->makeActionButton($delete_title, $path, self::CMD_COMMENT_MODERATE_DELETE ));
+
+		if ($hidden || $deleted) {
+			$commands->append($this->makeActionButton(__('art-unmoderate-comment'), $path, self::CMD_COMMENT_UNMODERATE ));
+		}
+
+		return null;
+	}
+
+	/**
+	 * Sets the moderation status of a public comment.
+	 *
+	 * @param HyphaRequest $request
+	 * @return array|null
+	 */
+	protected function commentModerateAction(HyphaRequest $request) {
+		if (!$this->O_O->isUser()) {
+			notify('error', __('login-to-perform-action'));
+			return ['redirect', $this->constructFullPath($this->pagename)];
+		}
+
+		$this->xml->lockAndReload();
+
+		/** @var HyphaDomElement|null $comment */
+		$commentId = $request->getArg(1);
+		$comment = $this->xml->document()->getElementById($commentId);
+		if (!$comment instanceof HyphaDomElement || $comment->tagName != self::FIELD_NAME_DISCUSSION_COMMENT) {
+			$this->xml->unlock();
+			notify('error', __('not-found')); // 404
+			return null;
+		}
+
+		$digestArgs = [
+			'commenter' => $comment->getAttribute(self::FIELD_NAME_DISCUSSION_COMMENTER_NAME),
+			'moderator' => $this->O_O->getUser()->getAttribute('fullname'),
+			'title' => $this->getTitle(),
+		];
+
+		if ($request->getCommand() === self::CMD_COMMENT_UNMODERATE) {
+			$comment->removeAttribute(self::FIELD_NAME_DISCUSSION_MODERATION_STATUS);
+			writeToDigest(__('art-digest-comment-unmoderated', $digestArgs), 'comment moderation');
+		} else {
+			$form = $this->createCommentModerateForm($comment, $request->getPostData());
+
+			if (!empty($form->errors)) {
+				return $this->commentModerateViewRender($request, $form, $comment);
+			}
+
+			$reason = $form->dataFor(self::FIELD_NAME_MODERATE_REASON);
+			$digestArgs['reason'] = $reason;
+
+			if ($request->getCommand() === self::CMD_COMMENT_MODERATE_HIDE) {
+				$status = self::MODERATION_STATUS_HIDDEN;
+				writeToDigest(__('art-digest-comment-hidden', $digestArgs), 'comment moderation');
+			} else {
+				$status = self::MODERATION_STATUS_DELETED;
+				writeToDigest(__('art-digest-comment-deleted', $digestArgs), 'comment moderation');
+			}
+
+			$comment->setAttribute(self::FIELD_NAME_DISCUSSION_MODERATION_REASON, $reason);
+			$comment->setAttribute(self::FIELD_NAME_DISCUSSION_MODERATION_STATUS, $status);
+		}
+
+		$this->xml->saveAndUnlock();
+
+		notify('success', ucfirst(__('art-successfully-updated')));
+		return ['redirect', $this->constructFullPath($this->pagename)];
+	}
+
+	/**
 	 * Confirms the comment that was submitted by a commenter.
 	 *
 	 * @param HyphaRequest $request
@@ -1055,6 +1242,31 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	}
 
 	/**
+	 * Render a single comment.
+	 *
+	 * @param HyphaDomElement $comment
+	 * @param bool $review
+	 * @param bool $firstAndBlocking
+	 * @param bool $resolved
+	 * @return DomNodeList
+	 */
+	protected function createCommentDomElement(HyphaDomElement $comment, $review = false, $firstAndBlocking = false, $resolved = false) {
+		$createdAt = date('j-m-y, H:i', ltrim($comment->getAttribute(self::FIELD_NAME_CREATED_AT), 't'));
+		$committerName = $this->getCommentCommenter($comment);
+		$commentHtml = nl2br(htmlspecialchars($comment->getText()));
+		$commentHtml .= '<p>' . __('art-by') . ' <strong>' . htmlspecialchars($committerName) . '</strong> ' . __('art-at') . ' ' . htmlspecialchars($createdAt);
+		if (!$review && isUser()) {
+			$committerEmail = $comment->getAttribute(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL);
+			$commentHtml .= ' <span> | ' . __('art-email') . ': <a href="mailto:' . htmlspecialchars($committerEmail) . '">' . htmlspecialchars($committerEmail) . '</a></span>';
+		}
+		if ($firstAndBlocking) {
+			$commentHtml .= ' | ' . ($resolved ? __('art-is-resolved') : __('art-is-blocking'));
+		}
+		$commentHtml .= '</p>';
+		return $this->html->create($commentHtml);
+	}
+
+	/**
 	 * Creates discussions HTML DOM element.
 	 *
 	 * @param string $type
@@ -1099,21 +1311,61 @@ class peer_reviewed_article extends HyphaDatatypePage {
 				if (!$review && (bool)$comment->getAttribute(self::FIELD_NAME_DISCUSSION_COMMENT_PENDING)) {
 					continue;
 				}
-				$createdAt = date('j-m-y, H:i', ltrim($comment->getAttribute(self::FIELD_NAME_CREATED_AT), 't'));
-				$committerName = $this->getCommentCommenter($comment);
-				$commentHtml = nl2br(htmlspecialchars($comment->getText()));
-				$commentHtml .= '<p>' . __('art-by') . ' <strong>' . htmlspecialchars($committerName) . '</strong> ' . __('art-at') . ' ' . htmlspecialchars($createdAt);
-				if (!$review && isUser()) {
-					$committerEmail = $comment->getAttribute(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL);
-					$commentHtml .= ' <span> | ' . __('art-email') . ': <a href="mailto:' . htmlspecialchars($committerEmail) . '">' . htmlspecialchars($committerEmail) . '</a></span>';
+
+				$li = $this->html->createElement('li')->appendTo($commentList);
+				$commentHtml = $this->createCommentDomElement($comment, $review, $firstComment && $blocking, $resolved);
+				$hidden = $comment->getAttribute(self::FIELD_NAME_DISCUSSION_MODERATION_STATUS) === self::MODERATION_STATUS_HIDDEN;
+				$deleted = $comment->getAttribute(self::FIELD_NAME_DISCUSSION_MODERATION_STATUS) === self::MODERATION_STATUS_DELETED;
+				if ($hidden || $deleted) {
+					if ($deleted) {
+						$li->addClass('deleted');
+						$placeholder = $this->html->createElement('div')->appendTo($li);
+					} else {
+						$li->addClass('hidden');
+						$details = $this->html->createElement('details')->appendTo($li);
+						$placeholder = $this->html->createElement('summary')->appendTo($details);
+						$commentHtml->appendTo($details);
+					}
+					$placeholder->addClass('moderated-placeholder');
+					$statusSpan = $this->html->createElement('span')->appendTo($placeholder);
+					if ($deleted) {
+						$statusSpan->setText(__('art-comment-is-deleted'));
+					} else {
+						$statusSpan->setText(__('art-comment-is-hidden'));
+					}
+					$statusSpan->addClass('moderate-status');
+					$moderateReason = $comment->getAttribute(self::FIELD_NAME_DISCUSSION_MODERATION_REASON);
+					if ($moderateReason) {
+						$reasonSpan = $this->html->createElement('span')->appendTo($placeholder);
+						$reasonSpan->addClass('moderate-reason');
+						$reasonSpan->setText(' (' . $moderateReason . ')');
+					}
+					if (!$deleted) {
+						$showSpan = $this->html->createElement('span')->appendTo($placeholder);
+						$showSpan->setText(__('art-moderate-show-comment'));
+						$showSpan->addClass('show-moderated');
+					}
+				} else {
+					$li->append($commentHtml);
 				}
+
 				if ($firstComment) {
-					if ($blocking) {
-						$commentHtml .= ' | ' . ($resolved ? __('art-is-resolved') : __('art-is-blocking'));
+					$li->addClass("first-comment");
+				}
+
+				if (!$review && $this->O_O->isUser()) {
+					$moderate = $this->html->createElement('a');
+					$moderate->addClass('moderate-link');
+					$path = $this->pagename . '/' . str_replace('{id}', $comment->getId(), self::PATH_COMMENTS_MODERATE);
+					$moderate->setAttribute('href', $this->constructFullPath($path));
+					if ($hidden || $deleted) {
+						$moderate->setText(__('art-moderate-modify'));
+						$placeholder->append($moderate);
+					} else {
+						$moderate->setText(__('art-moderate-comment'));
+						$commentHtml->append($moderate);
 					}
 				}
-				$commentHtml .= '</p>';
-				$commentList->append('<li ' . ($firstComment ? 'class="first-comment"' : '') . '>' . $commentHtml . '</li>');
 				$firstComment = false;
 			}
 

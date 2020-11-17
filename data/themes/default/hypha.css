@@ -740,7 +740,60 @@ input {
 
 .public-comment-wrapper li p {
  margin: 0;
+ /* Expand to include any contained floats */
+ overflow: auto;
 }
+
+.public-comment-wrapper summary.moderated-placeholder {
+ /* Hide expand/collapse triangle */
+ list-style: none;
+ cursor: pointer;
+}
+
+.public-comment-wrapper .moderated-placeholder {
+ font-style: italic;
+}
+
+.public-comment-wrapper .show-moderated {
+ float: right;
+}
+
+.public-comment-wrapper details[open] .show-moderated {
+ display: none;
+}
+
+.public-comment-wrapper details .show-moderated::after {
+ content: "\21E9";
+ font-size: 120%;
+ vertical-align: middle;
+}
+
+.public-comment-wrapper .hidden .moderated-placeholder .moderate-link {
+ display: none;
+}
+
+.public-comment-wrapper details[open] .moderated-placeholder .moderate-link {
+ display: inline;
+ float: right;
+}
+
+.public-comment-wrapper .moderate-link {
+ float: right;
+}
+
+.moderation-comment {
+ background: #FFFFE0;
+ padding-left: 15px;
+ padding-right: 15px;
+ border: 1px solid black;
+}
+
+.moderation-comment .prefix {
+ display: block;
+ text-align: center;
+ font-weight: bold;
+}
+
 
 nav.main{
  z-index: 1;
