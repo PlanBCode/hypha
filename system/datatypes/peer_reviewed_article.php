@@ -111,6 +111,14 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		'other',
 	];
 
+	const APPROVES_NEEDED = 3;
+
+	const CHECK_LEVEL_REQUIRED = 'required';
+	const CHECK_LEVEL_RECOMMENDED = 'recommended';
+	const CHECK_STATUS_PASSED = 'passed';
+	const CHECK_STATUS_FAILED = 'failed';
+	const CHECK_STATUS_RECOMMENDED = 'recommended';
+
 	protected $statusMtx = [
 		self::STATUS_NEWLY_CREATED => [],
 		self::STATUS_DRAFT => [self::STATUS_REVIEW => ['label' => 'art-start-review', 'cmd' => self::CMD_STATUS_CHANGE_REVIEW]],
@@ -124,11 +132,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		return __('datatype.name.peer_reviewed_article');
 	}
 
-	/**
-	 * @param DOMElement $pageListNode
-	 * @param RequestContext $O_O
-	 */
-	public function __construct(DomElement $pageListNode, RequestContext $O_O) {
+	public function __construct(HyphaDomElement $pageListNode, RequestContext $O_O) {
 		parent::__construct($pageListNode, $O_O);
 		$this->xml = new Xml('peer_reviewed_article', Xml::multiLingualOff, Xml::versionsOff);
 		$this->xml->loadFromFile('data/pages/' . $pageListNode->getAttribute('id'));
@@ -284,6 +288,8 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		if (isUser()) {
 			$userId = $this->O_O->getUser()->getAttribute('id');
 
+			list($checkStatus, $checks) = $this->runChecks();
+
 			/** @var HyphaDomElement $commands */
 			$commands = $this->html->find('#pageCommands');
 			/** @var HyphaDomElement $commandsAtEnd */
@@ -295,8 +301,8 @@ class peer_reviewed_article extends HyphaDatatypePage {
 				if (!$this->hasUserApproved($userId)) {
 					$commandsAtEnd->append($this->makeActionButton(__('art-approve'), null, self::CMD_APPROVE));
 				}
-			} else {
-				foreach ($this->statusMtx[$status] as $newStatus => $option) {
+			} else if ($checkStatus != self::CHECK_STATUS_FAILED) {
+				foreach ($this->statusMtx[$status] as $option) {
 					if (self::STATUS_APPROVED === $status && $option['cmd'] === self::CMD_STATUS_CHANGE_PUBLISHED && !$this->hasUserCreated($userId) && !isAdmin()) {
 						continue;
 					}
@@ -353,8 +359,16 @@ class peer_reviewed_article extends HyphaDatatypePage {
 
 		$this->appendAuthorAndTimestamp($main, $article);
 
-		if (isUser())
-			$this->renderExcerptBody($main);
+		if (isUser()) {
+			if ($checks) {
+				$checklist = $this->renderChecklist($checkStatus, $checks);
+				$checklist->appendTo($main);
+			}
+
+			$preview = $this->html->createElement('div')->addClass('excerpt-preview')->appendTo($main);
+			$this->html->createElement('span')->addClass('prefix')->setText(__('art-excerpt-preview'))->appendTo($preview);
+			$this->renderExcerptBody($preview);
+		}
 
 		$text = $content->find(self::FIELD_NAME_TEXT)->children();
 		/** @var HyphaDomElement $div */
@@ -395,6 +409,177 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Returns an array describing all state transition checks.
+	 *
+	 * @return array<string, array{
+	 *   statuses: list<self::STATUS_*>,
+	 *   checker: callable():array{bool, array},
+	 *   level: self::CHECK_LEVEL_*,
+	 * }>
+	 */
+	protected function getChecks() {
+		// This cannot be a static property, since anonymous
+		// functions are not allowed in initializers for those.
+		return [
+			'has-article-body' => [
+				'statuses' => [self::STATUS_DRAFT, self::STATUS_REVIEW, self::STATUS_APPROVED],
+				'checker' => function() {
+					return [$this->xml->find(self::FIELD_NAME_CONTENT)->hasContent(), []];
+				},
+				'level' => self::CHECK_LEVEL_REQUIRED,
+			],
+			'has-method' => [
+				'statuses' => [self::STATUS_DRAFT, self::STATUS_REVIEW, self::STATUS_APPROVED],
+				'checker' => function() {
+					return [$this->xml->find(self::FIELD_NAME_METHOD)->hasTextContent(), []];
+				},
+				'level' => self::CHECK_LEVEL_REQUIRED,
+			],
+			'has-sources' => [
+				'statuses' => [self::STATUS_DRAFT, self::STATUS_REVIEW, self::STATUS_APPROVED],
+				'checker' => function() {
+					return [$this->xml->find(self::FIELD_NAME_SOURCES)->hasTextContent(), []];
+				},
+				'level' => self::CHECK_LEVEL_RECOMMENDED,
+			],
+			'has-excerpt' => [
+				'statuses' => [self::STATUS_DRAFT, self::STATUS_REVIEW, self::STATUS_APPROVED],
+				'checker' => function() {
+					return [$this->getExcerpt()->hasTextContent(), []];
+				},
+				'level' => self::CHECK_LEVEL_REQUIRED,
+			],
+			'has-featured-image' => [
+				'statuses' => [self::STATUS_DRAFT, self::STATUS_REVIEW, self::STATUS_APPROVED],
+				'checker' => function() {
+					return [$this->xml->find(self::FIELD_NAME_FEATURED_IMAGE)->getText() !== "", []];
+				},
+				'level' => self::CHECK_LEVEL_RECOMMENDED,
+			],
+			'has-tags' => [
+				'statuses' => [self::STATUS_DRAFT, self::STATUS_REVIEW, self::STATUS_APPROVED],
+				'checker' => function() {
+					return [count(HyphaTags::tagsForPageListNode($this->pageListNode)) > 0, []];
+				},
+				'level' => self::CHECK_LEVEL_REQUIRED,
+			],
+			'has-approvals' => [
+				'statuses' => [self::STATUS_REVIEW, self::STATUS_APPROVED],
+				'checker' => function() {
+					$approveCount = $this->xml->find(self::FIELD_NAME_APPROVE_CONTAINER)->children()->count();
+					return [$approveCount >= self::APPROVES_NEEDED, ['have' => $approveCount, 'need' => self::APPROVES_NEEDED]];
+				},
+				'level' => self::CHECK_LEVEL_REQUIRED,
+			],
+			'has-no-blocks' => [
+				'statuses' => [self::STATUS_REVIEW, self::STATUS_APPROVED],
+				'checker' => function() {
+					$xpath = '//' . self::FIELD_NAME_DISCUSSION_CONTAINER . '//' . self::FIELD_NAME_DISCUSSION . '[@' . self::FIELD_NAME_DISCUSSION_BLOCKING . '="1" and @' . self::FIELD_NAME_DISCUSSION_BLOCK_RESOLVED . '!="1"]';
+					$blockingCount = $this->xml->findXPath($xpath)->count();
+					return [$blockingCount === 0, ['left' => $blockingCount]];
+				},
+				'level' => self::CHECK_LEVEL_REQUIRED,
+			],
+		];
+	}
+
+	/**
+	 * Runs any checks, as appropriate for the current status, and
+	 * returns both the overall result, and a list of each check for
+	 * the current status with its result.
+	 *
+	 * @return array{
+	 *   (self::CHECK_STATUS_*),
+	 *   array<string, array{
+	 *     passed: bool,
+	 *     status: self::CHECK_STATUS_*,
+	 *     label: string,
+	 *   }>}
+	 */
+	protected function runChecks() {
+		$result = [];
+		$overallStatus = self::CHECK_STATUS_PASSED;
+
+		$articleStatus = $this->getStatus();
+		foreach ($this->getChecks() as $name => $check) {
+			if (!in_array($articleStatus, $check['statuses']))
+				continue;
+			// Call the checker function
+			list($passed, $labelargs) = $check['checker']();
+			if ($passed) {
+				$status = self::CHECK_STATUS_PASSED;
+			} else if ($check['level'] == self::CHECK_LEVEL_REQUIRED) {
+				$status = self::CHECK_STATUS_FAILED;
+				$overallStatus = self::CHECK_STATUS_FAILED;
+			} else {
+				$status = self::CHECK_STATUS_RECOMMENDED;
+				if ($overallStatus == self::CHECK_STATUS_PASSED)
+					$overallStatus = self::CHECK_STATUS_RECOMMENDED;
+			}
+			$result[$name] = [
+				'passed' => $passed,
+				'status' => $status,
+				'label' => __("art-check-$name-$status", $labelargs),
+			];
+		}
+		$order = [self::CHECK_STATUS_PASSED, self::CHECK_STATUS_FAILED, self::CHECK_STATUS_RECOMMENDED];
+		uasort($result, function($a, $b) use ($order) {return array_search($a['status'], $order) - array_search($b['status'], $order); });
+
+		return [$overallStatus, $result];
+	}
+
+	/**
+	 * Renders a checklist div containing the given check result (as
+	 * returned by runChecks).
+	 *
+	 * @param bool $checkStatus
+	 * @param array<string, array{
+	 *     passed: bool,
+	 *     status: self::CHECK_STATUS_*,
+	 *     label: string,
+	 *   }> $checks
+	 * @return HyphaDomElement
+	 */
+	protected function renderChecklist($checkStatus, $checks) {
+		$wrapper = $this->html->createElement('div');
+		$wrapper->addClass('review-start-checklist');
+		$wrapper->addClass($checkStatus);
+
+		$header = $this->html->createElement('h2')->appendTo($wrapper);
+		$header->setText(__('art-check-header'));
+
+		$status = $this->getStatus();
+		if ($status == self::STATUS_DRAFT) {
+			if ($checkStatus == self::CHECK_STATUS_FAILED)
+				$msg = __('art-check-cannot-start-review');
+			else
+				$msg = __('art-check-can-start-review');
+		} else if ($status == self::STATUS_REVIEW || $status == self::STATUS_APPROVED) {
+			if ($checkStatus == self::CHECK_STATUS_FAILED)
+				$msg = __('art-check-cannot-publish');
+			else
+				$msg = __('art-check-can-publish');
+		} else {
+			$msg = '';
+		}
+
+		if ($msg) {
+			$prefix = $this->html->createElement('span')->appendTo($wrapper);
+			$prefix->addClass('prefix');
+			$prefix->setText($msg);
+		}
+
+		$list = $this->html->createElement('ul')->appendTo($wrapper);
+		foreach ($checks as $name => $check) {
+			$li = $this->html->createElement('li')->appendTo($list);
+			$li->addClass($name);
+			$li->addClass($check['status']);
+			$li->setText($check['label']);
+		}
+		return $wrapper;
 	}
 
 	protected function appendAuthorAndTimestamp($container, $article) {
@@ -559,9 +744,18 @@ class peer_reviewed_article extends HyphaDatatypePage {
 			return ['redirect', $this->constructFullPath($this->pagename)];
 		}
 
-		$success = $this->updateToNewStatus($newStatus);
+		list($checkStatus, $_checks) = $this->runChecks();
+		if ($checkStatus === self::CHECK_STATUS_FAILED) {
+			$success = false;
+		} else {
+			$success = $this->updateToNewStatus($newStatus);
+		}
 		if ($success) {
 			notify('success', ucfirst(__('art-successfully-updated')));
+		} else {
+			// Should not normally happen (e.g. the button
+			// for this change should not exist).
+			notify('error', __('art-unsupported-status-change'));
 		}
 
 		return ['redirect', $this->constructFullPath($this->pagename)];
@@ -1077,7 +1271,6 @@ EOF;
 	protected function updateToNewStatus($newStatus) {
 		$currentStatus = $this->getStatus();
 		if (!isset($this->statusMtx[$currentStatus]) || !isset($this->statusMtx[$currentStatus][$newStatus])) {
-			notify('error', __('art-unsupported-status-change'));
 			return false;
 		}
 
@@ -1853,22 +2046,11 @@ EOF;
 	 * @return bool
 	 */
 	protected function canBeSetAsApproved() {
-		/** @var HyphaDomElement $discussions */
-		$discussions = $this->xml->find(self::FIELD_NAME_DISCUSSION_CONTAINER);
-		/** @var NodeList $blockingDiscussions */
-		$xpath = './/' . self::FIELD_NAME_DISCUSSION . '[@' . self::FIELD_NAME_DISCUSSION_BLOCKING . '="1" and @' . self::FIELD_NAME_DISCUSSION_BLOCK_RESOLVED . '!="1"]';
-		$blockingDiscussions = $discussions->findXPath($xpath);
-		$blockingDiscussionsCount = $blockingDiscussions->count();
-		if ($blockingDiscussionsCount > 0) {
-			return false;
-		}
+		list($_checkStatus, $checks) = $this->runChecks();
 
-		$approveCount = $this->xml->find(self::FIELD_NAME_APPROVE_CONTAINER)->children()->count();
-		if ($approveCount < 3) {
-			return false;
-		}
-
-		return $this->getStatus() === self::STATUS_REVIEW;
+		return $this->getStatus() === self::STATUS_REVIEW &&
+		       $checks['has-approvals']['passed'] &&
+		       $checks['has-no-blocks']['passed'];
 	}
 
 	/**

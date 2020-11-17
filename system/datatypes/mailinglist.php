@@ -69,11 +69,7 @@ class mailinglist extends HyphaDatatypePage {
 	const ADDRESS_STATUS_CONFIRMED = 'confirmed';
 	const ADDRESS_STATUS_UNSUBSCRIBED = 'unsubscribed';
 
-	/**
-	 * @param DOMElement $pageListNode
-	 * @param RequestContext $O_O
-	 */
-	public function __construct(DOMElement $pageListNode, RequestContext $O_O) {
+	public function __construct(HyphaDomElement $pageListNode, RequestContext $O_O) {
 		parent::__construct($pageListNode, $O_O);
 		$this->xml = new Xml('mailinglist', Xml::multiLingualOn, Xml::versionsOff);
 		$this->xml->loadFromFile('data/pages/' . $pageListNode->getAttribute('id'));
