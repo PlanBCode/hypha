@@ -128,6 +128,8 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		self::STATUS_RETRACTED => [/*self::STATUS_DRAFT => 'to_draft'*/], // "to draft" is not supported yet
 	];
 
+	const URL_REGEX='/(?:(?:https?|ft|):\/\/)?(?:\S+(?::\S*)?@|\d{1,3}(?:\.\d{1,3}){3}|(?:(?:[a-z\d\x{00a1}-\x{ffff}]+-?)*[a-z\d\x{00a1}-\x{ffff}]+)(?:\.(?:[a-z\d\x{00a1}-\x{ffff}]+-?)*[a-z\d\x{00a1}-\x{ffff}]+)*(?:\.[a-z\x{00a1}-\x{ffff}]{2,6}))(?::\d+)?(?:[^\s]*)?/iu';
+
 	public static function getDatatypeName() {
 		return __('datatype.name.peer_reviewed_article');
 	}
@@ -1447,7 +1449,11 @@ EOF;
 		$createdAt = date('j-m-y, H:i', ltrim($comment->getAttribute(self::FIELD_NAME_CREATED_AT), 't'));
 		$committerName = $this->getCommentCommenter($comment);
 		$commentHtml = nl2br(htmlspecialchars($comment->getText()));
-		$commentHtml .= '<p>' . __('art-by') . ' <strong>' . htmlspecialchars($committerName) . '</strong> ' . __('art-at') . ' ' . htmlspecialchars($createdAt);
+		$commentHtml = preg_replace_callback(self::URL_REGEX, function($matches) {
+			$url = $matches[0];
+			return '<a href="'.$url.'" target="_blank">' . $url . '</a>';
+		}, $commentHtml);
+		$commentHtml .= ' <p>' . __('art-by') . ' <strong>' . htmlspecialchars($committerName) . '</strong> ' . __('art-at') . ' ' . htmlspecialchars($createdAt);
 		if (!$review && isUser()) {
 			$committerEmail = $comment->getAttribute(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL);
 			$commentHtml .= ' <span> | ' . __('art-email') . ': <a href="mailto:' . htmlspecialchars($committerEmail) . '">' . htmlspecialchars($committerEmail) . '</a></span>';
