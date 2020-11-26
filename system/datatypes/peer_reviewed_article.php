@@ -128,7 +128,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		self::STATUS_RETRACTED => [/*self::STATUS_DRAFT => 'to_draft'*/], // "to draft" is not supported yet
 	];
 
-	// Source: /https://urlregex.com
+	// Source: https://urlregex.com
 	const URL_REGEX='/(?:(?:https?|ft|):\/\/)?(?:\S+(?::\S*)?@|\d{1,3}(?:\.\d{1,3}){3}|(?:(?:[a-z\d\x{00a1}-\x{ffff}]+-?)*[a-z\d\x{00a1}-\x{ffff}]+)(?:\.(?:[a-z\d\x{00a1}-\x{ffff}]+-?)*[a-z\d\x{00a1}-\x{ffff}]+)*(?:\.[a-z\x{00a1}-\x{ffff}]{2,6}))(?::\d+)?(?:[^\s]*)?/iu';
 
 	public static function getDatatypeName() {
@@ -1452,7 +1452,14 @@ EOF;
 		$commentHtml = htmlspecialchars($comment->getText());
 		$commentHtml = preg_replace_callback(self::URL_REGEX, function($matches) {
 			$url = $matches[0];
-			return '<a href="'.$url.'" target="_blank">' . $url . '</a>';
+			if( substr($url,-1) === '.'){
+				$url=substr($url,0,-1);
+				$suffix = '.';
+			}else{
+				$suffix = '';
+			}
+			//return 'A<a href="' . $url . '" target="_blank">' . $url . '</a>' . $suffix. ''; // curiously this does show the suffix
+			return '<a href="' . $url . '" target="_blank">' . $url . '</a>' . $suffix. ''; // this does not show the suffix
 		}, $commentHtml);
 		$commentHtml = nl2br($commentHtml);
 		$commentHtml .= ' <p>' . __('art-by') . ' <strong>' . htmlspecialchars($committerName) . '</strong> ' . __('art-at') . ' ' . htmlspecialchars($createdAt);
