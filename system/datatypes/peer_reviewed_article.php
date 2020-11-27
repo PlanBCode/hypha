@@ -1450,16 +1450,16 @@ EOF;
 		$createdAt = date('j-m-y, H:i', ltrim($comment->getAttribute(self::FIELD_NAME_CREATED_AT), 't'));
 		$committerName = $this->getCommentCommenter($comment);
 		$commentHtml = htmlspecialchars($comment->getText());
-		$commentHtml = preg_replace_callback(self::URL_REGEX, function($matches) {
+		$commentHtml = preg_replace_callback(self::URL_REGEX, function($matches) { // replace urls with links
 			$url = $matches[0];
-			if( substr($url,-1) === '.'){
+			if( substr($url,-1) === '.'){ // ensure that period does not end up in the link
 				$url=substr($url,0,-1);
 				$suffix = '.';
 			}else{
 				$suffix = '';
 			}
-			//return 'A<a href="' . $url . '" target="_blank">' . $url . '</a>' . $suffix. ''; // curiously this does show the suffix
-			return '<a href="' . $url . '" target="_blank">' . $url . '</a>' . $suffix. ''; // this does not show the suffix
+			// encapsulated in a span to prevent trimming by html->create
+			return '<span><a href="' . $url . '" target="_blank">' . $url . '</a>' . $suffix.'</span>';
 		}, $commentHtml);
 		$commentHtml = nl2br($commentHtml);
 		$commentHtml .= ' <p>' . __('art-by') . ' <strong>' . htmlspecialchars($committerName) . '</strong> ' . __('art-at') . ' ' . htmlspecialchars($createdAt);
