@@ -308,6 +308,11 @@
 		"ml-received-by" => "ontvangen door",
 		"ml-sure-to-send" => "Je staat op het punt om deze mailing naar [[count]] adres(sen) te versturen. Wil je doorgaan?",
 
+		// mailing list - progress feedback ui
+		"ml-sure-to-close" => "Weet je zeker dat je het verzenden wil onderbreken?",
+		"ml-do-not-close" => "Let op: Sluit dit venster niet tot de hele mailing is verstuurd",
+		"ml-send-in-progress" => "De mail wordt verstuurd...",
+
 		// mailing list - response
 		"ml-no-sender" => "geen afzender, pas de mailinglist aan",
 		"ml-mail-has-invalid-status" => "de mail heeft een onjuiste status",

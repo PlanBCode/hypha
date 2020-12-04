@@ -31,6 +31,8 @@ class mailinglist extends HyphaDatatypePage {
 	const FIELD_NAME_MESSAGE = 'message';
 	const FIELD_NAME_ADDRESS = 'address';
 	const FIELD_NAME_STATUS = 'status';
+	const FIELD_NAME_TOTAL = 'total';
+	const FIELD_NAME_PROGRESS = 'progress';
 	const FIELD_NAME_CONFIRM_CODE = 'confirm-code';
 	const FIELD_NAME_UNSUBSCRIBE_CODE = 'unsubscribe-code';
 	const FIELD_NAME_REMINDED = 'reminded';
@@ -60,6 +62,7 @@ class mailinglist extends HyphaDatatypePage {
 	const CMD_SAVE = 'save';
 	const CMD_SEND = 'send';
 	const CMD_SEND_TEST = 'test_send';
+	const CMD_PROGRESS = 'progress';
 
 	const MAILING_STATUS_DRAFT = 'draft';
 	const MAILING_STATUS_SENDING = 'sending';
@@ -69,6 +72,7 @@ class mailinglist extends HyphaDatatypePage {
 	const ADDRESS_STATUS_CONFIRMED = 'confirmed';
 	const ADDRESS_STATUS_UNSUBSCRIBED = 'unsubscribed';
 
+	const PROGRESS_UPDATE_INTERVAL_MS = 1000;
 	const TIME_LIMIT_PER_MAIL = 30;
 
 	public function __construct(HyphaDomElement $pageListNode, RequestContext $O_O) {
@@ -116,6 +120,7 @@ class mailinglist extends HyphaDatatypePage {
 			case [self::PATH_MAILS,                null]:                return $this->mailingView($request);
 			case [self::PATH_MAILS,                self::CMD_SEND]:      return $this->mailingSendAction($request);
 			case [self::PATH_MAILS,                self::CMD_SEND_TEST]: return $this->mailingSendTestAction($request);
+			case [self::PATH_MAILS,                self::CMD_PROGRESS]:  return $this->mailingProgressAction($request);
 			case [self::PATH_MAILS_EDIT,           null]:                return $this->mailingEditView($request);
 			case [self::PATH_MAILS_EDIT,           self::CMD_SAVE]:      return $this->mailingEditAction($request);
 		}
@@ -646,6 +651,11 @@ class mailinglist extends HyphaDatatypePage {
 		return null;
 	}
 
+	protected function getNumberOfAddresses(){
+		$xpath = './/' . self::FIELD_NAME_ADDRESS . '[@' . self::FIELD_NAME_STATUS . '="' . self::ADDRESS_STATUS_CONFIRMED . '"]';
+		$addresses = $this->findAddresses($xpath);
+		return count($addresses);
+	}
 	/**
 	 * @param HyphaRequest $request
 	 *
@@ -697,14 +707,58 @@ class mailinglist extends HyphaDatatypePage {
 		if (self::MAILING_STATUS_DRAFT == $status) {
 			$editPath = $this->substituteSpecial(self::PATH_MAILS_EDIT_ID, ['id' => $mailing->getId()]);
 			$commands->append($this->makeActionButton(__('edit'), $editPath));
-			$xpath = './/' . self::FIELD_NAME_ADDRESS . '[@' . self::FIELD_NAME_STATUS . '="' . self::ADDRESS_STATUS_CONFIRMED . '"]';
-			$addresses = $this->findAddresses($xpath);
-			$num = count($addresses);
-
+			$num = $this->getNumberOfAddresses();
 			$linkToMailing = $this->path(self::PATH_MAILS_VIEW_ID, ['id' => $mailingId]);
-			$action = 'if(confirm(' . json_encode(__('ml-sure-to-send', ['count' => $num])) . '))' . makeAction($linkToMailing, self::CMD_SEND, '');
-			$action = str_replace(['"'], ['\''], $action);
-			$commands->append(makeButton(__('send'), $action));
+
+			$action = 'if(confirm(' . json_encode(__('ml-sure-to-send', ['count' => $num])) . ')){
+				const divPopUp = document.createElement("div"); // create a popup
+				divPopUp.className = "messagebox modal";
+				const divProgress = document.createElement("div");
+				divProgress.className = "progress";
+
+				const spanProgressText = document.createElement("span");
+				spanProgressText.innerHTML= "'.__('ml-send-in-progress').'";
+				spanProgressText.className = "progress-text";
+				const spanProgressIndicator = document.createElement("span");
+				spanProgressIndicator.className = "progress-indicator";
+				spanProgressIndicator.innerHTML = "0/'.$num.'";
+				const divWarning = document.createElement("div");
+				divWarning.className = "warning";
+				divWarning.innerHTML = "'.__('ml-do-not-close').'";
+				divProgress.appendChild(spanProgressText);
+				divProgress.appendChild(spanProgressIndicator);
+				divPopUp.appendChild(divProgress);
+				divPopUp.appendChild(divWarning);
+
+				const divGray = document.createElement("div"); // create a gray layer
+				divGray.className="gray-modal-background";
+				document.body.appendChild(divGray);
+				document.body.appendChild(divPopUp);
+				let checkProgressInterval;
+				const onCompleted = function(){
+					if(checkProgressInterval) clearInterval(checkProgressInterval);
+					checkProgressInterval = null;
+					if(divPopUp && divPopUp.parentNode === document.body) document.body.removeChild(divPopUp);
+					if(divGray && divGray.parentNode === document.body) document.body.removeChild(divGray);
+					window.onbeforeunload = undefined;
+				};
+				const updateProgress = function(result){
+					const {'.self::FIELD_NAME_STATUS.','.self::FIELD_NAME_PROGRESS.','.self::FIELD_NAME_TOTAL.'} = JSON.parse(result);
+					if('.self::FIELD_NAME_PROGRESS.'>='.self::FIELD_NAME_TOTAL.' || '.self::FIELD_NAME_STATUS.' === "'.self::MAILING_STATUS_SENT.'") onCompleted();
+					else spanProgressIndicator.innerHTML = '.self::FIELD_NAME_PROGRESS.'+"/"+'.self::FIELD_NAME_TOTAL.';
+				};
+				const checkProgress = function(){'. // retrieve the progress of the send action
+					makeAction($linkToMailing, self::CMD_PROGRESS, '', null, 'updateProgress')
+				.'};
+				checkProgressInterval = setInterval(checkProgress,'.self::PROGRESS_UPDATE_INTERVAL_MS.');
+				window.onbeforeunload = function(){return \''.__('ml-sure-to-close').'\';};' // lock the browser from exiting.
+				 . makeAction($linkToMailing, self::CMD_SEND, '', null, 'onCompleted').';
+			 }';
+
+			if ($num > 0){ // hide send button if no addresses available
+				$action = str_replace(['"'], ['\''], $action);
+				$commands->append(makeButton(__('send'), $action));
+			}
 			$action = 'hypha('.json_encode($linkToMailing).', '.json_encode(self::CMD_SEND_TEST).', prompt(' . json_encode(__('email')) . '), $(this).closest(\'form\'));';
 			$action = str_replace(['"'], ['\''], $action);
 			$commands->append(makeButton(__('ml-test-send'), $action));
@@ -1010,6 +1064,8 @@ EOF;
 		$this->xml->lockAndReload();
 		$mailing = $this->xml->getElementById($mailingId);
 		$mailing->setAttribute('status', self::MAILING_STATUS_SENDING);
+		$count = 0;
+		$mailing->setAttribute(self::FIELD_NAME_PROGRESS, $count);
 		/** @var HyphaDomElement $mailings */
 		$mailings = $this->getDoc()->getOrCreate('mailings');
 		$mailings->append($mailing);
@@ -1018,6 +1074,11 @@ EOF;
 		// iterate over the confirmed addresses and send the mailing
 		$xpath = './/' . self::FIELD_NAME_ADDRESS . '[@' . self::FIELD_NAME_STATUS . '="' . self::ADDRESS_STATUS_CONFIRMED . '"]';
 		$receivers = $this->findAddresses($xpath);
+		if (count($receivers) === 0) {
+			notify('error', __('ml-mail-has-invalid-status'));
+			return null;
+		}
+
 		$linkToMailing = $this->path(self::PATH_MAILS_VIEW_ID, ['id' => $mailingId]);
 		/** @var HyphaDomElement $receiver */
 		foreach ($receivers as $receiver) {
@@ -1030,12 +1091,19 @@ EOF;
 			$message .= $mailing->getHtml();
 			$message .= '<p><a href="' . $linkToUnsubscribe . '">' . __('ml-unsubscribe') . '</a></p>';
 			$this->sendMail($mailing->getAttribute('subject'), $message, [$email], $senderData['email'], $senderData['name']);
+
+			$this->xml->lockAndReload();
+			$mailing = $this->xml->getElementById($mailingId);
+			$mailing->setAttribute(self::FIELD_NAME_PROGRESS, ++$count);
+			$this->xml->saveAndUnlock();
+
 		}
 
 		// mark mailing as sent
 		$this->xml->lockAndReload();
 		$mailing = $this->xml->getElementById($mailingId);
 		$mailing->setAttribute(self::FIELD_NAME_STATUS, self::MAILING_STATUS_SENT);
+		$mailing->removeAttribute(self::FIELD_NAME_PROGRESS);
 		$mailing->setAttribute('date', date('Y-m-d H:i:s'));
 		$mailing->setAttribute('receivers', count($receivers));
 		/** @var HyphaDomElement $mailings */
@@ -1081,6 +1149,24 @@ EOF;
 		// goto view page with notification
 		notify('success', __('ml-successfully-sent'));
 		return 'reload';
+	}
+
+	protected function mailingProgressAction(HyphaRequest $request) {
+		$mailingId = $request->getArg(1);
+
+		// check if given id was correct
+		/** @var HyphaDomElement $mailing */
+		$mailing = $this->xml->getElementById($mailingId);
+		if (!$mailing instanceof HyphaDomElement) {
+			return '404';
+		}
+		$status = $mailing->getAttribute(self::FIELD_NAME_STATUS);
+		$progress = $mailing->getAttribute(self::FIELD_NAME_PROGRESS);
+		$total = $this->getNumberOfAddresses();
+		$result = [ self::FIELD_NAME_PROGRESS => $progress, self::FIELD_NAME_TOTAL => $total, self::FIELD_NAME_STATUS => $status];
+		header('Content-Type: application/json');
+		echo json_encode($result);
+		exit; // since this is a data only endpoint no further html needs to be generated
 	}
 
 	/**
