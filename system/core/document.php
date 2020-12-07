@@ -589,12 +589,15 @@
 		 *
 		 * Currently, this validates:
 		 *  - Fields with the `required` attribute set.
+		 *  - Fields with the `type=email` set.
 		 */
 		function validate() {
 			foreach ($this->fields as $name => $elems) {
 				foreach ($elems as $elem) {
 					if ($elem->hasAttribute('required'))
 						$this->validateRequiredField($name);
+					if ($elem->tagName == 'input' && $elem->getAttribute('type') == 'email')
+						$this->validateEmailField($name);
 				}
 			}
 			$this->is_validated = true;
@@ -623,6 +626,15 @@
 			return true;
 		}
 
+		/**
+		 * Ensures that the given field, if not empty, contains
+		 * a valid mail address.
+		 *
+		 * Normally, you should set the `type` HTML attribute to
+		 * `email` on the input field to make validate() apply
+		 * this check automatically instead of calling this
+		 * directly.
+		 */
 		function validateEmailField($name) {
 			$value = $this->dataFor($name);
 			if (!$value)
