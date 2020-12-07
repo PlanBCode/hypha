@@ -96,7 +96,7 @@
 			$html = <<<EOF
 				<div class="section">
 					<label for="[[field-name-title]]">[[title]]</label>
-					<input type="text" id="[[field-name-title]]" name="[[field-name-title]]" onblur="validatePagename(this);" onkeyup="validatePagename(this);" />
+					<input required type="text" id="[[field-name-title]]" name="[[field-name-title]]" onblur="validatePagename(this);" onkeyup="validatePagename(this);" />
 					<input type="checkbox" id="[[field-name-private]]" name="[[field-name-private]]" />
 					<label for="[[field-name-private]]">[[private]]</label>
 				</div>
@@ -157,7 +157,6 @@ EOF;
 			$form = $this->createEditForm($request->getPostData());
 
 			// validate
-			$form->validateRequiredField(self::FIELD_NAME_PAGE_NAME);
 			$form->validate();
 
 			// process form if it was posted
@@ -222,9 +221,7 @@ EOF;
 			$form = $this->createTranslationForm($request->getPostData());
 
 			// validate
-			$form->validateRequiredField(self::FIELD_NAME_PAGE_NAME);
 			// TODO: validate that the language is a valid one
-			$form->validateRequiredField(self::FIELD_NAME_LANGUAGE);
 			$form->validate();
 
 			// process form if it was posted
@@ -284,11 +281,11 @@ EOF;
 			$html = <<<EOF
 				<div class="section">
 					<label for="[[field-name-language]]">[[language]]</label>
-					<select id="[[field-name-language]]" name="[[field-name-language]]">[[option-list-language]]</select>
+					<select required id="[[field-name-language]]" name="[[field-name-language]]">[[option-list-language]]</select>
 				</div>
 				<div class="section">
 					<label for="[[field-name-title]]">[[title]]</label>
-					<input type="text" id="[[field-name-title]]" name="[[field-name-title]]" onblur="validatePagename(this);" onkeyup="validatePagename(this);" />
+					<input required type="text" id="[[field-name-title]]" name="[[field-name-title]]" onblur="validatePagename(this);" onkeyup="validatePagename(this);" />
 				</div>
 				<editor name="[[field-name-content]]"></editor>
 EOF;

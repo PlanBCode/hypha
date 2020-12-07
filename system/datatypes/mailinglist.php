@@ -290,9 +290,6 @@ class mailinglist extends HyphaDatatypePage {
 		$form = $this->createEditForm($request->getPostData());
 
 		// validate form
-		$form->validateRequiredField(self::FIELD_NAME_SENDER_EMAIL);
-		$form->validateRequiredField(self::FIELD_NAME_SENDER_NAME);
-		$form->validateEmailField(self::FIELD_NAME_SENDER_EMAIL);
 		$form->validate();
 
 		// return form if there are errors
@@ -329,8 +326,6 @@ class mailinglist extends HyphaDatatypePage {
 		$form = $this->createSubscribeForm($request->getPostData());
 
 		// validate form
-		$form->validateRequiredField(self::FIELD_NAME_EMAIL);
-		$form->validateEmailField(self::FIELD_NAME_EMAIL);
 		$form->validate();
 
 		// process form if there are no errors
@@ -811,8 +806,6 @@ class mailinglist extends HyphaDatatypePage {
 		// create form
 		$form = $this->createMailingForm($request->getPostData());
 
-		$form->validateRequiredField(self::FIELD_NAME_SUBJECT);
-		$form->validateRequiredField(self::FIELD_NAME_MESSAGE);
 		$form->validate();
 
 		if (!$form->isValid()) {
@@ -914,8 +907,6 @@ class mailinglist extends HyphaDatatypePage {
 		$form = $this->createMailingForm($request->getPostData());
 
 		// process form if it was posted
-		$form->validateRequiredField(self::FIELD_NAME_SUBJECT);
-		$form->validateRequiredField(self::FIELD_NAME_MESSAGE);
 		$form->validate();
 
 		if (!$form->isValid()) {
@@ -947,7 +938,7 @@ class mailinglist extends HyphaDatatypePage {
 	protected function createSubscribeForm(array $values = []) {
 		$html = <<<EOF
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
-				<label for="[[field-name-email]]">[[email]]</label>: <input type="text" id="[[field-name-email]]" name="[[field-name-email]]" placeholder="[[email]]" />
+				<label for="[[field-name-email]]">[[email]]</label>: <input required type="email" id="[[field-name-email]]" name="[[field-name-email]]" placeholder="[[email]]" />
 			</div>
 EOF;
 
@@ -969,8 +960,8 @@ EOF;
 		$html = <<<EOF
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
 				<strong><label for="[[field-name-page-name]]">[[title]]</label></strong> <input type="text" id="[[field-name-page-name]]" name="[[field-name-page-name]]" />
-				<strong><label for="[[field-name-sender-name]]"> [[sender-name]] </label></strong><input type="text" id="[[field-name-sender-name]]" name="[[field-name-sender-name]]" />
-				<strong><label for="[[field-name-sender-email]]"> [[sender-email]] </label></strong><input type="text" id="[[field-name-sender-email]]" name="[[field-name-sender-email]]" />
+				<strong><label for="[[field-name-sender-name]]"> [[sender-name]] </label></strong><input required type="text" id="[[field-name-sender-name]]" name="[[field-name-sender-name]]" />
+				<strong><label for="[[field-name-sender-email]]"> [[sender-email]] </label></strong><input required type="email" id="[[field-name-sender-email]]" name="[[field-name-sender-email]]" />
 				<strong><label for="[[field-name-private-page]]"> [[private-page]] </label></strong><input type="checkbox" name="[[field-name-private-page]]" id="[[field-name-private-page]]" />
 			</div>
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
@@ -1009,10 +1000,10 @@ EOF;
 	protected function createMailingForm(array $values = []) {
 		$html = <<<EOF
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
-				<label for="[[field-name-subject]]"> [[subject]] </label> <input type="text" id="[[field-name-subject]]" name="[[field-name-subject]]" />
+				<label for="[[field-name-subject]]"> [[subject]] </label> <input required type="text" id="[[field-name-subject]]" name="[[field-name-subject]]" />
 			</div>
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
-				<strong><label for="[[field-name-message]]"> [[message]] </label></strong><editor id="[[field-name-message]]" name="[[field-name-message]]"></editor>
+				<strong><label for="[[field-name-message]]"> [[message]] </label></strong><editor required id="[[field-name-message]]" name="[[field-name-message]]"></editor>
 			</div>
 EOF;
 

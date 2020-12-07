@@ -831,12 +831,6 @@ class peer_reviewed_article extends HyphaDatatypePage {
 
 		// create form to start a discussion
 		$form = $this->createCommentForm($type, $request->getPostData());
-		if (!$review && !isUser()) {
-			$form->validateRequiredField(self::FIELD_NAME_DISCUSSION_COMMENTER_NAME . $dataFieldSuffix);
-			$form->validateRequiredField(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL . $dataFieldSuffix);
-			$form->validateEmailField(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL . $dataFieldSuffix);
-		}
-		$form->validateRequiredField(self::FIELD_NAME_DISCUSSION_COMMENT . $dataFieldSuffix);
 		$form->validate();
 
 		// process form if it was posted
@@ -929,12 +923,6 @@ class peer_reviewed_article extends HyphaDatatypePage {
 
 		// create form to comment on a discussion
 		$form = $this->createCommentForm($type, $request->getPostData(), $discussion);
-		if (!$review && !isUser()) {
-			$form->validateRequiredField(self::FIELD_NAME_DISCUSSION_COMMENTER_NAME . $dataFieldSuffix);
-			$form->validateRequiredField(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL . $dataFieldSuffix);
-			$form->validateEmailField(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL . $dataFieldSuffix);
-		}
-		$form->validateRequiredField(self::FIELD_NAME_DISCUSSION_COMMENT . $dataFieldSuffix);
 		$form->validate();
 
 		// process form if it was posted
@@ -1770,7 +1758,7 @@ EOF;
 		$html = <<<EOF
 			<div class="new-comment [[type]]">
 			<div>
-				<strong><label for="[[field-name-comment]]">[[comment]]</label></strong><textarea name="[[field-name-comment]]" id="[[field-name-comment]]"></textarea>
+				<strong><label for="[[field-name-comment]]">[[comment]]</label></strong><textarea required name="[[field-name-comment]]" id="[[field-name-comment]]"></textarea>
 			</div>
 EOF;
 
@@ -1794,10 +1782,10 @@ EOF;
 			// only non-users need to enter their name
 			$html .= <<<EOF
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
-				<strong><label for="[[field-name-name]]">[[name]]</label></strong><div class="label_suffix">[[un-anonymous]]</div> <input type="text" id="[[field-name-name]]" name="[[field-name-name]]" />
+				<strong><label for="[[field-name-name]]">[[name]]</label></strong><div class="label_suffix">[[un-anonymous]]</div> <input required type="text" id="[[field-name-name]]" name="[[field-name-name]]" />
 			</div>
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
-				<strong><label for="[[field-name-email]]">[[email]]</label></strong> <input type="text" id="[[field-name-email]]" name="[[field-name-email]]" />
+				<strong><label for="[[field-name-email]]">[[email]]</label></strong> <input required type="email" id="[[field-name-email]]" name="[[field-name-email]]" />
 			</div>
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
 				<strong><label for="[[field-name-subscribe]]">[[subscribe]]</label></strong> <input type="checkbox" id="[[field-name-subscribe]]" name="[[field-name-subscribe]]" /> [[info-button-subscribe]]
