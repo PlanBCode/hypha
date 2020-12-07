@@ -568,6 +568,15 @@
 			return $default;
 		}
 
+		/**
+		 * Is this form valid? Returns true when all of the
+		 * fields for which validateXXXField methods were called
+		 * were valid.
+		 */
+		function isValid() {
+			return empty($this->errors);
+		}
+
 		function validateRequiredField($name) {
 			if (!array_key_exists($name, $this->fields)) {
 				$this->errors[$name] = __('field-not-found');

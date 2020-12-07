@@ -160,7 +160,7 @@ EOF;
 			$form->validateRequiredField(self::FIELD_NAME_PAGE_NAME);
 
 			// process form if it was posted
-			if (!empty($form->errors)) {
+			if (!$form->isValid()) {
 				return $this->editViewRender($request, $form);
 			}
 
@@ -226,7 +226,7 @@ EOF;
 			$form->validateRequiredField(self::FIELD_NAME_LANGUAGE);
 
 			// process form if it was posted
-			if (!empty($form->errors))
+			if (!$form->isValid())
 				return $this->translateViewRender($request, $form);
 
 			$language = $form->dataFor(self::FIELD_NAME_LANGUAGE);

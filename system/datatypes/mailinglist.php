@@ -295,7 +295,7 @@ class mailinglist extends HyphaDatatypePage {
 		$form->validateEmailField(self::FIELD_NAME_SENDER_EMAIL);
 
 		// return form if there are errors
-		if (!empty($form->errors)) {
+		if (!$form->isValid()) {
 			return $this->editViewRender($request, $form);
 		}
 
@@ -332,7 +332,7 @@ class mailinglist extends HyphaDatatypePage {
 		$form->validateEmailField(self::FIELD_NAME_EMAIL);
 
 		// process form if there are no errors
-		if (!empty($form->errors)) {
+		if (!$form->isValid()) {
 			return $this->defaultViewRender($request, $form);
 		}
 
@@ -811,7 +811,7 @@ class mailinglist extends HyphaDatatypePage {
 
 		$form->validateRequiredField(self::FIELD_NAME_SUBJECT);
 		$form->validateRequiredField(self::FIELD_NAME_MESSAGE);
-		if (!empty($form->errors)) {
+		if (!$form->isValid()) {
 			return $this->mailingFormViewRender($form, '', self::PATH_MAILS_NEW);
 		}
 
@@ -912,7 +912,7 @@ class mailinglist extends HyphaDatatypePage {
 		// process form if it was posted
 		$form->validateRequiredField(self::FIELD_NAME_SUBJECT);
 		$form->validateRequiredField(self::FIELD_NAME_MESSAGE);
-		if (!empty($form->errors)) {
+		if (!$form->isValid()) {
 			$cancelPath = $this->substituteSpecial(self::PATH_MAILS_VIEW_ID, ['id' => $mailingId]);
 			$submitPath = $this->substituteSpecial(self::PATH_MAILS_EDIT_ID, ['id' => $mailingId]);
 			return $this->mailingFormViewRender($form, $cancelPath, $submitPath);

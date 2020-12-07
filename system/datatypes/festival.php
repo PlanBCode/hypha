@@ -341,7 +341,7 @@ EOF;
 			$form->validateRequiredField(self::FIELD_NAME_TITLE);
 
 			// process form if it was posted
-			if (!empty($form->errors))
+			if (!$form->isValid())
 				return $this->settingsViewRender($request, $form);
 
 			$this->xml->lockAndReload();
@@ -443,7 +443,7 @@ EOF;
 			$form->validateEmailField(self::FIELD_NAME_EMAIL);
 			$form->validateMoneyField(self::FIELD_NAME_AMOUNT);
 
-			if (!empty($form->errors))
+			if (!$form->isValid())
 				return $this->signupViewRender($request, $form);
 
 			$this->xml->lockAndReload();
@@ -773,7 +773,7 @@ EOF;
 			if (array_key_exists('image_upload', $_FILES))
 				$form->handleImageUpload(self::FIELD_NAME_IMAGE, $_FILES['image_upload']);
 
-			if (!empty($form->errors)) {
+			if (!$form->isValid()) {
 				$this->xml->unlock();
 				return $this->contributeViewRender($request, $form, $editing);
 			}

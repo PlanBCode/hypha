@@ -714,7 +714,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		}
 
 		// process form if there are no errors
-		if (!empty($form->errors)) {
+		if (!$form->isValid()) {
 			return $this->editViewRender($request, $form);
 		}
 
@@ -836,7 +836,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		$form->validateRequiredField(self::FIELD_NAME_DISCUSSION_COMMENT . $dataFieldSuffix);
 
 		// process form if it was posted
-		if (!empty($form->errors)) {
+		if (!$form->isValid()) {
 			return $this->discussionRender($request, $form, $type);
 		}
 
@@ -933,7 +933,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		$form->validateRequiredField(self::FIELD_NAME_DISCUSSION_COMMENT . $dataFieldSuffix);
 
 		// process form if it was posted
-		if (!empty($form->errors)) {
+		if (!$form->isValid()) {
 			$this->xml->unlock();
 			return $this->discussionRender($request, $form, $type, $discussion);
 		}
@@ -1139,7 +1139,7 @@ EOF;
 		} else {
 			$form = $this->createCommentModerateForm($comment, $request->getPostData());
 
-			if (!empty($form->errors)) {
+			if (!$form->isValid()) {
 				return $this->commentModerateViewRender($request, $form, $comment);
 			}
 
