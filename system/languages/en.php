@@ -184,6 +184,7 @@
 		"edit-day" => "edit day",
 		"invalid-money-amount" => "Not a valid amount of money",
 		"required-field-missing" => "Required field missing",
+		"email-field-invalid" => "Invalid email address supplied",
 		"failed-to-process-image" => "Failed to process image",
 		"image-type-must-be-one-of" => "Image type must be one of: [[allowed-filetypes]]",
 		"error-uploading-file" => "Error uploading file: [[error]]",

@@ -184,6 +184,7 @@
 		"edit-day" => "bewerk dag",
 		"invalid-money-amount" => "Geen geldig bedrag",
 		"required-field-missing" => "Verplicht veld ontbreekt",
+		"email-field-invalid" => "Ongeldig emailadres opgegeven",
 		"failed-to-process-image" => "Afbeelding verwerken is mislukt",
 		"image-type-must-be-one-of" => "Afbeelding moet één van de volgende bestandstypen zijn: [[allowed-filetypes]]",
 		"error-uploading-file" => "Uploaden bestand mislukt: [[error]]",

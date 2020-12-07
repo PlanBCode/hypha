@@ -635,7 +635,7 @@
 				return true;
 
 			if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-				$this->errors[$name] = __('invalid-email');
+				$this->errors[$name] = __('email-field-invalid');
 				return false;
 			}
 			return true;
