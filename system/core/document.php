@@ -612,10 +612,6 @@
 		 * only required in combination with other values.
 		 */
 		function validateRequiredField($name) {
-			if (!array_key_exists($name, $this->fields)) {
-				$this->errors[$name] = __('field-not-found');
-				return false;
-			}
 			$value = $this->dataFor($name);
 			if (!$value) {
 				$this->errors[$name] = __('required-field-missing');
