@@ -587,12 +587,29 @@
 		 * processing it, otherwise `isValid()` will return
 		 * false.
 		 *
-		 * Currently, this does not check anything yet.
+		 * Currently, this validates:
+		 *  - Fields with the `required` attribute set.
 		 */
 		function validate() {
+			foreach ($this->fields as $name => $elems) {
+				foreach ($elems as $elem) {
+					if ($elem->hasAttribute('required'))
+						$this->validateRequiredField($name);
+				}
+			}
 			$this->is_validated = true;
 		}
 
+		/**
+		 * Ensures that the given field is present in the
+		 * submitted form data.
+		 *
+		 * Normally, you should set the `required` HTML
+		 * attribute to make validate() apply this check
+		 * automatically rather than calling this method
+		 * directly, but you still can for e.g. fields that are
+		 * only required in combination with other values.
+		 */
 		function validateRequiredField($name) {
 			if (!array_key_exists($name, $this->fields)) {
 				$this->errors[$name] = __('field-not-found');
