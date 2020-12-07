@@ -588,6 +588,7 @@
 		 * Currently, this validates:
 		 *  - Fields with the `required` attribute set.
 		 *  - Fields with the `type=email` set.
+		 *  - Editor fields for safe HTML
 		 */
 		function validate() {
 			foreach ($this->fields as $name => $elems) {
@@ -596,6 +597,8 @@
 						$this->validateRequiredField($name);
 					if ($elem->tagName == 'input' && $elem->getAttribute('type') == 'email')
 						$this->validateEmailField($name);
+					if ($elem->tagName == 'editor')
+						$this->validateHtmlField($name);
 				}
 			}
 			$this->is_validated = true;
@@ -636,6 +639,34 @@
 
 			if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
 				$this->errors[$name] = __('email-field-invalid');
+				return false;
+			}
+			return true;
+		}
+
+		/**
+		 * Ensures that the given field, if not empty, contains
+		 * no obviously unsafe HTML.
+		 *
+		 * Normally, you should use the `editor` field to make
+		 * validate() apply this check automatically instead of
+		 * calling this directly.
+		 */
+		function validateHtmlField($name) {
+			$value = $this->dataFor($name);
+			if (!$value)
+				return true;
+
+			$dom = $this->root->document()->createElement('dummy');
+			$dom->append($value);
+
+			// This forbids the presence of script tags,
+			// which is the most obvious and severe form of
+			// unsafe HTML (and these have been seen to be
+			// automatically inserted into requests by
+			// viruses...).
+			if ($dom->find('script')->count() > 0) {
+				$this->errors[$name] = __('html-field-contains-script');
 				return false;
 			}
 			return true;
