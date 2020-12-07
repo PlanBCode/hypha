@@ -158,6 +158,7 @@ EOF;
 
 			// validate
 			$form->validateRequiredField(self::FIELD_NAME_PAGE_NAME);
+			$form->validate();
 
 			// process form if it was posted
 			if (!$form->isValid()) {
@@ -224,6 +225,7 @@ EOF;
 			$form->validateRequiredField(self::FIELD_NAME_PAGE_NAME);
 			// TODO: validate that the language is a valid one
 			$form->validateRequiredField(self::FIELD_NAME_LANGUAGE);
+			$form->validate();
 
 			// process form if it was posted
 			if (!$form->isValid())

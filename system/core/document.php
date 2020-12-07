@@ -275,6 +275,8 @@
 		public $root;
 		/** The data associated with this form */
 		public $data;
+		/** Is this form already validated? Does not mean it is also actually valid. */
+		public $is_validated;
 		/** Any collected errors from validation */
 		public $errors;
 		/** The fields found in this form. Maps field name to an array of DOM elements with that name. */
@@ -303,6 +305,7 @@
 			$this->root->append($form);
 
 			$this->data = $data;
+			$this->is_validated = false;
 			$this->errors = [];
 			$this->fields = [];
 			$this->file_fields = [];
@@ -569,12 +572,25 @@
 		}
 
 		/**
-		 * Is this form valid? Returns true when all of the
-		 * fields for which validateXXXField methods were called
-		 * were valid.
+		 * Is this form valid? Returns true when:
+		 *  - validate() was called
+		 *  - all of the fields for which validateXXXField
+		 *    methods were called were also valid.
 		 */
 		function isValid() {
-			return empty($this->errors);
+			return $this->is_validated && empty($this->errors);
+		}
+
+		/**
+		 * Validate this form against rules expressed in the
+		 * form itself. This must be called on a form before
+		 * processing it, otherwise `isValid()` will return
+		 * false.
+		 *
+		 * Currently, this does not check anything yet.
+		 */
+		function validate() {
+			$this->is_validated = true;
 		}
 
 		function validateRequiredField($name) {

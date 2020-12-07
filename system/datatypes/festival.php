@@ -339,6 +339,7 @@ EOF;
 			$form = $this->createSettingsForm($request->getPostData());
 
 			$form->validateRequiredField(self::FIELD_NAME_TITLE);
+			$form->validate();
 
 			// process form if it was posted
 			if (!$form->isValid())
@@ -442,6 +443,7 @@ EOF;
 			$form->validateRequiredField(self::FIELD_NAME_EMAIL);
 			$form->validateEmailField(self::FIELD_NAME_EMAIL);
 			$form->validateMoneyField(self::FIELD_NAME_AMOUNT);
+			$form->validate();
 
 			if (!$form->isValid())
 				return $this->signupViewRender($request, $form);
@@ -770,6 +772,8 @@ EOF;
 			$form->validateRequiredField(self::FIELD_NAME_NAME);
 			$form->validateRequiredField(self::FIELD_NAME_TITLE);
 			$form->validateRequiredField(self::FIELD_NAME_CATEGORY);
+			$form->validate();
+
 			if (array_key_exists('image_upload', $_FILES))
 				$form->handleImageUpload(self::FIELD_NAME_IMAGE, $_FILES['image_upload']);
 
