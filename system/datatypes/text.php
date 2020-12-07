@@ -90,7 +90,7 @@
 		/**
 		 * @param array $values
 		 *
-		 * @return WymHTMLForm
+		 * @return HTMLForm
 		 */
 		protected function createEditForm(array $values = []) {
 			$html = <<<EOF
@@ -112,7 +112,7 @@ EOF;
 
 			$html = hypha_substitute($html, $vars);
 
-			return new WymHTMLForm($html, $values);
+			return new HTMLForm($html, $values);
 		}
 
 		protected function editView(HyphaRequest $request) {
@@ -273,7 +273,7 @@ EOF;
 
 		/**
 		 * @param array $values
-		 * @return WymHTMLForm
+		 * @return HTMLForm
 		 */
 		protected function createTranslationForm(array $values = []) {
 			$selectedLanguage = isset($values[self::FIELD_NAME_LANGUAGE]) ? $values[self::FIELD_NAME_LANGUAGE] : null;
@@ -301,7 +301,7 @@ EOF;
 
 			$html = hypha_substitute($html, $vars);
 
-			return new WymHTMLForm($html, $values);
+			return new HTMLForm($html, $values);
 		}
 
 		protected function savePage($content, $pagename = null, $language = null, $privateFlag = null) {

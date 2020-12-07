@@ -170,7 +170,7 @@ class mailinglist extends HyphaDatatypePage {
 		return $this->defaultViewRender($request, $form);
 	}
 
-	protected function defaultViewRender(HyphaRequest $request, WymHTMLForm $form) {
+	protected function defaultViewRender(HyphaRequest $request, HTMLForm $form) {
 		// add edit button for registered users
 		if (isUser()) {
 			/** @var HyphaDomElement $commands */
@@ -779,7 +779,7 @@ class mailinglist extends HyphaDatatypePage {
 		return $this->mailingFormViewRender($form, '', self::PATH_MAILS_NEW);
 	}
 
-	protected function mailingFormViewRender(WymHTMLForm $form, $cancelPath, $submitPath) {
+	protected function mailingFormViewRender(HTMLForm $form, $cancelPath, $submitPath) {
 		// update the form dom so that values and errors can be displayed
 		$form->updateDom();
 
@@ -933,7 +933,7 @@ class mailinglist extends HyphaDatatypePage {
 	 * Creates a HTML form object for the subscribers.
 	 *
 	 * @param array $values
-	 * @return WymHTMLForm
+	 * @return HTMLForm
 	 */
 	protected function createSubscribeForm(array $values = []) {
 		$html = <<<EOF
@@ -949,12 +949,12 @@ EOF;
 
 		$html = hypha_substitute($html, $vars);
 
-		return new WymHTMLForm($html, $values);
+		return new HTMLForm($html, $values);
 	}
 
 	/**
 	 * @param array $values
-	 * @return WymHTMLForm
+	 * @return HTMLForm
 	 */
 	protected function createEditForm(array $values = []) {
 		$html = <<<EOF
@@ -989,13 +989,13 @@ EOF;
 
 		$html = hypha_substitute($html, $vars);
 
-		return new WymHTMLForm($html, $values);
+		return new HTMLForm($html, $values);
 	}
 
 	/**
 	 * @param array $values
 	 *
-	 * @return WymHTMLForm
+	 * @return HTMLForm
 	 */
 	protected function createMailingForm(array $values = []) {
 		$html = <<<EOF
@@ -1016,7 +1016,7 @@ EOF;
 
 		$html = hypha_substitute($html, $vars);
 
-		return new WymHTMLForm($html, $values);
+		return new HTMLForm($html, $values);
 	}
 
 	/**

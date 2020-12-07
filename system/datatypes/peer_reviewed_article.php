@@ -669,10 +669,10 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	 * Appends edit form to #main and adds buttons
 	 *
 	 * @param HyphaRequest $request
-	 * @param WymHTMLForm $form
+	 * @param HTMLForm $form
 	 * @return null
 	 */
-	protected function editViewRender(HyphaRequest $request, WymHTMLForm $form) {
+	protected function editViewRender(HyphaRequest $request, HTMLForm $form) {
 		// update the form dom so that error can be displayed, if there are any
 		$form->updateDom();
 
@@ -862,12 +862,12 @@ class peer_reviewed_article extends HyphaDatatypePage {
 
 	/**
 	 * @param HyphaRequest $request
-	 * @param WymHTMLForm $form
+	 * @param HTMLForm $form
 	 * @param string $type
 	 * @param null|HyphaDomElement $discussion
 	 * @return null
 	 */
-	protected function discussionRender(HyphaRequest $request, WymHTMLForm $form, $type, HyphaDomElement $discussion = null) {
+	protected function discussionRender(HyphaRequest $request, HTMLForm $form, $type, HyphaDomElement $discussion = null) {
 		// update the form dom so that error can be displayed, if there are any
 		$form->updateDom();
 
@@ -995,7 +995,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	}
 
 	/**
-	 * Constructs the WymHTMLForm for the comment form.
+	 * Constructs the HTMLForm for the comment form.
 	 *
 	 * @param HyphaDomElement $comment
 	 * @param array $values
@@ -1301,11 +1301,11 @@ EOF;
 	 * Adds a discussion DOM element to the database.
 	 *
 	 * @param NodeList|HyphaDomElement $discussionContainer
-	 * @param WymHTMLForm $form
+	 * @param HTMLForm $form
 	 * @param string dataFieldSuffix
 	 * @return HyphaDomElement
 	 */
-	protected function addDiscussion(HyphaDomElement $discussionContainer, WymHTMLForm $form, $dataFieldSuffix) {
+	protected function addDiscussion(HyphaDomElement $discussionContainer, HTMLForm $form, $dataFieldSuffix) {
 		$this->xml->requireLock();
 
 		/** @var HyphaDomElement $discussion */
@@ -1333,11 +1333,11 @@ EOF;
 	 * Adds a comment DOM element to a discussion in the database.
 	 *
 	 * @param HyphaDomElement $discussion
-	 * @param WymHTMLForm $form
+	 * @param HTMLForm $form
 	 * @param string dataFieldSuffix
 	 * @return HyphaDomElement
 	 */
-	protected function addDiscussionComment(HyphaDomElement $discussion, WymHTMLForm $form, $dataFieldSuffix) {
+	protected function addDiscussionComment(HyphaDomElement $discussion, HTMLForm $form, $dataFieldSuffix) {
 		$this->xml->requireLock();
 
 		/** @var HyphaDomElement $comment */
@@ -1670,7 +1670,7 @@ EOF;
 	 * Creates a HTML form object for the article.
 	 *
 	 * @param array $values
-	 * @return WymHTMLForm
+	 * @return HTMLForm
 	 */
 	protected function createEditForm(array $values = []) {
 		$html = <<<EOF
@@ -1737,16 +1737,16 @@ EOF;
 
 		$html = hypha_substitute($html, $vars);
 
-		return new WymHTMLForm($html, $values);
+		return new HTMLForm($html, $values);
 	}
 
 	/**
-	 * Constructs the WymHTMLForm for the comment form.
+	 * Constructs the HTMLForm for the comment form.
 	 *
 	 * @param string $type
 	 * @param array $values
 	 * @param null|HyphaDomElement $discussion
-	 * @return WymHTMLForm
+	 * @return HTMLForm
 	 */
 	protected function createCommentForm($type, array $values = [], HyphaDomElement $discussion = null) {
 		$new = $discussion === null;
@@ -1807,7 +1807,7 @@ EOF;
 
 		$html = hypha_substitute($html, $vars);
 
-		return new WymHTMLForm($html, $values);
+		return new HTMLForm($html, $values);
 	}
 
 	/**

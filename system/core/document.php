@@ -331,15 +331,6 @@
 		}
 
 		/*
-			Function: getFormField
-
-			Form fields to look through
-		 */
-		protected function getFormFieldTypes() {
-			return ['input', 'select', 'textarea', 'label', 'img'];
-		}
-
-		/*
 			Function: scanForm
 
 			Look through the DOM to find form fields and
@@ -347,7 +338,9 @@
 		 */
 		protected function scanForm($root)
 		{
-			foreach($root->find(implode(', ', $this->getFormFieldTypes())) as $elem) {
+			$tags = 'input, select, textarea, label, img, editor';
+
+			foreach($root->find($tags) as $elem) {
 				if ($elem->tagName == 'label') {
 					$name = self::getNameAttr($elem, 'for');
 					if ($name)
@@ -471,6 +464,11 @@
 				}
 			} else if ($field->tagName == 'textarea') {
 				$field->setText($value);
+			} else if ($field->tagName == 'editor') {
+				// Editor tags must always contain valid
+				// HTML, so use setHtml rather than
+				// setText
+				$field->setHtml($value);
 			}
 		}
 
