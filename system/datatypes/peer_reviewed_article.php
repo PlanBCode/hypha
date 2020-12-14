@@ -128,8 +128,8 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		self::STATUS_RETRACTED => [/*self::STATUS_DRAFT => 'to_draft'*/], // "to draft" is not supported yet
 	];
 
-	// Source: https://urlregex.com
-	const URL_REGEX='/(?:(?:https?|ft|):\/\/)?(?:\S+(?::\S*)?@|\d{1,3}(?:\.\d{1,3}){3}|(?:(?:[a-z\d\x{00a1}-\x{ffff}]+-?)*[a-z\d\x{00a1}-\x{ffff}]+)(?:\.(?:[a-z\d\x{00a1}-\x{ffff}]+-?)*[a-z\d\x{00a1}-\x{ffff}]+)*(?:\.[a-z\x{00a1}-\x{ffff}]{2,6}))(?::\d+)?(?:[^\s]*)?/iu';
+	const URL_REGEX='/(https?:\/\/)?[\w\/-]+\.[\w\/-?=%.&#]+/iu';
+	// [protocol://] [word] . [suffix /path ?query&parameter=value#bookmark  ]
 
 	public static function getDatatypeName() {
 		return __('datatype.name.peer_reviewed_article');
@@ -1450,7 +1450,7 @@ EOF;
 		$createdAt = date('j-m-y, H:i', ltrim($comment->getAttribute(self::FIELD_NAME_CREATED_AT), 't'));
 		$committerName = $this->getCommentCommenter($comment);
 		$commentHtml = htmlspecialchars($comment->getText());
-		$commentHtml = preg_replace_callback(self::URL_REGEX, function($matches) { // replace urls with links
+		$tryToParseLinks = preg_replace_callback(self::URL_REGEX, function($matches) { // replace urls with links
 			$url = $matches[0];
 			if( substr($url,-1) === '.'){ // ensure that period does not end up in the link
 				$url=substr($url,0,-1);
@@ -1461,6 +1461,9 @@ EOF;
 			// encapsulated in a span to prevent trimming by html->create
 			return '<span><a href="' . $url . '" target="_blank">' . $url . '</a>' . $suffix.'</span>';
 		}, $commentHtml);
+
+		if(!is_null($tryToParseLinks)) $commentHtml = $tryToParseLinks; // In case regex fails
+
 		$commentHtml = nl2br($commentHtml);
 		$commentHtml .= ' <p>' . __('art-by') . ' <strong>' . htmlspecialchars($committerName) . '</strong> ' . __('art-at') . ' ' . htmlspecialchars($createdAt);
 		if (!$review && isUser()) {
