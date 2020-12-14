@@ -128,8 +128,8 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		self::STATUS_RETRACTED => [/*self::STATUS_DRAFT => 'to_draft'*/], // "to draft" is not supported yet
 	];
 
-	// Source: https://urlregex.com
-	const URL_REGEX='/(?:(?:https?|ft|):\/\/)?(?:\S+(?::\S*)?@|\d{1,3}(?:\.\d{1,3}){3}|(?:(?:[a-z\d\x{00a1}-\x{ffff}]+-?)*[a-z\d\x{00a1}-\x{ffff}]+)(?:\.(?:[a-z\d\x{00a1}-\x{ffff}]+-?)*[a-z\d\x{00a1}-\x{ffff}]+)*(?:\.[a-z\x{00a1}-\x{ffff}]{2,6}))(?::\d+)?(?:[^\s]*)?/iu';
+	const URL_REGEX='/(https?:\/\/|www.)[\w\/-]+\.[\w\/-?=%.&#_]*/iu';
+	// [protocol://|www.] [word] . [suffix /path ?query&parameter=value#bookmark]
 
 	public static function getDatatypeName() {
 		return __('datatype.name.peer_reviewed_article');
