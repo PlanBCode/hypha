@@ -128,8 +128,8 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		self::STATUS_RETRACTED => [/*self::STATUS_DRAFT => 'to_draft'*/], // "to draft" is not supported yet
 	];
 
-	const URL_REGEX='/(https?:\/\/|www.)[\w\/-]+\.[\w\/-?=%.&#_]*/iu';
-	// [protocol://|www.] [word] . [suffix /path ?query&parameter=value#bookmark]
+	const URL_REGEX='/(https?:\/\/|www.)[\w\/-]+\.[\w\/-?=%.&#_]*[\w\/-?=%&#_]/iu';
+	// [protocol://|www.] [word] . [suffix /path ?query&parameter=value#bookmark] [last char must not be a dot]
 
 	public static function getDatatypeName() {
 		return __('datatype.name.peer_reviewed_article');
@@ -1452,14 +1452,8 @@ EOF;
 		$commentHtml = htmlspecialchars($comment->getText());
 		$tryToParseLinks = preg_replace_callback(self::URL_REGEX, function($matches) { // replace urls with links
 			$url = $matches[0];
-			if( substr($url,-1) === '.'){ // ensure that period does not end up in the link
-				$url=substr($url,0,-1);
-				$suffix = '.';
-			}else{
-				$suffix = '';
-			}
 			// encapsulated in a span to prevent trimming by html->create
-			return '<span><a href="' . $url . '" target="_blank">' . $url . '</a>' . $suffix.'</span>';
+			return '<span><a href="' . $url . '" target="_blank">' . $url . '</a></span>';
 		}, $commentHtml);
 
 		if(!is_null($tryToParseLinks)) $commentHtml = $tryToParseLinks; // In case regex fails
