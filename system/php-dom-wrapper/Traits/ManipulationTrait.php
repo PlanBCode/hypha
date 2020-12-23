@@ -107,7 +107,7 @@ trait ManipulationTrait
     protected function nodesFromHtml($html) {
         $class = get_class($this->document());
         $doc = new $class();
-        $nodes = $doc->html($html)->find('body > *');
+        $nodes = $doc->html($html)->findXPath('//body/node()');
 
         return $nodes;
     }
