@@ -1452,8 +1452,7 @@ EOF;
 		$commentHtml = htmlspecialchars($comment->getText());
 		$tryToParseLinks = preg_replace_callback(self::URL_REGEX, function($matches) { // replace urls with links
 			$url = $matches[0];
-			// encapsulated in a span to prevent trimming by html->create
-			return '<span><a href="' . $url . '" target="_blank">' . $url . '</a></span>';
+			return '<a href="' . $url . '" target="_blank">' . $url . '</a>';
 		}, $commentHtml);
 
 		if(!is_null($tryToParseLinks)) $commentHtml = $tryToParseLinks; // In case regex fails
