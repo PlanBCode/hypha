@@ -130,6 +130,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 
 	const URL_REGEX='/(https?:\/\/|www.)[\w\/-]+\.[\w\/-?=%.&#_]*[\w\/-?=%&#_]/iu';
 	// [protocol://|www.] [word] . [suffix /path ?query&parameter=value#bookmark] [last char must not be a dot]
+	const MAX_COMMENT_LENGTH = 100;
 
 	public static function getDatatypeName() {
 		return __('datatype.name.peer_reviewed_article');
@@ -1458,6 +1459,17 @@ EOF;
 		if(!is_null($tryToParseLinks)) $commentHtml = $tryToParseLinks; // In case regex fails
 
 		$commentHtml = nl2br($commentHtml);
+		if(strlen($commentHtml) > self::MAX_COMMENT_LENGTH){
+			$id = rand();
+			$stub = substr(strip_tags($commentHtml),0, self::MAX_COMMENT_LENGTH*0.7);
+			$commentHtml = '<div style="display:none;" id="commentFull'.$id.'">'.$commentHtml.'</div>
+			<span id="commentStub'.$id.'">'.$stub.'...</span>
+			<br/><a id="commentToggle'.$id.'" onclick="
+				document.getElementById(\'commentStub'.$id.'\').style.display=\'none\';
+				document.getElementById(\'commentFull'.$id.'\').style.display=\'block\';
+				document.getElementById(\'commentToggle'.$id.'\').style.display=\'none\';
+			">' . __('art-read-more') . '...</a>'; //TODO translation
+		}
 		$commentHtml .= ' <p>' . __('art-by') . ' <strong>' . htmlspecialchars($committerName) . '</strong> ' . __('art-at') . ' ' . htmlspecialchars($createdAt);
 		if (!$review && isUser()) {
 			$committerEmail = $comment->getAttribute(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL);
