@@ -154,6 +154,17 @@ class PagelistMacro extends HyphaMacro {
 					throw new UnexpectedValueException("Invalid language: $lang. Valid options are: " . implode(', ', $usedLangs));
 			}
 		}
+		// Showing languages other than the current is disabled
+		// for now, since createPageInstance now always
+		// implicitly uses getContentLanguage() and throws a
+		// fatal error for pages not available in that language.
+		// Still allow the "languages=" filter specifying just
+		// the current language, to allow seamless migration
+		// later.
+		// See https://github.com/PlanBCode/hypha/issues/310
+		if ($languages && $languages != [$this->O_O->getContentLanguage()])
+			throw new UnexpectedValueException("Filtering by other languages than the current page language not yet supported");
+		$languages = [$this->O_O->getContentLanguage()];
 
 		$pageNodes = hypha_findPages([
 			'tags' => $tags,
