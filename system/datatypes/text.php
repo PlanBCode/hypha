@@ -42,6 +42,7 @@
 				case [self::PATH_EDIT,      self::CMD_SAVE]:      return $this->editAction($request);
 				case [self::PATH_TRANSLATE, null]:                return $this->translateView($request);
 				case [self::PATH_TRANSLATE, self::CMD_TRANSLATE]: return $this->translateAction($request);
+				case [self::PATH_REVERT,    self::CMD_REVERT]:    return $this->revertAction($request);
 			}
 
 			return '404';
@@ -58,7 +59,7 @@
 			$this->html->writeToElement('langList', hypha_indexLanguages($this->pageListNode, $this->language));
 
 			// show content, and only allow access to previous revisions for logged in clients
-			$version = isUser() && $request->getPostValue(self::FIELD_NAME_VERSION);
+			$version = isUser() ? $request->getPostValue(self::FIELD_NAME_VERSION) : '';
 			$this->html->writeToElement('main', $this->getContent($version));
 
 			// setup addition widgets when client is logged in
