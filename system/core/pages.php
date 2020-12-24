@@ -95,6 +95,7 @@
 		public function renderSingleLine(HyphaDomElement $container) {
 			$h2 = $container->document()->createElement('h2');
 			$h2->setText($this->getTitle());
+			$h2->addClass('title');
 			$h2->appendTo($container);
 		}
 
@@ -679,4 +680,68 @@ EOF;
 			}
 		}
 		return 'Subject: "' . htmlspecialchars($subject) . '" not found';
+	}
+
+	function hypha_findPages($filters) {
+		/** @var HyphaDomElement $hyphaXml */
+		global $hyphaXml;
+
+		$pageFilters = '';
+
+		$pageTypes = array_key_exists('page_types', $filters) ? $filters['page_types'] : null;
+		if ($pageTypes) {
+			$pageTypes = $filters['page_types'];
+			$filterFunc = function($type) { return "@type=" . xpath_encode($type); };
+			$attrFilters = array_map($filterFunc, $pageTypes);
+			$pageFilters .= "[" . implode(" or ", $attrFilters) . "]";
+		}
+
+		$includePrivate = array_key_exists('include_private', $filters) ? $filters['include_private'] : false;
+		if ($includePrivate !== true) {
+			$pageFilters .= "[@private='off']";
+		}
+
+		// TODO: skip and limit might not be useful
+		// without sorting, but xpath 1.0 does not seem
+		// to support sorting.
+		$positionFilters = '';
+		$skip = array_key_exists('skip', $filters) ? $filters['skip'] : 0;
+		$limit = array_key_exists('limit', $filters) ? $filters['limit'] : 0;
+		if ($skip > 0) {
+			// Note: position() is 1-based
+			$positionFilters .= '[position() >= ' . ($skip + 1) . ']';
+		}
+		if ($limit > 0) {
+			// This refers to the position *after*
+			// applying skip, because it is in a
+			// different [] predicate block.
+			$positionFilters .= '[position() < ' . ($limit + 1) . ']';
+		}
+
+		$tagFilters = '';
+		$tags = array_key_exists('tags', $filters) ? $filters['tags'] : null;
+		if ($tags) {
+			$filterFunc = function($tag) { return "@id=" . xpath_encode($tag->getId()); };
+			$attrFilters = array_map($filterFunc, $tags);
+			$tagFilters .= "[child::tag[" . implode(" or ", $attrFilters) . "]]";
+		}
+		$excludeTags = array_key_exists('exclude_tags', $filters) ? $filters['exclude_tags'] : null;
+		if ($excludeTags) {
+			$filterFunc = function($tag) { return "@id=" . xpath_encode($tag->getId()); };
+			$attrFilters = array_map($filterFunc, $excludeTags);
+			$tagFilters .= "[not(child::tag[" . implode(" or ", $attrFilters) . "])]";
+		}
+
+		$langFilters = '';
+		$languages = array_key_exists('languages', $filters) ? $filters['languages'] : null;
+		if ($languages) {
+			$filterFunc = function($lang) { return "@id=" . xpath_encode($lang); };
+			$attrFilters = array_map($filterFunc, $languages);
+			$langFilters = '[child::language[' . implode(' or ', $attrFilters) . ']]';
+		}
+
+		$xpath = "hypha/pageList/page${pageFilters}{$tagFilters}${langFilters}${positionFilters}";
+		$pages = $hyphaXml->findXPath($xpath);
+
+		return $pages;
 	}

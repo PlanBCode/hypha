@@ -1171,29 +1171,33 @@ body.type_peer_reviewed_article .input-wrapper.field_type_editor:not(.field_name
     color: #b90;
 }
 
-.tagindex {
+.tagindex, .pagelist {
     list-style-type: none;
     padding-left: 0;
 }
 
-.tagindex-item {
+.tagindex-item, .pagelist-item {
     border-bottom: 1px black solid;
+}
+
+.pagelist-item:first-child {
+    border-top: 1px black solid;
 }
 
 .tagindex-item:last-child {
     border-bottom: none;
 }
 
-.tagindex-item h2 {
+.tagindex-item h2, .pagelist-item h2 {
     margin: 0;
 }
 
-.tagindex-item.is-private h2:after {
+.tagindex-item.is-private h2:after, .pagelist-item.is-private h2:after {
     content: " *";
     color: #b90;
 }
 
-.tagindex-item > a {
+.tagindex-item > a, .pagelist-item > a {
     text-decoration: none;
     color: inherit;
 }

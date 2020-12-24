@@ -375,6 +375,9 @@ sub[class]:hover::before                { content: "subscript type \"" attr(clas
 body.short sub:hover::before            { content: "sub" }
 body.short sub[class]:hover::before     { content: "sub." attr(class) }
 
+macro          { display: block; }
+macro::before  { content: "<<<MACRO: " attr(name) ">>>" }
+
 span:hover,
 strong:hover, b:hover,
 em:hover, i:hover,

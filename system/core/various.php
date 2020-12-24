@@ -159,3 +159,30 @@
 		return is_array($obj) || (is_object($obj) && ($obj instanceof \Traversable));
 	    }
 	}
+
+	/**
+	 * Convert a unix timestamp (int or string) to a DateTime object
+	 * set to the default timezone.
+	 *
+	 * The timestamp can be optionally prefixed with a "t", which
+	 * will be stripped before converting it.
+	 *
+	 * If an empty timestamp (i.e. any value that is falsy before
+	 * t-stripping) is passed, null is returned.
+	 *
+	 * @param (string | int) $timestamp
+	 * @return (DateTime | null)
+	 */
+	function timestampToDateTime($timestamp) {
+		if (!$timestamp)
+			return null;
+
+		$timestamp = ltrim($timestamp, "t");
+		$datetime = new DateTime("@" . $timestamp);
+		/* Datetime created from a unix timestamp is always set
+		 * to to UTC (even when explicitly passing a timezone to
+		 * the constructor or createFromFormat), so set it
+		 * explicitly. */
+		$datetime->setTimezone(new DateTimeZone(date_default_timezone_get()));
+		return $datetime;
+	}

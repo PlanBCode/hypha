@@ -50,8 +50,9 @@
 
 		public function getSortDateTime() {
 			$version = getCurrentVersionNode($this->xml);
-			$timestamp = ltrim($version->getId(), "t");
-			return new DateTime("@" . $timestamp);
+			if (!$version)
+				return null;
+			return timestampToDateTime($version->getId());
 		}
 
 		protected function defaultView(HyphaRequest $request) {

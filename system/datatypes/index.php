@@ -40,6 +40,7 @@
 			$languageName = substr($languageName, 0, strpos($languageName, ' ('));
 
 			// get list of available pages and sort alphabetically
+			$pageList = [];
 			foreach(hypha_getPageList() as $page) {
 				$lang = hypha_pageGetLanguage($page, $language);
 				if ($lang) if ($this->O_O->isUser() || ($page->getAttribute('private')!='on')) {
@@ -52,6 +53,7 @@
 			// add capitals
 			$capital = 'A';
 			$first = true;
+			$htmlList = [];
 			if ($pageList) foreach($pageList as $pagename) {
 				while($capital < strtoupper($pagename[0])) $capital++;
 				if (strtoupper($pagename[0]) == $capital) {
