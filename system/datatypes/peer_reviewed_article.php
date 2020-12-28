@@ -130,7 +130,8 @@ class peer_reviewed_article extends HyphaDatatypePage {
 
 	const URL_REGEX='/(https?:\/\/|www.)[\w\/-]+\.[\w\/-?=%.&#_]*[\w\/-?=%&#_]/iu';
 	// [protocol://|www.] [word] . [suffix /path ?query&parameter=value#bookmark] [last char must not be a dot]
-	const MAX_COMMENT_LENGTH = 100;
+	const MAX_COMMENT_LENGTH = 100 * 6; // Roughly hundred words
+	const MIN_COMMENT_STUB_LENGTH = self::MAX_COMMENT_LENGTH  * 0.7;
 
 	public static function getDatatypeName() {
 		return __('datatype.name.peer_reviewed_article');
@@ -1438,6 +1439,19 @@ EOF;
 		return $approvesDomElement;
 	}
 
+	protected function processCommentText($commentText){
+		$commentHtml = htmlspecialchars($commentText);
+		$tryToParseLinks = preg_replace_callback(self::URL_REGEX, function($matches) { // replace urls with links
+			$url = $matches[0];
+			return '<a href="' . $url . '" target="_blank">' . $url . '</a>';
+		}, $commentHtml);
+
+		if(!is_null($tryToParseLinks)) $commentHtml = $tryToParseLinks; // In case regex fails
+
+		$commentHtml = nl2br($commentHtml);
+		return $commentHtml;
+	}
+
 	/**
 	 * Render a single comment.
 	 *
@@ -1450,26 +1464,23 @@ EOF;
 	protected function createCommentDomElement(HyphaDomElement $comment, $review = false, $firstAndBlocking = false, $resolved = false) {
 		$createdAt = date('j-m-y, H:i', ltrim($comment->getAttribute(self::FIELD_NAME_CREATED_AT), 't'));
 		$committerName = $this->getCommentCommenter($comment);
-		$commentHtml = htmlspecialchars($comment->getText());
-		$tryToParseLinks = preg_replace_callback(self::URL_REGEX, function($matches) { // replace urls with links
-			$url = $matches[0];
-			return '<a href="' . $url . '" target="_blank">' . $url . '</a>';
-		}, $commentHtml);
+		$commentText = $comment->getText();
 
-		if(!is_null($tryToParseLinks)) $commentHtml = $tryToParseLinks; // In case regex fails
+		if(strlen($commentText) > self::MAX_COMMENT_LENGTH){
+			$firstWordBreak = self::MIN_COMMENT_STUB_LENGTH + strcspn($commentText, ' \n', self::MIN_COMMENT_STUB_LENGTH);
+			$commentStub = substr($commentText,0, $firstWordBreak);
+			$commentHtml = '<div style="display:none;">'.$this->processCommentText($commentText).'</div>
+			<span>'.$this->processCommentText($commentStub).'...</span>
+			<br/><a onclick="
+				const commentToggle = event.target;
+				const commentStub = commentToggle.previousElementSibling.previousElementSibling; // skip br
+				const commentFull = commentStub.previousElementSibling;
+				commentStub.style.display=\'none\';
+				commentFull.style.display=\'block\';
+				commentToggle.style.display=\'none\';
+			">' . __('art-read-more') . '...</a>';
+		}else $commentHtml = $this->processCommentText($commentText);
 
-		$commentHtml = nl2br($commentHtml);
-		if(strlen($commentHtml) > self::MAX_COMMENT_LENGTH){
-			$id = rand();
-			$stub = substr(strip_tags($commentHtml),0, self::MAX_COMMENT_LENGTH*0.7);
-			$commentHtml = '<div style="display:none;" id="commentFull'.$id.'">'.$commentHtml.'</div>
-			<span id="commentStub'.$id.'">'.$stub.'...</span>
-			<br/><a id="commentToggle'.$id.'" onclick="
-				document.getElementById(\'commentStub'.$id.'\').style.display=\'none\';
-				document.getElementById(\'commentFull'.$id.'\').style.display=\'block\';
-				document.getElementById(\'commentToggle'.$id.'\').style.display=\'none\';
-			">' . __('art-read-more') . '...</a>'; //TODO translation
-		}
 		$commentHtml .= ' <p>' . __('art-by') . ' <strong>' . htmlspecialchars($committerName) . '</strong> ' . __('art-at') . ' ' . htmlspecialchars($createdAt);
 		if (!$review && isUser()) {
 			$committerEmail = $comment->getAttribute(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL);
