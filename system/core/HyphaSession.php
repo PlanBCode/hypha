@@ -27,9 +27,19 @@
 			// (not sent over HTTP) if appropriate, and
 			// *only* sent on http(s) requests (not
 			// accessible to scripts).
-			session_name('hyphaSession');
+			// Use a diferent name for the Https cookie, so
+			// a secure HTTPS session can coexist with an
+			// insecure HTTP session (Without this, the HTTP
+			// session simply breaks because the cookie is
+			// marked as secure and thus off-limits for HTTP).
+			$secure = $request->isSecure();
+			if ($secure)
+				$name = 'hyphaSessionSecure';
+			else
+				$name = 'hyphaSessionInsecure';
+			session_name($name);
 			ini_set('session.cookie_path', $request->getRootUrlPath());
-			ini_set('session.cookie_secure', $request->isSecure());
+			ini_set('session.cookie_secure', $secure);
 			ini_set('session.cookie_httponly', true);
 			// This enables browser protections against CSRF
 			// attacks by omitting this cookie from all

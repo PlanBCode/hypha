@@ -40,7 +40,8 @@
 				$this->hyphaUser = hypha_getUserById($userid);
 			else
 				$this->hyphaUser = null;
-			$this->csrfToken = isset($_COOKIE['hyphaCsrfToken']) ? $_COOKIE['hyphaCsrfToken'] : null;
+			$name = $this->getCsrfTokenCookieName();
+			$this->csrfToken = isset($_COOKIE[$name]) ? $_COOKIE[$name] : null;
 
 			$theme = $this->getThemeName();
 			$this->data = new StdClass();
@@ -145,6 +146,18 @@
 			return $this->dictionary;
 		}
 
+		protected function getCsrfTokenCookieName() {
+			// Use a diferent name for the Https cookie, so
+			// a secure HTTPS session can coexist with an
+			// insecure HTTP session (Without this, the HTTP
+			// session simply breaks because the cookie is
+			// marked as secure and thus off-limits for HTTP).
+			if ($this->getRequest()->isSecure())
+				return 'hyphaCsrfTokenSecure';
+			else
+				return 'hyphaCsrfTokenInsecure';
+		}
+
 		/*
 			Function: getOrGenerateCsrfToken
 
@@ -179,11 +192,12 @@
 			// Cookies are well-protected by the browser, so
 			// it is not possible for other sites to get
 			// access to this cookie to do an CSRF attack.
-			setcookie('hyphaCsrfToken', $this->csrfToken,
+			$name = $this->getCsrfTokenCookieName();
+			setcookie($name, $this->csrfToken,
 			          /* expire */ 0,
 			          /* path */ $this->getRequest()->getRootUrlPath(),
 				  /* domain */ "",
-				  /* secure */ $this->getRequest()->isSecure(),
+				  /* secure */ $secure,
 				  /* http_only */ true);
 		}
 
