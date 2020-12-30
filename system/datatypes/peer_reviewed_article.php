@@ -131,7 +131,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	const URL_REGEX='/(https?:\/\/|www.)[\w\/-]+\.[\w\/-?=%.&#_]*[\w\/-?=%&#_]/iu';
 	// [protocol://|www.] [word] . [suffix /path ?query&parameter=value#bookmark] [last char must not be a dot]
 	const MAX_COMMENT_LENGTH = 100 * 6; // Roughly hundred words
-	const MIN_COMMENT_STUB_LENGTH = self::MAX_COMMENT_LENGTH  * 0.7;
+	const MIN_COMMENT_STUB_LENGTH = self::MAX_COMMENT_LENGTH * 0.7;
 
 	public static function getDatatypeName() {
 		return __('datatype.name.peer_reviewed_article');
@@ -1466,20 +1466,22 @@ EOF;
 		$committerName = $this->getCommentCommenter($comment);
 		$commentText = $comment->getText();
 
-		if(strlen($commentText) > self::MAX_COMMENT_LENGTH){
-			$firstWordBreak = self::MIN_COMMENT_STUB_LENGTH + strcspn($commentText, ' \n', self::MIN_COMMENT_STUB_LENGTH);
+		if (strlen($commentText) > self::MAX_COMMENT_LENGTH) {
+			$firstWordBreak = self::MIN_COMMENT_STUB_LENGTH + strcspn($commentText, " \n", self::MIN_COMMENT_STUB_LENGTH);
 			$commentStub = substr($commentText,0, $firstWordBreak);
-			$commentHtml = '<div style="display:none;">'.$this->processCommentText($commentText).'</div>
-			<span>'.$this->processCommentText($commentStub).'...</span>
-			<br/><a onclick="
+			$commentHtml = '<div class="comment-full" style="display:none;">'.$this->processCommentText($commentText).'</div>
+			<span class="comment-stub">'.$this->processCommentText($commentStub).'...</span>
+			<a class="comment-read-more" onclick="
 				const commentToggle = event.target;
-				const commentStub = commentToggle.previousElementSibling.previousElementSibling; // skip br
+				const commentStub = commentToggle.previousElementSibling;
 				const commentFull = commentStub.previousElementSibling;
 				commentStub.style.display=\'none\';
 				commentFull.style.display=\'block\';
 				commentToggle.style.display=\'none\';
 			">' . __('art-read-more') . '...</a>';
-		}else $commentHtml = $this->processCommentText($commentText);
+		} else {
+			$commentHtml = $this->processCommentText($commentText);
+		}
 
 		$commentHtml .= ' <p>' . __('art-by') . ' <strong>' . htmlspecialchars($committerName) . '</strong> ' . __('art-at') . ' ' . htmlspecialchars($createdAt);
 		if (!$review && isUser()) {
