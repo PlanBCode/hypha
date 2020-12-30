@@ -491,6 +491,7 @@
 		"art-unresolved-block(s)" => "onopgeloste breekpunt(en)",
 		"art-date-format-date" => "%e %B %Y", // see for format: https://www.php.net/manual/en/function.date.php
 		"art-date-format-time" => "om %k:%Mu", // see for format: https://www.php.net/manual/en/function.date.php
+		"art-read-more" => "Lees meer",
 
 		// sharing links
 		"share-email-subject" => "Zie '[[title]]' op [[domain]]",

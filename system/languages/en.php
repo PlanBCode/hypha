@@ -496,7 +496,8 @@
 		"art-unresolved-block(s)" => "unresolved block(s)",
 		"art-date-format-date" => "%B %e, %Y", // see for format: https://www.php.net/manual/en/function.date.php
 		"art-date-format-time" => "at %l:%M%p", // see for format: https://www.php.net/manual/en/function.date.php
-
+		"art-read-more" => "Read more",
+	
 		// sharing links
 		"share-email-subject" => "See '[[title]]' at [[domain]]",
 		"share-email-body" => "I came across '[[title]]' at [[domain]]: [[url]]",
