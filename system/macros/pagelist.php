@@ -11,7 +11,7 @@
  *    prefixed with a language (e.g. tag="en/taglabel") to select a tag
  *    from another language, otherwise the current content language is
  *    used to find the tag.
- *  - exclude_tags:
+ *  - exclude-tags:
  *    A comma separated list of tags, only items without any of these
  *    tags will be shown. Syntax is the same as the "tags" attribute. If
  *    an item matches both tags and exclude_tags, it is excluded.
