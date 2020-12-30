@@ -54,13 +54,16 @@
 		$messageHtml .= '</html>' . "\r\n";
 
 		$error = array();
+
+		$mailSubject = getEncodedSubject($subject);
+
 		foreach (explode(',', $receivers) as $receiver) {
 			$validEmail = filter_var($receiver, FILTER_VALIDATE_EMAIL);
 			if (!$DEBUG && !$validEmail) {
 				$error[] = $receiver;
 				continue;
 			}
-			$success = mail($receiver, $subject, $messageHtml, $headers, '-f '.$senderEmail);
+			$success = mail($receiver, $mailSubject, $messageHtml, $headers, '-f '.$senderEmail);
 			if (!$success) {
 				$error[] = $receiver;
 			}
@@ -71,6 +74,31 @@
 		}
 
 		return '';
+	}
+
+	/**
+	 * Make sure the subject is ASCII-clean
+	 *
+	 * Some e-mail providers reject e-mail messages with non-ASCII
+	 * characters in the subject.
+	 *
+	 * @param string $subject
+	 *
+	 * @return string Encoded subject
+	 */
+	function getEncodedSubject($subject) {
+		if (preg_match('/^[\x20-\x7e]*$/', $subject)) {
+			// ascii-only subject, return as-is
+			return $subject;
+		}
+
+		// TODO: It would be nicer to use quoted-printable
+		// encoding, since that leaves all non-special
+		// characters directly readable, but this encoding is a
+		// bit tricky to implement. See
+		// https://github.com/PlanBCode/hypha/pull/346#issuecomment-703561118
+		// https://stackoverflow.com/q/20806154/740048
+		return '=?UTF-8?B?'.base64_encode($subject).'?=';
 	}
 
 	/*
