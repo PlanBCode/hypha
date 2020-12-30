@@ -79,25 +79,26 @@
 	/**
 	 * Make sure the subject is ASCII-clean
 	 *
-	 * Some e-mail providers reject e-mail messages with non-ASCII characters in the subject.
-	 * See issue https://github.com/PlanBCode/hypha/issues/202
-	 * source: https://stackoverflow.com/a/54688095/740048
+	 * Some e-mail providers reject e-mail messages with non-ASCII
+	 * characters in the subject.
 	 *
 	 * @param string $subject
 	 *
 	 * @return string Encoded subject
 	 */
 	function getEncodedSubject($subject) {
-		if (!preg_match('/[^\x20-\x7e]/', $subject)) {
+		if (preg_match('/^[\x20-\x7e]*$/', $subject)) {
 			// ascii-only subject, return as-is
 			return $subject;
 		}
-		// subject is non-ascii, needs encoding
-		$encoded = quoted_printable_encode($subject);
-		$prefix = '=?UTF-8?q?';
-		$suffix = '?=';
 
-		return $prefix . str_replace("=\r\n", $suffix . "\r\n  " . $prefix, $encoded) . $suffix;
+		// TODO: It would be nicer to use quoted-printable
+		// encoding, since that leaves all non-special
+		// characters directly readable, but this encoding is a
+		// bit tricky to implement. See
+		// https://github.com/PlanBCode/hypha/pull/346#issuecomment-703561118
+		// https://stackoverflow.com/q/20806154/740048
+		return '=?UTF-8?B?'.base64_encode($subject).'?=';
 	}
 
 	/*
