@@ -83,7 +83,7 @@
 		public function getIndexData() {
 			$id = $this->pageListNode->getAttribute('id');
 			$date = $this->getSortDateTime();
-			$dataMtx = [
+			$data = [
 				__(self::INDEX_TABLE_COLUMNS_TITLE) => [
 					'class' => 'type_'.get_class($this).' '.($this->privateFlag ? 'is-private' : 'is-public'),
 					'sort' => preg_replace("/[^A-Za-z0-9]/", '', $this->getTitle()).'_'.$id,
@@ -95,7 +95,22 @@
 					'value' => $date ? $date->format('Y-m-d') : '',
 				],
 			];
-			return array_intersect_key($dataMtx, array_fill_keys(self::getIndexTableColumns(), ''));
+			return $this->filterIndexData($data);
+		}
+
+		/**
+		 * @param array $data
+		 *
+		 * @return array
+		 */
+		protected function filterIndexData(array $data) {
+			$availableColumns = self::getIndexTableColumns();
+			foreach ($data as $column => $dataPerColumn) {
+				if (!in_array($column, $availableColumns)) {
+					unset($data[$column]);
+				}
+			}
+			return $data;
 		}
 
 		protected function deletePage() {

@@ -2045,13 +2045,13 @@ EOF;
 	 * @return array
 	 */
 	public function getIndexData() {
-		$dataMtx = [
+		$data = [
 			__(self::INDEX_TABLE_COLUMNS_STATUS) => [
 				'value' => $this->getStatus(),
 				'sort' => $this->getStatus(),
 			],
 		] + parent::getIndexData();
-		return array_intersect_key($dataMtx, array_fill_keys(self::getIndexTableColumns(), ''));
+		return $this->filterIndexData($data);
 	}
 
 	/**
