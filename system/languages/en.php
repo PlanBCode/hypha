@@ -497,7 +497,13 @@
 		"art-date-format-date" => "%B %e, %Y", // see for format: https://www.php.net/manual/en/function.date.php
 		"art-date-format-time" => "at %l:%M%p", // see for format: https://www.php.net/manual/en/function.date.php
 		"art-read-more" => "Read more",
-	
+
+		// index
+		"index_table_column_title" => "title",
+		"index_table_column_author" => "author",
+		"index_table_column_date" => "date",
+		"index_table_column_status" => "status",
+
 		// sharing links
 		"share-email-subject" => "See '[[title]]' at [[domain]]",
 		"share-email-body" => "I came across '[[title]]' at [[domain]]: [[url]]",

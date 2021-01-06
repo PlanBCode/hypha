@@ -47,10 +47,10 @@
 		abstract class for a page backed by datatype and xml file.
 	*/
 	abstract class HyphaDatatypePage extends HyphaPage {
-		const INDEX_TABLE_COLUMNS_TITLE = 'title';
-		const INDEX_TABLE_COLUMNS_AUTHOR = 'author';
-		const INDEX_TABLE_COLUMNS_DATE = 'date';
-		const INDEX_TABLE_COLUMNS_STATUS = 'status';
+		const INDEX_TABLE_COLUMNS_TITLE = 'index_table_column_title';
+		const INDEX_TABLE_COLUMNS_AUTHOR = 'index_table_column_author';
+		const INDEX_TABLE_COLUMNS_DATE = 'index_table_column_date';
+		const INDEX_TABLE_COLUMNS_STATUS = 'index_table_column_status';
 
 		public $pageListNode, $language, $pagename, $privateFlag;
 
