@@ -39,42 +39,116 @@
 			$languageName = $isoLangList[$language];
 			$languageName = substr($languageName, 0, strpos($languageName, ' ('));
 
+			$this->html->linkScript('//cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js');
+			$this->html->linkStyle('//cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css');
+
+			$html = <<<TABLE
+	<table class="page_index">
+		<thead>
+			<tr>
+				[[headerItems]]
+			</tr>
+		</thead>
+		<tbody>
+			[[tbody]]
+		</tbody>
+	</table>
+TABLE;
+
+			$tRowTpl = <<<ROW
+			<tr>
+				[[recordItems]]
+			</tr>
+ROW;
+			$tRowItemTpl = <<<ROWITEM
+				<td class="index-item [[name]] [[class]]" data-sort="[[sort]]">[[value]]</td>
+ROWITEM;
+
+			$dataTypes = hypha_getDataTypes();
+
 			// get list of available pages and sort alphabetically
 			$pageList = [];
-			foreach(hypha_getPageList() as $page) {
+			foreach(hypha_getPageList() as $index => $page) {
 				$lang = hypha_pageGetLanguage($page, $language);
-				if ($lang) if ($this->O_O->isUser() || ($page->getAttribute('private')!='on')) {
-					$pageList[] = $lang->getAttribute('name').($page->getAttribute('private')=='on' ? '&#;' : '');
-					$pageListDatatype[$lang->getAttribute('name')] = $page->getAttribute('type');
+				$isPrivateOrUser = $this->O_O->isUser() || ($page->getAttribute('private') != 'on');
+				$isInDataType = array_key_exists($page->getAttribute('type'), $dataTypes);
+				if ($lang && $isPrivateOrUser && $isInDataType) {
+					/** @var HyphaDatatypePage $hyphaPage */
+					$hyphaPage = createPageInstance($this->O_O, $page);
+					$titleSort = preg_replace("/[^A-Za-z0-9]/", '', $hyphaPage->getTitle());
+					$titleSort .= '_'.$index;
+					$pageList[$titleSort] = $hyphaPage;
 				}
 			}
-			if ($pageList) array_multisort(array_map('strtolower', $pageList), $pageList);
+			ksort($pageList);
 
-			// add capitals
-			$capital = 'A';
-			$first = true;
-			$htmlList = [];
-			if ($pageList) foreach($pageList as $pagename) {
-				while($capital < strtoupper($pagename[0])) $capital++;
-				if (strtoupper($pagename[0]) == $capital) {
-					if (!$first) {
-						$htmlList[] = '</div>';
+			$columns = [];
+			foreach ($dataTypes as $class => $name) {
+				$cols = call_user_func($class . '::getIndexTableColumns');
+				$columns += array_combine($cols, $cols);
+			}
+
+			$tbody = '';
+			// iterate over page list
+			foreach($pageList as $titleSort => $hyphaPage) {
+				$recordItems = '';
+				$items = $hyphaPage->getIndexData();
+				foreach ($columns as $name) {
+					if (array_key_exists($name, $items)) {
+						$item = $items[$name];
+					} else {
+						$item = '';
 					}
-					$htmlList[] = '<div class="letter-wrapper">';
-					$htmlList[] = '<div class="letter">'.$capital.'</div>';
-					$capital++;
-					$first = false;
+					if (!is_array($item)) {
+						$item = ['value' => $item];
+					}
+
+					$vars = ['name' => $name];
+					foreach (['value', 'sort', 'class'] as $key) {
+						if (array_key_exists($key, $item)) {
+							$vars[$key] = $item[$key];
+						}
+					}
+					$recordItems .= hypha_substitute($tRowItemTpl, $vars);
 				}
-				$privatePos = strpos($pagename, '&#;');
-				if ($privatePos) $pagename = substr($pagename, 0, $privatePos);
-				$htmlList[] = '<div class="index-item type_'.$pageListDatatype[$pagename].' '.($privatePos ? 'is-private' : 'is-public').'"><a href="'.$language.'/'.$pagename.'">'.showPagename($pagename).'</a></div>';
+
+				$vars = [
+				    'recordItems' => $recordItems,
+                ];
+
+				$tbody .= hypha_substitute($tRowTpl, $vars);
 			}
 
-			$html = '<div class="index">';
-			foreach($htmlList as $htmlLine) $html.= $htmlLine;
-			$html.= '</div>';
+			$headerItems = '';
+			foreach ($columns as $column) {
+				$headerItems .= '<th>'.$column.'</th>';
+			}
+
+			$vars = [
+				'headerItems' => $headerItems,
+				'tbody' => $tbody,
+			];
+
+			$html = hypha_substitute($html, $vars);
+
+			// initialize datatable
+			$js = <<<EOD
+	$(document).ready(function () {
+		$('.page_index').DataTable({
+			order: [[ [[sortIndex]], "desc" ]],
+			paging: false,
+		});
+	});
+EOD;
+
+			$dateIndex = array_search(__(HyphaDatatypePage::INDEX_TABLE_COLUMNS_DATE), array_values($columns));
+			$vars = [
+				'sortIndex' => $dateIndex,
+			];
+			$js = hypha_substitute($js, $vars);
+			$this->html->writeScript($js);
 
 			$this->html->writeToElement('pagename', __('page-index').': '.$languageName);
 			$this->html->writeToElement('main', $html);
+		}
 	}
-}
