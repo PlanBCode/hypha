@@ -756,11 +756,9 @@ class mailinglist extends HyphaDatatypePage {
 			 }';
 
 			if ($num > 0){ // hide send button if no addresses available
-				$action = str_replace(['"'], ['\''], $action);
 				$commands->append(makeButton(__('send'), $action));
 			}
 			$action = 'hypha('.json_encode($linkToMailing).', '.json_encode(self::CMD_SEND_TEST).', prompt(' . json_encode(__('email')) . '), $(this).closest(\'form\'));';
-			$action = str_replace(['"'], ['\''], $action);
 			$commands->append(makeButton(__('ml-test-send'), $action));
 		}
 
