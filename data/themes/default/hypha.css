@@ -1206,3 +1206,34 @@ body.type_peer_reviewed_article .input-wrapper.field_type_editor:not(.field_name
  max-width: 150px;
  max-height: 150px;
 }
+
+div.messagebox.modal{
+  position: fixed;
+  left:25vw;
+  top:25vw;
+  width:50vw;
+  background-color: white;
+  color: black;
+  z-index: 200;
+  padding: 1cm;
+}
+
+div.messagebox.modal span.progress-indicator::before {
+  content: "(";
+}
+
+div.messagebox.modal span.progress-indicator::after {
+  content: ")";
+}
+
+
+div.gray-modal-background{
+  position: fixed;
+  left:0;
+  top:0;
+  width:100vw;
+  height: 100vh;
+  background-color: rgba(100,100,100,0.85);
+  z-index: 100;
+  pointerEvens: none;
+}
