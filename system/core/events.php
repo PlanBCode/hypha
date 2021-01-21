@@ -205,12 +205,12 @@
 		return false;
 	}
 
-	function makeAction($langPageView, $command, $argument, HTMLForm $form = null) {
+	function makeAction($langPageView, $command, $argument, HTMLForm $form = null, $jsCallBackAsString='null') {
 		if (null === $form) {
 			global $hyphaHtml;
 			$form = $hyphaHtml->getDefaultForm();
 		}
-		return 'hypha(\''.$langPageView.'\', \''.$command.'\', \''.$argument.'\', document.getElementById(\''.$form->getId().'\'));';
+		return 'hypha(\''.$langPageView.'\', \''.$command.'\', \''.$argument.'\', document.getElementById(\''.$form->getId().'\'),'.$jsCallBackAsString.');';
 	}
 
 	/*
