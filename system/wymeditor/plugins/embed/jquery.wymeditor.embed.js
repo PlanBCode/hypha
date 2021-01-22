@@ -58,6 +58,53 @@
             ]
         };
 
+        WYMeditor.XhtmlValidator._tags.video = {
+            "attributes":[
+                "width",
+                "height",
+                "autoplay",
+                "controls",
+                "loop",
+                "muted",
+                "poster",
+                "preload",
+                "src"
+            ]
+        };
+
+        WYMeditor.XhtmlValidator._tags.audio = {
+            "attributes":[
+                "autoplay",
+                "controls",
+                "loop",
+                "muted",
+                "preload",
+                "src",
+                "crossorigin",
+                "currentTime",
+                "disableRemotePlayback"
+            ]
+        };
+
+        WYMeditor.XhtmlValidator._tags.source = {
+            "attributes":[
+                "src",
+                "srcset",
+                "type",
+                "media",
+                "sizes",
+                "autoPictureInPicture",
+                "buffered",
+                "controlslist",
+                "crossorigin",
+                "currentTime",
+                "disablePictureInPicture",
+                "disableRemotePlayback",
+                "intrinsicsize",
+                "playsinline"
+            ]
+        };
+
         // Override the XhtmlSaxListener to allow param, embed and iframe.
         //
         // We have to do an explicit override
@@ -67,12 +114,16 @@
         var XhtmlSaxListener = WYMeditor.XhtmlSaxListener;
         WYMeditor.XhtmlSaxListener = function () {
             var listener = XhtmlSaxListener.call(this);
-            // param, embed and iframe should be inline tags so that they can
-            // be nested inside other elements
+            // param, embed, iframe and source should be inline tags so
+            // that they can be nested inside other elements, audio and
+            // video block tags so source can be nested in them.
             removeItem('param', listener.block_tags);
             listener.inline_tags.push('param');
             listener.inline_tags.push('embed');
             listener.inline_tags.push('iframe');
+            listener.block_tags.push('audio');
+            listener.block_tags.push('video');
+            listener.inline_tags.push('source');
 
             return listener;
         };
