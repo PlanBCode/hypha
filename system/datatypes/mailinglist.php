@@ -36,6 +36,7 @@ class mailinglist extends HyphaDatatypePage {
 	const FIELD_NAME_CONFIRM_CODE = 'confirm-code';
 	const FIELD_NAME_UNSUBSCRIBE_CODE = 'unsubscribe-code';
 	const FIELD_NAME_REMINDED = 'reminded';
+	const FIELD_NAME_RECEIVERS = 'receivers';
 
 	const PATH_EDIT = 'edit';
 	const PATH_MAILS = 'mails';
@@ -1050,7 +1051,7 @@ EOF;
 		}
 
 		// get status
-		$status = $mailing->getAttribute('status');
+		$status = $mailing->getAttribute(self::FIELD_NAME_STATUS);
 		if (self::MAILING_STATUS_DRAFT !== $status) {
 			notify('error', __('ml-mail-has-invalid-status'));
 			return null;
@@ -1061,11 +1062,11 @@ EOF;
 		// mark mailing as sending
 		$this->xml->lockAndReload();
 		$mailing = $this->xml->getElementById($mailingId);
-		$mailing->setAttribute('status', self::MAILING_STATUS_SENDING);
+		$mailing->setAttribute(self::FIELD_NAME_STATUS, self::MAILING_STATUS_SENDING);
 		$count = 0;
 		$mailing->setAttribute(self::FIELD_NAME_PROGRESS, $count);
 		/** @var HyphaDomElement $mailings */
-		$mailings = $this->getDoc()->getOrCreate('mailings');
+		$mailings = $this->getDoc()->getOrCreate(self::FIELD_NAME_MAILINGS_CONTAINER);
 		$mailings->append($mailing);
 		$this->xml->saveAndUnlock();
 
@@ -1081,14 +1082,14 @@ EOF;
 		/** @var HyphaDomElement $receiver */
 		foreach ($receivers as $receiver) {
 			set_time_limit(self::TIME_LIMIT_PER_MAIL);
-			$email = $receiver->getAttribute('email');
-			$code = $receiver->getAttribute('unsubscribe-code');
+			$email = $receiver->getAttribute(self::FIELD_NAME_EMAIL);
+			$code = $receiver->getAttribute(self::FIELD_NAME_UNSUBSCRIBE_CODE);
 			// include email for server record purposes
 			$linkToUnsubscribe = $this->path(self::PATH_UNSUBSCRIBE_CODE, ['address' => $email, 'code' => $code]);
 			$message = '<p><a href="' . $linkToMailing . '">' . __('ml-if-unreadable-use-link') . '</a></p>';
 			$message .= $mailing->getHtml();
 			$message .= '<p><a href="' . $linkToUnsubscribe . '">' . __('ml-unsubscribe') . '</a></p>';
-			$this->sendMail($mailing->getAttribute('subject'), $message, [$email], $senderData['email'], $senderData['name']);
+			$this->sendMail($mailing->getAttribute(self::FIELD_NAME_SUBJECT), $message, [$email], $senderData['email'], $senderData['name']);
 
 			$this->xml->lockAndReload();
 			$mailing = $this->xml->getElementById($mailingId);
@@ -1102,10 +1103,10 @@ EOF;
 		$mailing = $this->xml->getElementById($mailingId);
 		$mailing->setAttribute(self::FIELD_NAME_STATUS, self::MAILING_STATUS_SENT);
 		$mailing->removeAttribute(self::FIELD_NAME_PROGRESS);
-		$mailing->setAttribute('date', date('Y-m-d H:i:s'));
-		$mailing->setAttribute('receivers', count($receivers));
+		$mailing->setAttribute(self::FIELD_NAME_DATE, date('Y-m-d H:i:s'));
+		$mailing->setAttribute(self::FIELD_NAME_RECEIVERS, count($receivers));
 		/** @var HyphaDomElement $mailings */
-		$mailings = $this->getDoc()->getOrCreate('mailings');
+		$mailings = $this->getDoc()->getOrCreate(self::FIELD_NAME_MAILINGS_CONTAINER);
 		$mailings->append($mailing);
 		$this->xml->saveAndUnlock();
 
@@ -1140,7 +1141,7 @@ EOF;
 		$senderData = $this->getSenderData();
 
 		$subject = __('ml-test-mail-subject-prefix') . ' - ';
-		$subject .= $mailing->getAttribute('subject');
+		$subject .= $mailing->getAttribute(self::FIELD_NAME_SUBJECT);
 
 		$this->sendMail($subject, $message, [$email], $senderData['email'], $senderData['name']);
 
