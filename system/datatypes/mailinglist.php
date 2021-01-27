@@ -1033,7 +1033,7 @@ EOF;
 	 *
 	 * @param HyphaRequest $request
 	 * @throws Exception
-	 * @return null
+	 * @return string|null
 	 */
 	protected function mailingSendAction(HyphaRequest $request) {
 		if (!$this->hasSender()) {
