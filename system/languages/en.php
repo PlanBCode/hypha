@@ -313,6 +313,11 @@
 		"ml-received-by" => "received by",
 		"ml-sure-to-send" => "Are you sure you want to send off this mailing to [[count]] recipient(s)?",
 
+		// mailing list - progress feedback ui
+		"ml-sure-to-close" => "Are you sure you want to leave and stop sending the mailing?",
+		"ml-do-not-close" => "Attention: Do not close this window untill all mails are sent.",
+		"ml-send-in-progress" => "The mail is being sent...",
+
 		// mailing list - response
 		"ml-no-sender" => "no sender, please edit the mailing list",
 		"ml-mail-has-invalid-status" => "this email has an invalid status",

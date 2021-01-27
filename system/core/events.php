@@ -142,8 +142,6 @@
 			}
 			request.open('POST', url, true);
 			request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-			request.setRequestHeader("Content-length", params.length);
-			request.setRequestHeader("Connection", "close");
 			request.send(params);
 		}
 		else {
@@ -207,12 +205,12 @@
 		return false;
 	}
 
-	function makeAction($langPageView, $command, $argument, HTMLForm $form = null) {
+	function makeAction($langPageView, $command, $argument, HTMLForm $form = null, $jsCallBackAsString='null') {
 		if (null === $form) {
 			global $hyphaHtml;
 			$form = $hyphaHtml->getDefaultForm();
 		}
-		return 'hypha(\''.$langPageView.'\', \''.$command.'\', \''.$argument.'\', document.getElementById(\''.$form->getId().'\'));';
+		return 'hypha(\''.$langPageView.'\', \''.$command.'\', \''.$argument.'\', document.getElementById(\''.$form->getId().'\'),'.$jsCallBackAsString.');';
 	}
 
 	/*

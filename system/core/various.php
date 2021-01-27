@@ -97,7 +97,7 @@
 	*/
 	function makeButton($label, $action, $id = '', $class = '') {
 		$class = 'button' . ($class ? ' ' . $class : '');
-		return '<input type="button" class="'.$class.'" '.($id?' id="'.$id.'"':'').'value="'.$label.'" onclick="'.$action.'" />';
+		return '<input type="button" class="'.htmlspecialchars($class).'" '.($id?' id="'.htmlspecialchars($id).'"':'').'value="'.htmlspecialchars($label).'" onclick="'.htmlspecialchars($action).'" />';
 	}
 
 	/*
