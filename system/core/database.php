@@ -559,8 +559,52 @@
 			http_response_code(404);
 			die("Invalid filename: $filename");
 		}
+		// TODO: Use X-Sendfile header to let Apache serve the file?
+		$filesize = filesize($filename);
+		$headers = getallheaders();
+		$matches = [];
+		// Only supports fully-qualified bytes=start-end ranges,
+		// not `bytes=-suffixlength` or `bytes=start-` or
+		// multi-part ranges.
+		if (array_key_exists('Range', $headers) && preg_match('/bytes=(\d+)-(\d+)$/', $headers['Range'], $matches)) {
+			// https://developer.mozilla.org/en-US/docs/Web/HTTP/Range_requests
+			// https://stackoverflow.com/questions/9629223/audio-duration-returns-infinity-on-safari-when-mp3-is-served-from-php
+			$start = intval($matches[1]);
+			$end = intval($matches[2]);
+		} else {
+			$start = 0;
+			$end = $filesize;
+		}
+		$bytesize = $end - $start;
 		header('Content-Type: ' . getMimeType($filename));
-		readfile($filename);
+		header('Content-Length: ' . (string)($bytesize));
+		header('Content-Range: bytes ' . $start . '-' . $end. '/' . $filesize);
+		header('Accept-Ranges: bytes');
+
+		// Allow caching of the response (overriding default PHP
+		// headers that disallow all caching).
+		// TODO: If user-based authorization is ever added to
+		// this function, this should be changed from public to
+		// private.
+		// TODO: Support ETag or If-Modified-Since to allow
+		// cheap validation of cached contents?
+		header('Pragma: public');
+		header('Cache-Control: public, max-age=86400');
+
+		if ($start === 0 && $end === $filesize) {
+			readfile($filename);
+		} else {
+			http_response_code(206); // Partial content
+			$handle = fopen($filename, "r");
+			fseek($handle, $start);
+			$left = $end - $start;
+			$BLOCK_SIZE = 16*1024;
+			while (!feof($handle) && ($left > 0) && (connection_status() == CONNECTION_NORMAL)) {
+				print(fread($handle, min($BLOCK_SIZE, $left)));
+				$left -= $BLOCK_SIZE;
+			}
+			fclose($handle);
+		}
 		exit;
 	}
 
