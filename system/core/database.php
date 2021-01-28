@@ -581,6 +581,16 @@
 		header('Content-Range: bytes ' . $start . '-' . $end. '/' . $filesize);
 		header('Accept-Ranges: bytes');
 
+		// Allow caching of the response (overriding default PHP
+		// headers that disallow all caching).
+		// TODO: If user-based authorization is ever added to
+		// this function, this should be changed from public to
+		// private.
+		// TODO: Support ETag or If-Modified-Since to allow
+		// cheap validation of cached contents?
+		header('Pragma: public');
+		header('Cache-Control: public, max-age=86400');
+
 		if ($start === 0 && $end === $filesize) {
 			readfile($filename);
 		} else {
