@@ -669,10 +669,10 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	 * Appends edit form to #main and adds buttons
 	 *
 	 * @param HyphaRequest $request
-	 * @param WymHTMLForm $form
+	 * @param HTMLForm $form
 	 * @return null
 	 */
-	protected function editViewRender(HyphaRequest $request, WymHTMLForm $form) {
+	protected function editViewRender(HyphaRequest $request, HTMLForm $form) {
 		// update the form dom so that error can be displayed, if there are any
 		$form->updateDom();
 
@@ -714,7 +714,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		}
 
 		// process form if there are no errors
-		if (!empty($form->errors)) {
+		if (!$form->isValid()) {
 			return $this->editViewRender($request, $form);
 		}
 
@@ -828,15 +828,9 @@ class peer_reviewed_article extends HyphaDatatypePage {
 
 		// create form to start a discussion
 		$form = $this->createCommentForm($type, $request->getPostData());
-		if (!$review && !isUser()) {
-			$form->validateRequiredField(self::FIELD_NAME_DISCUSSION_COMMENTER_NAME . $dataFieldSuffix);
-			$form->validateRequiredField(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL . $dataFieldSuffix);
-			$form->validateEmailField(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL . $dataFieldSuffix);
-		}
-		$form->validateRequiredField(self::FIELD_NAME_DISCUSSION_COMMENT . $dataFieldSuffix);
 
 		// process form if it was posted
-		if (!empty($form->errors)) {
+		if (!$form->isValid()) {
 			return $this->discussionRender($request, $form, $type);
 		}
 
@@ -864,12 +858,12 @@ class peer_reviewed_article extends HyphaDatatypePage {
 
 	/**
 	 * @param HyphaRequest $request
-	 * @param WymHTMLForm $form
+	 * @param HTMLForm $form
 	 * @param string $type
 	 * @param null|HyphaDomElement $discussion
 	 * @return null
 	 */
-	protected function discussionRender(HyphaRequest $request, WymHTMLForm $form, $type, HyphaDomElement $discussion = null) {
+	protected function discussionRender(HyphaRequest $request, HTMLForm $form, $type, HyphaDomElement $discussion = null) {
 		// update the form dom so that error can be displayed, if there are any
 		$form->updateDom();
 
@@ -925,15 +919,9 @@ class peer_reviewed_article extends HyphaDatatypePage {
 
 		// create form to comment on a discussion
 		$form = $this->createCommentForm($type, $request->getPostData(), $discussion);
-		if (!$review && !isUser()) {
-			$form->validateRequiredField(self::FIELD_NAME_DISCUSSION_COMMENTER_NAME . $dataFieldSuffix);
-			$form->validateRequiredField(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL . $dataFieldSuffix);
-			$form->validateEmailField(self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL . $dataFieldSuffix);
-		}
-		$form->validateRequiredField(self::FIELD_NAME_DISCUSSION_COMMENT . $dataFieldSuffix);
 
 		// process form if it was posted
-		if (!empty($form->errors)) {
+		if (!$form->isValid()) {
 			$this->xml->unlock();
 			return $this->discussionRender($request, $form, $type, $discussion);
 		}
@@ -1002,7 +990,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	}
 
 	/**
-	 * Constructs the WymHTMLForm for the comment form.
+	 * Constructs the HTMLForm for the comment form.
 	 *
 	 * @param HyphaDomElement $comment
 	 * @param array $values
@@ -1139,7 +1127,7 @@ EOF;
 		} else {
 			$form = $this->createCommentModerateForm($comment, $request->getPostData());
 
-			if (!empty($form->errors)) {
+			if (!$form->isValid()) {
 				return $this->commentModerateViewRender($request, $form, $comment);
 			}
 
@@ -1307,11 +1295,11 @@ EOF;
 	 * Adds a discussion DOM element to the database.
 	 *
 	 * @param NodeList|HyphaDomElement $discussionContainer
-	 * @param WymHTMLForm $form
+	 * @param HTMLForm $form
 	 * @param string dataFieldSuffix
 	 * @return HyphaDomElement
 	 */
-	protected function addDiscussion(HyphaDomElement $discussionContainer, WymHTMLForm $form, $dataFieldSuffix) {
+	protected function addDiscussion(HyphaDomElement $discussionContainer, HTMLForm $form, $dataFieldSuffix) {
 		$this->xml->requireLock();
 
 		/** @var HyphaDomElement $discussion */
@@ -1339,11 +1327,11 @@ EOF;
 	 * Adds a comment DOM element to a discussion in the database.
 	 *
 	 * @param HyphaDomElement $discussion
-	 * @param WymHTMLForm $form
+	 * @param HTMLForm $form
 	 * @param string dataFieldSuffix
 	 * @return HyphaDomElement
 	 */
-	protected function addDiscussionComment(HyphaDomElement $discussion, WymHTMLForm $form, $dataFieldSuffix) {
+	protected function addDiscussionComment(HyphaDomElement $discussion, HTMLForm $form, $dataFieldSuffix) {
 		$this->xml->requireLock();
 
 		/** @var HyphaDomElement $comment */
@@ -1676,7 +1664,7 @@ EOF;
 	 * Creates a HTML form object for the article.
 	 *
 	 * @param array $values
-	 * @return WymHTMLForm
+	 * @return HTMLForm
 	 */
 	protected function createEditForm(array $values = []) {
 		$html = <<<EOF
@@ -1743,16 +1731,16 @@ EOF;
 
 		$html = hypha_substitute($html, $vars);
 
-		return new WymHTMLForm($html, $values);
+		return new HTMLForm($html, $values);
 	}
 
 	/**
-	 * Constructs the WymHTMLForm for the comment form.
+	 * Constructs the HTMLForm for the comment form.
 	 *
 	 * @param string $type
 	 * @param array $values
 	 * @param null|HyphaDomElement $discussion
-	 * @return WymHTMLForm
+	 * @return HTMLForm
 	 */
 	protected function createCommentForm($type, array $values = [], HyphaDomElement $discussion = null) {
 		$new = $discussion === null;
@@ -1764,7 +1752,7 @@ EOF;
 		$html = <<<EOF
 			<div class="new-comment [[type]]">
 			<div>
-				<strong><label for="[[field-name-comment]]">[[comment]]</label></strong><textarea name="[[field-name-comment]]" id="[[field-name-comment]]"></textarea>
+				<strong><label for="[[field-name-comment]]">[[comment]]</label></strong><textarea required name="[[field-name-comment]]" id="[[field-name-comment]]"></textarea>
 			</div>
 EOF;
 
@@ -1788,10 +1776,10 @@ EOF;
 			// only non-users need to enter their name
 			$html .= <<<EOF
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
-				<strong><label for="[[field-name-name]]">[[name]]</label></strong><div class="label_suffix">[[un-anonymous]]</div> <input type="text" id="[[field-name-name]]" name="[[field-name-name]]" />
+				<strong><label for="[[field-name-name]]">[[name]]</label></strong><div class="label_suffix">[[un-anonymous]]</div> <input required type="text" id="[[field-name-name]]" name="[[field-name-name]]" />
 			</div>
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
-				<strong><label for="[[field-name-email]]">[[email]]</label></strong> <input type="text" id="[[field-name-email]]" name="[[field-name-email]]" />
+				<strong><label for="[[field-name-email]]">[[email]]</label></strong> <input required type="email" id="[[field-name-email]]" name="[[field-name-email]]" />
 			</div>
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
 				<strong><label for="[[field-name-subscribe]]">[[subscribe]]</label></strong> <input type="checkbox" id="[[field-name-subscribe]]" name="[[field-name-subscribe]]" /> [[info-button-subscribe]]
@@ -1813,7 +1801,7 @@ EOF;
 
 		$html = hypha_substitute($html, $vars);
 
-		return new WymHTMLForm($html, $values);
+		return new HTMLForm($html, $values);
 	}
 
 	/**

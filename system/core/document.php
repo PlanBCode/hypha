@@ -275,6 +275,8 @@
 		public $root;
 		/** The data associated with this form */
 		public $data;
+		/** Is this form already validated? Does not mean it is also actually valid. */
+		public $is_validated;
 		/** Any collected errors from validation */
 		public $errors;
 		/** The fields found in this form. Maps field name to an array of DOM elements with that name. */
@@ -303,6 +305,7 @@
 			$this->root->append($form);
 
 			$this->data = $data;
+			$this->is_validated = false;
 			$this->errors = [];
 			$this->fields = [];
 			$this->file_fields = [];
@@ -328,15 +331,6 @@
 		}
 
 		/*
-			Function: getFormField
-
-			Form fields to look through
-		 */
-		protected function getFormFieldTypes() {
-			return ['input', 'select', 'textarea', 'label', 'img'];
-		}
-
-		/*
 			Function: scanForm
 
 			Look through the DOM to find form fields and
@@ -344,7 +338,9 @@
 		 */
 		protected function scanForm($root)
 		{
-			foreach($root->find(implode(', ', $this->getFormFieldTypes())) as $elem) {
+			$tags = 'input, select, textarea, label, img, editor';
+
+			foreach($root->find($tags) as $elem) {
 				if ($elem->tagName == 'label') {
 					$name = self::getNameAttr($elem, 'for');
 					if ($name)
@@ -468,6 +464,11 @@
 				}
 			} else if ($field->tagName == 'textarea') {
 				$field->setText($value);
+			} else if ($field->tagName == 'editor') {
+				// Editor tags must always contain valid
+				// HTML, so use setHtml rather than
+				// setText
+				$field->setHtml($value);
 			}
 		}
 
@@ -568,11 +569,58 @@
 			return $default;
 		}
 
-		function validateRequiredField($name) {
-			if (!array_key_exists($name, $this->fields)) {
-				$this->errors[$name] = __('field-not-found');
-				return false;
+		/**
+		 * Is this form valid?
+		 *
+		 * Automatically calls `validate()` if it has not been
+		 * called yet.
+		 *
+		 * Returns true when `validate()` and any
+		 * `validateXXXField()` methods previously manually called
+		 * found no validation problems.
+		 */
+		function isValid() {
+			if (!$this->is_validated)
+				$this->validate();
+			return empty($this->errors);
+		}
+
+		/**
+		 * Validate this form against rules expressed in the
+		 * form itself. This is called by `isValid()`
+		 * automatically, so normally you should not need to
+		 * call this explicitly.
+		 *
+		 * Currently, this validates:
+		 *  - Fields with the `required` attribute set.
+		 *  - Fields with the `type=email` set.
+		 *  - Editor fields for safe HTML
+		 */
+		function validate() {
+			foreach ($this->fields as $name => $elems) {
+				foreach ($elems as $elem) {
+					if ($elem->hasAttribute('required'))
+						$this->validateRequiredField($name);
+					if ($elem->tagName == 'input' && $elem->getAttribute('type') == 'email')
+						$this->validateEmailField($name);
+					if ($elem->tagName == 'editor')
+						$this->validateHtmlField($name);
+				}
 			}
+			$this->is_validated = true;
+		}
+
+		/**
+		 * Ensures that the given field is present in the
+		 * submitted form data.
+		 *
+		 * Normally, you should set the `required` HTML
+		 * attribute to make validate() apply this check
+		 * automatically rather than calling this method
+		 * directly, but you still can for e.g. fields that are
+		 * only required in combination with other values.
+		 */
+		function validateRequiredField($name) {
 			$value = $this->dataFor($name);
 			if (!$value) {
 				$this->errors[$name] = __('required-field-missing');
@@ -581,13 +629,50 @@
 			return true;
 		}
 
+		/**
+		 * Ensures that the given field, if not empty, contains
+		 * a valid mail address.
+		 *
+		 * Normally, you should set the `type` HTML attribute to
+		 * `email` on the input field to make validate() apply
+		 * this check automatically instead of calling this
+		 * directly.
+		 */
 		function validateEmailField($name) {
 			$value = $this->dataFor($name);
 			if (!$value)
 				return true;
 
 			if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-				$this->errors[$name] = __('invalid-email');
+				$this->errors[$name] = __('email-field-invalid');
+				return false;
+			}
+			return true;
+		}
+
+		/**
+		 * Ensures that the given field, if not empty, contains
+		 * no obviously unsafe HTML.
+		 *
+		 * Normally, you should use the `editor` field to make
+		 * validate() apply this check automatically instead of
+		 * calling this directly.
+		 */
+		function validateHtmlField($name) {
+			$value = $this->dataFor($name);
+			if (!$value)
+				return true;
+
+			$dom = $this->root->document()->createElement('dummy');
+			$dom->append($value);
+
+			// This forbids the presence of script tags,
+			// which is the most obvious and severe form of
+			// unsafe HTML (and these have been seen to be
+			// automatically inserted into requests by
+			// viruses...).
+			if ($dom->find('script')->count() > 0) {
+				$this->errors[$name] = __('html-field-contains-script');
 				return false;
 			}
 			return true;

@@ -184,6 +184,8 @@
 		"edit-day" => "edit day",
 		"invalid-money-amount" => "Not a valid amount of money",
 		"required-field-missing" => "Required field missing",
+		"email-field-invalid" => "Invalid email address supplied",
+		"html-field-contains-script" => "HTML <script> tags are not allowed. They are considered unsafe as they can be used for hacks or viruses. If you did not add them yourself your computer might be infected.",
 		"failed-to-process-image" => "Failed to process image",
 		"image-type-must-be-one-of" => "Image type must be one of: [[allowed-filetypes]]",
 		"error-uploading-file" => "Error uploading file: [[error]]",

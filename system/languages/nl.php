@@ -184,6 +184,8 @@
 		"edit-day" => "bewerk dag",
 		"invalid-money-amount" => "Geen geldig bedrag",
 		"required-field-missing" => "Verplicht veld ontbreekt",
+		"email-field-invalid" => "Ongeldig emailadres opgegeven",
+		"html-field-contains-script" => "HTML <script> tags zijn niet toegestaan. Ze worden als onveilig beschouwd omdat ze gebruikt kunnen worden voor hacks en virussen. Als je ze niet zelf hebt toegevoegd, is je computer misschien geïnfecteerd.",
 		"failed-to-process-image" => "Afbeelding verwerken is mislukt",
 		"image-type-must-be-one-of" => "Afbeelding moet één van de volgende bestandstypen zijn: [[allowed-filetypes]]",
 		"error-uploading-file" => "Uploaden bestand mislukt: [[error]]",

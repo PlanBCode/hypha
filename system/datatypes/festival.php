@@ -294,7 +294,7 @@
 				<table>
 					<tr>
 						<td><label for="[[field-name-title]]">[[title]]</label></td>
-						<td><input id="[[field-name-title]]" name="[[field-name-title]]"/></td>
+						<td><input required id="[[field-name-title]]" name="[[field-name-title]]"/></td>
 					</tr>
 				</table>
 EOF;
@@ -338,10 +338,8 @@ EOF;
 			// create form
 			$form = $this->createSettingsForm($request->getPostData());
 
-			$form->validateRequiredField(self::FIELD_NAME_TITLE);
-
 			// process form if it was posted
-			if (!empty($form->errors))
+			if (!$form->isValid())
 				return $this->settingsViewRender($request, $form);
 
 			$this->xml->lockAndReload();
@@ -372,12 +370,12 @@ EOF;
 					<table class="festivalForm">
 						<tr>
 							<th><label for="[[field-name-name]]">[[name]]</label></th>
-							<td><input type="text" name="[[field-name-name]]"></td>
+							<td><input required type="text" name="[[field-name-name]]"></td>
 							<td>*</td>
 						</tr>
 						<tr>
 							<th><label for="[[field-name-email]]">[[email]]</label></th>
-							<td><input type="text" name="[[field-name-email]]"></td>
+							<td><input required type="email" name="[[field-name-email]]"></td>
 							<td>*</td>
 						</tr>
 						<tr>
@@ -438,12 +436,9 @@ EOF;
 			// create form
 			$form = $this->createSignupForm($request->getPostData());
 
-			$form->validateRequiredField(self::FIELD_NAME_NAME);
-			$form->validateRequiredField(self::FIELD_NAME_EMAIL);
-			$form->validateEmailField(self::FIELD_NAME_EMAIL);
 			$form->validateMoneyField(self::FIELD_NAME_AMOUNT);
 
-			if (!empty($form->errors))
+			if (!$form->isValid())
 				return $this->signupViewRender($request, $form);
 
 			$this->xml->lockAndReload();
@@ -634,12 +629,12 @@ EOF;
 					<table class="festivalForm">
 						<tr>
 							<th><label for="[[field-name-name]]">[[name]]</label></th>
-							<td><input type="text" name="[[field-name-name]]"/></td>
+							<td><input required type="text" name="[[field-name-name]]"/></td>
 							<td>*</td>
 						</tr>
 						<tr>
 							<th><label for="[[field-name-title]]">[[title]]</label></th>
-							<td><input type="text" name="[[field-name-title]]"/></td>
+							<td><input required type="text" name="[[field-name-title]]"/></td>
 							<td>*</td>
 						</tr>
 						<tr>
@@ -662,7 +657,7 @@ EOF;
 						</tr>
 						<tr>
 							<th><label for="[[field-name-category]]">[[category]]</label></th>
-							<td><select name="[[field-name-category]]">
+							<td><select required name="[[field-name-category]]">
 								<option disabled="disabled" selected="selected">select</option>
 								<option value="lecture">Lecture</option>
 								<option value="workshop">Workshop</option>
@@ -767,13 +762,10 @@ EOF;
 
 			$form = $this->createContributionForm($request->getPostData());
 
-			$form->validateRequiredField(self::FIELD_NAME_NAME);
-			$form->validateRequiredField(self::FIELD_NAME_TITLE);
-			$form->validateRequiredField(self::FIELD_NAME_CATEGORY);
 			if (array_key_exists('image_upload', $_FILES))
 				$form->handleImageUpload(self::FIELD_NAME_IMAGE, $_FILES['image_upload']);
 
-			if (!empty($form->errors)) {
+			if (!$form->isValid()) {
 				$this->xml->unlock();
 				return $this->contributeViewRender($request, $form, $editing);
 			}

@@ -170,7 +170,7 @@ class mailinglist extends HyphaDatatypePage {
 		return $this->defaultViewRender($request, $form);
 	}
 
-	protected function defaultViewRender(HyphaRequest $request, WymHTMLForm $form) {
+	protected function defaultViewRender(HyphaRequest $request, HTMLForm $form) {
 		// add edit button for registered users
 		if (isUser()) {
 			/** @var HyphaDomElement $commands */
@@ -289,13 +289,8 @@ class mailinglist extends HyphaDatatypePage {
 		// create form
 		$form = $this->createEditForm($request->getPostData());
 
-		// validate form
-		$form->validateRequiredField(self::FIELD_NAME_SENDER_EMAIL);
-		$form->validateRequiredField(self::FIELD_NAME_SENDER_NAME);
-		$form->validateEmailField(self::FIELD_NAME_SENDER_EMAIL);
-
 		// return form if there are errors
-		if (!empty($form->errors)) {
+		if (!$form->isValid()) {
 			return $this->editViewRender($request, $form);
 		}
 
@@ -327,12 +322,8 @@ class mailinglist extends HyphaDatatypePage {
 		// create form
 		$form = $this->createSubscribeForm($request->getPostData());
 
-		// validate form
-		$form->validateRequiredField(self::FIELD_NAME_EMAIL);
-		$form->validateEmailField(self::FIELD_NAME_EMAIL);
-
 		// process form if there are no errors
-		if (!empty($form->errors)) {
+		if (!$form->isValid()) {
 			return $this->defaultViewRender($request, $form);
 		}
 
@@ -782,7 +773,7 @@ class mailinglist extends HyphaDatatypePage {
 		return $this->mailingFormViewRender($form, '', self::PATH_MAILS_NEW);
 	}
 
-	protected function mailingFormViewRender(WymHTMLForm $form, $cancelPath, $submitPath) {
+	protected function mailingFormViewRender(HTMLForm $form, $cancelPath, $submitPath) {
 		// update the form dom so that values and errors can be displayed
 		$form->updateDom();
 
@@ -809,9 +800,7 @@ class mailinglist extends HyphaDatatypePage {
 		// create form
 		$form = $this->createMailingForm($request->getPostData());
 
-		$form->validateRequiredField(self::FIELD_NAME_SUBJECT);
-		$form->validateRequiredField(self::FIELD_NAME_MESSAGE);
-		if (!empty($form->errors)) {
+		if (!$form->isValid()) {
 			return $this->mailingFormViewRender($form, '', self::PATH_MAILS_NEW);
 		}
 
@@ -909,10 +898,7 @@ class mailinglist extends HyphaDatatypePage {
 		// create form
 		$form = $this->createMailingForm($request->getPostData());
 
-		// process form if it was posted
-		$form->validateRequiredField(self::FIELD_NAME_SUBJECT);
-		$form->validateRequiredField(self::FIELD_NAME_MESSAGE);
-		if (!empty($form->errors)) {
+		if (!$form->isValid()) {
 			$cancelPath = $this->substituteSpecial(self::PATH_MAILS_VIEW_ID, ['id' => $mailingId]);
 			$submitPath = $this->substituteSpecial(self::PATH_MAILS_EDIT_ID, ['id' => $mailingId]);
 			return $this->mailingFormViewRender($form, $cancelPath, $submitPath);
@@ -936,12 +922,12 @@ class mailinglist extends HyphaDatatypePage {
 	 * Creates a HTML form object for the subscribers.
 	 *
 	 * @param array $values
-	 * @return WymHTMLForm
+	 * @return HTMLForm
 	 */
 	protected function createSubscribeForm(array $values = []) {
 		$html = <<<EOF
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
-				<label for="[[field-name-email]]">[[email]]</label>: <input type="text" id="[[field-name-email]]" name="[[field-name-email]]" placeholder="[[email]]" />
+				<label for="[[field-name-email]]">[[email]]</label>: <input required type="email" id="[[field-name-email]]" name="[[field-name-email]]" placeholder="[[email]]" />
 			</div>
 EOF;
 
@@ -952,19 +938,19 @@ EOF;
 
 		$html = hypha_substitute($html, $vars);
 
-		return new WymHTMLForm($html, $values);
+		return new HTMLForm($html, $values);
 	}
 
 	/**
 	 * @param array $values
-	 * @return WymHTMLForm
+	 * @return HTMLForm
 	 */
 	protected function createEditForm(array $values = []) {
 		$html = <<<EOF
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
 				<strong><label for="[[field-name-page-name]]">[[title]]</label></strong> <input type="text" id="[[field-name-page-name]]" name="[[field-name-page-name]]" />
-				<strong><label for="[[field-name-sender-name]]"> [[sender-name]] </label></strong><input type="text" id="[[field-name-sender-name]]" name="[[field-name-sender-name]]" />
-				<strong><label for="[[field-name-sender-email]]"> [[sender-email]] </label></strong><input type="text" id="[[field-name-sender-email]]" name="[[field-name-sender-email]]" />
+				<strong><label for="[[field-name-sender-name]]"> [[sender-name]] </label></strong><input required type="text" id="[[field-name-sender-name]]" name="[[field-name-sender-name]]" />
+				<strong><label for="[[field-name-sender-email]]"> [[sender-email]] </label></strong><input required type="email" id="[[field-name-sender-email]]" name="[[field-name-sender-email]]" />
 				<strong><label for="[[field-name-private-page]]"> [[private-page]] </label></strong><input type="checkbox" name="[[field-name-private-page]]" id="[[field-name-private-page]]" />
 			</div>
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
@@ -992,21 +978,21 @@ EOF;
 
 		$html = hypha_substitute($html, $vars);
 
-		return new WymHTMLForm($html, $values);
+		return new HTMLForm($html, $values);
 	}
 
 	/**
 	 * @param array $values
 	 *
-	 * @return WymHTMLForm
+	 * @return HTMLForm
 	 */
 	protected function createMailingForm(array $values = []) {
 		$html = <<<EOF
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
-				<label for="[[field-name-subject]]"> [[subject]] </label> <input type="text" id="[[field-name-subject]]" name="[[field-name-subject]]" />
+				<label for="[[field-name-subject]]"> [[subject]] </label> <input required type="text" id="[[field-name-subject]]" name="[[field-name-subject]]" />
 			</div>
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
-				<strong><label for="[[field-name-message]]"> [[message]] </label></strong><editor id="[[field-name-message]]" name="[[field-name-message]]"></editor>
+				<strong><label for="[[field-name-message]]"> [[message]] </label></strong><editor required id="[[field-name-message]]" name="[[field-name-message]]"></editor>
 			</div>
 EOF;
 
@@ -1019,7 +1005,7 @@ EOF;
 
 		$html = hypha_substitute($html, $vars);
 
-		return new WymHTMLForm($html, $values);
+		return new HTMLForm($html, $values);
 	}
 
 	/**
