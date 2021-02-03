@@ -570,20 +570,26 @@
 		}
 
 		/**
-		 * Is this form valid? Returns true when:
-		 *  - validate() was called
-		 *  - all of the fields for which validateXXXField
-		 *    methods were called were also valid.
+		 * Is this form valid?
+		 *
+		 * Automatically calls `validate()` if it has not been
+		 * called yet.
+		 *
+		 * Returns true when `validate()` and any
+		 * `validateXXXField()` methods previously manually called
+		 * found no validation problems.
 		 */
 		function isValid() {
-			return $this->is_validated && empty($this->errors);
+			if (!$this->is_validated)
+				$this->validate();
+			return empty($this->errors);
 		}
 
 		/**
 		 * Validate this form against rules expressed in the
-		 * form itself. This must be called on a form before
-		 * processing it, otherwise `isValid()` will return
-		 * false.
+		 * form itself. This is called by `isValid()`
+		 * automatically, so normally you should not need to
+		 * call this explicitly.
 		 *
 		 * Currently, this validates:
 		 *  - Fields with the `required` attribute set.

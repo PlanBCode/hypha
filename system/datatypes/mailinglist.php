@@ -289,9 +289,6 @@ class mailinglist extends HyphaDatatypePage {
 		// create form
 		$form = $this->createEditForm($request->getPostData());
 
-		// validate form
-		$form->validate();
-
 		// return form if there are errors
 		if (!$form->isValid()) {
 			return $this->editViewRender($request, $form);
@@ -324,9 +321,6 @@ class mailinglist extends HyphaDatatypePage {
 	protected function subscribeAction(HyphaRequest $request) {
 		// create form
 		$form = $this->createSubscribeForm($request->getPostData());
-
-		// validate form
-		$form->validate();
 
 		// process form if there are no errors
 		if (!$form->isValid()) {
@@ -806,8 +800,6 @@ class mailinglist extends HyphaDatatypePage {
 		// create form
 		$form = $this->createMailingForm($request->getPostData());
 
-		$form->validate();
-
 		if (!$form->isValid()) {
 			return $this->mailingFormViewRender($form, '', self::PATH_MAILS_NEW);
 		}
@@ -905,9 +897,6 @@ class mailinglist extends HyphaDatatypePage {
 
 		// create form
 		$form = $this->createMailingForm($request->getPostData());
-
-		// process form if it was posted
-		$form->validate();
 
 		if (!$form->isValid()) {
 			$cancelPath = $this->substituteSpecial(self::PATH_MAILS_VIEW_ID, ['id' => $mailingId]);

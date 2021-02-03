@@ -713,9 +713,6 @@ class peer_reviewed_article extends HyphaDatatypePage {
 			$form->handleImageUpload(self::FIELD_NAME_FEATURED_IMAGE, $_FILES[self::FIELD_NAME_FEATURED_IMAGE]);
 		}
 
-		// validate form
-		$form->validate();
-
 		// process form if there are no errors
 		if (!$form->isValid()) {
 			return $this->editViewRender($request, $form);
@@ -831,7 +828,6 @@ class peer_reviewed_article extends HyphaDatatypePage {
 
 		// create form to start a discussion
 		$form = $this->createCommentForm($type, $request->getPostData());
-		$form->validate();
 
 		// process form if it was posted
 		if (!$form->isValid()) {
@@ -923,7 +919,6 @@ class peer_reviewed_article extends HyphaDatatypePage {
 
 		// create form to comment on a discussion
 		$form = $this->createCommentForm($type, $request->getPostData(), $discussion);
-		$form->validate();
 
 		// process form if it was posted
 		if (!$form->isValid()) {
@@ -1131,7 +1126,6 @@ EOF;
 			writeToDigest(__('art-digest-comment-unmoderated', $digestArgs), 'comment moderation');
 		} else {
 			$form = $this->createCommentModerateForm($comment, $request->getPostData());
-			$form->validate();
 
 			if (!$form->isValid()) {
 				return $this->commentModerateViewRender($request, $form, $comment);

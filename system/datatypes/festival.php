@@ -337,7 +337,6 @@ EOF;
 
 			// create form
 			$form = $this->createSettingsForm($request->getPostData());
-			$form->validate();
 
 			// process form if it was posted
 			if (!$form->isValid())
@@ -438,7 +437,6 @@ EOF;
 			$form = $this->createSignupForm($request->getPostData());
 
 			$form->validateMoneyField(self::FIELD_NAME_AMOUNT);
-			$form->validate();
 
 			if (!$form->isValid())
 				return $this->signupViewRender($request, $form);
@@ -763,8 +761,6 @@ EOF;
 			$editing = ($obj->tagName == self::TAG_CONTRIBUTION);
 
 			$form = $this->createContributionForm($request->getPostData());
-
-			$form->validate();
 
 			if (array_key_exists('image_upload', $_FILES))
 				$form->handleImageUpload(self::FIELD_NAME_IMAGE, $_FILES['image_upload']);

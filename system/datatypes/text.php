@@ -156,9 +156,6 @@ EOF;
 			// create form
 			$form = $this->createEditForm($request->getPostData());
 
-			// validate
-			$form->validate();
-
 			// process form if it was posted
 			if (!$form->isValid()) {
 				return $this->editViewRender($request, $form);
@@ -220,10 +217,7 @@ EOF;
 			// create form
 			$form = $this->createTranslationForm($request->getPostData());
 
-			// validate
 			// TODO: validate that the language is a valid one
-			$form->validate();
-
 			// process form if it was posted
 			if (!$form->isValid())
 				return $this->translateViewRender($request, $form);
