@@ -656,6 +656,17 @@
 		if ($hyphaRequest->isSystemPage()) {
 			$classes[] = implode('_', $hyphaRequest->getRelativeUrlPathParts());
 		}
+		if (isset($hyphaPage->pageListNode)) {
+			foreach (HyphaTags::tagsForPageListNode($hyphaPage->pageListNode) as $tag) {
+				$classes[] = 'tag_' . $tag->getId();
+				$langNode = $tag->getLanguageNode($O_O->getContentLanguage());
+				if ($langNode) {
+					// This uses validatePageName to produce a clean copy of the
+					// tag label suitable as a CSS class.
+					$classes[] = 'tag_' .  validatePageName($langNode->attr('label'));
+				}
+			}
+		}
 		$bodyElement->attr('class', implode(' ', array_filter($classes)));
 	}
 
