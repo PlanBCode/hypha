@@ -13,14 +13,27 @@
 		}
 
 		/**
+		 * Return the ids of of the tags assigned to the given
+		 * page list node.
+		 *
+		 * @return list<string>
+		 */
+		static function tagIdsForPageListNode(HyphaDomElement $pageListNode) {
+			$ids = [];
+			foreach ($pageListNode->findXPath('./tag/@id') as $node)
+				$ids[] = $node->value;
+			return $ids;
+		}
+
+		/**
 		 * Return the tags assigned to the given page list node
 		 *
 		 * @return list<HyphaTag>
 		 */
 		static function tagsForPageListNode(HyphaDomElement $pageListNode) {
 			$idFilters = [];
-			foreach ($pageListNode->findXPath('./tag/@id') as $idAttr)
-				$idFilters[] = '@xml:id=' . xpath_encode($idAttr->value);
+			foreach (self::tagIdsForPageListNODe($pageListNode) as $id)
+				$idFilters[] = '@xml:id=' . xpath_encode($id);
 			$tags = [];
 			if (!empty($idFilters)) {
 				$path = '/hypha/tagList/tag[' . implode(" or ", $idFilters) . "]";
@@ -47,11 +60,8 @@
 		/** @var HyphaDomElement $hyphaXml */
 		global $hyphaXml;
 
-		$selectedTagIds = [];
-
-		/** @var HyphaDomElement $tagEl */
 		// Build list of active tags for given page
-		foreach ($pageListNode->findXPath('tag') as $tagEl) $selectedTagIds[] = $tagEl->getAttribute('id');
+		$selectedTagIds = HyphaTags::tagIdsForPageListNODe($pageListNode);
 
 		$selectedTags = [];
 		$deselectedTags = [];
