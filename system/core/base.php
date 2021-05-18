@@ -637,7 +637,8 @@
 		return false;
 	}
 
-	function hypha_setBodyClass(HyphaRequest $hyphaRequest, $hyphaPage) {
+	function hypha_setBodyClass(RequestContext $O_O, $hyphaPage) {
+		$hyphaRequest = $O_O->getRequest();
 		/** @var \DOMWrap\NodeList $bodyElement */
 		$bodyElement = $hyphaPage->html->find('body');
 		$classes = explode(' ', $bodyElement->attr('class'));
@@ -647,8 +648,8 @@
 				$classes[] = 'is_home';
 			}
 		}
-		$classes[] = isUser() ? 'is_logged_in' : '';
-		$classes[] = isAdmin() ? 'is_admin' : '';
+		$classes[] = $O_O->isUser() ? 'is_logged_in' : '';
+		$classes[] = $O_O->isAdmin() ? 'is_admin' : '';
 		$classes[] = 'type_' . get_class($hyphaPage);
 
 		if ($hyphaRequest->getLanguage()) {
