@@ -54,6 +54,16 @@
 		function getId() {
 			return $this->node->getId();
 		}
+
+		/**
+		 * Returns the language subnode of this tag for the
+		 * given language, or null if no such language exists.
+		 *
+		 * @return HyphaDomElement|null
+		 */
+		function getLanguageNode(string $language) {
+			return $this->node->findXPath('language[@id=' . xpath_encode($language) . ']')->first();
+		}
 	}
 
 	function tagList(HyphaDomElement $pageListNode, $lang) {
