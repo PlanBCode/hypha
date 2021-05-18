@@ -651,10 +651,8 @@
 		$classes[] = $O_O->isUser() ? 'is_logged_in' : '';
 		$classes[] = $O_O->isAdmin() ? 'is_admin' : '';
 		$classes[] = 'type_' . get_class($hyphaPage);
+		$classes[] = 'lang_' . $O_O->getContentLanguage();
 
-		if ($hyphaRequest->getLanguage()) {
-			$classes[] = 'lang_' . $hyphaRequest->getLanguage();
-		}
 		if ($hyphaRequest->isSystemPage()) {
 			$classes[] = implode('_', $hyphaRequest->getRelativeUrlPathParts());
 		}
