@@ -637,7 +637,8 @@
 		return false;
 	}
 
-	function hypha_setBodyClass(HyphaRequest $hyphaRequest, $hyphaPage) {
+	function hypha_setBodyClass(RequestContext $O_O, $hyphaPage) {
+		$hyphaRequest = $O_O->getRequest();
 		/** @var \DOMWrap\NodeList $bodyElement */
 		$bodyElement = $hyphaPage->html->find('body');
 		$classes = explode(' ', $bodyElement->attr('class'));
@@ -647,15 +648,24 @@
 				$classes[] = 'is_home';
 			}
 		}
-		$classes[] = isUser() ? 'is_logged_in' : '';
-		$classes[] = isAdmin() ? 'is_admin' : '';
+		$classes[] = $O_O->isUser() ? 'is_logged_in' : '';
+		$classes[] = $O_O->isAdmin() ? 'is_admin' : '';
 		$classes[] = 'type_' . get_class($hyphaPage);
+		$classes[] = 'lang_' . $O_O->getContentLanguage();
 
-		if ($hyphaRequest->getLanguage()) {
-			$classes[] = 'lang_' . $hyphaRequest->getLanguage();
-		}
 		if ($hyphaRequest->isSystemPage()) {
 			$classes[] = implode('_', $hyphaRequest->getRelativeUrlPathParts());
+		}
+		if (isset($hyphaPage->pageListNode)) {
+			foreach (HyphaTags::tagsForPageListNode($hyphaPage->pageListNode) as $tag) {
+				$classes[] = 'tag_' . $tag->getId();
+				$langNode = $tag->getLanguageNode($O_O->getContentLanguage());
+				if ($langNode) {
+					// This uses validatePageName to produce a clean copy of the
+					// tag label suitable as a CSS class.
+					$classes[] = 'tag_' .  validatePageName($langNode->attr('label'));
+				}
+			}
 		}
 		$bodyElement->attr('class', implode(' ', array_filter($classes)));
 	}

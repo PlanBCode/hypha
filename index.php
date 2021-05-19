@@ -147,7 +147,7 @@
 	// obfuscate email addresses to strangers. It's ok to send readable addresses to logged in members. This also prevents conflicts in the editor.
 //	if (!$O_O->isUser()) registerPostProcessingFunction('obfuscateEmail');
 
-	if ($hyphaPage) hypha_setBodyClass($hyphaRequest, $hyphaPage);
+	if ($hyphaPage) hypha_setBodyClass($O_O, $hyphaPage);
 	if ($hyphaPage) hypha_setPreviewPanel($O_O, $hyphaPage);
 
 	// Add the default form. This does not happen earlier, since
