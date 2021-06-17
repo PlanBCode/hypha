@@ -602,6 +602,39 @@ EOF;
 			$node->text('');
 	}
 
+	function add_captions_to_all_images($element) {
+		/** @var \DOMWrap\NodeList $img */
+		// process images that reside within "main"
+		foreach ($element->findXPath('//*[@id="main"]//img[@title or @data-attribution]') as $img) {
+			// do not process images that reside within the wymeditor
+			if ($img->parents('.wymeditor')->count() === 0) {
+				add_caption_to_image($img);
+			}
+		}
+	}
+
+	function add_caption_to_image($img) {
+		$doc = $img->document();
+
+		$img->wrap('<figure>');
+		$caption = $doc->createElement('figcaption');
+		$img->after($caption);
+
+		$title = $img->getAttribute('title');
+		if ($title) {
+			$span = $doc->createElement('span', $title);
+			$span->addClass('title');
+			$caption->append($span);
+		}
+
+		$attribution = $img->getAttribute('data-attribution');
+		if ($attribution) {
+			$small = $doc->createElement('small', $attribution);
+			$small->addClass('attribution');
+			$caption->append($small);
+		}
+	}
+
 	/*
 		Function: versionSelector
 		generate html select element with available revisions for given page
