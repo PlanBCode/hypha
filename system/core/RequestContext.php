@@ -197,7 +197,7 @@
 			          /* expire */ 0,
 			          /* path */ $this->getRequest()->getRootUrlPath(),
 				  /* domain */ "",
-				  /* secure */ $secure,
+				  /* secure */ $this->getRequest()->isSecure(),
 				  /* http_only */ true);
 		}
 
