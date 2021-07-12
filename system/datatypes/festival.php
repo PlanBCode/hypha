@@ -24,6 +24,7 @@
 		const FIELD_NAME_TITLE = 'title';
 		const FIELD_NAME_WEBSITE = 'website';
 
+		const PATH_ABOUT = 'about';
 		const PATH_CONFIRMATION_NEEDED = 'confirmation-needed';
 		const PATH_CONFIRM = 'confirm';
 		const PATH_CONTRIBUTE = 'contribute';
@@ -44,12 +45,16 @@
 		const CONFIG_TAG = 'config';
 		const CONFIG_TAG_FORM = 'form';
 		const CONFIG_TAG_DAYS = 'config';
+		const CONFIG_TAG_LANGUAGE = 'language';
 		const CONFIG_TAG_LOCATIONS = 'config';
+		const CONFIG_ID_ABOUT = 'about';
 		const CONFIG_ID_TITLE = 'festival-title';
 		const CONFIG_ID_SIGNUP_FORM = 'signup-form';
 		const CONFIG_ID_CONTRIBUTION_FORM = 'contribution-form';
 		const CONFIG_ID_DAYS = 'days';
 		const CONFIG_ID_LOCATIONS = 'locations';
+		const CONFIG_ID_LINEUP_HEADER = 'lineup-header';
+		const CONFIG_ID_TIMETABLE_HEADER = 'timetable-header';
 		const CONFIG_ATTR_VALUE = 'value';
 
 		const TAG_PARTICIPANTS_CONTAINER = 'participants';
@@ -70,6 +75,7 @@
 		const TAG_CONTRIBUTION_DESCRIPTION = 'description';
 		const TAG_CONTRIBUTION_NOTES = 'notes';
 		const TAG_CONTRIBUTION_EVENT = 'event';
+		const TAG_CONTRIBUTION_LANGUAGE = 'language';
 
 		const ATTR_PARTICIPANT_EMAIL_CONFIRMED = 'email-confirmed';
 		const ATTR_PARTICIPANT_EMAIL = 'email';
@@ -92,11 +98,64 @@
 		const ATTR_DAY_END = 'end';
 		const ATTR_LOCATION_DISPLAY = 'display';
 
+		const ATTR_LANGUAGE_ID = 'id';
+
 		public function __construct($pageListNode, RequestContext $O_O) {
 			parent::__construct($pageListNode, $O_O);
 			$this->xml = new Xml('festival', Xml::multiLingualOn, Xml::versionsOff);
 			$this->xml->loadFromFile('data/pages/'.$pageListNode->getAttribute('id'));
+
+			$this->migrate();
 		}
+
+		public function migrate() {
+			if ($this->xml->documentElement->getAttribute('migrated'))
+				return;
+			$this->xml->lockAndReload();
+
+			// Make sure day ids are valid ids (starting
+			// with a letter).
+			foreach ($this->getConfigElement(self::CONFIG_ID_DAYS, self::CONFIG_TAG_DAYS)->children() as $day)
+				$day->setId('day' . $day->getId());
+
+			foreach ($this->xml->find(self::TAG_CONTRIBUTION_EVENT) as $event)
+				$event->setAttribute(self::ATTR_EVENT_DAY, 'day' . $event->getAttribute(self::ATTR_EVENT_DAY));
+
+			// Duplicate the header
+			$header = $this->getConfigElement('header');
+			if ($header) {
+				$this->getConfigElement(self::CONFIG_ID_LINEUP_HEADER, self::CONFIG_TAG)->append($header->html());
+				$this->getConfigElement(self::CONFIG_ID_TIMETABLE_HEADER, self::CONFIG_TAG)->append($header->html());
+				$header->remove();
+			}
+
+			// Make stuff translated
+			foreach ($this->xml->find(self::TAG_CONTRIBUTION) as $c) {
+				$lang = $this->xml->createElement(self::TAG_CONTRIBUTION_LANGUAGE);
+				$lang->setAttribute(self::ATTR_LANGUAGE_ID, 'nl');
+				$c->append($lang);
+				foreach ([self::ATTR_CONTRIBUTION_IMAGE, self::ATTR_CONTRIBUTION_NAME, self::ATTR_CONTRIBUTION_TITLE, self::ATTR_CONTRIBUTION_WEBSITE, self::ATTR_CONTRIBUTION_CATEGORY] as $attr) {
+					$lang->setAttribute($attr, $c->getAttribute($attr));
+					$c->removeAttribute($attr);
+				}
+				$lang->append($c->get(self::TAG_CONTRIBUTION_DESCRIPTION));
+			}
+
+			foreach ([self::CONFIG_ID_CONTRIBUTION_FORM, self::CONFIG_ID_SIGNUP_FORM, self::CONFIG_ID_LINEUP_HEADER, self::CONFIG_ID_TIMETABLE_HEADER, self::CONFIG_ID_ABOUT] as $id) {
+				$c = $this->getConfigElement($id);
+				if ($c) {
+					$lang = $this->xml->createElement(self::CONFIG_TAG_LANGUAGE);
+					$lang->setAttribute(self::ATTR_LANGUAGE_ID, 'nl');
+					$lang->append($c->children());
+					$c->append($lang);
+				}
+			}
+
+
+			$this->xml->documentElement->setAttribute('migrated', 1);
+			$this->xml->saveAndUnlock();
+		}
+
 
 		public static function getDatatypeName() {
 			return __('datatype.name.festivalpage');
@@ -105,15 +164,17 @@
 		public function process(HyphaRequest $request) {
 			$this->html->writeToElement('pagename', showPagename($this->pagename) . ' ' . asterisk($this->privateFlag));
 
+			$commands = $this->html->find('#pageCommands');
+			$commands->append($this->makeActionButton(__('about'), self::PATH_ABOUT));
+			$commands->append($this->makeActionButton(__('festival-signup'), self::PATH_SIGNUP));
+			$commands->append($this->makeActionButton(__('festival-lineup'), self::PATH_LINEUP));
+			$commands->append($this->makeActionButton(__('festival-timetable'), self::PATH_TIMETABLE));
+
 			if (isUser() && !in_array($request->getView(), [self::PATH_SETTINGS])) {
-				$commands = $this->html->find('#pageCommands');
 				$commands->append($this->makeActionButton(__('settings'), self::PATH_SETTINGS));
-				$commands->append($this->makeActionButton(__('festival-signup'), self::PATH_SIGNUP));
 				$commands->append($this->makeActionButton(__('festival-contribute'), self::PATH_CONTRIBUTE));
 				$commands->append($this->makeActionButton(__('festival-participants'), self::PATH_PARTICIPANTS));
 				$commands->append($this->makeActionButton(__('festival-contributions'), self::PATH_CONTRIBUTIONS));
-				$commands->append($this->makeActionButton(__('festival-lineup'), self::PATH_LINEUP));
-				$commands->append($this->makeActionButton(__('festival-timetable'), self::PATH_TIMETABLE));
 
 				if (isAdmin()) {
 					$action = 'if(confirm(\'' . __('sure-to-delete') . '\'))' . makeAction($this->language . '/' . $this->pagename, 'delete', '');
@@ -124,6 +185,7 @@
 			switch ([$request->getView(), $request->getCommand()]) {
 				case [null,                           null]:             return $this->lineupView($request);
 				case [null,                           self::CMD_DELETE]: return $this->deleteAction($request);
+				case [self::PATH_ABOUT,               null]:             return $this->aboutView($request);
 				case [self::PATH_CONFIRMATION_NEEDED, null]:             return $this->confirmationNeededView($request);
 				case [self::PATH_CONFIRM,             null]:             return $this->confirmView($request);
 				case [self::PATH_CONTRIBUTE,          null]:             return $this->contributeView($request);
@@ -166,18 +228,39 @@
 		 * Retrieve the XML element with the given id and return
 		 * it.
 		 *
+		 * If a language is given, return a language subtag with
+		 * the given id, or if it does not exist, any other
+		 * language subtag.
+		 *
 		 * If the element does not exist and a tagname is given,
 		 * it is created using the given tagname. Otherwise,
 		 * null is returned.
 		 */
-		protected function getConfigElement($id, $tagname = null) {
+		protected function getConfigElement($id, $tagname = null, $language = null) {
 			$elem = $this->xml->getElementById($id);
 			if (!$elem && $tagname) {
 				$elem = $this->xml->createElement($tagname);
 				$elem->setId($id);
 				$this->xml->documentElement->appendChild($elem);
 			}
-			return $elem;
+
+			if ($language) {
+				$firstlang = null;
+				foreach ($elem->find(self::CONFIG_TAG_LANGUAGE) as $lang) {
+					if ($firstlang === null)
+						$firstlang = $lang;
+					if ($lang->getAttribute(self::ATTR_LANGUAGE_ID) == $language)
+						return $lang;
+				}
+				if ($firstlang === null && $tagname) {
+					$firstlang = $this->xml->createElement(self::CONFIG_TAG_LANGUAGE);
+					$firstlang->setAttribute(self::ATTR_LANGUAGE_ID, $language);
+					$elem->appendChild($firstlang);
+				}
+				return $firstlang;
+			} else {
+				return $elem;
+			}
 		}
 
 		/**
@@ -190,6 +273,14 @@
 		protected function setConfig($id, $value, $tagname = self::CONFIG_TAG, $attribute = self::CONFIG_ATTR_VALUE) {
 			$config = $this->getConfigElement($id, $tagname);
 			return $config->setAttribute($attribute, $value);
+		}
+
+		protected function getContributions() {
+			$result = [];
+			foreach ($this->xml->documentElement->getOrCreate(self::TAG_CONTRIBUTION_CONTAINER)->children() as $contribution) {
+				$result[] = new FestivalContribution($contribution, $this->language);
+			}
+			return $result;
 		}
 
 		/**
@@ -253,18 +344,18 @@
 			$this->html->find('#main')->appendChild($table);
 			$table->addClass('contributions');
 			$table->addHeaderRow()->addCells([__('name'), __('title'), __('category'), __('website')]);
-			foreach ($this->xml->documentElement->getOrCreate(self::TAG_CONTRIBUTION_CONTAINER)->children() as $contribution) {
+			foreach ($this->getContributions() as $contribution) {
 				$row = $table->addRow();
-				$row->addCell($contribution->getAttribute(self::ATTR_CONTRIBUTION_NAME));
-				$row->addCell($contribution->getAttribute(self::ATTR_CONTRIBUTION_TITLE));
-				$row->addCell($contribution->getAttribute(self::ATTR_CONTRIBUTION_CATEGORY));
-				$row->addCell($contribution->getAttribute(self::ATTR_CONTRIBUTION_WEBSITE));
+				$row->addCell($contribution->getTranslatedAttribute(self::ATTR_CONTRIBUTION_NAME));
+				$row->addCell($contribution->getTranslatedAttribute(self::ATTR_CONTRIBUTION_TITLE));
+				$row->addCell($contribution->getTranslatedAttribute(self::ATTR_CONTRIBUTION_CATEGORY));
+				$row->addCell($contribution->getTranslatedAttribute(self::ATTR_CONTRIBUTION_WEBSITE));
 
 				$button = $this->makeActionButton(__('edit'), self::PATH_CONTRIBUTE . '/'.$contribution->getId());
 				$row->addCell()->append($button);
 
-				$description = $contribution->getOrCreate(self::TAG_CONTRIBUTION_DESCRIPTION)->text();
-				$imgfilename = $contribution->getAttribute(self::ATTR_CONTRIBUTION_IMAGE);
+				$description = $contribution->getDescription();
+				$imgfilename = $contribution->getTranslatedAttribute(self::ATTR_CONTRIBUTION_IMAGE);
 				if ($description || $imgfilename) {
 					$cell = $table->addRow()->addCell(__('description') . ': ' . $description);
 					$cell->setAttribute('colspan', 5);
@@ -272,7 +363,7 @@
 					if ($imgfilename) {
 						$imgtag = $this->html->createElement('img');
 						$cell->insertBefore($imgtag, $cell->firstChild);
-						$image = new HyphaImage($contribution->getAttribute(self::ATTR_CONTRIBUTION_IMAGE));
+						$image = new HyphaImage($contribution->getTranslatedAttribute(self::ATTR_CONTRIBUTION_IMAGE));
 						$imgtag->setAttribute('src', $image->getUrl(50, 50));
 					}
 				}
@@ -363,7 +454,7 @@ EOF;
 		 * Create a signup form, based on the one configured.
 		 */
 		private function createSignupForm(array $values = []) {
-			$html = $this->getConfigElement(self::CONFIG_ID_SIGNUP_FORM, self::CONFIG_TAG_FORM)->children();
+			$html = $this->getConfigElement(self::CONFIG_ID_SIGNUP_FORM, self::CONFIG_TAG_FORM, $this->language)->children();
 
 			if ($html->count() == 0) {
 				$html = <<<EOF
@@ -416,6 +507,7 @@ EOF;
 		}
 
 		protected function signupViewRender(HyphaRequest $request, HTMLForm $form) {
+			$this->html->find('#langList')->append(hypha_indexLanguages($this->pageListNode, $this->language, join('/', $request->getArgs())));
 			$form->updateDom();
 
 			$this->html->find('#main')->append($form);
@@ -622,7 +714,7 @@ EOF;
 		}
 
 		private function createContributionForm(array $values = []) {
-			$html = $this->getConfigElement(self::CONFIG_ID_CONTRIBUTION_FORM, self::CONFIG_TAG_FORM)->children();
+			$html = $this->getConfigElement(self::CONFIG_ID_CONTRIBUTION_FORM, self::CONFIG_TAG_FORM, $this->language)->children();
 
 			if ($html->count() == 0) {
 				$html = <<<EOF
@@ -714,16 +806,16 @@ EOF;
 
 			$form = $this->createContributionForm();
 			if ($editing) {
+				$contribution = new FestivalContribution($obj, $this->language);
 				// create form
-				$description = $obj->get(self::TAG_CONTRIBUTION_DESCRIPTION);
 				$notes = $obj->get(self::TAG_CONTRIBUTION_NOTES);
 				$formData = [
-					self::FIELD_NAME_NAME => $obj->getAttr(self::ATTR_CONTRIBUTION_NAME),
-					self::FIELD_NAME_TITLE => $obj->getAttr(self::ATTR_CONTRIBUTION_TITLE),
-					self::FIELD_NAME_CATEGORY => $obj->getAttr(self::ATTR_CONTRIBUTION_CATEGORY),
-					self::FIELD_NAME_IMAGE => $obj->getAttr(self::ATTR_CONTRIBUTION_IMAGE),
-					self::FIELD_NAME_WEBSITE => $obj->getAttr(self::ATTR_CONTRIBUTION_WEBSITE),
-					self::FIELD_NAME_DESCRIPTION => $description ? $description->text() : null,
+					self::FIELD_NAME_NAME => $contribution->getTranslatedAttribute(self::ATTR_CONTRIBUTION_NAME),
+					self::FIELD_NAME_TITLE => $contribution->getTranslatedAttribute(self::ATTR_CONTRIBUTION_TITLE),
+					self::FIELD_NAME_CATEGORY => $contribution->getTranslatedAttribute(self::ATTR_CONTRIBUTION_CATEGORY),
+					self::FIELD_NAME_IMAGE => $contribution->getTranslatedAttribute(self::ATTR_CONTRIBUTION_IMAGE),
+					self::FIELD_NAME_WEBSITE => $contribution->getTranslatedAttribute(self::ATTR_CONTRIBUTION_WEBSITE),
+					self::FIELD_NAME_DESCRIPTION => $contribution->getDescription(),
 					self::FIELD_NAME_NOTES => $notes ? $notes->text() : null,
 				];
 
@@ -733,6 +825,8 @@ EOF;
 		}
 
 		protected function contributeViewrender(HyphaRequest $request, HTMLForm $form, $editing) {
+			$this->html->find('#langList')->append(hypha_indexLanguages($this->pageListNode, $this->language, join('/', $request->getArgs())));
+
 			// Update the form to include any data
 			$form->updateDom();
 
@@ -772,26 +866,26 @@ EOF;
 
 			// get contribution element or create new contribution element
 			if ($obj->tagName == self::TAG_CONTRIBUTION) {
-				$contribution = $obj;
+				$contribution = new FestivalContribution($obj, $this->language);
 			} else {
-				$contribution = $this->xml->createElement(self::TAG_CONTRIBUTION);
-				$contribution->generateId();
-				$contribution->setAttribute(self::ATTR_CONTRIBUTION_KEY, bin2hex(openssl_random_pseudo_bytes(8)));
+				$node = $this->xml->createElement(self::TAG_CONTRIBUTION);
+				$node->generateId();
+				$node->setAttribute(self::ATTR_CONTRIBUTION_KEY, bin2hex(openssl_random_pseudo_bytes(8)));
 				if ($obj ->tagName == self::TAG_PARTICIPANT)
-					$contribution->setAttribute(self::ATTR_CONTRIBUTION_PARTICIPANT, $obj->getId());
+					$node->setAttribute(self::ATTR_CONTRIBUTION_PARTICIPANT, $obj->getId());
 
-				$this->xml->documentElement->getOrCreate(self::TAG_CONTRIBUTION_CONTAINER)->appendChild($contribution);
+				$this->xml->documentElement->getOrCreate(self::TAG_CONTRIBUTION_CONTAINER)->appendChild($node);
+				$contribution = new FestivalContribution($node, $this->language);
 			}
 
 			// set attributes
-			$contribution->setAttribute(self::ATTR_CONTRIBUTION_NAME, $form->dataFor(self::FIELD_NAME_NAME));
-			$contribution->setAttribute(self::ATTR_CONTRIBUTION_TITLE, $form->dataFor(self::FIELD_NAME_TITLE));
-			$contribution->setAttribute(self::ATTR_CONTRIBUTION_CATEGORY, $form->dataFor(self::FIELD_NAME_CATEGORY));
-			$contribution->setAttribute(self::ATTR_CONTRIBUTION_IMAGE, $form->dataFor(self::FIELD_NAME_IMAGE));
-			$contribution->setAttribute(self::ATTR_CONTRIBUTION_WEBSITE, $form->dataFor(self::FIELD_NAME_WEBSITE));
+			$contribution->setTranslatedAttribute(self::ATTR_CONTRIBUTION_NAME, $form->dataFor(self::FIELD_NAME_NAME));
+			$contribution->setTranslatedAttribute(self::ATTR_CONTRIBUTION_TITLE, $form->dataFor(self::FIELD_NAME_TITLE));
+			$contribution->setTranslatedAttribute(self::ATTR_CONTRIBUTION_CATEGORY, $form->dataFor(self::FIELD_NAME_CATEGORY));
+			$contribution->setTranslatedAttribute(self::ATTR_CONTRIBUTION_IMAGE, $form->dataFor(self::FIELD_NAME_IMAGE));
+			$contribution->setTranslatedAttribute(self::ATTR_CONTRIBUTION_WEBSITE, $form->dataFor(self::FIELD_NAME_WEBSITE));
 
-			$description = $contribution->getOrCreate(self::TAG_CONTRIBUTION_DESCRIPTION);
-			$description->setText($form->dataFor(self::FIELD_NAME_DESCRIPTION, ''));
+			$contribution->setDescription($form->dataFor(self::FIELD_NAME_DESCRIPTION, ''));
 
 			$notes = $contribution->getOrCreate(self::TAG_CONTRIBUTION_NOTES);
 			$notes->setText($form->dataFor(self::FIELD_NAME_NOTES, ''));
@@ -813,7 +907,7 @@ EOF;
 
 			$vars = [
 				'name' => htmlspecialchars($name),
-				'contribution'=> htmlspecialchars($contribution->getAttribute(self::ATTR_CONTRIBUTION_TITLE) . ' - ' . $contribution->getAttribute(self::ATTR_CONTRIBUTION_NAME)),
+				'contribution'=> htmlspecialchars($contribution->getTranslatedAttribute(self::ATTR_CONTRIBUTION_TITLE) . ' - ' . $contribution->getTranslatedAttribute(self::ATTR_CONTRIBUTION_NAME)),
 			];
 			if ($editing)
 				$digest = __('festival-edited-contribution', $vars);
@@ -829,7 +923,7 @@ EOF;
 				// Send email
 				$vars = [
 					'festival-title' => $this->getConfig(self::CONFIG_ID_TITLE),
-					'title' => $contribution->getAttribute(self::ATTR_CONTRIBUTION_TITLE),
+					'title' => $contribution->getTranslatedAttribute(self::ATTR_CONTRIBUTION_TITLE),
 					'editlink' => $edit_url,
 				];
 				$this->sendMail($email, 'festival-contribution-added', $vars);
@@ -844,11 +938,23 @@ EOF;
 			return ['redirect', $lineup_url];
 		}
 
+		protected function aboutView() {
+			$this->html->find('#langList')->append(hypha_indexLanguages($this->pageListNode, $this->language, self::PATH_ABOUT));
+
+			$this->html->find('#pagename')->text($this->getConfig('festival-title'));
+			$content = $this->getConfigElement(self::CONFIG_ID_ABOUT, null, $this->language);
+			if ($content)
+				$this->html->find('#main')->append($content->children());
+		}
 
 		protected function lineupView(HyphaRequest $request) {
+			$this->html->find('#langList')->append(hypha_indexLanguages($this->pageListNode, $this->language, self::PATH_LINEUP));
+
 			$html = '';
-			$contributions = $this->xml->documentElement->getOrCreate(self::TAG_CONTRIBUTION_CONTAINER)->children();
-			foreach($contributions as $contribution) {
+			$header = $this->getConfigElement(self::CONFIG_ID_LINEUP_HEADER, null, $this->language);
+			if ($header)
+				$html .= '<div class="header">' . $header->html() . '</div>';
+			foreach($this->getContributions() as $contribution) {
 				$html.= $this->buildContribution($contribution);
 				$html.= '<div class="hbar"></div>';
 			}
@@ -868,14 +974,14 @@ EOF;
 			$editurl = $this->constructFullPath($this->pagename.'/' . self::PATH_CONTRIBUTE . '/'.$contribution->getId());
 
 			$title = '';
-			if ($contribution->getAttribute(self::ATTR_CONTRIBUTION_CATEGORY))
-				$title .= $contribution->getAttribute(self::ATTR_CONTRIBUTION_CATEGORY) . ': ';
-			if ($contribution->getAttribute(self::ATTR_CONTRIBUTION_NAME))
-				$title .= $contribution->getAttribute(self::ATTR_CONTRIBUTION_NAME);
-			if ($contribution->getAttribute(self::ATTR_CONTRIBUTION_NAME) && $contribution->getAttribute(self::ATTR_CONTRIBUTION_TITLE))
+			if ($contribution->getTranslatedAttribute(self::ATTR_CONTRIBUTION_CATEGORY))
+				$title .= $contribution->getTranslatedAttribute(self::ATTR_CONTRIBUTION_CATEGORY) . ': ';
+			if ($contribution->getTranslatedAttribute(self::ATTR_CONTRIBUTION_NAME))
+				$title .= $contribution->getTranslatedAttribute(self::ATTR_CONTRIBUTION_NAME);
+			if ($contribution->getTranslatedAttribute(self::ATTR_CONTRIBUTION_NAME) && $contribution->getTranslatedAttribute(self::ATTR_CONTRIBUTION_TITLE))
 				$title .= ' - ';
-			if ($contribution->getAttribute(self::ATTR_CONTRIBUTION_TITLE))
-				$title .= $contribution->getAttribute(self::ATTR_CONTRIBUTION_TITLE);
+			if ($contribution->getTranslatedAttribute(self::ATTR_CONTRIBUTION_TITLE))
+				$title .= $contribution->getTranslatedAttribute(self::ATTR_CONTRIBUTION_TITLE);
 
 			$html.= '<h2 id="'.htmlspecialchars($id).'"><a href="'.htmlspecialchars($url).'">'.htmlspecialchars($title).'</a>';
 			if (isUser())
@@ -883,15 +989,15 @@ EOF;
 			$html.= '</h2>';
 
 			// image and description
-			$image_filename = $contribution->getAttribute(self::ATTR_CONTRIBUTION_IMAGE);
+			$image_filename = $contribution->getTranslatedAttribute(self::ATTR_CONTRIBUTION_IMAGE);
 			if ($image_filename) {
 				$img_width = 150;
 				$img_height = 150;
 				$image = new HyphaImage($image_filename);
 				$html.= '<a href="'.htmlspecialchars($image->getUrl()).'"><img src="'.htmlspecialchars($image->getUrl($img_width, $img_height)).'"/></a>';
 			}
-			$description = $contribution->getElementsByTagName(self::TAG_CONTRIBUTION_DESCRIPTION)->Item(0);
-			if ($description) $html.= nl2br(htmlspecialchars($description->text()));
+			$description = $contribution->getDescription();
+			if ($description) $html.= nl2br(htmlspecialchars($description));
 
 			$days = $this->getConfigElement(self::CONFIG_ID_DAYS, self::CONFIG_TAG_DAYS)->children();
 			$locations = $this->getConfigElement(self::CONFIG_ID_LOCATIONS, self::CONFIG_TAG_LOCATIONS)->children();
@@ -910,7 +1016,7 @@ EOF;
 				}
 				if ($timesHtml) $html.= '<div class="event"><div class="date">'.htmlspecialchars($day->getAttribute(self::ATTR_DAY_DISPLAY)).'</div>'.$timesHtml.'</div>';
 			}
-			$website = htmlspecialchars($contribution->getAttribute(self::ATTR_CONTRIBUTION_WEBSITE));
+			$website = htmlspecialchars($contribution->getTranslatedAttribute(self::ATTR_CONTRIBUTION_WEBSITE));
 			if ($website)
 				$html.= "<div class=\"website\"><a href=\"$website\">$website</a></div>";
 			$html.= '</div>';
@@ -919,14 +1025,19 @@ EOF;
 		}
 
 		protected function timetableView(HyphaRequest $request) {
+			$this->html->find('#langList')->append(hypha_indexLanguages($this->pageListNode, $this->language, self::PATH_TIMETABLE));
+
 			// Make a list of all days, and per day all
 			// locations and the begin and end time.
-			$contributions = $this->xml->documentElement->getOrCreate(self::TAG_CONTRIBUTION_CONTAINER)->children();
+			$contributions = $this->getContributions();
 			$days = $this->getConfigElement(self::CONFIG_ID_DAYS, self::CONFIG_TAG_DAYS)->children();
 			$locations = $this->getConfigElement(self::CONFIG_ID_LOCATIONS, self::CONFIG_TAG_LOCATIONS)->children();
 
-			// iterate over all dates
 			$html = '';
+			$header = $this->getConfigElement(self::CONFIG_ID_TIMETABLE_HEADER, null, $this->language);
+			if ($header)
+				$html .= '<div class="header">' . $header->html() . '</div>';
+			// iterate over all dates
 			$d = 0;
 			foreach($days as $day) {
 				$daybegin = $day->getAttribute(self::ATTR_DAY_BEGIN);
@@ -972,9 +1083,9 @@ EOF;
 								$locevents[] = [
 									$this->timetocols($daybegin, $event->getAttribute(self::ATTR_EVENT_BEGIN)),
 									$this->timetocols($daybegin, $event->getAttribute(self::ATTR_EVENT_END)),
-									$contribution->getAttribute(self::ATTR_CONTRIBUTION_NAME),
+									$contribution->getTranslatedAttribute(self::ATTR_CONTRIBUTION_NAME),
 									$contribution->getId(),
-									$contribution->getAttribute(self::ATTR_CONTRIBUTION_TITLE),
+									$contribution->getTranslatedAttribute(self::ATTR_CONTRIBUTION_TITLE),
 								];
 						}
 					}
@@ -1254,5 +1365,82 @@ EOF;
 			$path = '' == $path ? '' : '/' . $path;
 
 			return $rootUrl . $language . $path;
+		}
+	}
+
+
+	/**
+	 * Helper class to get retrieve (translated) info for
+	 * contributions.
+	 */
+	class FestivalContribution {
+		private $node;
+		private $language_nodes;
+		private $language;
+
+		public function __construct($node, $language) {
+			$this->node = $node;
+			$this->language = $language;
+			$this->language_nodes = [];
+			foreach ($node->find(festivalpage::TAG_CONTRIBUTION_LANGUAGE) as $node) {
+				if ($node->getAttribute(festivalpage::ATTR_LANGUAGE_ID) == $language)
+					array_unshift($this->language_nodes, $node);
+				else
+					$this->language_nodes[] = $node;
+			}
+		}
+
+		public function getOrCreateLanguage() {
+			if (empty($this->language_nodes) || $this->language_nodes[0]->getAttribute(festivalpage::ATTR_LANGUAGE_ID) != $this->language) {
+				$lang = $this->node->document()->createElement(festivalpage::TAG_CONTRIBUTION_LANGUAGE);
+				$lang->setAttribute(festivalpage::ATTR_LANGUAGE_ID, $this->language);
+				$this->node->appendChild($lang);
+				array_unshift($this->language_nodes, $lang);
+			}
+			return $this->language_nodes[0];
+		}
+
+		public function getTranslatedAttribute($attr) {
+			foreach ($this->language_nodes as $node) {
+				if ($node->hasAttribute($attr))
+					return $node->getAttribute($attr);
+			}
+			return null;
+		}
+
+		public function setTranslatedAttribute($attr, $val) {
+			$lang = $this->getOrCreateLanguage();
+			$lang->setAttribute($attr, $val);
+		}
+
+
+		public function getDescription() {
+			$tag = $this->getTranslated(festivalpage::TAG_CONTRIBUTION_DESCRIPTION);
+			if ($tag === null)
+				return '';
+			return $tag->text();
+		}
+
+		public function setDescription($val) {
+			$lang = $this->getOrCreateLanguage();
+			$description = $lang->getOrCreate(festivalpage::TAG_CONTRIBUTION_DESCRIPTION);
+			$description->setText($val);
+		}
+
+		public function getTranslated($tag) {
+			foreach ($this->language_nodes as $node) {
+				$element = $node->get($tag);
+				if ($element !== null)
+					return $element;
+			}
+			return null;
+		}
+
+
+		/**
+		 * Forward any other calls to the underlying node.
+		 */
+		public function __call($name, $arguments) {
+			return call_user_func_array([$this->node, $name], $arguments);
 		}
 	}

@@ -292,6 +292,7 @@
 		"festival-contribution-added-body" => '<p>Your contribution "[[title]]" has been added and is now shown on the lineup.</p><p>To edit your contribution, use <a href="[[editlink]]">this link</a>.</p>',
 
 		// festival - buttons & links
+		"festival-about" => "about",
 		"festival-modify" => "modify",
 		"festival-contribute" => "contribute",
 		"festival-edit-contribution" => "edit contribution",

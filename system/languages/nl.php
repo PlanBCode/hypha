@@ -259,6 +259,7 @@
 		"festival-signed-up-for" => " heeft zich ingeschreven voor ",
 		"festival-failed-to-pay-for" => " kon niet betalen voor ",
 		"festival-payed-for" => " heeft betaald voor ",
+		"festival-confirmed-for" => " heeft email bevestigd voor ",
 
 		// festival - notify & messages
 		"festival-successful-signup-for" => "Je bent ingeschreven voor ",
@@ -287,6 +288,7 @@
 		"festival-contribution-added-body" => '<p>Je bijdrage "[[title]]" is toegevoegd en wordt nu in de lineup weergegeven.</p><p>Om je bijdrage te wijzigen, gebruik <a href="[[editlink]]">deze link</a>.</p>',
 
 		// festival - buttons & links
+		"festival-about" => "info",
 		"festival-modify" => "wijzigen",
 		"festival-contribute" => "bijdragen",
 		"festival-edit-contribution" => "wijzig bijdrage",
