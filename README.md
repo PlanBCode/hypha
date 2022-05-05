@@ -22,7 +22,7 @@ The hypha homepage can be found at [hypha.net](http://hypha.net).
 
 Hypha needs Apache running, with php version 5.6 or above.
 
-## Basic install
+## Basic Installation
 
 The easiest way to install hypha is probably to follow the instructions on
 (http://hypha.net/hypha.php)[http://hypha.net/hypha.php]. This script packages a fully self-contained copy of hypha
@@ -30,11 +30,13 @@ in a single monolithic php file. If you drop this file on a server and call it f
 necessary files and configure your site according to a few settings to have to enter. The script guides you through the
 installation process step by step.
 
-## Advanced install though git
+Your url should look like this `http://<address-of-your-apache>/index.php`
+
+## Advanced Install Though Git
 
 1. Pull in a git clone, either by downloading a [zip file](https://github.com/PlanBCode/hypha/archive/master.zip)
    and extracting it in your web-folder of choice, or by
    issuing a `git clone https://github.com/PlanBCode/hypha.git .` from the commandline in that folder.
-2. Open the file `hypha.php` in a text editor and enter a superuser name and password.
-3. Set write permissions to the folder `data/`, e.g. by issuing a `chmod -R 777 .`
-4. Navigate to your web-folder in a browser and follow instructions from there.
+2. Set write permissions to the folder `data/`, e.g. by issuing a `chmod -R 777 .`
+3. Navigate to your web-folder in a browser to open `index.php` provided by hypha, and follow instructions from there.
+   Your url should look like this `http://<address-of-your-apache>/index.php`.
