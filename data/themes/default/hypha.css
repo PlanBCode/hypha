@@ -15,9 +15,12 @@
  --headingscolor: var(--primarycolor);
  --linkcolor: var(--secondarycolor);
  --linkhovercolor: #805B15;
- --headercolor: transparent;
+ --headercolor: transparent; /* Deprecated, kept for compatibility with existing derived themes. Use headerbackground instead. */
+ --headerbackground: var(--headercolor);
+ --headerforeground: #fff;
  --pagecontainerbackgroundcolor: #fff;
  --menubackground: var(--primarycolor);
+ --menuforeground: #ffffff;
  --formheaderback: #226765;
  --menulinkhoverback: #aaa;
  --menulinkactiveback: #ccc;
@@ -152,7 +155,7 @@ a.nopagelink {
 }
 
 .navContainer nav.main a {
- color: #FFFFFF;
+ color: var(--menuforeground);
  margin-right: 10px;
  text-decoration: none;
  padding: 8px;
@@ -197,7 +200,7 @@ a.nopagelink {
 
 /* ---- Header ---- */
 .headerContainer {
- background-color: var(--headercolor);
+ background-color: var(--headerbackground);
 }
 
 .headerContainer.flex {
@@ -213,7 +216,7 @@ a.nopagelink {
 .headerContainer p {
  font-weight: bold;
  font-size: 24pt;
- color: #fff;
+ color: var(--headerforeground);
  margin: 0;
  padding: 15px;
 }
