@@ -17,7 +17,7 @@
  --linkhovercolor: #805B15;
  --headercolor: transparent; /* Deprecated, kept for compatibility with existing derived themes. Use headerbackground instead. */
  --headerbackground: var(--headercolor);
- --headerforeground: #fff;
+ --headerforeground: var(--primarycolor);
  --pagecontainerbackgroundcolor: #fff;
  --menubackground: var(--primarycolor);
  --menuforeground: #ffffff;
