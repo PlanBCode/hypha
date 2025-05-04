@@ -793,8 +793,9 @@
 		Parameters:
 		$page - DOMElement containing page settings
 		$language - page language
+		$subpage - added to the page url, a / is added automatically
 	*/
-	function hypha_indexLanguages($page, $language) {
+	function hypha_indexLanguages($page, $language, $subpage='') {
 		$langList = hypha_getUsedContentLanguages();
 		if (count($langList)) asort($langList);
 
@@ -807,8 +808,12 @@
 		foreach($langList as $lang) {
 			if ($lang == $language) $index.= '<span class="language selected">'.$lang.'</span>';
 			elseif (!$page || array_key_exists($lang, $pageLangList)) {
-				if ($page) $index.= '<span class="language"><a href="'.$lang.'/'.$pageLangList[$lang].'">'.$lang.'</a></span>';
-				else $index.= '<span class="language"><a href="index/'.$lang.'">'.$lang.'</a></span>';
+				if ($page)
+					$url = $lang.'/'.$pageLangList[$lang];
+				else
+					$url = 'index/' . $lang;
+				if ($subpage) $url .= '/'.$subpage;
+			        $index.= '<span class="language"><a href="'.$url.'">'.$lang.'</a></span>';
 			}
 			else $index.= '<span class="language disabled">'.$lang.'</span>';
 		}
