@@ -40,3 +40,10 @@ Your url should look like this `http://<address-of-your-apache>/index.php`
 2. Set write permissions to the folder `data/`, e.g. by issuing a `chmod -R 777 .`
 3. Navigate to your web-folder in a browser to open `index.php` provided by hypha, and follow instructions from there.
    Your url should look like this `http://<address-of-your-apache>/index.php`.
+
+## Contribution
+### Setup Development Environment with Docker
+There is an unofficial repository to help you setup your own php-apache docker
+instance to host hypha. Check
+[therepository](https://github.com/tai271828/php-apache-bionic-hypha) if you want
+to use docker as your development environment.
