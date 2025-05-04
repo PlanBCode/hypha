@@ -500,6 +500,12 @@
 		"art-date-format-time" => "om %k:%Mu", // see for format: https://www.php.net/manual/en/function.date.php
 		"art-read-more" => "Lees meer",
 
+		// index
+		"index_table_column_title" => "title",
+		"index_table_column_author" => "author",
+		"index_table_column_date" => "date",
+		"index_table_column_status" => "status",
+
 		// sharing links
 		"share-email-subject" => "Zie '[[title]]' op [[domain]]",
 		"share-email-body" => "Ik kwam '[[title]]' tegen op [[domain]]: [[url]]",

@@ -2021,6 +2021,30 @@ EOF;
 	}
 
 	/**
+	 * @return array
+	 */
+	public static function getIndexTableColumns() {
+		$columns = parent::getIndexTableColumns();
+		if (isUser()) {
+			$columns[] = __(self::INDEX_TABLE_COLUMNS_STATUS);
+		}
+		return $columns;
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getIndexData() {
+		$data = [
+			__(self::INDEX_TABLE_COLUMNS_STATUS) => [
+				'value' => $this->getStatus(),
+				'sort' => $this->getStatus(),
+			],
+		] + parent::getIndexData();
+		return $this->filterIndexData($data);
+	}
+
+	/**
 	 * Gets the article title.
 	 *
 	 * @return string
@@ -2035,6 +2059,13 @@ EOF;
 		}
 
 		return $title;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getAuthor() {
+		return $this->xml->find(self::FIELD_NAME_ARTICLE)->getAttribute(self::FIELD_NAME_AUTHOR);
 	}
 
 	/**
