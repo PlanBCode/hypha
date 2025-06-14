@@ -28,6 +28,8 @@ WYMeditor.STRINGS.nl = {
     Title:            'Titel',
     Relationship:     'Relatie',
     Alternative_Text: 'Alternatieve tekst',
+    Attribution:      'Bijdrage',
+    Attribution_placeholder: 'licentie: auteur (datum)',
     Caption:          'Bijschrift',
     Summary:          'Summary',
     Number_Of_Rows:   'Aantal rijen',

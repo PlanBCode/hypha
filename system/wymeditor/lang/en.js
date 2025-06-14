@@ -28,6 +28,8 @@ WYMeditor.STRINGS.en = {
     Title:            'Title',
     Relationship:     'Relationship',
     Alternative_Text: 'Alternative text',
+    Attribution:      'Attribution',
+    Attribution_placeholder: 'license: author (date)',
     Caption:          'Caption',
     Summary:          'Summary',
     Number_Of_Rows:   'Number of rows',
