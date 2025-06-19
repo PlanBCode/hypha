@@ -333,6 +333,14 @@
 			$xpath = "(//img | //iframe | //video | //embed)[1]";
 			return $this->hasTextContent() || $this->findXPath($xpath)->count() > 0;
 		}
+
+		/**
+		 * Converts the given string to a DOM text node and
+		 * appends the result to the current node.
+		 */
+		function appendText(string $text) {
+			$this->appendChild(new DOMText($text));
+		}
 	}
 
 	/*

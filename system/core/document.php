@@ -176,7 +176,7 @@
 				$script->setAttribute('id', 'jsAggregator');
 				$this->getElementsByTagName('head')->Item(0)->appendChild($script);
 			}
-			$script->appendChild($this->createTextNode(preg_replace('#<script[^>]*>(.*)</script>#isU','$1', $js)));
+			$script->appendText(preg_replace('#<script[^>]*>(.*)</script>#isU','$1', $js));
 		}
 
 		/*
@@ -194,7 +194,7 @@
 				$style->setAttribute('type', 'text/css');
 				$this->getElementsByTagName('head')->Item(0)->appendChild($style);
 			}
-			$style->appendChild($this->createTextNode(preg_replace('/(<style>|<\/style>)/i', '', $css)));
+			$style->appendText(preg_replace('/(<style>|<\/style>)/i', '', $css));
 		}
 
 		/*

@@ -514,7 +514,7 @@ EOF;
 			$this->html->find('#pagename')->text(__('festival-confirmation-needed'));
 			$main = $this->html->find('#main');
 			$message = __('festival-complete-by-confirming');
-			$main->append($message);
+			$main->appendText($message);
 			return null;
 		}
 
@@ -588,7 +588,7 @@ EOF;
 			$main = $this->html->find('#main');
 			$message = __('festival-complete-by-paying');
 			$button = $this->makeActionButton(__('pay'), join('/', $request->getArgs()), self::CMD_PAY);
-			$main->append($message);
+			$main->appendText($message);
 			$main->append($button);
 		}
 

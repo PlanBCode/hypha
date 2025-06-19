@@ -360,7 +360,7 @@ class mailinglist extends HyphaDatatypePage {
 			$address->setAttribute(self::FIELD_NAME_REMINDED, false);
 			/** @var HyphaDomElement $addressesContainer */
 			$addressesContainer = $this->getDoc()->get(self::FIELD_NAME_ADDRESSES_CONTAINER);
-			$addressesContainer->append($address);
+			$addressesContainer->appendText($address);
 			$this->xml->saveAndUnlock();
 		} else {
 			$this->xml->unlock();
@@ -418,7 +418,7 @@ class mailinglist extends HyphaDatatypePage {
 					$address->setAttribute(self::FIELD_NAME_REMINDED, false);
 					/** @var HyphaDomElement $addressesContainer */
 					$addressesContainer = $this->getDoc()->get(self::FIELD_NAME_ADDRESSES_CONTAINER);
-					$addressesContainer->append($address);
+					$addressesContainer->appendText($address);
 					$this->xml->saveAndUnlock();
 					$count++;
 				}
