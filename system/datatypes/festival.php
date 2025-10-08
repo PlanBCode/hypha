@@ -884,8 +884,8 @@ EOF;
 
 			$contributions = $this->xml->documentElement->getOrCreate(self::TAG_CONTRIBUTION_CONTAINER)->children();
 			foreach($contributions as $contribution) {
-				$contributionsdiv->append($this->buildContribution($contribution));
-				$contributionsdiv->append('<div class="hbar"></div>');
+				$contributionsdiv->appendHtml($this->buildContribution($contribution));
+				$contributionsdiv->appendHtml('<div class="hbar"></div>');
 			}
 		}
 

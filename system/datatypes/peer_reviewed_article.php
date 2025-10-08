@@ -355,12 +355,12 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		// Email
 		$subject = __('share-email-subject', ['domain' => hypha_getTitle(), 'title' => $this->getTitle()]);
 		$body = __('share-email-body', ['domain' => hypha_getTitle(), 'title' => $this->getTitle(), 'url' => $linkToPage]);
-		$shareDiv->append('<a href="mailto:?subject='.rawurlencode($subject).'&body='.rawurlencode($body).'"><div class="email-link"></div></a>');
+		$shareDiv->appendHtml('<a href="mailto:?subject='.rawurlencode($subject).'&body='.rawurlencode($body).'"><div class="email-link"></div></a>');
 		// Twitter
 		$text = __('share-twitter', ['domain' => hypha_getTitle(), 'title' => $this->getTitle(), 'url' => $linkToPage]);
-		$shareDiv->append('<a href="https://twitter.com/intent/tweet?text='.rawurlencode($text).'&url='.rawurlencode($linkToPage).'" target="_blank"><div class="twitter-link"></div></a>');
+		$shareDiv->appendHtml('<a href="https://twitter.com/intent/tweet?text='.rawurlencode($text).'&url='.rawurlencode($linkToPage).'" target="_blank"><div class="twitter-link"></div></a>');
 		// Facebook
-		$shareDiv->append('<a href="https://www.facebook.com/sharer/sharer.php?u='.rawurlencode($linkToPage).'" target="_blank"><div class="facebook-link"></div></a>');
+		$shareDiv->appendHtml('<a href="https://www.facebook.com/sharer/sharer.php?u='.rawurlencode($linkToPage).'" target="_blank"><div class="facebook-link"></div></a>');
 
 		$this->appendAuthorAndTimestamp($main, $article);
 
@@ -388,7 +388,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 			/** @var HyphaDomElement $methodContainer */
 			$methodContainer = $this->html->createElement('div');
 			$methodContainer->attr('class', 'method');
-			$methodContainer->append('<h2>' . __('art-method') . '</h2>');
+			$methodContainer->appendHtml('<h2>' . __('art-method') . '</h2>');
 			$methodContainer->append($method);
 			$main->append($methodContainer);
 		}
@@ -399,7 +399,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 			/** @var HyphaDomElement $div */
 			$div = $this->html->createElement('div');
 			$div->setAttribute('class', 'sources');
-			$div->append('<h2>' . __('art-sources') . '</h2>');
+			$div->appendHtml('<h2>' . __('art-sources') . '</h2>');
 			$div->append($sources);
 			$main->append($div);
 		}
@@ -1406,7 +1406,7 @@ EOF;
 		$approvesDomElement = $this->html->createElement('div');
 		$approvesDomElement->attr('class', 'approves');
 		$approves = $this->xml->find(self::FIELD_NAME_APPROVE_CONTAINER)->find(self::FIELD_NAME_APPROVE)->toArray();
-		$approvesDomElement->append('<h2>' . __('art-approves') . '</h2>');
+		$approvesDomElement->appendHtml('<h2>' . __('art-approves') . '</h2>');
 
 		/** @var HyphaDomElement $list */
 		$list = $this->html->createElement('ul');
@@ -1416,11 +1416,11 @@ EOF;
 			$approver = hypha_getUserById($approverId);
 			$approverName = $approver instanceof HyphaDomElement ? $approver->getAttribute('fullname') : $approverId;
 			$html = '<p>' . __('art-by') . ' <strong>' . $approverName . '</strong> ' . __('art-at') . ' ' . $createdAt . '</p>';
-			$li = $this->html->createElement('li')->append($html);
+			$li = $this->html->createElement('li')->appendHtml($html);
 			$list->append($li);
 		}
 		if (empty($approves)) {
-			$list->append('<li>' . __('art-no-approves-yet') . '</li>');
+			$list->appendHtml('<li>' . __('art-no-approves-yet') . '</li>');
 		}
 		$approvesDomElement->append($list);
 
@@ -1615,7 +1615,7 @@ EOF;
 				}
 				if (null !== $msgId) {
 					$path = str_replace('{id}', $discussion->getId(), self::PATH_DISCUSSIONS_CLOSED);
-					$commentList->append('<p>' . $this->makeActionButton(__($msgId), $path, self::CMD_DISCUSSION_CLOSED) . '</p>');
+					$commentList->appendHtml('<p>' . $this->makeActionButton(__($msgId), $path, self::CMD_DISCUSSION_CLOSED) . '</p>');
 				}
 			}
 
@@ -1654,7 +1654,7 @@ EOF;
 		$discussionsDomElement->append($this->makeDiscussionActionButton($type));
 
 		$title = $review ? __('art-review-comments') : __('art-comments');
-		$discussionsDomElement->append('<h2>' . $title . '</h2>');
+		$discussionsDomElement->appendHtml('<h2>' . $title . '</h2>');
 		$discussionsDomElement->attr('class', $type . '-comments-wrapper');
 
 		return $discussionsDomElement;

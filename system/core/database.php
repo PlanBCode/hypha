@@ -341,6 +341,14 @@
 		function appendText(string $text) {
 			$this->appendChild(new DOMText($text));
 		}
+
+		/* Parse the given string as HTML and append the result
+		 * to the current node.
+		 */
+		function appendHtml(string $html) {
+			if ($html)
+				$this->appendChildren($this->ownerDocument->createFromHtml($html));
+		}
 	}
 
 	/*

@@ -193,11 +193,11 @@ class mailinglist extends HyphaDatatypePage {
 
 		// display page name and description
 		$description = $this->getDoc()->get(self::FIELD_NAME_DESCRIPTION)->getHtml();
-		$main->append($description);
+		$main->appendHtml($description);
 
 		// display form
 		$viewAddresses = isUser() ? '<span style="float: right;">' . $this->makeActionButton(__('ml-view-addresses'), self::PATH_ADDRESSES) . '</span>' : '';
-		$main->append('<div><h3>' . htmlspecialchars(__('subscribe')) . $viewAddresses . '</h3></div>');
+		$main->appendHtml('<div><h3>' . htmlspecialchars(__('subscribe')) . $viewAddresses . '</h3></div>');
 
 		// update the form dom so that values and errors can be displayed
 		$form->updateDom();
@@ -210,7 +210,7 @@ class mailinglist extends HyphaDatatypePage {
 		$formContainer->append($this->makeActionButton(__('subscribe'), null, self::CMD_SUBSCRIBE));
 
 		// display archive (non-users only get to see sent items)
-		$main->append('<div><h3>' . htmlspecialchars(__('archive')) . '</h3></div>');
+		$main->appendHtml('<div><h3>' . htmlspecialchars(__('archive')) . '</h3></div>');
 		$this->appendMailingsList($main);
 
 		return null;
@@ -767,16 +767,16 @@ EOF;
 		/** @var HyphaDomElement $main */
 		$subject = $mailing->getAttribute('subject');
 		$main = $this->html->find('#main');
-		$main->append('<div><h2>' . htmlspecialchars($subject) . '</h2></div>');
+		$main->appendHtml('<div><h2>' . htmlspecialchars($subject) . '</h2></div>');
 		$date = $mailing->getAttribute('date');
 		if ($date) {
 			$date = new DateTime($date);
-			$main->append('<div>' . htmlspecialchars(__('date')) . ': ' . $date->format(__('ml-date-format')) . '</h2></div>');
+			$main->appendHtml('<div>' . htmlspecialchars(__('date')) . ': ' . $date->format(__('ml-date-format')) . '</h2></div>');
 		}
 		if (isUser()) {
 			$receivers = $mailing->getAttribute('receivers');
 			if (null != $receivers) {
-				$main->append('<div>' . htmlspecialchars(__('ml-received-by')) . ': ' . $receivers . '</div>');
+				$main->appendHtml('<div>' . htmlspecialchars(__('ml-received-by')) . ': ' . $receivers . '</div>');
 			}
 		}
 		$main->append($mailing->getHtml());
