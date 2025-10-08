@@ -349,6 +349,22 @@
 			if ($html)
 				$this->appendChildren($this->ownerDocument->createFromHtml($html));
 		}
+
+		/*
+		 * Append the given iterable of DOMNodes to the current
+		 * node.
+		 */
+		function appendChildren(Traversable|array $nodes) {
+			// Convert to array, since we might be passed
+			// a DOMNodeList, which is dynamic and behaves
+			// unexpectedly when nodes are moved out of it
+			// via appendChild.
+			if (!is_array($nodes))
+				$nodes = iterator_to_array($nodes);
+
+			foreach ($nodes as $node)
+				$this->appendChild($node);
+		}
 	}
 
 	/*
