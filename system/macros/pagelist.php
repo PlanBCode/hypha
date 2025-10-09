@@ -207,7 +207,7 @@ class PagelistMacro extends HyphaMacro {
 
 		foreach ($pages as $page) {
 			$li = $this->renderPage($page);
-			$ul->append($li);
+			$ul->appendChild($li);
 		}
 		return $ul;
 	}

@@ -175,10 +175,9 @@
 EOF;
 		$pagetype_options = $html->create('<dummy/>');
 		foreach($types as $type => $datatypeName) {
-			$option = $html->create('<option/>')->setAttr('value', $type)->setText($datatypeName);
+			$option = $pagetype_options->createChild('option')->setAttr('value', $type)->setText($datatypeName);
 			if ($type==hypha_getDefaultNewPageType())
 				$option->setAttr('selected', 'selected');
-			$pagetype_options->append($option);
 		}
 		$vars = [
 			'create-new-page' => __('create-new-page'),

@@ -478,7 +478,7 @@ EOF;
 			$participant->setAttribute(self::ATTR_PARTICIPANT_PHONE, $form->dataFor(self::FIELD_NAME_PHONE));
 			$participant->setAttribute(self::ATTR_PARTICIPANT_KEY, bin2hex(openssl_random_pseudo_bytes(8)));
 			$participant->setAttribute(self::ATTR_PARTICIPANT_ATTENDING, implode(',', $form->dataFor('attending', [])));
-			$this->xml->documentElement->getOrCreate(self::TAG_PARTICIPANTS_CONTAINER)->append($participant);
+			$this->xml->documentElement->getOrCreate(self::TAG_PARTICIPANTS_CONTAINER)->appendChild($participant);
 			if ((float)$form->dataFor(self::FIELD_NAME_AMOUNT, 0) > 0)
 				$this->setupPayment($participant, $form->dataFor(self::FIELD_NAME_AMOUNT, 0));
 			$this->xml->saveAndUnlock();
@@ -589,7 +589,7 @@ EOF;
 			$message = __('festival-complete-by-paying');
 			$button = $this->makeActionButton(__('pay'), join('/', $request->getArgs()), self::CMD_PAY);
 			$main->appendText($message);
-			$main->append($button);
+			$main->appendChild($button);
 		}
 
 		/**

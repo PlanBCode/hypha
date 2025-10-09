@@ -246,7 +246,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		$this->xml->lockAndReload();
 		$build = function (HyphaDomElement $doc, array $structure) use (&$build) {
 			foreach ($structure as $name => $children) {
-				$doc->append($build($doc->getOrCreate($name), $children));
+				$doc->appendChild($build($doc->getOrCreate($name), $children));
 			}
 			return $doc;
 		};
@@ -402,12 +402,12 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		}
 
 		if (isUser() && self::STATUS_DRAFT !== $status) {
-			$main->append($this->createDiscussionsDomElement(self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER));
-			$main->append($this->createApprovesDomElement());
+			$main->appendChild($this->createDiscussionsDomElement(self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER));
+			$main->appendChild($this->createApprovesDomElement());
 		}
 
 		if (self::STATUS_PUBLISHED === $status) {
-			$main->append($this->createDiscussionsDomElement(self::FIELD_NAME_DISCUSSION_PUBLIC_CONTAINER));
+			$main->appendChild($this->createDiscussionsDomElement(self::FIELD_NAME_DISCUSSION_PUBLIC_CONTAINER));
 		}
 
 		return null;
@@ -783,7 +783,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		if (!$this->hasUserApproved($userId)) {
 			/** @var HyphaDomElement $approve */
 			$approve = $this->xml->createElement(self::FIELD_NAME_APPROVE);
-			$approves->append($approve);
+			$approves->appendChild($approve);
 			$approve->setAttribute(self::FIELD_NAME_USER, $userId);
 			$approve->setAttribute(self::FIELD_NAME_CREATED_AT, 't' . time());
 			$this->xml->saveAndUnlock();
@@ -1329,7 +1329,7 @@ EOF;
 		/** @var HyphaDomElement $comment */
 		$comment = $this->xml->createElement(self::FIELD_NAME_DISCUSSION_COMMENT);
 		$comment->generateId();
-		$discussion->append($comment);
+		$discussion->appendChild($comment);
 
 		$text = $form->dataFor(self::FIELD_NAME_DISCUSSION_COMMENT . $dataFieldSuffix);
 		$comment->setText($text);
@@ -1553,7 +1553,7 @@ EOF;
 						$showSpan->addClass('show-moderated');
 					}
 				} else {
-					$li->append($commentHtml);
+					$li->appendChildren($commentHtml);
 				}
 
 				if ($firstComment) {
@@ -1561,16 +1561,17 @@ EOF;
 				}
 
 				if (!$review && $this->O_O->isUser()) {
-					$moderate = $this->html->createElement('a');
+					$para = $this->html->createElement('p');
+					$moderate = $para->createChild('a');
 					$moderate->addClass('moderate-link');
 					$path = $this->pagename . '/' . str_replace('{id}', $comment->getId(), self::PATH_COMMENTS_MODERATE);
 					$moderate->setAttribute('href', $this->constructFullPath($path));
 					if ($hidden || $deleted) {
 						$moderate->setText(__('art-moderate-modify'));
-						$placeholder->append($moderate);
+						$placeholder->appendChild($para);
 					} else {
 						$moderate->setText(__('art-moderate-comment'));
-						$commentHtml->append($moderate);
+						$li->appendChild($para);
 					}
 				}
 				$firstComment = false;
@@ -1590,7 +1591,7 @@ EOF;
 				}
 			}
 			$discussionHtml->attr('class', $class);
-			$discussionHtml->append($commentList);
+			$discussionHtml->appendChild($commentList);
 
 			if ($review) {
 				$msgId = null;
@@ -1616,7 +1617,7 @@ EOF;
 				];
 				$replyForm = $this->createCommentForm($type, $formData, $discussion);
 				$replyForm->updateDom();
-				$commentList->append($replyForm);
+				$commentList->appendChild($replyForm);
 				$commentList->appendChild($this->makeDiscussionActionButton($type, $discussion));
 			}
 
@@ -1626,7 +1627,7 @@ EOF;
 		foreach ($reviewCommentContainersSorted as $openClosedSorted) {
 			foreach ($openClosedSorted as $blockingNonBLockingSorted) {
 				foreach ($blockingNonBLockingSorted as $discussionHtml) {
-					$discussionsDomElement->append($discussionHtml);
+					$discussionsDomElement->appendChild($discussionHtml);
 				}
 			}
 		}

@@ -153,7 +153,7 @@ class mailinglist extends HyphaDatatypePage {
 		$this->xml->lockAndReload();
 		$build = function (HyphaDomElement $doc, array $structure) use (&$build) {
 			foreach ($structure as $name => $children) {
-				$doc->append($build($doc->getOrCreate($name), $children));
+				$doc->appendChild($build($doc->getOrCreate($name), $children));
 			}
 			return $doc;
 		};
@@ -779,7 +779,7 @@ EOF;
 				$main->appendHtml('<div>' . htmlspecialchars(__('ml-received-by')) . ': ' . $receivers . '</div>');
 			}
 		}
-		$main->append($mailing->getInnerHtml());
+		$main->appendChildren($mailing->childNodes);
 
 		// buttons
 		/** @var HyphaDomElement $commands */
@@ -906,7 +906,7 @@ EOF;
 
 		/** @var HyphaDomElement $mailing */
 		$mailing = $this->xml->createElement(self::FIELD_NAME_MAILING);
-		$mailingsContainer->append($mailing);
+		$mailingsContainer->appendChild($mailing);
 
 		$mailing->generateId();
 		$mailing->setAttr(self::FIELD_NAME_STATUS, self::MAILING_STATUS_DRAFT);
@@ -1147,7 +1147,7 @@ EOF;
 		$mailing->setAttribute(self::FIELD_NAME_PROGRESS, $count);
 		/** @var HyphaDomElement $mailings */
 		$mailings = $this->getDoc()->getOrCreate(self::FIELD_NAME_MAILINGS_CONTAINER);
-		$mailings->append($mailing);
+		$mailings->appendChild($mailing);
 		$this->xml->saveAndUnlock();
 
 		// iterate over the confirmed addresses and send the mailing
@@ -1187,7 +1187,7 @@ EOF;
 		$mailing->setAttribute(self::FIELD_NAME_RECEIVERS, count($receivers));
 		/** @var HyphaDomElement $mailings */
 		$mailings = $this->getDoc()->getOrCreate(self::FIELD_NAME_MAILINGS_CONTAINER);
-		$mailings->append($mailing);
+		$mailings->appendChild($mailing);
 		$this->xml->saveAndUnlock();
 
 		// goto view page with notification

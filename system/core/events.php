@@ -262,8 +262,10 @@
 		foreach ($forms as $form) {
 			// if form does not have a csrf field, inject csrf field.
 			if ($form->find('input[name=csrfToken]')->count() === 0) {
-				$form->append($input = $html->create('<input name="csrfToken" type="hidden"'));
-				$input->setAttr('value', $O_O->getOrGenerateCsrfToken());
+				$input = $form->createChild('input');
+				$input->setAttribute('name', "csrfToken");
+				$input->setAttribute('type', "hidden");
+				$input->setAttribute('value', $O_O->getOrGenerateCsrfToken());
 			}
 		}
 	}

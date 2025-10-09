@@ -39,7 +39,7 @@
 			$pages = $this->sortPages($pages);
 
 			$pagesList = $this->renderPages($pages);
-			$main->append($pagesList);
+			$main->appendChild($pagesList);
 		}
 
 		protected function sortPages($pages) {
@@ -74,7 +74,7 @@
 			$ul->addClass('tagindex');
 			foreach ($pages as $page) {
 				$li = $this->renderPage($page);
-				$ul->append($li);
+				$ul->appendChild($li);
 			}
 			return $ul;
 		}
