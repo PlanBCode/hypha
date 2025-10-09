@@ -78,7 +78,7 @@
 			if (null !== $base_url) {
 				$base = $this->createElement('base');
 				$base->setAttribute('href', $base_url);
-				$head->prepend($base);
+				$base = $head->insertBefore($base, $head->childNodes->item(0));
 			}
 		}
 
@@ -428,7 +428,7 @@
 				$list = $this->root->findOneXPath(".//ul[class='form-errors']");
 				if (!$list) {
 					$list = $this->root->document()->createElement('ul')->addClass('form-errors');
-					$this->root->prepend($list);
+					$list = $this->root->insertBefore($list, $this->root->childNodes->Item(0));
 				}
 
 				foreach ($this->errors as $name => $error) {
