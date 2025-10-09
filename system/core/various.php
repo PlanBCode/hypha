@@ -96,8 +96,16 @@
 		$class - optional CSS class
 	*/
 	function makeLink($label, $action, $class = null, $tooltip = null) {
-		$classattr = ($class ? " class=".$class : "");
-		return '<a'.$classattr.' href="javascript:'.$action.'"'.($tooltip!==null?' title="'.$tooltip.'"':'').'>'.$label.'</a>';
+		global $hyphaHtml;
+		$link = $hyphaHtml->createElement('a');
+		if ($class)
+			$link->addClass($class);
+		$link->addClass('button');
+		$link->setAttribute('href', "javascript:$action");
+		if ($tooltip !== null)
+			$link->setAttribute('title', $tooltip);
+		$link->appendHtml($label);
+		return $link;
 	}
 
 	/*
