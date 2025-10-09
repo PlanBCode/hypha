@@ -198,8 +198,17 @@
 			$id - element identifier
 			$data - content to be added
 		*/
-		public function writeToElement($id, $data) {
-			if ($this->getElementById($id)) setInnerHtml($this->getElementById($id), getInnerHtml($this->getElementById($id)).$data);
+		public function writeToElement($id, string|DOMNode $data) {
+			$elem = $this->getElementById($id);
+			if (!$elem)
+				return;
+
+			if (is_string($data))
+				setInnerHtml($elem, getInnerHtml($elem).$data);
+			elseif ($data instanceof DOMNode)
+				$elem->appendChild($data);
+			else
+				throw new LogicException("Invalid argument type");
 		}
 
 		/*
