@@ -267,14 +267,10 @@
 	*/
 	class HTMLForm implements IteratorAggregate {
 		/**
-		 * A dummy root element that contains the form (which
-		 * can be just a single tag wrapping the entire form,
-		 * but also multiple elements). The root itself is
-                * ignored, only its children are relevant.
-		 *
-		 * @var \DOMWrap\Element
+		 * The form tag that contains everything else in this
+		 * form.
 		 */
-		public $root;
+		public $form_element;
 		/** The data associated with this form */
 		public $data;
 		/** Is this form already validated? Does not mean it is also actually valid. */
@@ -295,16 +291,22 @@
 			Wraps an existing form
 
 			Parameters:
-			@param string|NodeList|\DOMNode|\Closure $form
-			$form - The form, either as a single DomElement,
-				a list (or any traversable) of
-				DomElements, or a string containing
-				HTML. Accepts anything that can be passed
-				to domwrap's append method.
+			@param $form - The form, either as a single HyphaDomElement,
+				or a string containing HTML (must be
+				rooted in a single <form> tag).
 		*/
-		function __construct($form, $data = []) {
-			$this->root = (new HTMLDocument())->createElement('root');
-			$this->root->append($form);
+		function __construct(string|HyphaDomElement $form, $data = []) {
+			if (is_string($form)) {
+				$nodes = (new HTMLDocument())->createFromHtml($form);
+				if ($nodes->length != 1)
+					throw new InvalidArgumentException("Form HTML has more than one root tag");
+				if ($nodes->Item(0)->tagName != 'form')
+					throw new InvalidArgumentException("Form HTML root tag is not <form>");
+				$this->form_element = $nodes->Item(0);
+			} else {
+				assert($form instanceof HyphaDomElement);
+				$this->form_element = $form;
+			}
 
 			$this->data = $data;
 			$this->is_validated = false;
@@ -314,7 +316,8 @@
 			$this->labels = [];
 			$this->image_previews = [];
 
-			$this->scanForm($this->root);
+
+			$this->scanForm($this->form_element);
 		}
 
 		// This is called when the for is iterated over (e.g.
@@ -325,11 +328,11 @@
 		// DomElement (e.g. $div->append($form)) as if it was a
 		// DomElement itself.
 		public function getIterator() {
-			return $this->root->children();
+			return new ArrayIterator([$this->form_element]);
 		}
 
 		public function getId() {
-			return $this->root->findOneXPath('form')->getId();
+			return $this->form_element->getId();
 		}
 
 		/*
@@ -338,11 +341,11 @@
 			Look through the DOM to find form fields and
 			their labels
 		 */
-		protected function scanForm($root)
+		protected function scanForm($form)
 		{
 			$tags = './/input | .//select | .//textarea | .//label | .//img | .//editor';
 
-			foreach($root->findXPath($tags) as $elem) {
+			foreach($form->findXPath($tags) as $elem) {
 				if ($elem->tagName == 'label') {
 					$name = self::getNameAttr($elem, 'for');
 					if ($name)
@@ -425,10 +428,10 @@
 				// Note this does exact class matching, so
 				// breaks if another class is added (xpath does not
 				// have native proper class matching)
-				$list = $this->root->findOneXPath(".//ul[class='form-errors']");
+				$list = $this->form_element->findOneXPath(".//ul[class='form-errors']");
 				if (!$list) {
-					$list = $this->root->document()->createElement('ul')->addClass('form-errors');
-					$list = $this->root->insertBefore($list, $this->root->childNodes->Item(0));
+					$list = $this->form_element->ownerDocument->createElement('ul')->addClass('form-errors');
+					$list = $this->form_element->insertBefore($list, $this->form_element->childNodes->item(0));
 				}
 
 				foreach ($this->errors as $name => $error) {
@@ -510,7 +513,7 @@
 		 * @return HyphaDomElement The found element
 		 */
 		public function findField($name, $tagName) {
-			$found = $this->root->findXPath('.//'.$tagName.'[@name='. xpath_encode($name).']');
+			$found = $this->form_element->findXPath('.//'.$tagName.'[@name='. xpath_encode($name).']');
 			if ($found->length < 1)
 				throw new LogicException("Form field \"$name\" not found");
 			else if ($found->length > 1)
@@ -654,8 +657,8 @@
 			if (!$value)
 				return true;
 
-			$dom = $this->root->document()->createElement('dummy');
-			$dom->append($value);
+			$dom = $this->form_element->document()->createElement('dummy');
+			$dom->appendHtml($value);
 
 			// This forbids the presence of script tags,
 			// which is the most obvious and severe form of
