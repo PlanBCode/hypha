@@ -1706,13 +1706,13 @@ EOF;
 			'featured-image' => __('art-featured-image'),
 			'field-name-featured-image' => self::FIELD_NAME_FEATURED_IMAGE,
 
-			'info-button-excerpt' => makeInfoButton('help-art-excerpt'),
+			'info-button-excerpt' => makeInfoButton('help-art-excerpt')->getOuterHtml(),
 			'text' => __('art-article'),
 			'field-name-text' => self::FIELD_NAME_TEXT,
-			'info-button-text' => makeInfoButton('help-art-text'),
+			'info-button-text' => makeInfoButton('help-art-text')->getOuterHtml(),
 			'method' => __('art-method'),
 			'field-name-method' => self::FIELD_NAME_METHOD,
-			'info-button-method' => makeInfoButton('help-art-method'),
+			'info-button-method' => makeInfoButton('help-art-method')->getOuterHtml(),
 			'sources' => __('art-sources'),
 			'field-name-sources' => self::FIELD_NAME_SOURCES,
 		];
@@ -1748,7 +1748,7 @@ EOF;
 		$vars['type'] = $type;
 		$vars['comment'] = $new ? __('art-comment-on-article') : __('art-comment-on-comment');
 		$vars['field-name-comment'] = self::FIELD_NAME_DISCUSSION_COMMENT . $dataFieldSuffix;
-		$vars['info-button-comment-rules'] = makeInfoButton('help-comment-rules');
+		$vars['info-button-comment-rules'] = makeInfoButton('help-comment-rules')->getOuterHtml();
 
 		if ($new && $review && !in_array($this->getStatus(), [self::STATUS_APPROVED, self::STATUS_PUBLISHED])) {
 			$html .= <<<EOF
@@ -1757,7 +1757,7 @@ EOF;
 			</div>
 EOF;
 			$vars['blocking'] = __('art-blocking');
-			$vars['info-button-blocking'] = makeInfoButton('help-blocking-comment');
+			$vars['info-button-blocking'] = makeInfoButton('help-blocking-comment')->getOuterHtml();
 			$vars['field-name-comment-blocking'] = self::FIELD_NAME_DISCUSSION_BLOCKING . $dataFieldSuffix;
 		}
 
@@ -1780,7 +1780,7 @@ EOF;
 			$vars['email'] = __('art-email');
 			$vars['field-name-email'] = self::FIELD_NAME_DISCUSSION_COMMENTER_EMAIL . $dataFieldSuffix;
 			$vars['subscribe'] = __('art-subscribe');
-			$vars['info-button-subscribe'] = makeInfoButton('help-art-subscribe');
+			$vars['info-button-subscribe'] = makeInfoButton('help-art-subscribe')->getOuterHtml();
 			$vars['field-name-subscribe'] = self::FIELD_NAME_DISCUSSION_COMMENTER_SUBSCRIBE . $dataFieldSuffix;
 		}
 		$html .= '</div>';

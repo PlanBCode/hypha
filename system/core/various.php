@@ -109,8 +109,12 @@
 	*/
 	function makeInfoButton($tag) {
 		global $O_O;
+		global $hyphaHtml;
+		$button = $hyphaHtml->createElement('span');
+		$button->addClass('hyphaInfoButton');
 		$onclick = 'toggleInfoPopup(event, '.json_encode($tag).', ' . json_encode($O_O->getInterfaceLanguage()) . ', this)';
-		return '<span onclick="' . htmlspecialchars($onclick) . '" class="hyphaInfoButton"></span>';
+		$button->setAttribute("onclick", $onclick);
+		return $button;
 	}
 
 	/*
