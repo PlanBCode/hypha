@@ -680,7 +680,7 @@
 			$panel .= '<div class="panel_action_button">' . makeButton(__('apply-preview-theme'), makeAction('settings/theme', 'settingApplyPreviewTheme', ''))->getOuterHtml() . '</div>';
 			$panel .= '<div class="panel_cancel_button">' . makeButton(__('cancel-preview-theme'), makeAction('settings/theme', 'settingsCancelPreviewTheme', ''))->getOuterHtml() . '</div>';
 			$panel .= '</div>';
-			$bodyElement->parent()->appendHtml($panel);
+			$bodyElement->parentNode->appendHtml($panel);
 		}
 	}
 

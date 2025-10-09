@@ -907,7 +907,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 			return null;
 		}
 
-		$type = $discussion->parent()->nodeName;
+		$type = $discussion->parentNode->nodeName;
 		$review = self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER === $type;
 
 		$dataFieldSuffix = $this->constructDiscussionFieldSuffix($type, $discussion);
@@ -1184,7 +1184,7 @@ EOF;
 		$confirmCodeNodeList = $this->xml->findXPath($xpath);
 		if ($confirmCodeNodeList->length >= 1) {
 			/** @var HyphaDomElement $subscriber */
-			$subscriber = $confirmCodeNodeList->item(0)->parent();
+			$subscriber = $confirmCodeNodeList->item(0)->parentNode;
 			$subscriber->setAttribute(self::FIELD_NAME_DISCUSSION_SUBSCRIBER_STATUS, self::SUBSCRIBER_STATUS_CONFIRMED);
 			$subscriber->setAttribute(self::FIELD_NAME_DISCUSSION_SUBSCRIBER_UNSUBSCRIBE_CODE, $this->constructCode());
 
@@ -1339,7 +1339,7 @@ EOF;
 		}
 		$comment->setAttribute(self::FIELD_NAME_CREATED_AT, 't' . time());
 
-		$type = $discussion->parent()->nodeName;
+		$type = $discussion->parentNode->nodeName;
 		$review = self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER === $type;
 		if (!$review) {
 			if (isUser()) {
@@ -1940,7 +1940,7 @@ EOF;
 	 */
 	protected function getSubscribers(HyphaDomElement $comment) {
 		/** @var HyphaDomElement $discussion */
-		$discussion = $comment->parent();
+		$discussion = $comment->parentNode;
 
 		/** @var NodeList|HyphaDomElement[] $subscriberElements */
 		$xpath = './/' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER_CONTAINER . '/' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER . '[@ ' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER_STATUS . '=' . xpath_encode(self::SUBSCRIBER_STATUS_CONFIRMED) . ']';

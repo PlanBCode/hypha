@@ -79,7 +79,7 @@
 		// Divide list of all tags stored in hypha.xml in a selected tag list and a deselected tag list
 		foreach ($hyphaXml->findXPath('tagList/tag/language[@id=' . xpath_encode($lang) . ']') as $tagLang) {
 			/** @var HyphaDomElement $tagLang */
-			$id = $tagLang->parent()->getId();
+			$id = $tagLang->parentNode->getId();
 			$tag = ['label' => $tagLang->getAttribute('label'), 'description' => $tagLang->nodeValue, 'lang' => $tagLang->getAttribute('id')];
 			if (in_array($id, $selectedTagIds)) $selectedTags[$id] = $tag;
 			else $deselectedTags[$id] = $tag;
