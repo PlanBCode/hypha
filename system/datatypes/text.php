@@ -71,17 +71,17 @@
 				// if a revision is selected, show a 'revert' command button
 				if ($version) {
 					$commands = $this->html->find('#pageCommands');
-					$commands->append($this->makeActionButton(__('revert'), self::PATH_REVERT, self::CMD_REVERT));
+					$commands->appendChild($this->makeActionButton(__('revert'), self::PATH_REVERT, self::CMD_REVERT));
 				}
 				// if the latest revision is selected, show 'edit' and 'translate' command buttons
 				else {
 					$commands = $this->html->find('#pageCommands');
-					$commands->append($this->makeActionButton(__('edit'), self::PATH_EDIT));
-					$commands->append($this->makeActionButton(__('translate'), self::PATH_TRANSLATE));
+					$commands->appendChild($this->makeActionButton(__('edit'), self::PATH_EDIT));
+					$commands->appendChild($this->makeActionButton(__('translate'), self::PATH_TRANSLATE));
 
 					if (isAdmin()) {
 						$path = $this->language . '/' . $this->pagename;
-						$commands->append(makeButton(__('delete'), 'if(confirm(\'' . __('sure-to-delete') . '\'))' . makeAction($path, self::CMD_DELETE, '')));
+						$commands->appendChild(makeButton(__('delete'), 'if(confirm(\'' . __('sure-to-delete') . '\'))' . makeAction($path, self::CMD_DELETE, '')));
 					}
 				}
 			}
@@ -140,8 +140,8 @@ EOF;
 			$this->html->find('#main')->append($form);
 
 			$commands = $this->html->find('#pageCommands');
-			$commands->append($this->makeActionButton(__('save'), self::PATH_EDIT, self::CMD_SAVE));
-			$commands->append($this->makeActionButton(__('cancel'), ''));
+			$commands->appendChild($this->makeActionButton(__('save'), self::PATH_EDIT, self::CMD_SAVE));
+			$commands->appendChild($this->makeActionButton(__('cancel'), ''));
 
 			return null;
 		}
@@ -201,8 +201,8 @@ EOF;
 
 			// buttons
 			$commands = $this->html->find('#pageCommands');
-			$commands->append($this->makeActionButton(__('cancel')));
-			$commands->append($this->makeActionButton(__('save'), self::PATH_TRANSLATE, self::CMD_TRANSLATE));
+			$commands->appendChild($this->makeActionButton(__('cancel')));
+			$commands->appendChild($this->makeActionButton(__('save'), self::PATH_TRANSLATE, self::CMD_TRANSLATE));
 
 			return null;
 		}

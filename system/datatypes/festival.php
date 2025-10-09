@@ -109,17 +109,17 @@
 
 			if (isUser() && !in_array($request->getView(), [self::PATH_SETTINGS])) {
 				$commands = $this->html->find('#pageCommands');
-				$commands->append($this->makeActionButton(__('settings'), self::PATH_SETTINGS));
-				$commands->append($this->makeActionButton(__('festival-signup'), self::PATH_SIGNUP));
-				$commands->append($this->makeActionButton(__('festival-contribute'), self::PATH_CONTRIBUTE));
-				$commands->append($this->makeActionButton(__('festival-participants'), self::PATH_PARTICIPANTS));
-				$commands->append($this->makeActionButton(__('festival-contributions'), self::PATH_CONTRIBUTIONS));
-				$commands->append($this->makeActionButton(__('festival-lineup'), self::PATH_LINEUP));
-				$commands->append($this->makeActionButton(__('festival-timetable'), self::PATH_TIMETABLE));
+				$commands->appendChild($this->makeActionButton(__('settings'), self::PATH_SETTINGS));
+				$commands->appendChild($this->makeActionButton(__('festival-signup'), self::PATH_SIGNUP));
+				$commands->appendChild($this->makeActionButton(__('festival-contribute'), self::PATH_CONTRIBUTE));
+				$commands->appendChild($this->makeActionButton(__('festival-participants'), self::PATH_PARTICIPANTS));
+				$commands->appendChild($this->makeActionButton(__('festival-contributions'), self::PATH_CONTRIBUTIONS));
+				$commands->appendChild($this->makeActionButton(__('festival-lineup'), self::PATH_LINEUP));
+				$commands->appendChild($this->makeActionButton(__('festival-timetable'), self::PATH_TIMETABLE));
 
 				if (isAdmin()) {
 					$action = 'if(confirm(\'' . __('sure-to-delete') . '\'))' . makeAction($this->language . '/' . $this->pagename, 'delete', '');
-					$commands->append(makeButton(__('delete'), $action));
+					$commands->appendChild(makeButton(__('delete'), $action));
 				}
 			}
 
@@ -279,7 +279,7 @@
 				$row->addCell($contribution->getAttribute(self::ATTR_CONTRIBUTION_WEBSITE));
 
 				$button = $this->makeActionButton(__('edit'), self::PATH_CONTRIBUTE . '/'.$contribution->getId());
-				$row->addCell()->append($button);
+				$row->addCell()->appendChild($button);
 
 				$description = $contribution->getOrCreate(self::TAG_CONTRIBUTION_DESCRIPTION)->text();
 				$imgfilename = $contribution->getAttribute(self::ATTR_CONTRIBUTION_IMAGE);
@@ -352,8 +352,8 @@ EOF;
 			$this->html->find('#main')->append($form);
 
 			$commands = $this->html->find('#pageCommands');
-			$commands->append($this->makeActionButton(__('save'), self::PATH_SETTINGS, self::CMD_SAVE));
-			$commands->append($this->makeActionButton(__('cancel'), ''));
+			$commands->appendChild($this->makeActionButton(__('save'), self::PATH_SETTINGS, self::CMD_SAVE));
+			$commands->appendChild($this->makeActionButton(__('cancel'), ''));
 			return null;
 		}
 
@@ -450,7 +450,7 @@ EOF;
 			$this->html->find('#pagename')->text(__('festival-signup-for') . $this->getConfig(self::CONFIG_ID_TITLE));
 
 			$commands = $this->html->find('#pageEndCommands');
-			$commands->append($this->makeActionButton(__('signup'), self::PATH_SIGNUP, self::CMD_SIGNUP));
+			$commands->appendChild($this->makeActionButton(__('signup'), self::PATH_SIGNUP, self::CMD_SIGNUP));
 
 			return null;
 		}
@@ -770,7 +770,7 @@ EOF;
 
 			$commands = $this->html->find('#pageEndCommands');
 			$title = $editing ? __('festival-modify') : __('festival-contribute');
-			$commands->append($this->makeActionButton($title, join('/',$request->getArgs()), self::CMD_SAVE));
+			$commands->appendChild($this->makeActionButton($title, join('/',$request->getArgs()), self::CMD_SAVE));
 			return null;
 		}
 

@@ -181,10 +181,10 @@ class mailinglist extends HyphaDatatypePage {
 		if (isUser()) {
 			/** @var HyphaDomElement $commands */
 			$commands = $this->html->find('#pageCommands');
-			$commands->append($this->makeActionButton(__('edit'), self::PATH_EDIT));
+			$commands->appendChild($this->makeActionButton(__('edit'), self::PATH_EDIT));
 			if (isAdmin()) {
 				$path = $this->language . '/' . $this->pagename;
-				$commands->append(makeButton(__('delete'), 'if(confirm(\'' . __('sure-to-delete') . '\'))' . makeAction($path, self::CMD_DELETE, '')));
+				$commands->appendChild(makeButton(__('delete'), 'if(confirm(\'' . __('sure-to-delete') . '\'))' . makeAction($path, self::CMD_DELETE, '')));
 			}
 		}
 
@@ -207,7 +207,7 @@ class mailinglist extends HyphaDatatypePage {
 		$main->append($form);
 
 		$formContainer = $main->children()->end();
-		$formContainer->append($this->makeActionButton(__('subscribe'), null, self::CMD_SUBSCRIBE));
+		$formContainer->appendChild($this->makeActionButton(__('subscribe'), null, self::CMD_SUBSCRIBE));
 
 		// display archive (non-users only get to see sent items)
 		$main->appendHtml('<div><h3>' . htmlspecialchars(__('archive')) . '</h3></div>');
@@ -273,8 +273,8 @@ class mailinglist extends HyphaDatatypePage {
 
 		/** @var HyphaDomElement $commands */
 		$commands = $this->html->find('#pageCommands');
-		$commands->append($this->makeActionButton(__('save'), self::PATH_EDIT, self::CMD_SAVE));
-		$commands->append($this->makeActionButton(__('cancel'), ''));
+		$commands->appendChild($this->makeActionButton(__('save'), self::PATH_EDIT, self::CMD_SAVE));
+		$commands->appendChild($this->makeActionButton(__('cancel'), ''));
 
 		return null;
 	}
@@ -698,8 +698,8 @@ class mailinglist extends HyphaDatatypePage {
 		// add buttons
 		/** @var HyphaDomElement $commands */
 		$commands = $this->html->find('#pageCommands');
-		$commands->append($this->makeActionButton(__('back')));
-		if (isAdmin()) $commands->append($this->makeActionButton(__('add'), self::PATH_ADD));
+		$commands->appendChild($this->makeActionButton(__('back')));
+		if (isAdmin()) $commands->appendChild($this->makeActionButton(__('add'), self::PATH_ADD));
 		return null;
 	}
 
@@ -733,8 +733,8 @@ EOF;
 
 		/** @var HyphaDomElement $commands */
 		$commands = $this->html->find('#pageCommands');
-		$commands->append($this->makeActionButton(__('cancel'), self::PATH_ADDRESSES));
-		$commands->append($this->makeActionButton(__('add'), self::PATH_ADDRESSES, self::CMD_ADD));
+		$commands->appendChild($this->makeActionButton(__('cancel'), self::PATH_ADDRESSES));
+		$commands->appendChild($this->makeActionButton(__('add'), self::PATH_ADDRESSES, self::CMD_ADD));
 	}
 
 	protected function getNumberOfAddresses(){
@@ -784,7 +784,7 @@ EOF;
 		// buttons
 		/** @var HyphaDomElement $commands */
 		$commands = $this->html->find('#pageCommands');
-		$commands->append($this->makeActionButton(__('back')));
+		$commands->appendChild($this->makeActionButton(__('back')));
 
 		// get status
 		$status = $mailing->getAttribute('status');
@@ -792,7 +792,7 @@ EOF;
 		// add edit button when in draft
 		if (self::MAILING_STATUS_DRAFT == $status) {
 			$editPath = $this->substituteSpecial(self::PATH_MAILS_EDIT_ID, ['id' => $mailing->getId()]);
-			$commands->append($this->makeActionButton(__('edit'), $editPath));
+			$commands->appendChild($this->makeActionButton(__('edit'), $editPath));
 			$num = $this->getNumberOfAddresses();
 			$linkToMailing = $this->path(self::PATH_MAILS_VIEW_ID, ['id' => $mailingId]);
 
@@ -842,10 +842,10 @@ EOF;
 			 }';
 
 			if ($num > 0){ // hide send button if no addresses available
-				$commands->append(makeButton(__('send'), $action));
+				$commands->appendChild(makeButton(__('send'), $action));
 			}
 			$action = 'hypha('.json_encode($linkToMailing).', '.json_encode(self::CMD_SEND_TEST).', prompt(' . json_encode(__('email')) . '), $(this).closest(\'form\'));';
-			$commands->append(makeButton(__('ml-test-send'), $action));
+			$commands->appendChild(makeButton(__('ml-test-send'), $action));
 		}
 
 		return null;
@@ -877,8 +877,8 @@ EOF;
 
 		/** @var HyphaDomElement $commands */
 		$commands = $this->html->find('#pageCommands');
-		$commands->append($this->makeActionButton(__('cancel'), $cancelPath));
-		$commands->append($this->makeActionButton(__('save'), $submitPath, self::CMD_SAVE));
+		$commands->appendChild($this->makeActionButton(__('cancel'), $cancelPath));
+		$commands->appendChild($this->makeActionButton(__('save'), $submitPath, self::CMD_SAVE));
 	}
 
 	/**

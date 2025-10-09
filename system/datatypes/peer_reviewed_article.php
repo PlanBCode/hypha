@@ -298,24 +298,24 @@ class peer_reviewed_article extends HyphaDatatypePage {
 			$commands = $this->html->find('#pageCommands');
 			/** @var HyphaDomElement $commandsAtEnd */
 			$commandsAtEnd = $this->html->find('#pageEndCommands');
-			$commands->append($this->makeActionButton(__('edit'), self::PATH_EDIT));
+			$commands->appendChild($this->makeActionButton(__('edit'), self::PATH_EDIT));
 
 			// the status change from review to approved is done automatically
 			if (self::STATUS_REVIEW === $status) {
 				if (!$this->hasUserApproved($userId)) {
-					$commandsAtEnd->append($this->makeActionButton(__('art-approve'), null, self::CMD_APPROVE));
+					$commandsAtEnd->appendChild($this->makeActionButton(__('art-approve'), null, self::CMD_APPROVE));
 				}
 			} else if ($checkStatus != self::CHECK_STATUS_FAILED) {
 				foreach ($this->statusMtx[$status] as $option) {
 					if (self::STATUS_APPROVED === $status && $option['cmd'] === self::CMD_STATUS_CHANGE_PUBLISHED && !$this->hasUserCreated($userId) && !isAdmin()) {
 						continue;
 					}
-					$commands->append($this->makeActionButton(__($option['label']), null, $option['cmd']));
+					$commands->appendChild($this->makeActionButton(__($option['label']), null, $option['cmd']));
 				}
 			}
 			if (isAdmin()) {
 				$path = $this->language . '/' . $this->pagename;
-				$commands->append(makeButton(__('delete'), 'if(confirm(\'' . __('sure-to-delete') . '\'))' . makeAction($path, self::CMD_DELETE, '')));
+				$commands->appendChild(makeButton(__('delete'), 'if(confirm(\'' . __('sure-to-delete') . '\'))' . makeAction($path, self::CMD_DELETE, '')));
 			}
 		}
 
@@ -675,12 +675,12 @@ class peer_reviewed_article extends HyphaDatatypePage {
 
 		/** @var HyphaDomElement $commands */
 		$commands = $this->html->find('#pageCommands');
-		$commands->append($this->makeActionButton(__('art-cancel')));
-		$commands->append($this->makeActionButton(__('art-save'), self::PATH_EDIT, self::CMD_SAVE));
+		$commands->appendChild($this->makeActionButton(__('art-cancel')));
+		$commands->appendChild($this->makeActionButton(__('art-save'), self::PATH_EDIT, self::CMD_SAVE));
 		/** @var HyphaDomElement $commandsAtEnd */
 		$commandsAtEnd = $this->html->find('#pageEndCommands');
-		$commandsAtEnd->append($this->makeActionButton(__('art-cancel')));
-		$commandsAtEnd->append($this->makeActionButton(__('art-save'), self::PATH_EDIT, self::CMD_SAVE));
+		$commandsAtEnd->appendChild($this->makeActionButton(__('art-cancel')));
+		$commandsAtEnd->appendChild($this->makeActionButton(__('art-save'), self::PATH_EDIT, self::CMD_SAVE));
 
 		return null;
 	}
@@ -866,7 +866,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 
 		$actionButton = $this->makeDiscussionActionButton($type, $discussion);
 
-		$main->append($actionButton);
+		$main->appendChild($actionButton);
 
 		return null;
 	}
@@ -1065,7 +1065,7 @@ EOF;
 		$main->append($form);
 
 		$commands = $this->html->find('#pageEndCommands');
-		$commands->append($this->makeActionButton(__('cancel')));
+		$commands->appendChild($this->makeActionButton(__('cancel')));
 
 		$path = str_replace('{id}', $comment->getId(), self::PATH_COMMENTS_MODERATE);
 		// Show a hide button, but only if not already deleted,
@@ -1073,13 +1073,13 @@ EOF;
 		// and then hide).
 		if (!$deleted) {
 			$hide_title = $hidden ? __('art-moderate-change-reason') : __('art-moderate-hide-comment');
-			$commands->append($this->makeActionButton($hide_title, $path, self::CMD_COMMENT_MODERATE_HIDE ));
+			$commands->appendChild($this->makeActionButton($hide_title, $path, self::CMD_COMMENT_MODERATE_HIDE ));
 		}
 		$delete_title = $deleted ? __('art-moderate-change-reason') : __('art-moderate-delete-comment');
-		$commands->append($this->makeActionButton($delete_title, $path, self::CMD_COMMENT_MODERATE_DELETE ));
+		$commands->appendChild($this->makeActionButton($delete_title, $path, self::CMD_COMMENT_MODERATE_DELETE ));
 
 		if ($hidden || $deleted) {
-			$commands->append($this->makeActionButton(__('art-unmoderate-comment'), $path, self::CMD_COMMENT_UNMODERATE ));
+			$commands->appendChild($this->makeActionButton(__('art-unmoderate-comment'), $path, self::CMD_COMMENT_UNMODERATE ));
 		}
 
 		return null;
@@ -1617,7 +1617,7 @@ EOF;
 				$replyForm = $this->createCommentForm($type, $formData, $discussion);
 				$replyForm->updateDom();
 				$commentList->append($replyForm);
-				$commentList->append($this->makeDiscussionActionButton($type, $discussion));
+				$commentList->appendChild($this->makeDiscussionActionButton($type, $discussion));
 			}
 
 			$reviewCommentContainersSorted[(int)$closed][(int)!$blocking][] = $discussionHtml;
@@ -1639,7 +1639,7 @@ EOF;
 		$commentForm = $this->createCommentForm($type, $formData);
 		$commentForm->updateDom();
 		$discussionsDomElement->append($commentForm);
-		$discussionsDomElement->append($this->makeDiscussionActionButton($type));
+		$discussionsDomElement->appendChild($this->makeDiscussionActionButton($type));
 
 		$title = $review ? __('art-review-comments') : __('art-comments');
 		$discussionsDomElement->appendHtml('<h2>' . $title . '</h2>');
