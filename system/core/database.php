@@ -307,8 +307,7 @@
 			$result = $this->get($tag);
 
 			if (!$result) {
-				$result = $this->document()->createElement($tag);
-				$this->append($result);
+				$result = $this->createChild($tag);
 			}
 			return $result;
 		}
@@ -367,12 +366,23 @@
 		}
 
 		/*
+
 		 * Append the given iterable of DOMNodes to the current node,
 		 * importing (copying) the nodes into the current document.
 		 */
 		function appendImportedChildren(Traversable|array $nodes) {
 			foreach ($nodes as $node)
 				$this->appendChild($this->ownerDocument->importNode($node, true));
+		}
+
+		/*
+		 * Creates a node with the given tag name, appends it to
+		 * the current node and returns it.
+		 */
+		function createChild(string $tagname) {
+			$node = $this->document()->createElement($tagname);
+			$this->appendChild($node);
+			return $node;
 		}
 	}
 

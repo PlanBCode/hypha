@@ -218,7 +218,7 @@ class PagelistMacro extends HyphaMacro {
 		$li->addClass('type_' . get_class($page));
 		$li->addClass($page->privateFlag ? 'is-private' : 'is-public');
 
-		$a = $this->doc->createElement('a')->appendTo($li);
+		$a = $li->createChild('a');
 		$a->setAttribute('href', $page->language.'/'.$page->pagename);
 
 		$page->renderExcerpt($a);

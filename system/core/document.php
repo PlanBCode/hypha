@@ -67,15 +67,13 @@
 
 		public function initForBrowser($base_url = null) {
 			$this->documentElement->setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
-			$head = $this->find('head');
-			$metaMime = $this->createElement('meta', '');
+			$head = $this->find('head')->first();
+			$metaMime = $head->createChild('meta');
 			$metaMime->setAttribute('http-equiv', "Content-Type");
 			$metaMime->setAttribute('content', "text/html; charset=utf-8");
-			$head->appendChild($metaMime);
-			$metaViewport = $this->createElement('meta', '');
+			$metaViewport = $head->createChild('meta');
 			$metaViewport->setAttribute('name', "viewport");
 			$metaViewport->setAttribute('content', "width=device-width, initial-scale=1");
-			$head->appendChild($metaViewport);
 
 			if (null !== $base_url) {
 				$base = $this->createElement('base');
@@ -114,7 +112,7 @@
 		*/
 		public function setTitle($title) {
 			if ($this->getElementsByTagName('title')->length) $this->getElementsByTagName('title')->Item(0)->nodeValue = $title;
-			else $this->getElementsByTagName('head')->Item(0)->appendChild($this->createElement('title', $title));
+			else $this->getElementsByTagName('head')->Item(0)->createChild('title')->nodeValue = $title;
 		}
 
 		/*
@@ -125,11 +123,10 @@
 			$href - icon URL
 		*/
 		public function setFavicon($href) {
-			$style = $this->createElement('link', '');
+			$style = $this->getElementsByTagName('head')->Item(0)->createChild('link');
 			$style->setAttribute('href', $href);
 			$style->setAttribute('rel', 'shortcut icon');
 			$style->setAttribute('type', 'text/ico');
-			$this->getElementsByTagName('head')->Item(0)->appendChild($style);
 		}
 
 		/*
@@ -140,10 +137,9 @@
 			$src - url to a javascript
 		*/
 		public function linkScript($src) {
-			$script = $this->createElement('script', '');
+			$script = $this->getElementsByTagName('head')->Item(0)->createChild('script');
 			$script->setAttribute('src', $src);
 			$script->setAttribute('type', 'text/javascript');
-			$this->getElementsByTagName('head')->Item(0)->appendChild($script);
 		}
 
 		/*
@@ -154,11 +150,10 @@
 			$href - url to a CSS document
 		*/
 		public function linkStyle($href) {
-			$style = $this->createElement('link', '');
+			$style = $this->getElementsByTagName('head')->Item(0)->createChild('link');
 			$style->setAttribute('href', $href);
 			$style->setAttribute('rel', 'stylesheet');
 			$style->setAttribute('type', 'text/css');
-			$this->getElementsByTagName('head')->Item(0)->appendChild($style);
 		}
 
 		/*
@@ -171,10 +166,9 @@
 		public function writeScript($js) {
 			$script = $this->getElementById('jsAggregator');
 			if (empty($script)) {
-				$script = $this->createElement('script', '');
+				$script = $this->getElementsByTagName('head')->Item(0)->createChild('script');
 				$script->setAttribute('type', 'text/javascript');
 				$script->setAttribute('id', 'jsAggregator');
-				$this->getElementsByTagName('head')->Item(0)->appendChild($script);
 			}
 			$script->appendText(preg_replace('#<script[^>]*>(.*)</script>#isU','$1', $js));
 		}
@@ -190,9 +184,8 @@
 			$style = null;
 			foreach($this->getElementsByTagName('style') as $s) if (!$s->hasAttribute('src')) $style = $s;
 			if (empty($style)) {
-				$style = $this->createElement('style', '');
+				$style = $this->getElementsByTagName('head')->Item(0)->createChild('style');
 				$style->setAttribute('type', 'text/css');
-				$this->getElementsByTagName('head')->Item(0)->appendChild($style);
 			}
 			$style->appendText(preg_replace('/(<style>|<\/style>)/i', '', $css));
 		}
@@ -424,9 +417,8 @@
 				}
 
 				foreach ($this->errors as $name => $error) {
-					$item = $list->document()->createElement('li');
+					$item = $list->createChild('li');
 					$item->setText($this->labelFor($name) . ': ' . $error);
-					$list->append($item);
 				}
 			}
 		}
@@ -524,8 +516,7 @@
 		 * @return HyphaDomElement The created option element
 		 */
 		public function addOptionToSelect(HyphaDomElement $field, $value, $content, array $attributes = []) {
-			$doc =  $this->root->document();
-			$option = $doc->createElement('option')->appendTo($field);
+			$option = $field->createChild('option');
 			$option->setAttribute('value', $value);
 			$option->setText($content);
 			foreach ($attributes as $name => $value) {

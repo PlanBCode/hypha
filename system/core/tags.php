@@ -186,9 +186,8 @@
 
 		$hyphaXml->lockAndReload();
 		$pageListNode = hypha_getPage($lang, $O_O->getRequest()->getPageName());
-		$newtag = $hyphaXml->createElement('tag');
+		$newtag = $pageListNode->createChild('tag');
 		$newtag->setAttribute('id', $id);
-		$pageListNode->appendChild($newtag);
 		$hyphaXml->saveAndUnlock();
 
 		echo tagList($pageListNode, $lang);
@@ -224,8 +223,7 @@
 		// Check if tagList exists
 		$tagList = $hyphaXml->findXPath('hypha/tagList');
 		if ($tagList->count() === 0) {
-			$tagList = $hyphaXml->createElement('tagList');
-			$hyphaXml->documentElement->appendChild($tagList);
+			$tagList = $hyphaXml->documentElement->createChild('tagList');
 		}
 
 		// Check if tag exists
@@ -237,17 +235,15 @@
 			$newTagName = $json['name'];
 			$newTagDescription = $json['description'];
 
-			$newTag = $hyphaXml->createElement('tag');
+			$newTag = $tagList->createChild('tag');
 			$newTag->generateId();
-			$newTagLanguage = $hyphaXml->createElement('language', $newTagDescription);
+			$newTagLanguage = $newTag->createChild('language');
+			$newTagLanguage->appendText($newTagDescription);
 			$newTagLanguage->setAttribute('id', $lang);
 			$newTagLanguage->setAttribute('label', $newTagName);
-			$newTag->appendChild($newTagLanguage);
-			$tagList->appendChild($newTag);
 
-			$newTagRef = $hyphaXml->createElement('tag');
+			$newTagRef = $pageListNode->createChild('tag');
 			$newTagRef->setAttribute('id', $newTag->getId());
-			$pageListNode->appendChild($newTagRef);
 
 			$hyphaXml->saveAndUnlock();
 		} else {

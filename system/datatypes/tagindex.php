@@ -27,14 +27,12 @@
 
 			/** @var HyphaDomElement $pagename */
 			$pagename = $this->html->find('#pagename');
-			$tagprefixSpan = $this->html->createElement('span');
+			$tagprefixSpan = $pagename->createChild('span');
 			$tagprefixSpan->setText('Index for tag: ');
 			$tagprefixSpan->setAttribute('class', 'tag_prefix');
-			$tagSpan = $this->html->createElement('span');
+			$tagSpan = $pagename->createChild('span');
 			$tagSpan->setAttribute('class', 'selected_tag');
 			$tagSpan->setText($label);
-			$pagename->append($tagprefixSpan);
-			$pagename->append($tagSpan);
 
 			$includePrivate = isUser();
 			$pages = $this->getPages($tag, $includePrivate);
@@ -87,7 +85,7 @@
 			$li->addClass('type_' . get_class($page));
 			$li->addClass($page->privateFlag ? 'is-private' : 'is-public');
 
-			$a = $this->html->createElement('a')->appendTo($li);
+			$a = $li->createChild('a');
 			$a->setAttribute('href', $page->language.'/'.$page->pagename);
 
 			$page->renderExcerpt($a);

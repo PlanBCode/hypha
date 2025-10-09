@@ -93,10 +93,9 @@
 		}
 
 		public function renderSingleLine(HyphaDomElement $container) {
-			$h2 = $container->document()->createElement('h2');
+			$h2 = $container->createChild('h2');
 			$h2->setText($this->getTitle());
 			$h2->addClass('title');
-			$h2->appendTo($container);
 		}
 
 		public function renderExcerpt(HyphaDomElement $container) {

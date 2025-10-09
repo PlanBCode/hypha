@@ -878,8 +878,8 @@ EOF;
 			$this->html->find('#pagename')->text(__('festival-lineup-for') . $this->getConfig(self::CONFIG_ID_TITLE));
 			$main = $this->html->find('#main');
 			$description = $this->getConfig(self::CONFIG_ID_DESCRIPTION);
-			$this->html->createElement('p')->addClass('lineup-description')->setText($description)->appendTo($main);
-			$contributionsdiv = $this->html->createElement('div')->addClass('contributions')->appendTo($main);
+			$main->createChild('p')->addClass('lineup-description')->setText($description);
+			$contributionsdiv = $main->createChild('div')->addClass('contributions');
 
 
 			$contributions = $this->xml->documentElement->getOrCreate(self::TAG_CONTRIBUTION_CONTAINER)->children();

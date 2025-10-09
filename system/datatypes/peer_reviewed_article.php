@@ -188,9 +188,8 @@ class peer_reviewed_article extends HyphaDatatypePage {
 
 	public function renderExcerpt(HyphaDomElement $container) {
 		$doc = $container->document();
-		$h2 = $doc->createElement('h2')->setText($this->getTitle());
+		$h2 = $container->createChild('h2')->setText($this->getTitle());
 		$h2->addClass('title');
-		$h2->appendTo($container);
 
 		$article = $this->xml->find(self::FIELD_NAME_ARTICLE);
 		$this->appendAuthorAndTimestamp($container, $article);
@@ -200,17 +199,17 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	public function renderExcerptBody(HyphaDomElement $container) {
 		$doc = $container->document();
 		/** @var HyphaDomElement $excerpt */
-		$excerpt = $doc->createElement('div')->appendTo($container);
+		$excerpt = $container->createChild('div');
 		$excerpt->addClass('excerpt');
 
 		$featuredImageSrc = $this->xml->documentElement->getOrCreate(self::FIELD_NAME_FEATURED_IMAGE)->text();
 		if ($featuredImageSrc) {
-			$featured_image = $doc->createElement('img')->appendTo($excerpt);
+			$featured_image = $excerpt->createChild('img');
 			$featured_image->addClass('featured_image');
 			$featured_image->setAttribute('src', (new HyphaImage($featuredImageSrc))->getUrl());
 		}
 
-		$excerptBody = $doc->createElement('div')->appendTo($excerpt);
+		$excerptBody = $excerpt->createChild('div');
 		$excerptBody->addClass('excerpt_body');
 		$excerptBody->appendImportedChildren($this->getExcerpt()->children());
 	}
@@ -348,7 +347,8 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		}
 
 		// Sharing links
-		$shareDiv = $this->html->create('<div class="share-links">')->appendTo($main);
+		$shareDiv = $main->createChild('div');
+	        $shareDiv->addClass('share-links');
 		$linkToPage = $this->constructFullPath($this->pagename);
 		$themeImgPath = 'data/themes/' . $this->O_O->getThemeName() . '/images';
 
@@ -370,38 +370,35 @@ class peer_reviewed_article extends HyphaDatatypePage {
 				$checklist->appendTo($main);
 			}
 
-			$preview = $this->html->createElement('div')->addClass('excerpt-preview')->appendTo($main);
-			$this->html->createElement('span')->addClass('prefix')->setText(__('art-excerpt-preview'))->appendTo($preview);
+			$preview = $main->createChild('div')->addClass('excerpt-preview');
+			$preview->createChild('span')->addClass('prefix')->setText(__('art-excerpt-preview'));
 			$this->renderExcerptBody($preview);
 		}
 
 		$text_nodes = $content->find(self::FIELD_NAME_TEXT)->children();
 		/** @var HyphaDomElement $div */
-		$div = $this->html->createElement('div');
+		$div = $main->createChild('div');
 		$div->setAttribute('class', 'article');
 		$div->appendImportedChildren($text_nodes);
-		$main->append($div);
 
 		/** @var NodeList $method */
 		$method_nodes = $this->xml->find(self::FIELD_NAME_METHOD)->children();
 		if ($method_nodes->count() > 0) {
 			/** @var HyphaDomElement $methodContainer */
-			$methodContainer = $this->html->createElement('div');
+			$methodContainer = $main->createChild('div');
 			$methodContainer->attr('class', 'method');
 			$methodContainer->appendHtml('<h2>' . __('art-method') . '</h2>');
 			$methodContainer->appendImportedChildren($method_nodes);
-			$main->append($methodContainer);
 		}
 
 		/** @var NodeList $sources */
 		$sources = $this->xml->find(self::FIELD_NAME_SOURCES)->children();
 		if ($sources->count() > 0) {
 			/** @var HyphaDomElement $div */
-			$div = $this->html->createElement('div');
+			$div = $main->createChild('div');
 			$div->setAttribute('class', 'sources');
 			$div->appendHtml('<h2>' . __('art-sources') . '</h2>');
 			$div->appendImportedChildren($sources);
-			$main->append($div);
 		}
 
 		if (isUser() && self::STATUS_DRAFT !== $status) {
@@ -553,7 +550,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		$wrapper->addClass('review-start-checklist');
 		$wrapper->addClass($checkStatus);
 
-		$header = $this->html->createElement('h2')->appendTo($wrapper);
+		$header = $wrapper->createChild('h2');
 		$header->setText(__('art-check-header'));
 
 		$status = $this->getStatus();
@@ -572,14 +569,14 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		}
 
 		if ($msg) {
-			$prefix = $this->html->createElement('span')->appendTo($wrapper);
+			$prefix = $wrapper->createChild('span');
 			$prefix->addClass('prefix');
 			$prefix->setText($msg);
 		}
 
-		$list = $this->html->createElement('ul')->appendTo($wrapper);
+		$list = $wrapper->createChild('ul');
 		foreach ($checks as $name => $check) {
-			$li = $this->html->createElement('li')->appendTo($list);
+			$li = $list->createChild('li');
 			$li->addClass($name);
 			$li->addClass($check['status']);
 			$li->setText($check['label']);
@@ -594,26 +591,22 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		$publishedTimestamp = ltrim($article->getAttribute(self::FIELD_NAME_PUBLISHED_AT), 't');
 
 		if ($author) {
-			$author_div = $doc->createElement('div');
+			$author_div = $container->createChild('div');
 			$author_div->addClass('author');
 			$author_div->setText(__('art-by') . ' ' . $author);
-			$container->append($author_div);
 		}
 		if ($publishedTimestamp) {
 			/** @var HyphaDomElement $publish */
-			$publish_div = $doc->createElement('div');
+			$publish_div = $container->createChild('div');
 			$publish_div->setAttribute('class', 'published_at');
 			/** @var HyphaDomElement $publishDate */
-			$publishDate = $doc->createElement('span');
+			$publishDate = $publish_div->createChild('span');
 			$publishDate->setAttribute('class', 'date');
 			$publishDate->text(strftime(__('art-date-format-date'), $publishedTimestamp));
-			$publish_div->append($publishDate);
 			/** @var HyphaDomElement $publishTime */
-			$publishTime = $doc->createElement('span');
+			$publishTime = $publish_div->createChild('span');
 			$publishTime->setAttribute('class', 'time');
 			$publishTime->text(strftime(__('art-date-format-time'), $publishedTimestamp));
-			$publish_div->append($publishTime);
-			$container->append($publish_div);
 		}
 	}
 
@@ -1054,10 +1047,10 @@ EOF;
 		$deleted = $comment->getAttribute(self::FIELD_NAME_DISCUSSION_MODERATION_STATUS) === self::MODERATION_STATUS_DELETED;
 
 		$main = $this->html->find('#main')->first();
-		$commentDiv = $this->html->createElement('div')->appendTo($main);
+		$commentDiv = $main->createChild('div');
 		$commentDiv->addClass('moderation-comment');
 
-		$prefix = $this->html->createElement('span')->appendTo($commentDiv);
+		$prefix = $commentDiv->createChild('span');
 		$prefix->addClass('prefix');
 		if ($hidden) {
 			$prefix->setText(__('art-comment-is-hidden'));
@@ -1303,9 +1296,8 @@ EOF;
 		$this->xml->requireLock();
 
 		/** @var HyphaDomElement $discussion */
-		$discussion = $this->xml->createElement(self::FIELD_NAME_DISCUSSION);
+		$discussion = $discussionContainer->createChild(self::FIELD_NAME_DISCUSSION);
 		$discussion->generateId();
-		$discussionContainer->append($discussion);
 
 		$type = $discussionContainer->nodeName;
 		$review = self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER === $type;
@@ -1373,19 +1365,17 @@ EOF;
 					/** @var NodeList $subscriberNodeList */
 					$subscriber = $subscriberContainer->findXPath($xpath)->first();
 					if (!$subscriber instanceof HyphaDomElement) {
-						$subscriber = $this->xml->createElement(self::FIELD_NAME_DISCUSSION_SUBSCRIBER);
+						$subscriber = $subscriberContainer->createChild(self::FIELD_NAME_DISCUSSION_SUBSCRIBER);
 						$subscriber->setAttribute(self::FIELD_NAME_DISCUSSION_SUBSCRIBER_STATUS, self::SUBSCRIBER_STATUS_PENDING);
 						$subscriber->setAttribute(self::FIELD_NAME_DISCUSSION_SUBSCRIBER_EMAIL, $subscriberEmail);
 						$subscriber->setAttribute(self::FIELD_NAME_DISCUSSION_SUBSCRIBER_NAME, $userName);
-						$subscriberContainer->append($subscriber);
 					}
 
 					// if still pending, add notification confirm code
 					if ($subscriber->getAttribute(self::FIELD_NAME_DISCUSSION_SUBSCRIBER_STATUS) === self::SUBSCRIBER_STATUS_PENDING) {
 						/** @var HyphaDomElement $subscribeConfirmCode */
-						$subscribeConfirmCode = $this->xml->createElement(self::FIELD_NAME_DISCUSSION_SUBSCRIBER_CONFIRM_CODE);
+						$subscribeConfirmCode = $subscriber->createChild(self::FIELD_NAME_DISCUSSION_SUBSCRIBER_CONFIRM_CODE);
 						$subscribeConfirmCode->setAttribute(self::FIELD_NAME_DISCUSSION_SUBSCRIBER_CODE, $code);
-						$subscriber->append($subscribeConfirmCode);
 					}
 				}
 			}
@@ -1409,20 +1399,18 @@ EOF;
 		$approvesDomElement->appendHtml('<h2>' . __('art-approves') . '</h2>');
 
 		/** @var HyphaDomElement $list */
-		$list = $this->html->createElement('ul');
+		$list = $approvesDomElement->createChild('ul');
 		foreach ($approves as $approve) {
 			$createdAt = date('j-m-y, H:i', ltrim($approve->getAttribute(self::FIELD_NAME_CREATED_AT), 't'));
 			$approverId = $approve->getAttribute(self::FIELD_NAME_USER);
 			$approver = hypha_getUserById($approverId);
 			$approverName = $approver instanceof HyphaDomElement ? $approver->getAttribute('fullname') : $approverId;
 			$html = '<p>' . __('art-by') . ' <strong>' . $approverName . '</strong> ' . __('art-at') . ' ' . $createdAt . '</p>';
-			$li = $this->html->createElement('li')->appendHtml($html);
-			$list->append($li);
+			$li = $list->createChild('li')->appendHtml($html);
 		}
 		if (empty($approves)) {
 			$list->appendHtml('<li>' . __('art-no-approves-yet') . '</li>');
 		}
-		$approvesDomElement->append($list);
 
 		return $approvesDomElement;
 	}
@@ -1505,8 +1493,8 @@ EOF;
 		// in case of no discussions
 		if (empty($discussions)) {
 			/** @var HyphaDomElement $noCommentContainer */
-			$noCommentContainer = $this->html->createElement('ul')->appendTo($discussionsDomElement);
-			$noComment = $this->html->create('li')->appendTo($noCommentContainer);
+			$noCommentContainer = $discussionsDomElement->createChild('ul');
+			$noComment = $noCommentContainer->createChild('li');
 			$noComment->text(__('art-no-comments-yet'));
 		}
 
@@ -1531,22 +1519,22 @@ EOF;
 					continue;
 				}
 
-				$li = $this->html->createElement('li')->appendTo($commentList);
+				$li = $commentList->createChild('li');
 				$commentHtml = $this->createCommentDomElement($comment, $review, $firstComment && $blocking, $resolved);
 				$hidden = $comment->getAttribute(self::FIELD_NAME_DISCUSSION_MODERATION_STATUS) === self::MODERATION_STATUS_HIDDEN;
 				$deleted = $comment->getAttribute(self::FIELD_NAME_DISCUSSION_MODERATION_STATUS) === self::MODERATION_STATUS_DELETED;
 				if ($hidden || $deleted) {
 					if ($deleted) {
 						$li->addClass('deleted');
-						$placeholder = $this->html->createElement('div')->appendTo($li);
+						$placeholder = $li->createChild('div');
 					} else {
 						$li->addClass('hidden');
-						$details = $this->html->createElement('details')->appendTo($li);
-						$placeholder = $this->html->createElement('summary')->appendTo($details);
+						$details = $li->createChild('details');
+						$placeholder = $details->createChild('summary');
 						$commentHtml->appendTo($details);
 					}
 					$placeholder->addClass('moderated-placeholder');
-					$statusSpan = $this->html->createElement('span')->appendTo($placeholder);
+					$statusSpan = $placeholder->createChild('span');
 					if ($deleted) {
 						$statusSpan->setText(__('art-comment-is-deleted'));
 					} else {
@@ -1555,12 +1543,12 @@ EOF;
 					$statusSpan->addClass('moderate-status');
 					$moderateReason = $comment->getAttribute(self::FIELD_NAME_DISCUSSION_MODERATION_REASON);
 					if ($moderateReason) {
-						$reasonSpan = $this->html->createElement('span')->appendTo($placeholder);
+						$reasonSpan = $placeholder->createChild('span');
 						$reasonSpan->addClass('moderate-reason');
 						$reasonSpan->setText(' (' . $moderateReason . ')');
 					}
 					if (!$deleted) {
-						$showSpan = $this->html->createElement('span')->appendTo($placeholder);
+						$showSpan = $placeholder->createChild('span');
 						$showSpan->setText(__('art-moderate-show-comment'));
 						$showSpan->addClass('show-moderated');
 					}
@@ -1615,7 +1603,7 @@ EOF;
 				}
 				if (null !== $msgId) {
 					$path = str_replace('{id}', $discussion->getId(), self::PATH_DISCUSSIONS_CLOSED);
-					$commentList->appendHtml('<p>' . $this->makeActionButton(__($msgId), $path, self::CMD_DISCUSSION_CLOSED) . '</p>');
+					$commentList->createChild('p')->setHtml($this->makeActionButton(__($msgId), $path, self::CMD_DISCUSSION_CLOSED));
 				}
 			}
 
