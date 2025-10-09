@@ -677,8 +677,8 @@
 			$bodyElement = $hyphaPage->html->find('body');
 			$panel = '<div class="preview_panel" style="position:fixed; bottom:0; background-color: rgba(0, 0, 0, 0.8);">';
 			$panel .= '<div class="panel_text">' . __('previewing').': '.$previewTheme . '</div>';
-			$panel .= '<div class="panel_action_button">' . makeButton(__('apply-preview-theme'), makeAction('settings/theme', 'settingApplyPreviewTheme', '')) . '</div>';
-			$panel .= '<div class="panel_cancel_button">' . makeButton(__('cancel-preview-theme'), makeAction('settings/theme', 'settingsCancelPreviewTheme', '')) . '</div>';
+			$panel .= '<div class="panel_action_button">' . makeButton(__('apply-preview-theme'), makeAction('settings/theme', 'settingApplyPreviewTheme', ''))->getOuterHtml() . '</div>';
+			$panel .= '<div class="panel_cancel_button">' . makeButton(__('cancel-preview-theme'), makeAction('settings/theme', 'settingsCancelPreviewTheme', ''))->getOuterHtml() . '</div>';
 			$panel .= '</div>';
 			$bodyElement->parent()->appendHtml($panel);
 		}

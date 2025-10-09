@@ -349,8 +349,8 @@
 					echo '<option' . ($normalTheme === $theme ? ' selected' : '') . '>' . htmlspecialchars($theme) . '</option>';
 				}
 				echo '</select>';
-				echo makeButton(__('save'), makeAction('settings/theme', 'settingsSaveTheme', ''));
-				echo makeButton(__('preview-theme'), makeAction('settings/theme', 'settingsPreviewTheme', ''));
+				echo makeButton(__('save'), makeAction('settings/theme', 'settingsSaveTheme', ''))->getOuterHtml();
+				echo makeButton(__('preview-theme'), makeAction('settings/theme', 'settingsPreviewTheme', ''))->getOuterHtml();
 				$this->html->writeToElement('main', ob_get_clean());
 
 				$this->html->writeToElement('main', '<div id="copy-theme"></div>');
@@ -363,8 +363,8 @@
 				}
 				echo '</div>' . "\n";
 				echo '<div class="new-theme-name"><input type="text" name="dstTheme" placeholder="'.__('new-theme-name').'"></div>';
-				echo makeButton(__('copy-theme'), makeAction('settings/theme', 'settingsCopyTheme', ''));
-				echo makeButton(__('copy-theme-and-activate'), makeAction('settings/theme', 'settingsCopyThemeAndActivate', ''));
+				echo makeButton(__('copy-theme'), makeAction('settings/theme', 'settingsCopyTheme', ''))->getOuterHtml();
+				echo makeButton(__('copy-theme-and-activate'), makeAction('settings/theme', 'settingsCopyThemeAndActivate', ''))->getOuterHtml();
 				$this->html->writeToElement('copy-theme', ob_get_clean());
 
 			}
@@ -668,19 +668,19 @@
 					echo '<td>';
 					if ($user->getAttribute('rights')!='exmember') {
 						if ($user->getAttribute('username'))
-							echo makeButton(__('edit'), makeAction('settings/user/'.$user->getAttribute('username'), '', ''), '', 'edit');
+							echo makeButton(__('edit'), makeAction('settings/user/'.$user->getAttribute('username'), '', ''), '', 'edit')->getOuterHtml();
 
-						if ($user->getAttribute('rights')=='none') echo makeButton(__('restore'), makeAction('settings', 'settingsRestore', $user->getAttribute('id')), '', 'restore');
-						else echo makeButton(__('remove'), makeAction('settings', 'settingsRemove', $user->getAttribute('id')), '', 'remove');
+						if ($user->getAttribute('rights')=='none') echo makeButton(__('restore'), makeAction('settings', 'settingsRestore', $user->getAttribute('id')), '', 'restore')->getOuterHtml();
+						else echo makeButton(__('remove'), makeAction('settings', 'settingsRemove', $user->getAttribute('id')), '', 'remove')->getOuterHtml();
 
-						if ($user->getAttribute('rights')=='invitee') echo makeButton(__('remind'), makeAction('settings', 'settingsRemind', $user->getAttribute('id')), '', 'remind');
+						if ($user->getAttribute('rights')=='invitee') echo makeButton(__('remind'), makeAction('settings', 'settingsRemind', $user->getAttribute('id')), '', 'remind')->getOuterHtml();
 						elseif ($user->getAttribute('rights') !== 'none') {
-							if ($user->getAttribute('rights') !== 'admin') echo makeButton(__('admin'), makeAction('settings', 'settingsAdmin', $user->getAttribute('id')), '', 'admin');
-							elseif ($numAdmins>1) echo makeButton(__('unadmin'), makeAction('settings', 'settingsUnadmin', $user->getAttribute('username')), '', 'unadmin');
+							if ($user->getAttribute('rights') !== 'admin') echo makeButton(__('admin'), makeAction('settings', 'settingsAdmin', $user->getAttribute('id')), '', 'admin')->getOuterHtml();
+							elseif ($numAdmins>1) echo makeButton(__('unadmin'), makeAction('settings', 'settingsUnadmin', $user->getAttribute('username')), '', 'unadmin')->getOuterHtml();
 						}
 					}
 					else {
-						echo makeButton(__('reincarnate'), makeAction('settings', 'settingsReincarnate', $user->getAttribute('id')), '', 'reincarnate');
+						echo makeButton(__('reincarnate'), makeAction('settings', 'settingsReincarnate', $user->getAttribute('id')), '', 'reincarnate')->getOuterHtml();
 					}
 					echo '</td>';
 				}

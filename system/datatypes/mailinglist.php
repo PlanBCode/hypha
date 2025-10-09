@@ -196,7 +196,7 @@ class mailinglist extends HyphaDatatypePage {
 		$main->appendHtml($description);
 
 		// display form
-		$viewAddresses = isUser() ? '<span style="float: right;">' . $this->makeActionButton(__('ml-view-addresses'), self::PATH_ADDRESSES) . '</span>' : '';
+		$viewAddresses = isUser() ? '<span style="float: right;">' . $this->makeActionButton(__('ml-view-addresses'), self::PATH_ADDRESSES)->getOuterHtml() . '</span>' : '';
 		$main->appendHtml('<div><h3>' . htmlspecialchars(__('subscribe')) . $viewAddresses . '</h3></div>');
 
 		// update the form dom so that values and errors can be displayed
@@ -691,7 +691,7 @@ class mailinglist extends HyphaDatatypePage {
 			}
 			$row = $table->addRow();
 			$row->addCells(['', $email, $statusText]);
-			$row->addCell()->setHtml(implode(' ', $actions));
+			$row->addCell()->appendChildren($actions);
 		}
 		$table->addRow()->addCells([__('total'), count($addresses), '', '']);
 
@@ -1340,7 +1340,10 @@ EOF;
 		$header->addCell(__('subject'));
 		$header->addCell(__('status'));
 		$header->addCell();
-		$header->addCell()->setHtml(isUser() ? $this->makeActionButton(__('add-mailing'), self::PATH_MAILS_NEW) : '');
+		$cell = $header->addCell();
+		if (isUser())
+			$cell->appendChild($this->makeActionButton(__('add-mailing'), self::PATH_MAILS_NEW));
+
 		foreach ($mailings as $mailing) {
 			$status = $mailing->getAttribute(self::FIELD_NAME_STATUS);
 			$date = $mailing->getAttribute(self::FIELD_NAME_DATE);
@@ -1350,10 +1353,10 @@ EOF;
 				$date = '';
 			}
 			$viewPath = $this->substituteSpecial(self::PATH_MAILS_VIEW_ID, ['id' => $mailing->getId()]);
-			$buttons = $this->makeActionButton(__('view'), $viewPath);
+			$buttons = [$this->makeActionButton(__('view'), $viewPath)];
 			if (self::MAILING_STATUS_DRAFT == $status) {
 				$editPath = $this->substituteSpecial(self::PATH_MAILS_EDIT_ID, ['id' => $mailing->getId()]);
-				$buttons .= $this->makeActionButton(__('edit'), $editPath);
+				$buttons[] = $this->makeActionButton(__('edit'), $editPath);
 			}
 
 			$row = $table->addRow();
@@ -1361,7 +1364,7 @@ EOF;
 			$row->addCell($mailing->getAttribute(self::FIELD_NAME_SUBJECT));
 			$row->addCell(__('ml-mailing-status-' . $status));
 			$row->addCell($date);
-			$row->addCell()->setHtml($buttons);
+			$row->addCell()->appendChildren($buttons);
 		}
 	}
 
@@ -1403,7 +1406,7 @@ EOF;
 	 * @param null|string $path
 	 * @param null|string $command
 	 * @param null|string $argument
-	 * @return string
+	 * @return HyphaDomElement
 	 */
 	protected function makeActionButton($label, $path = null, $command = null, $argument = null) {
 		$path = $this->language . '/' . $this->pagename . ($path ? '/' . $path : '');

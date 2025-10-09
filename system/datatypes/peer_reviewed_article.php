@@ -1603,7 +1603,7 @@ EOF;
 				}
 				if (null !== $msgId) {
 					$path = str_replace('{id}', $discussion->getId(), self::PATH_DISCUSSIONS_CLOSED);
-					$commentList->createChild('p')->setHtml($this->makeActionButton(__($msgId), $path, self::CMD_DISCUSSION_CLOSED));
+					$commentList->createChild('p')->appendChild($this->makeActionButton(__($msgId), $path, self::CMD_DISCUSSION_CLOSED));
 				}
 			}
 
@@ -2113,7 +2113,7 @@ EOF;
 	 * @param null|string $path
 	 * @param null|string $command
 	 * @param null|string|array $argument
-	 * @return string
+	 * @return HyphaDomElement
 	 */
 	protected function makeActionButton($label, $path = null, $command = null, $argument = null) {
 		if (is_array($argument)) {

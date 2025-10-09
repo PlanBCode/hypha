@@ -82,8 +82,17 @@
 		$id - optional element id
 	*/
 	function makeButton($label, $action, $id = '', $class = '') {
-		$class = 'button' . ($class ? ' ' . $class : '');
-		return '<input type="button" class="'.htmlspecialchars($class).'" '.($id?' id="'.htmlspecialchars($id).'"':'').'value="'.htmlspecialchars($label).'" onclick="'.htmlspecialchars($action).'" />';
+		global $hyphaHtml;
+		$button = $hyphaHtml->createElement('input');
+		if ($id)
+			$button->setAttribute("id", $id);
+		if ($class)
+			$button->addClass($class);
+		$button->addClass('button');
+		$button->setAttribute("type", "button");
+		$button->setAttribute("value", $label);
+		$button->setAttribute("onclick", $action);
+		return $button;
 	}
 
 	/*

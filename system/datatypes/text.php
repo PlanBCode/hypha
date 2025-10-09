@@ -357,7 +357,7 @@ EOF;
 		 * @param null|string $command
 		 * @param null|string $argument
 		 *
-		 * @return string
+		 * @return HyphaDomElement
 		 */
 		protected function makeActionButton($label, $path = null, $command = null, $argument = null) {
 			$path = $this->language . '/' . $this->pagename . ($path ? '/' . $path : '');
