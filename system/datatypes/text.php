@@ -137,7 +137,7 @@ EOF;
 			// update the form dom so that error can be displayed, if there are any
 			$form->updateDom();
 
-			$this->html->getElementById('main')->append($form);
+			$form->appendTo($this->html->getElementById('main'));
 
 			$commands = $this->html->getElementById('pageCommands');
 			$commands->appendChild($this->makeActionButton(__('save'), self::PATH_EDIT, self::CMD_SAVE));
@@ -197,7 +197,7 @@ EOF;
 		protected function translateViewRender(HyphaRequest $request, HTMLForm $form) {
 			$form->updateDom();
 
-			$this->html->getElementById('main')->append($form);
+			$form->appendTo($this->html->getElementById('main'));
 
 			// buttons
 			$commands = $this->html->getElementById('pageCommands');

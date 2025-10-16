@@ -673,7 +673,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 
 		/** @var HyphaDomElement $main */
 		$main = $this->html->getElementById('main');
-		$main->append($form);
+		$form->appendTo($main);
 
 		/** @var HyphaDomElement $commands */
 		$commands = $this->html->getElementById('pageCommands');
@@ -864,7 +864,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 
 		/** @var HyphaDomElement $main */
 		$main = $this->html->getElementById('main');
-		$main->append($form);
+		$form->appendTo($main);
 
 		$actionButton = $this->makeDiscussionActionButton($type, $discussion);
 
@@ -1064,7 +1064,7 @@ EOF;
 
 		$this->createCommentDomElement($comment)->appendTo($commentDiv);
 
-		$main->append($form);
+		$form->appendTo($main);
 
 		$commands = $this->html->getElementById('pageEndCommands');
 		$commands->appendChild($this->makeActionButton(__('cancel')));
@@ -1641,7 +1641,7 @@ EOF;
 		];
 		$commentForm = $this->createCommentForm($type, $formData);
 		$commentForm->updateDom();
-		$discussionsDomElement->append($commentForm);
+		$commentForm->appendTo($discussionsDomElement);
 		$discussionsDomElement->appendChild($this->makeDiscussionActionButton($type));
 
 		$title = $review ? __('art-review-comments') : __('art-comments');

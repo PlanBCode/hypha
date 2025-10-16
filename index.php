@@ -155,7 +155,7 @@
 	if ($hyphaPage) hypha_setPreviewPanel($O_O, $hyphaPage);
 
 	// Add the default form.
-	$hyphaHtml->findOneXPath('body')->children()->wrapAll($hyphaHtml->getDefaultForm());
+	$hyphaHtml->getDefaultForm()->wrapAround($hyphaHtml->findOneXPath('body')->childNodes);
 
 	// poor man's cron job
 	if (time() - hypha_getLastDigestTime() >= hypha_getDigestInterval()) flushDigest();

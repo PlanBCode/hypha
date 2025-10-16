@@ -202,7 +202,7 @@ class mailinglist extends HyphaDatatypePage {
 		$form->updateDom();
 
 		$main = $this->html->getElementById('main');
-		$main->append($form);
+		$form->appendTo($main);
 
 		$formContainer = $main->childNodes->item($main->childNodes->length - 1);
 		$formContainer->appendChild($this->makeActionButton(__('subscribe'), null, self::CMD_SUBSCRIBE));
@@ -267,7 +267,7 @@ class mailinglist extends HyphaDatatypePage {
 
 		/** @var HyphaDomElement $main */
 		$main = $this->html->getElementById('main');
-		$main->append($form);
+		$form->appendTo($main);
 
 		/** @var HyphaDomElement $commands */
 		$commands = $this->html->getElementById('pageCommands');
@@ -727,7 +727,7 @@ EOF;
 
 		/** @var HyphaDomElement $main */
 		$main = $this->html->getElementById('main');
-		$main->append($form);
+		$form->appendTo($main);
 
 		/** @var HyphaDomElement $commands */
 		$commands = $this->html->getElementById('pageCommands');
@@ -871,7 +871,7 @@ EOF;
 
 		/** @var HyphaDomElement $main */
 		$main = $this->html->getElementById('main');
-		$main->append($form);
+		$form->appendTo($main);
 
 		/** @var HyphaDomElement $commands */
 		$commands = $this->html->getElementById('pageCommands');

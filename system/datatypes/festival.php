@@ -349,7 +349,7 @@ EOF;
 			// Update the form to include the data
 			$form->updateDom();
 
-			$this->html->getElementById('main')->append($form);
+			$form->appendTo($this->html->getElementById('main'));
 
 			$commands = $this->html->getElementById('pageCommands');
 			$commands->appendChild($this->makeActionButton(__('save'), self::PATH_SETTINGS, self::CMD_SAVE));
@@ -446,7 +446,7 @@ EOF;
 		protected function signupViewRender(HyphaRequest $request, HTMLForm $form) {
 			$form->updateDom();
 
-			$this->html->getElementById('main')->append($form);
+			$form->appendTo($this->html->getElementById('main'));
 			$this->html->getElementById('pagename')->text(__('festival-signup-for') . $this->getConfig(self::CONFIG_ID_TITLE));
 
 			$commands = $this->html->getElementById('pageEndCommands');
@@ -766,7 +766,7 @@ EOF;
 			$form->updateDom();
 
 			$this->html->getElementById('pagename')->text(__('festival-contribute-to') . $this->getConfig(self::CONFIG_ID_TITLE));
-			$this->html->getElementById('main')->append($form);
+			$form->appendTo($this->html->getElementById('main'));
 
 			$commands = $this->html->getElementById('pageEndCommands');
 			$title = $editing ? __('festival-modify') : __('festival-contribute');

@@ -281,7 +281,7 @@
 		Wrapper around a DomElement that contains form fields,
 		to allow manipulating the form more easily.
 	*/
-	class HTMLForm implements IteratorAggregate {
+	class HTMLForm {
 		/**
 		 * The form tag that contains everything else in this
 		 * form.
@@ -361,15 +361,36 @@
 			$this->scanForm($this->form_element);
 		}
 
-		// This is called when the for is iterated over (e.g.
-		// foreach ($elem in $form)). This returns the
-		// children() NodeList (which is also an iterator) so
-		// all content of the form will be iterated over.
-		// This allows a form to be directly appended to a
-		// DomElement (e.g. $div->append($form)) as if it was a
-		// DomElement itself.
-		public function getIterator() {
-			return new ArrayIterator([$this->form_element]);
+		/*
+		 * Function: appendTo
+		 *
+		 * Append this form as a child of the given DOMElement.
+		 *
+		 * The DomElement passed must belong to the same
+		 * document as this form.
+		 */
+		public function appendTo(DOMNode $node) {
+			$node->appendChild($this->form_element);
+		}
+
+		/*
+		 * Function: wrapAround
+		 *
+		 * Wrap this form around the given DOMNodes.
+		 *
+		 * All of the nodes passed should have the same parent.
+		 * These nodes will be moved into the form, and the
+		 * form will replace them.
+		 *
+		 * The DomNodes passed must belong to the same
+		 * document as this form.
+		 */
+		public function wrapAround(DOMNodeList $nodes) {
+			if ($nodes->length == 0)
+				throw new InvalidArgumentException("Cannot wrap around empty node list");
+			$parent = $nodes->item(0)->parentNode;
+			$this->form_element->appendChildren($nodes);
+			$this->appendTo($parent);
 		}
 
 		public function getId() {
