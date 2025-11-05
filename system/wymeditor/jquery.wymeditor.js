@@ -446,7 +446,9 @@ jQuery.extend(WYMeditor, {
         "th",
         "thead",
         "tr",
-        "ul"
+        "ul",
+	"summary",
+	"details"
     ],
 
     // The subset of the `ROOT_CONTAINERS` that prevent the user from using
@@ -19286,7 +19288,7 @@ WYMeditor.XhtmlSaxListener = function() {
         "object", "ol", "optgroup", "option", "p", "param", "pre", "q",
         "samp", "script", "select", "small", "span", "strong", "style",
         "sub", "sup", "table", "tbody", "td", "textarea", "tfoot", "th",
-        "thead", "title", "tr", "tt", "ul", "var", "extends"];
+        "thead", "title", "tr", "tt", "ul", "var", "extends", "details", "summary"];
 
 
     this.inline_tags = ["br", "col", "hr", "img", "input"];
@@ -20420,7 +20422,16 @@ WYMeditor.XhtmlValidator = {
         },
         "38":"tt",
         "39":"ul",
-        "40":"var"
+        "40":"var",
+	"details":
+        {
+            "attributes":
+            {
+                    "0":"open",
+                    "1":"name"
+            }
+        },
+        "41": "summary"
     },
 
     // Temporary skiped attributes
