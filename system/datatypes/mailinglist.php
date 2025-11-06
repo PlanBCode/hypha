@@ -720,7 +720,7 @@ EOF;
 
 		$html = hypha_substitute($html, $vars);
 
-		$form = new HTMLForm($html, null);
+		$form = $this->html->createForm($html, null);
 
 		// update the form dom so that values and errors can be displayed
 		$form->updateDom();
@@ -1030,7 +1030,7 @@ EOF;
 
 		$html = hypha_substitute($html, $vars);
 
-		return new HTMLForm($html, $values);
+		return $this->html->createForm($html, $values);
 	}
 
 	/**
@@ -1070,7 +1070,7 @@ EOF;
 
 		$html = hypha_substitute($html, $vars);
 
-		return new HTMLForm($html, $values);
+		return $this->html->createForm($html, $values);
 	}
 
 	/**
@@ -1097,7 +1097,7 @@ EOF;
 
 		$html = hypha_substitute($html, $vars);
 
-		return new HTMLForm($html, $values);
+		return $this->html->createForm($html, $values);
 	}
 
 	/**

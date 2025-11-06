@@ -214,6 +214,22 @@
 		}
 
 		/*
+			Function: createForm
+
+			Creates an HTMLForm object linked to this document.
+
+			Parameters:
+			@param $form - The form, either as a single form
+				       HyphaDomElement, a list of nodes to put
+				       into an autocreated form element, or a
+				       string containing either of those.
+			@param $data - Any (POST) data to apply to this form.
+		*/
+		public function createForm(string|HyphaDomElement|DOMNodeList|null $form = null, array $data = []) {
+			return new HTMLForm($this, $form, $data);
+		}
+
+		/*
 			Function: toString
 			returns the document as formatted string
 		*/
@@ -290,22 +306,39 @@
 			Function: __construct
 			Wraps an existing form
 
+			Should not normally be called directly, call
+			HTMLDocument::createForm() instead.
+
 			Parameters:
-			@param $form - The form, either as a single HyphaDomElement,
-				or a string containing HTML (must be
-				rooted in a single <form> tag).
+			@param $doc - The document this form should be associated with.
+			@param $form - The form, either as a string, DOMNodeList or a single HyphaDomNode (will be wrapped in a <form> tag if needed).
+			@param $data - Any (POST) data to apply to this form.
 		*/
-		function __construct(string|HyphaDomElement $form, $data = []) {
+		function __construct(HTMLDocument $doc, string|HyphaDomElement|DOMNodeList|null $form, $data = []) {
 			if (is_string($form)) {
-				$nodes = (new HTMLDocument())->createFromHtml($form);
-				if ($nodes->length != 1)
-					throw new InvalidArgumentException("Form HTML has more than one root tag");
-				if ($nodes->Item(0)->tagName != 'form')
-					throw new InvalidArgumentException("Form HTML root tag is not <form>");
-				$this->form_element = $nodes->Item(0);
-			} else {
-				assert($form instanceof HyphaDomElement);
+				$form = $doc->createFromHtml($form);
+				if ($form->length == 1 && $form->item(0)->tagName == 'form') {
+					$form = $form->item(0);
+				}
+			}
+
+			if ($form instanceof HyphaDomElement) {
+				if ($form->ownerDocument !== $doc);
+					$form = $doc->importNode($form, true);
+				assert($form->tagName == 'form');
 				$this->form_element = $form;
+			} else {
+				// If the root is not a single form tag, create one and put everything in
+				$this->form_element = $doc->createElement('form');
+				if ($form !== null) {
+					foreach (iterator_to_array($form) as $elem) {
+						if ($elem->ownerDocument !== $doc);
+							$elem = $doc->importNode($elem, true);
+						$this->form_element->appendChild($elem);
+					}
+				}
+				if ($this->form_element->findXPath("descendant::form")->length > 0)
+					throw new InvalidArgumentException("If a form element is passed, it should be a single root element");
 			}
 
 			$this->data = $data;
@@ -316,6 +349,14 @@
 			$this->labels = [];
 			$this->image_previews = [];
 
+			if (!$this->form_element->getId())
+				$this->form_element->generateId('form');
+			if (!$this->form_element->getAttribute('method'))
+				$this->form_element->setAttribute('method', 'POST');
+			if (!$this->form_element->getAttribute('accept-charset'))
+				$this->form_element->setAttribute('accept-charset', 'utf-8');
+			if (!$this->form_element->getAttribute('enctype'))
+				$this->form_element->setAttribute('enctype', 'multipart/form-data');
 
 			$this->scanForm($this->form_element);
 		}

@@ -80,7 +80,7 @@
 	$hyphaHtml->writeToElement('header', hypha_getHeader());
 	$hyphaHtml->writeToElement('footer', hypha_getFooter());
 	$hyphaHtml->writeToElement('menu', hypha_getMenu());
-	$defaultForm = new HTMLForm('<form id="hyphaForm" method="post" action="" accept-charset="utf-8" enctype="multipart/form-data" />');
+	$defaultForm = $hyphaHtml->createForm();
 	$hyphaHtml->setDefaultForm($defaultForm);
 
 	/*
@@ -154,9 +154,7 @@
 	if ($hyphaPage) hypha_setBodyClass($O_O, $hyphaPage);
 	if ($hyphaPage) hypha_setPreviewPanel($O_O, $hyphaPage);
 
-	// Add the default form. This does not happen earlier, since
-	// appending makes a copy of the form, so now we can be sure
-	// that all changes (if any) to the form are taken into account.
+	// Add the default form.
 	$hyphaHtml->findOneXPath('body')->children()->wrapAll($hyphaHtml->getDefaultForm());
 
 	// poor man's cron job

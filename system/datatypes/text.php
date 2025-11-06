@@ -112,7 +112,7 @@ EOF;
 
 			$html = hypha_substitute($html, $vars);
 
-			return new HTMLForm($html, $values);
+			return $this->html->createForm($html, $values);
 		}
 
 		protected function editView(HyphaRequest $request) {
@@ -295,7 +295,7 @@ EOF;
 
 			$html = hypha_substitute($html, $vars);
 
-			return new HTMLForm($html, $values);
+			return $this->html->createForm($html, $values);
 		}
 
 		protected function savePage($content, $pagename = null, $language = null, $privateFlag = null) {

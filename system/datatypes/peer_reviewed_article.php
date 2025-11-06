@@ -1006,7 +1006,7 @@ EOF;
 		];
 
 		$html = hypha_substitute($html, $vars);
-		return new HTMLForm($html, $values);
+		return $this->html->createForm($html, $values);
 	}
 
 	/**
@@ -1722,7 +1722,7 @@ EOF;
 
 		$html = hypha_substitute($html, $vars);
 
-		return new HTMLForm($html, $values);
+		return $this->html->createForm($html, $values);
 	}
 
 	/**
@@ -1790,7 +1790,7 @@ EOF;
 
 		$html = hypha_substitute($html, $vars);
 
-		return new HTMLForm($html, $values);
+		return $this->html->createForm($html, $values);
 	}
 
 	/**
