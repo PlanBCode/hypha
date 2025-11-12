@@ -295,9 +295,9 @@ class peer_reviewed_article extends HyphaDatatypePage {
 			list($checkStatus, $checks) = $this->runChecks();
 
 			/** @var HyphaDomElement $commands */
-			$commands = $this->html->find('#pageCommands');
+			$commands = $this->html->getElementById('pageCommands');
 			/** @var HyphaDomElement $commandsAtEnd */
-			$commandsAtEnd = $this->html->find('#pageEndCommands');
+			$commandsAtEnd = $this->html->getElementById('pageEndCommands');
 			$commands->appendChild($this->makeActionButton(__('edit'), self::PATH_EDIT));
 
 			// the status change from review to approved is done automatically
@@ -326,7 +326,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		$content = $this->xml->find(self::FIELD_NAME_CONTENT);
 
 		/** @var HyphaDomElement $main */
-		$main = $this->html->find('#main')->first();
+		$main = $this->html->getElementById('main');
 
 		/** @var HyphaDomElement $discussions */
 		$discussions = $this->xml->find(self::FIELD_NAME_DISCUSSION_PUBLIC_CONTAINER);
@@ -343,7 +343,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 				$commentCountText = __('art-public-comment-count-plural', ['count' => $commentCount]);
 			}
 
-			$this->html->find('#pagename')->before('<div class="number_of_comments">'.$commentCountText.'</div>');
+			$this->html->getElementById('pagename')->before('<div class="number_of_comments">'.$commentCountText.'</div>');
 		}
 
 		// Sharing links
@@ -670,15 +670,15 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		$form->updateDom();
 
 		/** @var HyphaDomElement $main */
-		$main = $this->html->find('#main');
+		$main = $this->html->getElementById('main');
 		$main->append($form);
 
 		/** @var HyphaDomElement $commands */
-		$commands = $this->html->find('#pageCommands');
+		$commands = $this->html->getElementById('pageCommands');
 		$commands->appendChild($this->makeActionButton(__('art-cancel')));
 		$commands->appendChild($this->makeActionButton(__('art-save'), self::PATH_EDIT, self::CMD_SAVE));
 		/** @var HyphaDomElement $commandsAtEnd */
-		$commandsAtEnd = $this->html->find('#pageEndCommands');
+		$commandsAtEnd = $this->html->getElementById('pageEndCommands');
 		$commandsAtEnd->appendChild($this->makeActionButton(__('art-cancel')));
 		$commandsAtEnd->appendChild($this->makeActionButton(__('art-save'), self::PATH_EDIT, self::CMD_SAVE));
 
@@ -861,7 +861,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		$form->updateDom();
 
 		/** @var HyphaDomElement $main */
-		$main = $this->html->find('#main');
+		$main = $this->html->getElementById('main');
 		$main->append($form);
 
 		$actionButton = $this->makeDiscussionActionButton($type, $discussion);
@@ -1046,7 +1046,7 @@ EOF;
 		$hidden = $comment->getAttribute(self::FIELD_NAME_DISCUSSION_MODERATION_STATUS) === self::MODERATION_STATUS_HIDDEN;
 		$deleted = $comment->getAttribute(self::FIELD_NAME_DISCUSSION_MODERATION_STATUS) === self::MODERATION_STATUS_DELETED;
 
-		$main = $this->html->find('#main')->first();
+		$main = $this->html->getElementById('main');
 		$commentDiv = $main->createChild('div');
 		$commentDiv->addClass('moderation-comment');
 
@@ -1064,7 +1064,7 @@ EOF;
 
 		$main->append($form);
 
-		$commands = $this->html->find('#pageEndCommands');
+		$commands = $this->html->getElementById('pageEndCommands');
 		$commands->appendChild($this->makeActionButton(__('cancel')));
 
 		$path = str_replace('{id}', $comment->getId(), self::PATH_COMMENTS_MODERATE);

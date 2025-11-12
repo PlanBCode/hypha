@@ -23,10 +23,10 @@
 				return '404';
 
 			/** @var HyphaDomElement $main */
-			$main = $this->html->find('#main');
+			$main = $this->html->getElementById('main');
 
 			/** @var HyphaDomElement $pagename */
-			$pagename = $this->html->find('#pagename');
+			$pagename = $this->html->getElementById('pagename');
 			$tagprefixSpan = $pagename->createChild('span');
 			$tagprefixSpan->setText('Index for tag: ');
 			$tagprefixSpan->setAttribute('class', 'tag_prefix');

@@ -108,7 +108,7 @@
 			$this->html->writeToElement('pagename', showPagename($this->pagename) . ' ' . asterisk($this->privateFlag));
 
 			if (isUser() && !in_array($request->getView(), [self::PATH_SETTINGS])) {
-				$commands = $this->html->find('#pageCommands');
+				$commands = $this->html->getElementById('pageCommands');
 				$commands->appendChild($this->makeActionButton(__('settings'), self::PATH_SETTINGS));
 				$commands->appendChild($this->makeActionButton(__('festival-signup'), self::PATH_SIGNUP));
 				$commands->appendChild($this->makeActionButton(__('festival-contribute'), self::PATH_CONTRIBUTE));
@@ -205,7 +205,7 @@
 			$totalcount = 0;
 
 			$table = new HTMLTable();
-			$this->html->find('#main')->appendChild($table);
+			$this->html->getElementById('main')->appendChild($table);
 			$table->addHeaderRow()->addCells([__('name'), __('email'), __('phone'), __('attending'), __('price'), __('festival-participant-status')]);
 			foreach ($this->xml->documentElement->getOrCreate(self::TAG_PARTICIPANTS_CONTAINER)->children() as $participant) {
 				$payamount = $participant->getAttribute(self::ATTR_PARTICIPANT_PAYMENT_AMOUNT);
@@ -242,7 +242,7 @@
 			}
 
 			$table = new HTMLTable();
-			$this->html->find('#main')->appendChild($table);
+			$this->html->getElementById('main')->appendChild($table);
 			$table->addHeaderRow()->addCells(['', __('count'), __('amount')]);
 			foreach ($stats as $category => $values) {
 				$row = $table->addRow();
@@ -268,7 +268,7 @@
 			// TODO: Styling
 			if (!isUser()) return notify('error', __('login-to-edit'));
 			$table = new HTMLTable();
-			$this->html->find('#main')->appendChild($table);
+			$this->html->getElementById('main')->appendChild($table);
 			$table->addClass('contributions');
 			$table->addHeaderRow()->addCells([__('name'), __('title'), __('category'), __('website')]);
 			foreach ($this->xml->documentElement->getOrCreate(self::TAG_CONTRIBUTION_CONTAINER)->children() as $contribution) {
@@ -349,9 +349,9 @@ EOF;
 			// Update the form to include the data
 			$form->updateDom();
 
-			$this->html->find('#main')->append($form);
+			$this->html->getElementById('main')->append($form);
 
-			$commands = $this->html->find('#pageCommands');
+			$commands = $this->html->getElementById('pageCommands');
 			$commands->appendChild($this->makeActionButton(__('save'), self::PATH_SETTINGS, self::CMD_SAVE));
 			$commands->appendChild($this->makeActionButton(__('cancel'), ''));
 			return null;
@@ -446,10 +446,10 @@ EOF;
 		protected function signupViewRender(HyphaRequest $request, HTMLForm $form) {
 			$form->updateDom();
 
-			$this->html->find('#main')->append($form);
-			$this->html->find('#pagename')->text(__('festival-signup-for') . $this->getConfig(self::CONFIG_ID_TITLE));
+			$this->html->getElementById('main')->append($form);
+			$this->html->getElementById('pagename')->text(__('festival-signup-for') . $this->getConfig(self::CONFIG_ID_TITLE));
 
-			$commands = $this->html->find('#pageEndCommands');
+			$commands = $this->html->getElementById('pageEndCommands');
 			$commands->appendChild($this->makeActionButton(__('signup'), self::PATH_SIGNUP, self::CMD_SIGNUP));
 
 			return null;
@@ -511,8 +511,8 @@ EOF;
 		 * confirmation is needed.
 		 */
 		protected function confirmationNeededView(HyphaRequest $request) {
-			$this->html->find('#pagename')->text(__('festival-confirmation-needed'));
-			$main = $this->html->find('#main');
+			$this->html->getElementById('pagename')->text(__('festival-confirmation-needed'));
+			$main = $this->html->getElementById('main');
 			$message = __('festival-complete-by-confirming');
 			$main->appendText($message);
 			return null;
@@ -584,8 +584,8 @@ EOF;
 			}
 
 			// Render the page
-			$this->html->find('#pagename')->text(__('festival-pay-for') . $this->getConfig(self::CONFIG_ID_TITLE));
-			$main = $this->html->find('#main');
+			$this->html->getElementById('pagename')->text(__('festival-pay-for') . $this->getConfig(self::CONFIG_ID_TITLE));
+			$main = $this->html->getElementById('main');
 			$message = __('festival-complete-by-paying');
 			$button = $this->makeActionButton(__('pay'), join('/', $request->getArgs()), self::CMD_PAY);
 			$main->appendText($message);
@@ -765,10 +765,10 @@ EOF;
 			// Update the form to include any data
 			$form->updateDom();
 
-			$this->html->find('#pagename')->text(__('festival-contribute-to') . $this->getConfig(self::CONFIG_ID_TITLE));
-			$this->html->find('#main')->append($form);
+			$this->html->getElementById('pagename')->text(__('festival-contribute-to') . $this->getConfig(self::CONFIG_ID_TITLE));
+			$this->html->getElementById('main')->append($form);
 
-			$commands = $this->html->find('#pageEndCommands');
+			$commands = $this->html->getElementById('pageEndCommands');
 			$title = $editing ? __('festival-modify') : __('festival-contribute');
 			$commands->appendChild($this->makeActionButton($title, join('/',$request->getArgs()), self::CMD_SAVE));
 			return null;
@@ -875,8 +875,8 @@ EOF;
 
 
 		protected function lineupView(HyphaRequest $request) {
-			$this->html->find('#pagename')->text(__('festival-lineup-for') . $this->getConfig(self::CONFIG_ID_TITLE));
-			$main = $this->html->find('#main');
+			$this->html->getElementById('pagename')->text(__('festival-lineup-for') . $this->getConfig(self::CONFIG_ID_TITLE));
+			$main = $this->html->getElementById('main');
 			$description = $this->getConfig(self::CONFIG_ID_DESCRIPTION);
 			$main->createChild('p')->addClass('lineup-description')->setText($description);
 			$contributionsdiv = $main->createChild('div')->addClass('contributions');
@@ -1059,8 +1059,8 @@ EOF;
 				$html.= '</table>';
 				$d++;
 			}
-			$this->html->find('#pagename')->text(__('festival-timetable-for') . $this->getConfig(self::CONFIG_ID_TITLE));
-			$this->html->find('#main')->html($html);
+			$this->html->getElementById('pagename')->text(__('festival-timetable-for') . $this->getConfig(self::CONFIG_ID_TITLE));
+			$this->html->getElementById('main')->appendHtml($html);
 		}
 
 		protected function timetocols($t1, $t2) {

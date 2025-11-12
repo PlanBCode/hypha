@@ -70,12 +70,12 @@
 
 				// if a revision is selected, show a 'revert' command button
 				if ($version) {
-					$commands = $this->html->find('#pageCommands');
+					$commands = $this->html->getElementById('pageCommands');
 					$commands->appendChild($this->makeActionButton(__('revert'), self::PATH_REVERT, self::CMD_REVERT));
 				}
 				// if the latest revision is selected, show 'edit' and 'translate' command buttons
 				else {
-					$commands = $this->html->find('#pageCommands');
+					$commands = $this->html->getElementById('pageCommands');
 					$commands->appendChild($this->makeActionButton(__('edit'), self::PATH_EDIT));
 					$commands->appendChild($this->makeActionButton(__('translate'), self::PATH_TRANSLATE));
 
@@ -137,9 +137,9 @@ EOF;
 			// update the form dom so that error can be displayed, if there are any
 			$form->updateDom();
 
-			$this->html->find('#main')->append($form);
+			$this->html->getElementById('main')->append($form);
 
-			$commands = $this->html->find('#pageCommands');
+			$commands = $this->html->getElementById('pageCommands');
 			$commands->appendChild($this->makeActionButton(__('save'), self::PATH_EDIT, self::CMD_SAVE));
 			$commands->appendChild($this->makeActionButton(__('cancel'), ''));
 
@@ -197,10 +197,10 @@ EOF;
 		protected function translateViewRender(HyphaRequest $request, HTMLForm $form) {
 			$form->updateDom();
 
-			$this->html->find('#main')->append($form);
+			$this->html->getElementById('main')->append($form);
 
 			// buttons
-			$commands = $this->html->find('#pageCommands');
+			$commands = $this->html->getElementById('pageCommands');
 			$commands->appendChild($this->makeActionButton(__('cancel')));
 			$commands->appendChild($this->makeActionButton(__('save'), self::PATH_TRANSLATE, self::CMD_TRANSLATE));
 

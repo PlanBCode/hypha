@@ -180,7 +180,7 @@ class mailinglist extends HyphaDatatypePage {
 		// add edit button for registered users
 		if (isUser()) {
 			/** @var HyphaDomElement $commands */
-			$commands = $this->html->find('#pageCommands');
+			$commands = $this->html->getElementById('pageCommands');
 			$commands->appendChild($this->makeActionButton(__('edit'), self::PATH_EDIT));
 			if (isAdmin()) {
 				$path = $this->language . '/' . $this->pagename;
@@ -188,8 +188,7 @@ class mailinglist extends HyphaDatatypePage {
 			}
 		}
 
-		/** @var NodeList $main */
-		$main = $this->html->find('#main');
+		$main = $this->html->getElementById('main');
 
 		// display page name and description
 		$description = $this->getDoc()->get(self::FIELD_NAME_DESCRIPTION)->getInnerHtml();
@@ -202,8 +201,7 @@ class mailinglist extends HyphaDatatypePage {
 		// update the form dom so that values and errors can be displayed
 		$form->updateDom();
 
-		/** @var NodeList $main */
-		$main = $this->html->find('#main');
+		$main = $this->html->getElementById('main');
 		$main->append($form);
 
 		$formContainer = $main->children()->end();
@@ -268,11 +266,11 @@ class mailinglist extends HyphaDatatypePage {
 		$form->updateDom();
 
 		/** @var HyphaDomElement $main */
-		$main = $this->html->find('#main');
+		$main = $this->html->getElementById('main');
 		$main->append($form);
 
 		/** @var HyphaDomElement $commands */
-		$commands = $this->html->find('#pageCommands');
+		$commands = $this->html->getElementById('pageCommands');
 		$commands->appendChild($this->makeActionButton(__('save'), self::PATH_EDIT, self::CMD_SAVE));
 		$commands->appendChild($this->makeActionButton(__('cancel'), ''));
 
@@ -661,7 +659,7 @@ class mailinglist extends HyphaDatatypePage {
 
 		$table = new HTMLTable();
 		/** @var HyphaDomElement $main */
-		$main = $this->html->find('#main');
+		$main = $this->html->getElementById('main');
 		$main->appendChild($table);
 		$table->addClass('section');
 		$table->addHeaderRow()->addCells(['', __('addresses'), __('status'), __('action')]);
@@ -697,7 +695,7 @@ class mailinglist extends HyphaDatatypePage {
 
 		// add buttons
 		/** @var HyphaDomElement $commands */
-		$commands = $this->html->find('#pageCommands');
+		$commands = $this->html->getElementById('pageCommands');
 		$commands->appendChild($this->makeActionButton(__('back')));
 		if (isAdmin()) $commands->appendChild($this->makeActionButton(__('add'), self::PATH_ADD));
 		return null;
@@ -728,11 +726,11 @@ EOF;
 		$form->updateDom();
 
 		/** @var HyphaDomElement $main */
-		$main = $this->html->find('#main');
+		$main = $this->html->getElementById('main');
 		$main->append($form);
 
 		/** @var HyphaDomElement $commands */
-		$commands = $this->html->find('#pageCommands');
+		$commands = $this->html->getElementById('pageCommands');
 		$commands->appendChild($this->makeActionButton(__('cancel'), self::PATH_ADDRESSES));
 		$commands->appendChild($this->makeActionButton(__('add'), self::PATH_ADDRESSES, self::CMD_ADD));
 	}
@@ -766,7 +764,7 @@ EOF;
 		// display mailing
 		/** @var HyphaDomElement $main */
 		$subject = $mailing->getAttribute('subject');
-		$main = $this->html->find('#main');
+		$main = $this->html->getElementById('main');
 		$main->appendHtml('<div><h2>' . htmlspecialchars($subject) . '</h2></div>');
 		$date = $mailing->getAttribute('date');
 		if ($date) {
@@ -783,7 +781,7 @@ EOF;
 
 		// buttons
 		/** @var HyphaDomElement $commands */
-		$commands = $this->html->find('#pageCommands');
+		$commands = $this->html->getElementById('pageCommands');
 		$commands->appendChild($this->makeActionButton(__('back')));
 
 		// get status
@@ -872,11 +870,11 @@ EOF;
 		$form->updateDom();
 
 		/** @var HyphaDomElement $main */
-		$main = $this->html->find('#main');
+		$main = $this->html->getElementById('main');
 		$main->append($form);
 
 		/** @var HyphaDomElement $commands */
-		$commands = $this->html->find('#pageCommands');
+		$commands = $this->html->getElementById('pageCommands');
 		$commands->appendChild($this->makeActionButton(__('cancel'), $cancelPath));
 		$commands->appendChild($this->makeActionButton(__('save'), $submitPath, self::CMD_SAVE));
 	}
@@ -1319,7 +1317,7 @@ EOF;
 	 *
 	 * @param NodeList $container
 	 */
-	protected function appendMailingsList(NodeList $container) {
+		protected function appendMailingsList(HyphaDomElement $container) {
 		/** @var HyphaDomElement $mailingsContainer */
 		$mailingsContainer = $this->getDoc()->get(self::FIELD_NAME_MAILINGS_CONTAINER);
 		if (isUser()) {
