@@ -67,7 +67,7 @@
 
 		public function initForBrowser($base_url = null) {
 			$this->documentElement->setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
-			$head = $this->find('head')->first();
+			$head = $this->findOneXPath('head');
 			$metaMime = $head->createChild('meta');
 			$metaMime->setAttribute('http-equiv', "Content-Type");
 			$metaMime->setAttribute('content', "text/html; charset=utf-8");
@@ -111,8 +111,10 @@
 			$title -
 		*/
 		public function setTitle($title) {
-			if ($this->getElementsByTagName('title')->length) $this->getElementsByTagName('title')->Item(0)->nodeValue = $title;
-			else $this->getElementsByTagName('head')->Item(0)->createChild('title')->nodeValue = $title;
+			$node = $this->findOneXPath('head/title');
+			if ($node === null)
+				$node = $this->findOneXPath('head')->createChild('title');
+			$node->nodeValue = $title;
 		}
 
 		/*
@@ -123,7 +125,7 @@
 			$href - icon URL
 		*/
 		public function setFavicon($href) {
-			$style = $this->getElementsByTagName('head')->Item(0)->createChild('link');
+			$style = $this->findOneXPath('head')->createChild('link');
 			$style->setAttribute('href', $href);
 			$style->setAttribute('rel', 'shortcut icon');
 			$style->setAttribute('type', 'text/ico');
@@ -137,7 +139,7 @@
 			$src - url to a javascript
 		*/
 		public function linkScript($src) {
-			$script = $this->getElementsByTagName('head')->Item(0)->createChild('script');
+			$script = $this->findOneXPath('head')->createChild('script');
 			$script->setAttribute('src', $src);
 			$script->setAttribute('type', 'text/javascript');
 		}
@@ -150,7 +152,7 @@
 			$href - url to a CSS document
 		*/
 		public function linkStyle($href) {
-			$style = $this->getElementsByTagName('head')->Item(0)->createChild('link');
+			$style = $this->findOneXPath('head')->createChild('link');
 			$style->setAttribute('href', $href);
 			$style->setAttribute('rel', 'stylesheet');
 			$style->setAttribute('type', 'text/css');
@@ -166,7 +168,7 @@
 		public function writeScript($js) {
 			$script = $this->getElementById('jsAggregator');
 			if (empty($script)) {
-				$script = $this->getElementsByTagName('head')->Item(0)->createChild('script');
+				$script = $this->findOneXPath('head')->createChild('script');
 				$script->setAttribute('type', 'text/javascript');
 				$script->setAttribute('id', 'jsAggregator');
 			}
@@ -182,9 +184,9 @@
 		*/
 		public function writeStyle($css) {
 			$style = null;
-			foreach($this->getElementsByTagName('style') as $s) if (!$s->hasAttribute('src')) $style = $s;
+			foreach($this->findXPath('head/style') as $s) if (!$s->hasAttribute('src')) $style = $s;
 			if (empty($style)) {
-				$style = $this->getElementsByTagName('head')->Item(0)->createChild('style');
+				$style = $this->findOneXPath('head')->createChild('style');
 				$style->setAttribute('type', 'text/css');
 			}
 			$style->appendText(preg_replace('/(<style>|<\/style>)/i', '', $css));
@@ -236,12 +238,13 @@
 
 			// Sort the head tag children, keeping the order of nodes with the same rank
 			// unchanged (this is important for script tags).
-			$nodes = $this->getElementsByTagName('head')->Item(0)->childNodes;
+			$head = $this->findOneXPath('head');
+			$nodes = $head->childNodes;
 			for ($i=0;$i<$nodes->length-1;$i++) {
 				for ($j = $i + 1; $j < $nodes->length; $j++) {
-					if ($ranking($nodes->Item($j - 1)) > $ranking($nodes->Item($j))) {
-						$swapnode = $this->getElementsByTagName('head')->Item(0)->removeChild($nodes->Item($j));
-						$this->getElementsByTagName('head')->Item(0)->insertBefore($swapnode, $nodes->Item($j - 1));
+					if ($ranking($nodes->item($j - 1)) > $ranking($nodes->item($j))) {
+						$swapnode = $head->removeChild($nodes->item($j));
+						$head->insertBefore($swapnode, $nodes->item($j - 1));
 					}
 				}
 			}
@@ -326,7 +329,7 @@
 		}
 
 		public function getId() {
-			return $this->root->find('form')->first()->getId();
+			return $this->root->findOneXPath('form')->getId();
 		}
 
 		/*
@@ -337,9 +340,9 @@
 		 */
 		protected function scanForm($root)
 		{
-			$tags = 'input, select, textarea, label, img, editor';
+			$tags = './/input | .//select | .//textarea | .//label | .//img | .//editor';
 
-			foreach($root->find($tags) as $elem) {
+			foreach($root->findXPath($tags) as $elem) {
 				if ($elem->tagName == 'label') {
 					$name = self::getNameAttr($elem, 'for');
 					if ($name)
@@ -419,7 +422,10 @@
 
 			// Show any errors
 			if ($this->errors) {
-				$list = $this->root->find('ul.form-errors')->first();
+				// Note this does exact class matching, so
+				// breaks if another class is added (xpath does not
+				// have native proper class matching)
+				$list = $this->root->findOneXPath(".//ul[class='form-errors']");
 				if (!$list) {
 					$list = $this->root->document()->createElement('ul')->addClass('form-errors');
 					$this->root->prepend($list);
@@ -454,7 +460,7 @@
 			} else if ($field->tagName == 'input') {
 				$field->setAttribute('value', $value);
 			} else if ($field->tagName == 'select') {
-				foreach($field->find('option') as $option) {
+				foreach($field->findXPath('option') as $option) {
 					if ($option->getAttribute('value') == $value)
 						$option->setAttribute('selected', 'selected');
 					else
@@ -656,7 +662,7 @@
 			// unsafe HTML (and these have been seen to be
 			// automatically inserted into requests by
 			// viruses...).
-			if ($dom->find('script')->count() > 0) {
+			if ($dom->findXPath('.//script')->length > 0) {
 				$this->errors[$name] = __('html-field-contains-script');
 				return false;
 			}

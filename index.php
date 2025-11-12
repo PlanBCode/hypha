@@ -141,7 +141,11 @@
 	}
 	// A class is used by default, but also look for the
 	// #hyphaCommands id which was used in earlier versions.
-	$hyphaHtml->find('.hyphaCommands, #hyphaCommands')->appendChildren($_cmds);
+	// Note: This uses naive substring matching, xpath has no builtin proper class matching
+	foreach ($hyphaHtml->findXPath("//div[contains(@class, 'hyphaCommands') or @id='hyphaCommands']") as $container) {
+		foreach ($_cmds as $cmd)
+			$container->appendChild($cmd->cloneNode(true));
+	}
 	if ($O_O->isUser()) $hyphaHtml->writeToElement('hyphaCommands', '<br/><div id="loggedIn">'.__('logged-in-as').' `'.$O_O->getUser()->getAttribute('username').'`'.asterisk(isAdmin()).'</div>');
 
 	// obfuscate email addresses to strangers. It's ok to send readable addresses to logged in members. This also prevents conflicts in the editor.
@@ -153,7 +157,7 @@
 	// Add the default form. This does not happen earlier, since
 	// appending makes a copy of the form, so now we can be sure
 	// that all changes (if any) to the form are taken into account.
-	$hyphaHtml->find('body')->children()->wrapAll($hyphaHtml->getDefaultForm());
+	$hyphaHtml->findOneXPath('body')->children()->wrapAll($hyphaHtml->getDefaultForm());
 
 	// poor man's cron job
 	if (time() - hypha_getLastDigestTime() >= hypha_getDigestInterval()) flushDigest();

@@ -36,7 +36,7 @@
 		];
 
 		// only add the editor code when the document contains an <editor> element
-		if ($html->getElementsByTagName('editor')->length) {
+		if ($html->findXPath('//editor')->length) {
 			foreach ($wymeditorSources as $src)
 				$html->linkScript($src);
 			$html->linkStyle($rootUrl.'system/wymeditor/skins/default/skin.css');
@@ -177,8 +177,7 @@
 			$html->writeScript(ob_get_clean());
 
 			// replace all editor elements with proper wymeditor tagname/class combination
-			while($html->getElementsByTagName('editor')->Item(0)) {
-				$editorElement = $html->getElementsByTagName('editor')->Item(0);
+			foreach (iterator_to_array($html->findXPath('//editor')) as $editorElement) {
 				$wymeditorElement = $editorElement->ownerDocument->createElement('textarea');
 				$parentElement = $editorElement->parentNode;
 				$parentElement->insertBefore($wymeditorElement, $editorElement);

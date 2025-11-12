@@ -923,14 +923,14 @@ EOF;
 				$image = new HyphaImage($image_filename);
 				$html.= '<a href="'.htmlspecialchars($image->getUrl()).'"><img src="'.htmlspecialchars($image->getUrl($img_width, $img_height)).'"/></a>';
 			}
-			$description = $contribution->getElementsByTagName(self::TAG_CONTRIBUTION_DESCRIPTION)->Item(0);
+			$description = $contribution->findOneXPath(self::TAG_CONTRIBUTION_DESCRIPTION);
 			if ($description) $html.= nl2br(htmlspecialchars($description->text()));
 
 			$days = $this->getConfigElement(self::CONFIG_ID_DAYS, self::CONFIG_TAG_DAYS)->children();
 			$locations = $this->getConfigElement(self::CONFIG_ID_LOCATIONS, self::CONFIG_TAG_LOCATIONS)->children();
 			foreach($days as $day) {
 				$timesHtml = '';
-				foreach($contribution->getElementsByTagName(self::TAG_CONTRIBUTION_EVENT) as $event) {
+				foreach($contribution->findXPath(self::TAG_CONTRIBUTION_EVENT) as $event) {
 					if ($event->getAttribute(self::ATTR_EVENT_DAY) == $day->getId()) {
 						if ($event->getAttribute(self::ATTR_EVENT_BEGIN)) {
 							$timesHtml .= '<div class="time-and-place">'.htmlspecialchars($event->getAttribute(self::ATTR_EVENT_BEGIN).'-'.$event->getAttribute(self::ATTR_EVENT_END));
@@ -966,7 +966,7 @@ EOF;
 				$dayend = $day->getAttribute(self::ATTR_DAY_END);
 
 				foreach($contributions as $contribution) {
-					$events = $contribution->getElementsByTagName(self::TAG_CONTRIBUTION_EVENT);
+					$events = $contribution->findXPath(self::TAG_CONTRIBUTION_EVENT);
 					foreach($events as $event) {
 						$eventday = $event->getAttribute(self::ATTR_EVENT_DAY);
 						$eventbegin = $event->getAttribute(self::ATTR_EVENT_BEGIN);
@@ -999,7 +999,7 @@ EOF;
 					// generate a list of events for the given date and location
 					$locevents = [];
 					foreach($contributions as $contribution) {
-						$events = $contribution->getElementsByTagName(self::TAG_CONTRIBUTION_EVENT);
+						$events = $contribution->findXPath(self::TAG_CONTRIBUTION_EVENT);
 						foreach($events as $event) {
 							if ($event->getAttribute(self::ATTR_EVENT_DAY) == $day->getId() && $event->getAttribute(self::ATTR_EVENT_LOCATION) == $location->getId())
 								$locevents[] = [

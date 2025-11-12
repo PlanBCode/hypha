@@ -201,7 +201,7 @@
 
 		$hyphaXml->lockAndReload();
 		$pageListNode = hypha_getPage($lang, $O_O->getRequest()->getPageName());
-		foreach($pageListNode->getElementsByTagName('tag') as $tag) if ($tag->getAttribute('id')==$id) $pageListNode->removeChild($tag);
+		foreach($pageListNode->findXPath('tag') as $tag) if ($tag->getAttribute('id')==$id) $pageListNode->removeChild($tag);
 		$hyphaXml->saveAndUnlock();
 
 		echo tagList($pageListNode, $lang);

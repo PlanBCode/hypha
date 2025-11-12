@@ -258,10 +258,10 @@
 	registerPostProcessingFunction('injectCsrf');
 	function injectCsrf(HTMLDocument $html) {
 		global $O_O;
-		$forms = $html->find('form');
+		$forms = $html->findXPath('//form');
 		foreach ($forms as $form) {
 			// if form does not have a csrf field, inject csrf field.
-			if ($form->find('input[name=csrfToken]')->count() === 0) {
+			if (!$form->findOneXPath('input[name=csrfToken]')) {
 				$input = $form->createChild('input');
 				$input->setAttribute('name', "csrfToken");
 				$input->setAttribute('type', "hidden");

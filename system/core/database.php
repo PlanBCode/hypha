@@ -46,7 +46,7 @@
 			the first one is returned.
 		 */
 		public function get($tag) {
-			return $this->thisElement()->find($tag, 'child::')->first();
+			return $this->thisElement()->findXPath($tag)->item(0);
 		}
 
 		/**
@@ -461,7 +461,7 @@
 	*/
 	function getLangNode($node, $language) {
 		if ($node->getAttribute('multiLingual')=='on') {
-			foreach($node->getElementsByTagName('language') as $langNode) if ($langNode->getAttribute('xml:id') == $language) return $langNode;
+			foreach($node->findXPath('language') as $langNode) if ($langNode->getAttribute('xml:id') == $language) return $langNode;
 			$langNode = $node->ownerDocument->createElement('language', '');
 			$langNode->setAttribute('xml:id', $language);
 			$node->appendChild($langNode);
@@ -500,7 +500,7 @@
 		$langNode = getLangNode($node, $language);
 		if ($node->getAttribute('versions')=='on') {
 			$versionList = array();
-			foreach($langNode->getElementsByTagName('version') as $v) $versionList[$v->getAttribute('xml:id')] = $v;
+			foreach($langNode->findXPath('version') as $v) $versionList[$v->getAttribute('xml:id')] = $v;
 			if ($versionList) {
 				krsort($versionList);
 				$content = getInnerHtml(reset($versionList));
@@ -576,7 +576,7 @@
 	function getCurrentVersionNode($node) {
 //		if ($node->documentElement->getAttribute('versions')=='on') {
 			$versionList = array();
-			foreach($node->getElementsByTagName('version') as $v) $versionList[$v->getAttribute('xml:id')] = $v;
+			foreach($node->findXPath('version') as $v) $versionList[$v->getAttribute('xml:id')] = $v;
 			if ($versionList) {
 				krsort($versionList);
 				return reset($versionList);
@@ -597,7 +597,7 @@
 	function getVersionBefore($node, $timestamp) {
 //		if ($node->documentElement->getAttribute('versions')=='on') {
 			$versionList = array();
-			foreach($node->getElementsByTagName('version') as $v) $versionList[$v->getAttribute('xml:id')] = $v;
+			foreach($node->findXPath('version') as $v) $versionList[$v->getAttribute('xml:id')] = $v;
 			if ($versionList) {
 				krsort($versionList);
 				foreach ($versionList as $id => $node) {
@@ -619,7 +619,7 @@
 		$version - active version (gets selected attribute in the option list)
 	*/
 /*	function versionsOptionList($node, $version) {
-		foreach($node->getElementsByTagName('version') as $v) {
+		foreach($node->findXPath('version') as $v) {
 			$timeStamp = $v->getAttribute('xml:id');
 			$history[$timeStamp] = date('j-m-y, H:i', ltrim($timeStamp, 't')).', '.$v->getAttribute('author');
 		}

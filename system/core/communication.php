@@ -112,7 +112,7 @@
 //	registerPostProcessingFunction('obfuscateEmail');
 	function obfuscateEmail($html) {
 		// reverse the character order of all email addresses in href attributes
-		$body = $html->getElementsByTagName('body')->Item(0);
+		$body = $html->findOneXPath('body');
 		setInnerHtml($body, preg_replace('/[\'|\"]mailto:([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4})[\'|\"]/ie', "'mailto:'.strrev('$1')", getInnerHtml($body)));
 
 		// replace all email addresses by a span element containing the address in reverse order

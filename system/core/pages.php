@@ -342,7 +342,7 @@ EOF;
 				$query = $_GET['term'];
 				$pageList = array();
 				foreach(hypha_getPageList() as $page) {
-					foreach($page->getElementsByTagName('language') as $language) {
+					foreach($page->findXPath('language') as $language) {
 						if ($language->getAttribute('id')==$args[0]) {
 							if (isUser() || ($page->getAttribute('private')!='on')) if(strpos(strtolower($language->getAttribute('name')), strtolower($query))!==false) $pageList[] = showPagename($language->getAttribute('name'));
 						}
@@ -469,7 +469,7 @@ EOF;
 		// page).
 		$language = hypha_pageGetLanguage($page, $hyphaContentLanguage);
 		if (!$language) $language = hypha_pageGetLanguage($page, hypha_getDefaultLanguage());
-		if (!$language) $language = $page->getElementsByTagName('language')->Item(0);
+		if (!$language) $language = $page->findOneXPath('language');
 		if (!$language)
 			return;
 
@@ -613,7 +613,7 @@ EOF;
 			$html = __('version').': '.'<select class="version" name="version" onchange="'.$_action.'">';
 
 			$history = array();
-			foreach($xml->getElementById($page->language)->getElementsByTagName('version') as $v) {
+			foreach($xml->getElementById($page->language)->findXPath('version') as $v) {
 				$timeStamp = $v->getAttribute('xml:id');
 				$history[$timeStamp] = date('j-m-y, H:i', ltrim($timeStamp, 't')).', '.$v->getAttribute('author');
 			}

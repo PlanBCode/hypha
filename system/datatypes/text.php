@@ -330,7 +330,7 @@ EOF;
 		public function digest($timestamp) {
 			// iterate over all available translations of the page
 			/** @var HyphaDomElement[] $langList */
-			$langList = $this->xml->getElementsByTagName('language');
+			$langList = $this->xml->findXPath('language');
 			$message = '';
 			foreach($langList as $lang) if (ltrim(getCurrentVersionNode($lang)->getAttribute('xml:id'), 't') > $timestamp) {
 				$language = $lang->getAttribute('xml:id');

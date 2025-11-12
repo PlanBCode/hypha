@@ -147,7 +147,7 @@
 	function hypha_getUsedContentLanguages() {
 		$langList = array();
 		foreach(hypha_getPageList() as $_page) {
-			foreach($_page->getElementsByTagName('language') as $_lang)
+			foreach($_page->findXPath('language') as $_lang)
 				if (!in_array($_lang->getAttribute('id'), $langList))
 					$langList[] = $_lang->getAttribute('id');
 		}
@@ -252,7 +252,7 @@
 	*/
 	function hypha_getTitle() {
 		global $hyphaXml;
-		return getInnerHtml($hyphaXml->getElementsByTagName('title')->Item(0));
+		return getInnerHtml($hyphaXml->findOneXPath('title'));
 	}
 
 	/*
@@ -265,7 +265,7 @@
 	function hypha_setTitle($string) {
 		global $hyphaXml;
 		$hyphaXml->requireLock();
-		setInnerHtml($hyphaXml->getElementsByTagName('title')->Item(0), $string);
+		setInnerHtml($hyphaXml->findOneXPath('title'), $string);
 	}
 
 	/*
@@ -316,7 +316,7 @@
 	*/
 	function hypha_getHeader() {
 		global $hyphaXml;
-		return getInnerHtml($hyphaXml->getElementsByTagName('header')->Item(0));
+		return getInnerHtml($hyphaXml->findOneXPath('header'));
 	}
 
 	/*
@@ -329,7 +329,7 @@
 	function hypha_setHeader($html) {
 		global $hyphaXml;
 		$hyphaXml->requireLock();
-		setInnerHtml($hyphaXml->getElementsByTagName('header')->Item(0), $html);
+		setInnerHtml($hyphaXml->findOneXPath('header'), $html);
 	}
 
 	/*
@@ -338,7 +338,7 @@
 	*/
 	function hypha_getFooter() {
 		global $hyphaXml;
-		return getInnerHtml($hyphaXml->getElementsByTagName('footer')->Item(0));
+		return getInnerHtml($hyphaXml->findOneXPath('footer'));
 	}
 
 	/*
@@ -351,7 +351,7 @@
 	function hypha_setFooter($html) {
 		global $hyphaXml;
 		$hyphaXml->requireLock();
-		setInnerHtml($hyphaXml->getElementsByTagName('footer')->Item(0), $html);
+		setInnerHtml($hyphaXml->findOneXPath('footer'), $html);
 	}
 
 	/*
@@ -360,7 +360,7 @@
 	*/
 	function hypha_getMenu() {
 		global $hyphaXml;
-		return getInnerHtml($hyphaXml->getElementsByTagName('menu')->Item(0));
+		return getInnerHtml($hyphaXml->findOneXPath('menu'));
 	}
 
 	/*
@@ -373,7 +373,7 @@
 	function hypha_setMenu($html) {
 		global $hyphaXml;
 		$hyphaXml->requireLock();
-		setInnerHtml($hyphaXml->getElementsByTagName('menu')->Item(0), $html);
+		setInnerHtml($hyphaXml->findOneXPath('menu'), $html);
 	}
 
 	/*
@@ -382,7 +382,7 @@
 	*/
 	function hypha_getUserList() {
 		global $hyphaXml;
-		return $hyphaXml->getElementsByTagName('userList')->Item(0)->getElementsByTagName('user');
+		return $hyphaXml->findOneXPath('userList')->getElementsByTagName('user');
 	}
 
 	/*
@@ -440,7 +440,7 @@
 		    && (!$email || !hypha_getUserByEmail($email))) {
 			$newUser = $hyphaXml->createElement('user');
 			$newUser->setAttribute('id', uniqid());
-			$hyphaXml->getElementsByTagName('userList')->Item(0)->appendChild($newUser);
+			$hyphaXml->findOneXPath('userList')->appendChild($newUser);
 			return hypha_setUser($newUser, $username, $password, $fullname, $email, $language, $rights);
 		} else {
 			return __('user-exists');
@@ -533,12 +533,12 @@
 	*/
 	function hypha_getPageList() {
 		global $hyphaXml;
-		return $hyphaXml->getElementsByTagName('pageList')->Item(0)->getElementsByTagName('page');
+		return $hyphaXml->findXPath('pageList/page');
 	}
 
 	function hypha_getPage($language, $name) {
 		foreach(hypha_getPageList() as $page) {
-			foreach($page->getElementsByTagName('language') as $lang) {
+			foreach($page->findXPath('language') as $lang) {
 				if(($lang->getAttribute('id')==$language) && (strtolower($lang->getAttribute('name'))==strtolower($name))) return $page;
 			}
 		}
@@ -553,7 +553,7 @@
 	}
 
 	function hypha_pageGetLanguage($page, $language) {
-		foreach($page->getElementsByTagName('language') as $lang) {
+		foreach($page->findXPath('language') as $lang) {
 			if($lang->getAttribute('id')==$language) return $lang;
 		}
 		return false;
@@ -581,7 +581,7 @@
 		$newPage = $hyphaXml->createElement('page');
 		$newPage->setAttribute('id', $id);
 		$newPage->setAttribute('type', $type);
-		$hyphaXml->getElementsByTagName('pageList')->Item(0)->appendChild($newPage);
+		$hyphaXml->findOneXPath('pageList')->appendChild($newPage);
 		return hypha_setPage($newPage, $language, $name, $private);
 	}
 
@@ -590,7 +590,7 @@
 		$hyphaXml->requireLock();
 		$targetPage = hypha_getPageById($id);
 		if ($targetPage instanceof HyphaDomElement) {
-			$hyphaXml->getElementsByTagName('pageList')->Item(0)->removeChild($targetPage);
+			$hyphaXml->findOneXPath('pageList')->removeChild($targetPage);
 		}
 	}
 
@@ -640,7 +640,7 @@
 	function hypha_setBodyClass(RequestContext $O_O, $hyphaPage) {
 		$hyphaRequest = $O_O->getRequest();
 		/** @var \DOMWrap\NodeList $bodyElement */
-		$bodyElement = $hyphaPage->html->find('body');
+		$bodyElement = $hyphaPage->html->findOneXPath('body');
 		$classes = explode(' ', $bodyElement->attr('class'));
 		if (isset($hyphaPage->pagename)) {
 			$classes[] = $hyphaPage->pagename;
@@ -674,7 +674,7 @@
 		$previewTheme = $O_O->getPreviewThemeName();
 		if (null !== $previewTheme) {
 			/** @var \DOMWrap\NodeList $bodyElement */
-			$bodyElement = $hyphaPage->html->find('body');
+			$bodyElement = $hyphaPage->html->findOneXPath('body');
 			$panel = '<div class="preview_panel" style="position:fixed; bottom:0; background-color: rgba(0, 0, 0, 0.8);">';
 			$panel .= '<div class="panel_text">' . __('previewing').': '.$previewTheme . '</div>';
 			$panel .= '<div class="panel_action_button">' . makeButton(__('apply-preview-theme'), makeAction('settings/theme', 'settingApplyPreviewTheme', ''))->getOuterHtml() . '</div>';

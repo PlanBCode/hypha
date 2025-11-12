@@ -175,7 +175,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	}
 
 	public function getSortDateTime() {
-		$article = $this->xml->find(self::FIELD_NAME_ARTICLE);
+		$article = $this->xml->findOneXPath(self::FIELD_NAME_ARTICLE);
 		$value = $article->getAttribute(self::FIELD_NAME_PUBLISHED_AT);
 		if (!$value)
 			$value = $article->getAttribute(self::FIELD_NAME_UPDATED_AT);
@@ -191,7 +191,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		$h2 = $container->createChild('h2')->setText($this->getTitle());
 		$h2->addClass('title');
 
-		$article = $this->xml->find(self::FIELD_NAME_ARTICLE);
+		$article = $this->xml->findOneXPath(self::FIELD_NAME_ARTICLE);
 		$this->appendAuthorAndTimestamp($container, $article);
 		$this->renderExcerptBody($container);
 	}
@@ -266,7 +266,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 
 		// set initial status, author, timestamps and title
 		/** @var HyphaDomElement $article */
-		$article = $this->xml->find(self::FIELD_NAME_ARTICLE);
+		$article = $this->xml->findOneXPath(self::FIELD_NAME_ARTICLE);
 		$article->setAttribute(self::FIELD_NAME_STATUS, self::STATUS_DRAFT);
 		$article->setAttribute(self::FIELD_NAME_AUTHOR, $user->getAttribute('fullname'));
 		$article->setAttribute(self::FIELD_NAME_CREATED_AT, 't' . time());
@@ -274,7 +274,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		$article->setAttribute(self::FIELD_NAME_UPDATED_AT, 't' . time());
 		$article->setAttribute(self::FIELD_NAME_PUBLISHED_AT, '');
 		/** @var HyphaDomElement $title */
-		$title = $this->xml->find(self::FIELD_NAME_TITLE);
+		$title = $this->xml->findOneXPath('//' . self::FIELD_NAME_TITLE);
 		$title->setText(showPagename($this->pagename));
 		$this->xml->saveAndUnlock();
 	}
@@ -321,15 +321,17 @@ class peer_reviewed_article extends HyphaDatatypePage {
 
 		// display page name and text
 		/** @var HyphaDomElement $article */
-		$article = $this->xml->find(self::FIELD_NAME_ARTICLE);
+		$article = $this->xml->findOneXPath(self::FIELD_NAME_ARTICLE);
 		/** @var HyphaDomElement $content */
-		$content = $this->xml->find(self::FIELD_NAME_CONTENT);
+		$content = $article->findOneXPath(self::FIELD_NAME_CONTENT);
+		/** @var HyphaDomElement $context */
+		$context = $article->findOneXPath(self::FIELD_NAME_CONTEXT);
 
 		/** @var HyphaDomElement $main */
 		$main = $this->html->getElementById('main');
 
 		/** @var HyphaDomElement $discussions */
-		$discussions = $this->xml->find(self::FIELD_NAME_DISCUSSION_PUBLIC_CONTAINER);
+		$discussions = $this->xml->findOneXPath(self::FIELD_NAME_DISCUSSION_CONTAINER . '/' . self::FIELD_NAME_DISCUSSION_PUBLIC_CONTAINER);
 
 		/** @var NodeList $commentCollection */
 		$xpath = './/' . self::FIELD_NAME_DISCUSSION_COMMENT . '[@' . self::FIELD_NAME_DISCUSSION_COMMENT_PENDING . '!="1"]';
@@ -375,15 +377,15 @@ class peer_reviewed_article extends HyphaDatatypePage {
 			$this->renderExcerptBody($preview);
 		}
 
-		$text_nodes = $content->find(self::FIELD_NAME_TEXT)->children();
+		$text_nodes = $content->findOneXPath(self::FIELD_NAME_TEXT)->childNodes;
 		/** @var HyphaDomElement $div */
 		$div = $main->createChild('div');
 		$div->setAttribute('class', 'article');
 		$div->appendImportedChildren($text_nodes);
 
 		/** @var NodeList $method */
-		$method_nodes = $this->xml->find(self::FIELD_NAME_METHOD)->children();
-		if ($method_nodes->count() > 0) {
+		$method_nodes = $context->findOneXPath(self::FIELD_NAME_METHOD)->childNodes;
+		if ($method_nodes->length > 0) {
 			/** @var HyphaDomElement $methodContainer */
 			$methodContainer = $main->createChild('div');
 			$methodContainer->attr('class', 'method');
@@ -392,8 +394,8 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		}
 
 		/** @var NodeList $sources */
-		$sources = $this->xml->find(self::FIELD_NAME_SOURCES)->children();
-		if ($sources->count() > 0) {
+		$sources = $content->findOneXPath(self::FIELD_NAME_SOURCES)->childNodes;
+		if ($sources->length > 0) {
 			/** @var HyphaDomElement $div */
 			$div = $main->createChild('div');
 			$div->setAttribute('class', 'sources');
@@ -429,21 +431,21 @@ class peer_reviewed_article extends HyphaDatatypePage {
 			'has-article-body' => [
 				'statuses' => [self::STATUS_DRAFT, self::STATUS_REVIEW, self::STATUS_APPROVED],
 				'checker' => function() {
-					return [$this->xml->find(self::FIELD_NAME_CONTENT)->hasContent(), []];
+					return [$this->xml->findOneXPath('//' . self::FIELD_NAME_CONTENT)->hasContent(), []];
 				},
 				'level' => self::CHECK_LEVEL_REQUIRED,
 			],
 			'has-method' => [
 				'statuses' => [self::STATUS_DRAFT, self::STATUS_REVIEW, self::STATUS_APPROVED],
 				'checker' => function() {
-					return [$this->xml->find(self::FIELD_NAME_METHOD)->hasTextContent(), []];
+					return [$this->xml->findOneXPath('//' . self::FIELD_NAME_METHOD)->hasTextContent(), []];
 				},
 				'level' => self::CHECK_LEVEL_REQUIRED,
 			],
 			'has-sources' => [
 				'statuses' => [self::STATUS_DRAFT, self::STATUS_REVIEW, self::STATUS_APPROVED],
 				'checker' => function() {
-					return [$this->xml->find(self::FIELD_NAME_SOURCES)->hasTextContent(), []];
+					return [$this->xml->findOneXPath('//' . self::FIELD_NAME_SOURCES)->hasTextContent(), []];
 				},
 				'level' => self::CHECK_LEVEL_RECOMMENDED,
 			],
@@ -457,7 +459,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 			'has-featured-image' => [
 				'statuses' => [self::STATUS_DRAFT, self::STATUS_REVIEW, self::STATUS_APPROVED],
 				'checker' => function() {
-					return [$this->xml->find(self::FIELD_NAME_FEATURED_IMAGE)->getText() !== "", []];
+					return [$this->xml->findOneXPath('//' . self::FIELD_NAME_FEATURED_IMAGE)->getText() !== "", []];
 				},
 				'level' => self::CHECK_LEVEL_RECOMMENDED,
 			],
@@ -471,7 +473,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 			'has-approvals' => [
 				'statuses' => [self::STATUS_REVIEW, self::STATUS_APPROVED],
 				'checker' => function() {
-					$approveCount = $this->xml->find(self::FIELD_NAME_APPROVE_CONTAINER)->children()->count();
+					$approveCount = $this->xml->findOneXPath('//' . self::FIELD_NAME_APPROVE_CONTAINER)->childNodes->length;
 					return [$approveCount >= self::APPROVES_NEEDED, ['have' => $approveCount, 'need' => self::APPROVES_NEEDED]];
 				},
 				'level' => self::CHECK_LEVEL_REQUIRED,
@@ -644,13 +646,13 @@ class peer_reviewed_article extends HyphaDatatypePage {
 
 		// create form
 		$formData = [
-			self::FIELD_NAME_TITLE => html_entity_decode(strip_tags($this->xml->find(self::FIELD_NAME_TITLE)->text())),
-			self::FIELD_NAME_AUTHOR => $this->xml->find(self::FIELD_NAME_ARTICLE)->getAttribute(self::FIELD_NAME_AUTHOR),
-			self::FIELD_NAME_TEXT => $this->xml->find(self::FIELD_NAME_TEXT)->children(),
-			self::FIELD_NAME_EXCERPT => $this->xml->find(self::FIELD_NAME_EXCERPT)->children(),
+			self::FIELD_NAME_TITLE => html_entity_decode(strip_tags($this->xml->findOneXPath('//' . self::FIELD_NAME_TITLE)->text())),
+			self::FIELD_NAME_AUTHOR => $this->xml->findOneXPath(self::FIELD_NAME_ARTICLE)->getAttribute(self::FIELD_NAME_AUTHOR),
+			self::FIELD_NAME_TEXT => $this->xml->findOneXPath('//' . self::FIELD_NAME_TEXT)->children(),
+			self::FIELD_NAME_EXCERPT => $this->xml->findOneXPath('//' . self::FIELD_NAME_EXCERPT)->children(),
 			self::FIELD_NAME_FEATURED_IMAGE => $this->xml->documentElement->getOrCreate(self::FIELD_NAME_FEATURED_IMAGE)->text(),
-			self::FIELD_NAME_METHOD => $this->xml->find(self::FIELD_NAME_METHOD)->children(),
-			self::FIELD_NAME_SOURCES => $this->xml->find(self::FIELD_NAME_SOURCES)->children(),
+			self::FIELD_NAME_METHOD => $this->xml->findOneXPath('//' . self::FIELD_NAME_METHOD)->children(),
+			self::FIELD_NAME_SOURCES => $this->xml->findOneXPath('//' . self::FIELD_NAME_SOURCES)->children(),
 		];
 
 		$form = $this->createEditForm($formData);
@@ -714,13 +716,13 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		$this->xml->lockAndReload();
 
 		$author = $form->dataFor(self::FIELD_NAME_AUTHOR);
-		$this->xml->find(self::FIELD_NAME_ARTICLE)->setAttribute(self::FIELD_NAME_AUTHOR, $author);
-		$this->xml->find(self::FIELD_NAME_ARTICLE)->setAttribute(self::FIELD_NAME_UPDATED_AT, 't' . time());
-		$this->xml->find(self::FIELD_NAME_TITLE)->setText($form->dataFor(self::FIELD_NAME_TITLE));
-		$this->xml->find(self::FIELD_NAME_TEXT)->setHtml($form->dataFor(self::FIELD_NAME_TEXT));
-		$this->xml->find(self::FIELD_NAME_EXCERPT)->setHtml($form->dataFor(self::FIELD_NAME_EXCERPT));
-		$this->xml->find(self::FIELD_NAME_METHOD)->setHtml($form->dataFor(self::FIELD_NAME_METHOD));
-		$this->xml->find(self::FIELD_NAME_SOURCES)->setHtml($form->dataFor(self::FIELD_NAME_SOURCES));
+		$this->xml->findOneXPath(self::FIELD_NAME_ARTICLE)->setAttribute(self::FIELD_NAME_AUTHOR, $author);
+		$this->xml->findOneXPath(self::FIELD_NAME_ARTICLE)->setAttribute(self::FIELD_NAME_UPDATED_AT, 't' . time());
+		$this->xml->findOneXPath('//' . self::FIELD_NAME_TITLE)->setText($form->dataFor(self::FIELD_NAME_TITLE));
+		$this->xml->findOneXPath('//' . self::FIELD_NAME_TEXT)->setInnerHtml($form->dataFor(self::FIELD_NAME_TEXT));
+		$this->xml->findOneXPath('//' . self::FIELD_NAME_EXCERPT)->setInnerHtml($form->dataFor(self::FIELD_NAME_EXCERPT));
+		$this->xml->findOneXPath('//' . self::FIELD_NAME_METHOD)->setInnerHtml($form->dataFor(self::FIELD_NAME_METHOD));
+		$this->xml->findOneXPath('//' . self::FIELD_NAME_SOURCES)->setInnerHtml($form->dataFor(self::FIELD_NAME_SOURCES));
 		$this->xml->documentElement->getOrCreate(self::FIELD_NAME_FEATURED_IMAGE)->setText($form->dataFor(self::FIELD_NAME_FEATURED_IMAGE));
 
 		$this->xml->saveAndUnlock();
@@ -776,7 +778,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		$this->xml->lockAndReload();
 
 		/** @var NodeList $approves */
-		$approves = $this->xml->find(self::FIELD_NAME_APPROVE_CONTAINER);
+		$approves = $this->xml->findOneXPath('//' . self::FIELD_NAME_APPROVE_CONTAINER);
 
 		$userId = $this->O_O->getUser()->getAttribute('id');
 
@@ -830,7 +832,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		$this->xml->lockAndReload();
 
 		// store discussion and comment
-		$discussionContainer = $this->xml->find($type)->first();
+		$discussionContainer = $this->xml->findOneXPath('//' . $type);
 		$discussion = $this->addDiscussion($discussionContainer, $form, $dataFieldSuffix);
 		$comment = $this->addDiscussionComment($discussion, $form, $dataFieldSuffix);
 		$this->xml->saveAndUnlock();
@@ -1188,8 +1190,8 @@ EOF;
 
 			// no need anymore for other confirmation codes
 			/** @var NodeList $confirmations */
-			$confirmations = $subscriber->find(self::FIELD_NAME_DISCUSSION_SUBSCRIBER_CONFIRM_CODE);
-			$confirmations->remove();
+			foreach ($subscriber->findXPath(self::FIELD_NAME_DISCUSSION_SUBSCRIBER_CONFIRM_CODE) as $confirm)
+				$subscriber->removeChild($confirm);
 			$confirmedSubscriber = true;
 		}
 
@@ -1261,7 +1263,7 @@ EOF;
 
 		$this->xml->lockAndReload();
 		/** @var HyphaDomElement $article */
-		$article = $this->xml->find(self::FIELD_NAME_ARTICLE);
+		$article = $this->xml->findOneXPath(self::FIELD_NAME_ARTICLE);
 		$article->setAttribute(self::FIELD_NAME_STATUS, $newStatus);
 		if ($newStatus === self::STATUS_PUBLISHED) {
 			$article->setAttribute(self::FIELD_NAME_PUBLISHED_AT, 't' . time());
@@ -1394,7 +1396,7 @@ EOF;
 		/** @var HyphaDomElement $approvesDomElement */
 		$approvesDomElement = $this->html->createElement('div');
 		$approvesDomElement->attr('class', 'approves');
-		$approves = $this->xml->find(self::FIELD_NAME_APPROVE_CONTAINER)->find(self::FIELD_NAME_APPROVE)->toArray();
+		$approves = $this->xml->findOneXPath('//' . self::FIELD_NAME_APPROVE_CONTAINER)->getElementsByTagName(self::FIELD_NAME_APPROVE);
 		$approvesDomElement->appendHtml('<h2>' . __('art-approves') . '</h2>');
 
 		/** @var HyphaDomElement $list */
@@ -1407,7 +1409,7 @@ EOF;
 			$html = '<p>' . __('art-by') . ' <strong>' . $approverName . '</strong> ' . __('art-at') . ' ' . $createdAt . '</p>';
 			$li = $list->createChild('li')->appendHtml($html);
 		}
-		if (empty($approves)) {
+		if ($approves->length == 0) {
 			$list->appendHtml('<li>' . __('art-no-approves-yet') . '</li>');
 		}
 
@@ -1484,10 +1486,11 @@ EOF;
 		$review = self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER === $type;
 
 		/** @var HyphaDomElement $container */
-		$container = $this->xml->find($review ? self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER : self::FIELD_NAME_DISCUSSION_PUBLIC_CONTAINER);
+		$container = $this->xml->findOneXPath('//' . ($review ? self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER : self::FIELD_NAME_DISCUSSION_PUBLIC_CONTAINER));
 
 		/** @var HyphaDomElement[] $discussions */
-		$discussions = $container->find(self::FIELD_NAME_DISCUSSION)->toArray();
+		$discussions = iterator_to_array($container->findXPath(self::FIELD_NAME_DISCUSSION));
+
 
 		// in case of no discussions
 		if (empty($discussions)) {
@@ -1510,7 +1513,7 @@ EOF;
 			$commentList = $this->html->createElement('ul');
 
 			/** @var NodeList|HyphaDomElement[] $comments */
-			$comments = $discussion->find(self::FIELD_NAME_DISCUSSION_COMMENT);
+			$comments = $discussion->findXPath(self::FIELD_NAME_DISCUSSION_COMMENT);
 			$firstComment = true;
 			foreach ($comments as $comment) {
 				// skip pending non-review comments
@@ -2012,8 +2015,8 @@ EOF;
 	 * @return string
 	 */
 	public function getTitle() {
-		$title = $this->xml->find(self::FIELD_NAME_TITLE);
-		if ($title instanceof NodeList) {
+		$title = $this->xml->findOneXPath('//' . self::FIELD_NAME_TITLE);
+		if ($title instanceof HyphaDomElement) {
 			$title = $title->getText();
 		}
 		if ('' === $title) {
@@ -2026,10 +2029,10 @@ EOF;
 	/**
 	 * Gets the article excerpt.
 	 *
-	 * @return NodeList
+	 * @return HyphDomElement
 	 */
 	public function getExcerpt() {
-		return $this->xml->find(self::FIELD_NAME_EXCERPT);
+		return $this->xml->findOneXPath('//' . self::FIELD_NAME_EXCERPT);
 	}
 
 	/**
@@ -2039,7 +2042,7 @@ EOF;
 	 */
 	protected function getStatus() {
 		/** @var HyphaDomElement $article */
-		$article = $this->xml->find(self::FIELD_NAME_ARTICLE)->first();
+		$article = $this->xml->findOneXPath(self::FIELD_NAME_ARTICLE);
 		if ($article instanceof HyphaDomElement) {
 			$status = $article->getAttribute(self::FIELD_NAME_STATUS);
 			if ('' == $status) {
@@ -2073,7 +2076,7 @@ EOF;
 	 */
 	protected function hasUserApproved($userId) {
 		/** @var HyphaDomElement $approves */
-		$approves = $this->xml->find(self::FIELD_NAME_APPROVE_CONTAINER);
+		$approves = $this->xml->findOneXPath('//' . self::FIELD_NAME_APPROVE_CONTAINER);
 		/** @var NodeList $approveCollection */
 		$xpath = './/' . self::FIELD_NAME_APPROVE . '[@' . self::FIELD_NAME_USER . '="' . $userId . '"]';
 		$approveCollection = $approves->findXPath($xpath);
@@ -2087,7 +2090,7 @@ EOF;
 	 * @return bool
 	 */
 	protected function hasUserCreated($userId) {
-		$article = $this->xml->find(self::FIELD_NAME_ARTICLE);
+		$article = $this->xml->findOneXPath(self::FIELD_NAME_ARTICLE);
 		$createdBy = $article->getAttribute(self::FIELD_NAME_CREATED_BY);
 		return $createdBy === $userId;
 	}
