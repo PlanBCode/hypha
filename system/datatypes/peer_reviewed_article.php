@@ -211,7 +211,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 
 		$excerptBody = $excerpt->createChild('div');
 		$excerptBody->addClass('excerpt_body');
-		$excerptBody->appendImportedChildren($this->getExcerpt()->children());
+		$excerptBody->appendImportedChildren($this->getExcerpt()->childNodes);
 	}
 
 	/**
@@ -648,11 +648,11 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		$formData = [
 			self::FIELD_NAME_TITLE => html_entity_decode(strip_tags($this->xml->findOneXPath('//' . self::FIELD_NAME_TITLE)->text())),
 			self::FIELD_NAME_AUTHOR => $this->xml->findOneXPath(self::FIELD_NAME_ARTICLE)->getAttribute(self::FIELD_NAME_AUTHOR),
-			self::FIELD_NAME_TEXT => $this->xml->findOneXPath('//' . self::FIELD_NAME_TEXT)->children(),
-			self::FIELD_NAME_EXCERPT => $this->xml->findOneXPath('//' . self::FIELD_NAME_EXCERPT)->children(),
+			self::FIELD_NAME_TEXT => $this->xml->findOneXPath('//' . self::FIELD_NAME_TEXT)->getInnerHtml(),
+			self::FIELD_NAME_EXCERPT => $this->xml->findOneXPath('//' . self::FIELD_NAME_EXCERPT)->getInnerHtml(),
 			self::FIELD_NAME_FEATURED_IMAGE => $this->xml->documentElement->getOrCreate(self::FIELD_NAME_FEATURED_IMAGE)->text(),
-			self::FIELD_NAME_METHOD => $this->xml->findOneXPath('//' . self::FIELD_NAME_METHOD)->children(),
-			self::FIELD_NAME_SOURCES => $this->xml->findOneXPath('//' . self::FIELD_NAME_SOURCES)->children(),
+			self::FIELD_NAME_METHOD => $this->xml->findOneXPath('//' . self::FIELD_NAME_METHOD)->getInnerHtml(),
+			self::FIELD_NAME_SOURCES => $this->xml->findOneXPath('//' . self::FIELD_NAME_SOURCES)->getInnerHtml(),
 		];
 
 		$form = $this->createEditForm($formData);

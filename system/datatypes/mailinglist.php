@@ -204,7 +204,7 @@ class mailinglist extends HyphaDatatypePage {
 		$main = $this->html->getElementById('main');
 		$main->append($form);
 
-		$formContainer = $main->children()->end();
+		$formContainer = $main->childNodes->item($main->childNodes->length - 1);
 		$formContainer->appendChild($this->makeActionButton(__('subscribe'), null, self::CMD_SUBSCRIBE));
 
 		// display archive (non-users only get to see sent items)
@@ -1321,12 +1321,12 @@ EOF;
 		/** @var HyphaDomElement $mailingsContainer */
 		$mailingsContainer = $this->getDoc()->get(self::FIELD_NAME_MAILINGS_CONTAINER);
 		if (isUser()) {
-			$mailings = $mailingsContainer->children();
+			$mailings = $mailingsContainer->childNodes;
 		} else {
 			$xpath = './/' . self::FIELD_NAME_MAILING . '[@' . self::FIELD_NAME_STATUS . '="' . self::MAILING_STATUS_SENT . '"]';
 			$mailings = $mailingsContainer->findXPath($xpath);
 		}
-		$mailings = array_reverse($mailings->toArray());
+		$mailings = array_reverse(iterator_to_array($mailings));
 
 		$table = new HTMLTable();
 		$container->appendChild($table);

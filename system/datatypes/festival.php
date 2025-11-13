@@ -207,7 +207,7 @@
 			$table = new HTMLTable();
 			$this->html->getElementById('main')->appendChild($table);
 			$table->addHeaderRow()->addCells([__('name'), __('email'), __('phone'), __('attending'), __('price'), __('festival-participant-status')]);
-			foreach ($this->xml->documentElement->getOrCreate(self::TAG_PARTICIPANTS_CONTAINER)->children() as $participant) {
+			foreach ($this->xml->documentElement->getOrCreate(self::TAG_PARTICIPANTS_CONTAINER)->childNodes as $participant) {
 				$payamount = $participant->getAttribute(self::ATTR_PARTICIPANT_PAYMENT_AMOUNT);
 				if ($payamount)
 					$status = $participant->getAttribute(self::ATTR_PARTICIPANT_PAYMENT_STATUS);
@@ -271,7 +271,7 @@
 			$this->html->getElementById('main')->appendChild($table);
 			$table->addClass('contributions');
 			$table->addHeaderRow()->addCells([__('name'), __('title'), __('category'), __('website')]);
-			foreach ($this->xml->documentElement->getOrCreate(self::TAG_CONTRIBUTION_CONTAINER)->children() as $contribution) {
+			foreach ($this->xml->documentElement->getOrCreate(self::TAG_CONTRIBUTION_CONTAINER)->childNodes as $contribution) {
 				$row = $table->addRow();
 				$row->addCell($contribution->getAttribute(self::ATTR_CONTRIBUTION_NAME));
 				$row->addCell($contribution->getAttribute(self::ATTR_CONTRIBUTION_TITLE));
@@ -389,9 +389,9 @@ EOF;
 		 * Create a signup form, based on the one configured.
 		 */
 		private function createSignupForm(array $values = []) {
-			$html = $this->getConfigElement(self::CONFIG_ID_SIGNUP_FORM, self::CONFIG_TAG_FORM)->children();
+			$html = $this->getConfigElement(self::CONFIG_ID_SIGNUP_FORM, self::CONFIG_TAG_FORM)->childNodes;
 
-			if ($html->count() == 0) {
+			if ($html->length == 0) {
 				$html = <<<EOF
 					<table class="festivalForm">
 						<tr>
@@ -651,9 +651,9 @@ EOF;
 		}
 
 		private function createContributionForm(array $values = []) {
-			$html = $this->getConfigElement(self::CONFIG_ID_CONTRIBUTION_FORM, self::CONFIG_TAG_FORM)->children();
+			$html = $this->getConfigElement(self::CONFIG_ID_CONTRIBUTION_FORM, self::CONFIG_TAG_FORM)->childNodes;
 
-			if ($html->count() == 0) {
+			if ($html->length == 0) {
 				$html = <<<EOF
 					<table class="festivalForm">
 						<tr>
@@ -882,7 +882,7 @@ EOF;
 			$contributionsdiv = $main->createChild('div')->addClass('contributions');
 
 
-			$contributions = $this->xml->documentElement->getOrCreate(self::TAG_CONTRIBUTION_CONTAINER)->children();
+			$contributions = $this->xml->documentElement->getOrCreate(self::TAG_CONTRIBUTION_CONTAINER)->childNodes;
 			foreach($contributions as $contribution) {
 				$contributionsdiv->appendHtml($this->buildContribution($contribution));
 				$contributionsdiv->appendHtml('<div class="hbar"></div>');
@@ -926,8 +926,8 @@ EOF;
 			$description = $contribution->findOneXPath(self::TAG_CONTRIBUTION_DESCRIPTION);
 			if ($description) $html.= nl2br(htmlspecialchars($description->text()));
 
-			$days = $this->getConfigElement(self::CONFIG_ID_DAYS, self::CONFIG_TAG_DAYS)->children();
-			$locations = $this->getConfigElement(self::CONFIG_ID_LOCATIONS, self::CONFIG_TAG_LOCATIONS)->children();
+			$days = $this->getConfigElement(self::CONFIG_ID_DAYS, self::CONFIG_TAG_DAYS)->childNodes;
+			$locations = $this->getConfigElement(self::CONFIG_ID_LOCATIONS, self::CONFIG_TAG_LOCATIONS)->childNodes;
 			foreach($days as $day) {
 				$timesHtml = '';
 				foreach($contribution->findXPath(self::TAG_CONTRIBUTION_EVENT) as $event) {
@@ -954,9 +954,9 @@ EOF;
 		protected function timetableView(HyphaRequest $request) {
 			// Make a list of all days, and per day all
 			// locations and the begin and end time.
-			$contributions = $this->xml->documentElement->getOrCreate(self::TAG_CONTRIBUTION_CONTAINER)->children();
-			$days = $this->getConfigElement(self::CONFIG_ID_DAYS, self::CONFIG_TAG_DAYS)->children();
-			$locations = $this->getConfigElement(self::CONFIG_ID_LOCATIONS, self::CONFIG_TAG_LOCATIONS)->children();
+			$contributions = $this->xml->documentElement->getOrCreate(self::TAG_CONTRIBUTION_CONTAINER)->childNodes;
+			$days = $this->getConfigElement(self::CONFIG_ID_DAYS, self::CONFIG_TAG_DAYS)->childNodes;
+			$locations = $this->getConfigElement(self::CONFIG_ID_LOCATIONS, self::CONFIG_TAG_LOCATIONS)->childNodes;
 
 			// iterate over all dates
 			$html = '';
