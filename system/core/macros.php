@@ -41,9 +41,9 @@ abstract class HyphaMacro {
 	/**
 	 * Invoke this macro.
 	 *
-	 * This method should either return a HyphaDomElement or a
-	 * NodeList, which will then replace for the macro
-	 * element.
+	 * This method should either return a HyphaDomElement, which
+	 * will then replace for the macro element, or false for no
+	 * replacement.
 	 *
 	 * Alternatively, if more complex replacement is needed, this
 	 * method can also return false, in which case the macro element
@@ -137,8 +137,8 @@ class HyphaMacros {
 		$macro = self::getMacro($name, $O_O, $macro_tag, $macro_context);
 		$res = $macro->invoke();
 
-		if ($res !== false && !($res instanceof HyphaDomElement) && !($res instanceof DOMWrap\NodeList))
-			throw new UnexpectedValueException("Macro $name should return false, dom element or node list but returned: " . var_export($res, true));
+		if ($res !== false && !($res instanceof HyphaDomElement))
+			throw new UnexpectedValueException("Macro $name should return false or dom element but returned: " . var_export($res, true));
 		return $res;
 	}
 
@@ -160,16 +160,16 @@ class HyphaMacros {
 				$xml = $macro->document()->saveXml($macro);
 				$msg = $e->getMessage();
 				trigger_error("Failed to invoke macro $xml: $msg", E_USER_WARNING);
-				$replacement = $element->document()->create('<span class="macro-error"/>');
+				$replacement = $element->document()->createElement('span')->addClass('macro-error');
 				if ($O_O->isUser())
 					$replacement->text("Macro failed: $msg");
 				else
 					$replacement->text("Macro failed");
 			}
 			if ($replacement)
-				$macro->replaceWith($replacement);
+				$macro->parentNode->replaceChild($replacement, $macro);
 			else
-				$macro->remove();
+				$macro->parentNode->removeChild($macro);
 		}
 	}
 
