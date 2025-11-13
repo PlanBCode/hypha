@@ -335,7 +335,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		$xpath = './/' . self::FIELD_NAME_DISCUSSION_COMMENT . '[@' . self::FIELD_NAME_DISCUSSION_COMMENT_PENDING . '!="1"]';
 		$commentCollection = $discussions->findXPath($xpath);
 
-		$commentCount = $commentCollection->count();
+		$commentCount = $commentCollection->length;
 		if ($commentCount > 0) {
 			if ($commentCount == 1) {
 				$commentCountText = __('art-public-comment-count-singular', ['count' => $commentCount]);
@@ -480,7 +480,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 				'statuses' => [self::STATUS_REVIEW, self::STATUS_APPROVED],
 				'checker' => function() {
 					$xpath = '//' . self::FIELD_NAME_DISCUSSION_CONTAINER . '//' . self::FIELD_NAME_DISCUSSION . '[@' . self::FIELD_NAME_DISCUSSION_BLOCKING . '="1" and @' . self::FIELD_NAME_DISCUSSION_BLOCK_RESOLVED . '!="1"]';
-					$blockingCount = $this->xml->findXPath($xpath)->count();
+					$blockingCount = $this->xml->findXPath($xpath)->length;
 					return [$blockingCount === 0, ['left' => $blockingCount]];
 				},
 				'level' => self::CHECK_LEVEL_REQUIRED,
@@ -1162,8 +1162,7 @@ EOF;
 
 		/** @var NodeList $commentNodeList */
 		$xpath = '//' . self::FIELD_NAME_DISCUSSION_COMMENT . '[@' . self::FIELD_NAME_DISCUSSION_COMMENT_CONFIRM_CODE . '=' . xpath_encode($code) . ']';
-		$commentNodeList = $this->xml->findXPath($xpath);
-		$comment = $commentNodeList->first();
+		$comment = $this->xml->findOneXPath($xpath);
 		if (!$comment instanceof HyphaDomElement) {
 			$this->xml->unlock();
 			notify('error', __('art-invalid-code'));
@@ -1181,9 +1180,9 @@ EOF;
 		/** @var NodeList $confirmCodeNodeList */
 		$xpath = '//' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER_CONFIRM_CODE . '[@' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER_CODE . '=' . xpath_encode($code) . ']';
 		$confirmCodeNodeList = $this->xml->findXPath($xpath);
-		if ($confirmCodeNodeList->count() >= 1) {
+		if ($confirmCodeNodeList->length >= 1) {
 			/** @var HyphaDomElement $subscriber */
-			$subscriber = $confirmCodeNodeList->first()->parent();
+			$subscriber = $confirmCodeNodeList->item(0)->parent();
 			$subscriber->setAttribute(self::FIELD_NAME_DISCUSSION_SUBSCRIBER_STATUS, self::SUBSCRIBER_STATUS_CONFIRMED);
 			$subscriber->setAttribute(self::FIELD_NAME_DISCUSSION_SUBSCRIBER_UNSUBSCRIBE_CODE, $this->constructCode());
 
@@ -1224,7 +1223,7 @@ EOF;
 		/** @var NodeList $subscriberContainer */
 		$xpath = '//' . self::FIELD_NAME_DISCUSSION_CONTAINER . '//' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER . '[@' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER_UNSUBSCRIBE_CODE . '=' . xpath_encode($code) . ']';
 		/** @var HyphaDomElement $subscriber */
-		$subscriber = $this->xml->findXPath($xpath)->first();
+		$subscriber = $this->xml->findOneXPath($xpath);
 		if (!$subscriber instanceof HyphaDomElement) {
 			$this->xml->unlock();
 			notify('error', __('art-invalid-code'));
@@ -1363,7 +1362,7 @@ EOF;
 						' and @' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER_STATUS . '!=' . xpath_encode(self::SUBSCRIBER_STATUS_UNSUBSCRIBED) .
 						']';
 					/** @var NodeList $subscriberNodeList */
-					$subscriber = $subscriberContainer->findXPath($xpath)->first();
+					$subscriber = $subscriberContainer->findOneXPath($xpath);
 					if (!$subscriber instanceof HyphaDomElement) {
 						$subscriber = $subscriberContainer->createChild(self::FIELD_NAME_DISCUSSION_SUBSCRIBER);
 						$subscriber->setAttribute(self::FIELD_NAME_DISCUSSION_SUBSCRIBER_STATUS, self::SUBSCRIBER_STATUS_PENDING);
@@ -2078,7 +2077,7 @@ EOF;
 		/** @var NodeList $approveCollection */
 		$xpath = './/' . self::FIELD_NAME_APPROVE . '[@' . self::FIELD_NAME_USER . '="' . $userId . '"]';
 		$approveCollection = $approves->findXPath($xpath);
-		return $approveCollection->count() >= 1;
+		return $approveCollection->length >= 1;
 	}
 
 	/**

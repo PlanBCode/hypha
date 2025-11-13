@@ -49,6 +49,35 @@
 			return $this->thisElement()->find($tag, 'child::')->first();
 		}
 
+		/**
+		 * Applies an XPath query to the current node and
+		 * returns the results.
+		 */
+		public function findXPath($query) : DOMNodeList {
+			$elem = $this->thisElement();
+			$xpath = new \DOMXPath($elem->ownerDocument);
+			$res = $xpath->query($query, $elem);
+			if ($res === false)
+				throw new InvalidArgumentException("XPath query is invalid: $query");
+			return $res;
+		}
+
+		/**
+		 * Applies an XPath query to the current node and
+		 * returns the single result.
+		 *
+		 * If the query returns zero results, null is returned.
+		 * If the query returns more than one result, it throws
+		 * an UnexpectedValueException.
+		 */
+		public function findOneXPath($query) : HyphaDomElement | null {
+			$res = $this->findXPath($query);
+
+			if ($res->length > 1)
+				throw new UnexpectedValueException("XPath query returned more than one result: $query");
+			return $res->item(0);
+		}
+
 		// Implementing classes must have this return the
 		// element accessors should operate on.
 		abstract protected function thisElement() : HyphaDomElement;
@@ -330,7 +359,7 @@
 		 */
 		function hasContent() {
 			$xpath = "(//img | //iframe | //video | //embed)[1]";
-			return $this->hasTextContent() || $this->findXPath($xpath)->count() > 0;
+			return $this->hasTextContent() || $this->findXPath($xpath)->length > 0;
 		}
 
 		/**

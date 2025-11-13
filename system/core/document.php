@@ -505,12 +505,12 @@
 		 */
 		public function findField($name, $tagName) {
 			$found = $this->root->findXPath('.//'.$tagName.'[@name='. xpath_encode($name).']');
-			if ($found->count() < 1)
+			if ($found->length < 1)
 				throw new LogicException("Form field \"$name\" not found");
-			else if ($found->count() > 1)
+			else if ($found->length > 1)
 				throw new LogicException("Form field \"$name\" found multiple times");
 
-			return $found->first();
+			return $found->item(0);
 		}
 
 		/**

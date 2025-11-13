@@ -338,7 +338,7 @@ class mailinglist extends HyphaDatatypePage {
 		$email = strtolower($form->dataFor(self::FIELD_NAME_EMAIL));
 
 		$xpath = './/' . self::FIELD_NAME_ADDRESS . '[@' . self::FIELD_NAME_EMAIL . '=' . xpath_encode($email) . ' and @' . self::FIELD_NAME_STATUS . '!="' . self::ADDRESS_STATUS_UNSUBSCRIBED . '"]';
-		$address = $this->findAddresses($xpath)->first();
+		$address = $this->findAddresses($xpath)->item(0);
 
 		$addAddress = !$address instanceof HyphaDomElement;
 		if ($addAddress) {
@@ -402,7 +402,7 @@ class mailinglist extends HyphaDatatypePage {
 			else {
 				// check if email is already in the list.
 				$xpath = './/' . self::FIELD_NAME_ADDRESS . '[@' . self::FIELD_NAME_EMAIL . '=' . xpath_encode($email) . ']';
-				$address = $this->findAddresses($xpath)->first();
+				$address = $this->findAddresses($xpath)->item(0);
 
 				if ($address instanceof HyphaDomElement) {
 					notify('error', ucfirst(__('ml-address-exists', ['email' => $email])));
@@ -456,7 +456,7 @@ class mailinglist extends HyphaDatatypePage {
 		$this->xml->lockAndReload();
 
 		$xpath = './/' . self::FIELD_NAME_ADDRESS . '[@' . self::FIELD_NAME_CONFIRM_CODE . '=' . xpath_encode($code) . ' and @' . self::FIELD_NAME_STATUS . '!="' . self::ADDRESS_STATUS_UNSUBSCRIBED . '"]';
-		$address = $this->findAddresses($xpath)->first();
+		$address = $this->findAddresses($xpath)->item(0);
 
 		if (!$address instanceof HyphaDomElement) {
 			$this->xml->unlock();
@@ -535,7 +535,7 @@ class mailinglist extends HyphaDatatypePage {
 	protected function unsubscribe($xpath) {
 		$this->xml->lockAndReload();
 
-		$address = $this->findAddresses($xpath)->first();
+		$address = $this->findAddresses($xpath)->item(0);
 		if (!$address instanceof HyphaDomElement) {
 			$this->xml->unlock();
 			throw new \Exception(__('not-found'), 404);
@@ -576,7 +576,7 @@ class mailinglist extends HyphaDatatypePage {
 		$this->xml->lockAndReload();
 
 		$xpath = './/' . self::FIELD_NAME_ADDRESS . '[@' . self::FIELD_NAME_EMAIL . '=' . xpath_encode($email) . ' and @' . self::FIELD_NAME_STATUS . '!="' . self::ADDRESS_STATUS_UNSUBSCRIBED . '"]';
-		$address = $this->findAddresses($xpath)->first();
+		$address = $this->findAddresses($xpath)->item(0);
 
 		if (!$address instanceof HyphaDomElement) {
 			$this->xml->unlock();
@@ -625,7 +625,7 @@ class mailinglist extends HyphaDatatypePage {
 		$this->xml->lockAndReload();
 
 		$xpath = './/' . self::FIELD_NAME_ADDRESS . '[@' . self::FIELD_NAME_EMAIL . '=' . xpath_encode($email) . ' and @' . self::FIELD_NAME_STATUS . '!="' . self::ADDRESS_STATUS_UNSUBSCRIBED . '"]';
-		$address = $this->findAddresses($xpath)->first();
+		$address = $this->findAddresses($xpath)->item(0);
 
 		if (!$address instanceof HyphaDomElement) {
 			$this->xml->unlock();

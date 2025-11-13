@@ -7,8 +7,8 @@
 		static function findTagByLabel($lang, $label) {
 			/** @var HyphaDomElement $hyphaXml */
 			global $hyphaXml;
-			$path = 'hypha/tagList/tag/language[@id=' . xpath_encode($lang) . ' and @label=' . xpath_encode($label) . ']';
-			$node = $hyphaXml->findXPath($path)->parent()->first();
+			$path = 'tagList/tag/language[@id=' . xpath_encode($lang) . ' and @label=' . xpath_encode($label) . ']';
+			$node = $hyphaXml->findOneXPath($path)->parentNode;
 			return ($node ? new HyphaTag($node) : null);
 		}
 
@@ -62,7 +62,7 @@
 		 * @return HyphaDomElement|null
 		 */
 		function getLanguageNode(string $language) {
-			return $this->node->findXPath('language[@id=' . xpath_encode($language) . ']')->first();
+			return $this->node->findOneXPath('language[@id=' . xpath_encode($language) . ']');
 		}
 	}
 
@@ -77,7 +77,7 @@
 		$deselectedTags = [];
 
 		// Divide list of all tags stored in hypha.xml in a selected tag list and a deselected tag list
-		foreach ($hyphaXml->findXPath('hypha/tagList/tag/language[@id=' . xpath_encode($lang) . ']') as $tagLang) {
+		foreach ($hyphaXml->findXPath('tagList/tag/language[@id=' . xpath_encode($lang) . ']') as $tagLang) {
 			/** @var HyphaDomElement $tagLang */
 			$id = $tagLang->parent()->getId();
 			$tag = ['label' => $tagLang->getAttribute('label'), 'description' => $tagLang->nodeValue, 'lang' => $tagLang->getAttribute('id')];
@@ -221,14 +221,14 @@
 
 
 		// Check if tagList exists
-		$tagList = $hyphaXml->findXPath('hypha/tagList');
-		if ($tagList->count() === 0) {
+		$tagList = $hyphaXml->findXPath('tagList');
+		if ($tagList->length === 0) {
 			$tagList = $hyphaXml->documentElement->createChild('tagList');
 		}
 
 		// Check if tag exists
-		$path = 'hypha/tagList/tag/language[@id=' . xpath_encode($lang) . ' and @label=' . xpath_encode($json['name']) . ']';
-		$tagExists = $hyphaXml->findXPath($path)->count() > 0;
+		$path = 'tagList/tag/language[@id=' . xpath_encode($lang) . ' and @label=' . xpath_encode($json['name']) . ']';
+		$tagExists = $hyphaXml->findXPath($path)->length > 0;
 
 		// Create new tag, add to tagList and page in hypha.xml
 		if (!$tagExists) {

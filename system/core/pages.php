@@ -738,7 +738,7 @@ EOF;
 			$langFilters = '[child::language[' . implode(' or ', $attrFilters) . ']]';
 		}
 
-		$xpath = "hypha/pageList/page${pageFilters}{$tagFilters}${langFilters}${positionFilters}";
+		$xpath = "pageList/page${pageFilters}{$tagFilters}${langFilters}${positionFilters}";
 		$pages = $hyphaXml->findXPath($xpath);
 
 		return $pages;
