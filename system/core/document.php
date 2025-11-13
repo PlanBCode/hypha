@@ -34,6 +34,8 @@
 	*/
 
 	class HTMLDocument extends DOMWrap\Document {
+		use HyphaDomAccessors;
+
 		const XML_HTML_UNKNOWN_TAG = 801;
 
 		/** @var null|HTMLForm */
@@ -66,6 +68,11 @@
 			libxml_use_internal_errors($previousSetting);
 			$this->registerNodeClass('DOMDocument', 'HTMLDocument');
 			$this->registerNodeClass('DOMElement', 'HyphaDomElement');
+		}
+
+		/* For HyphaDomAccessors */
+		protected function thisElement() : HyphaDomElement {
+			return $this->documentElement;
 		}
 
 		public function initForBrowser($base_url = null) {

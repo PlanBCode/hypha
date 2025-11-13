@@ -29,7 +29,34 @@
 	require_once 'various.php';
 	require_once dirname(__FILE__).'/../php-dom-wrapper/All.php';
 
+	/*
+	 * Some helper methods for accessing DOM children that are
+	 * shared between the HyphaDomElement, HtmlDocument, Xml and HTMLForm
+	 * classes.
+	 */
+	trait HyphaDomAccessors {
+		/*
+		        Function: get
+
+			Gets the child with the the given tag name
+			(non-recursively). If it does not exist, null is
+			returned.
+
+			If multiple nodes with the given tag name exist,
+			the first one is returned.
+		 */
+		public function get($tag) {
+			return $this->thisElement()->find($tag, 'child::')->first();
+		}
+
+		// Implementing classes must have this return the
+		// element accessors should operate on.
+		abstract protected function thisElement() : HyphaDomElement;
+	}
+
 	class Xml extends DOMWrap\Document {
+		use HyphaDomAccessors;
+
 		public $file;
 		const versionsOn = true;
 		const versionsOff = false;
@@ -55,6 +82,11 @@
 				$this->appendChild($rootElement);
 			}
 			$this->registerNodeClass('DOMElement', 'HyphaDomElement');
+		}
+
+		/* For HyphaDomAccessors */
+		protected function thisElement() : HyphaDomElement {
+			return $this->documentElement;
 		}
 
 		/*
@@ -144,6 +176,13 @@
 		extends the PHP DOMElement class). This adds a few extra helper methods.
 	*/
 	class HyphaDomElement extends DOMWrap\Element {
+		use HyphaDomAccessors;
+
+		/* For HyphaDomAccessors */
+		protected function thisElement() : HyphaDomElement {
+			return $this;
+		}
+
 		private function getIdAttribute() {
 			// DomDocument allows marking attributes as id
 			// attributes, so getElementById can use them.
@@ -238,20 +277,6 @@
 				$this->append($result);
 			}
 			return $result;
-		}
-
-		/*
-		        Function: get
-
-			Gets the child with the the given tag name
-			(non-recursively). If it does not exist, null is
-			returned.
-
-			If multiple nodes with the given tag name exist,
-			the first one is returned.
-		 */
-		function get($tag) {
-			return $this->find($tag, 'child::')->first();
 		}
 
 		/**
