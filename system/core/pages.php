@@ -486,7 +486,7 @@ EOF;
 		// page
 		if(!isUser() && $page->getAttribute('private') == 'on') {
 			$span = $node->document()->createElement('span');
-			$span->html($node->html());
+			$span->appendChildren($node->childNodes);
 			$node->replaceWith($span);
 			return;
 		}
