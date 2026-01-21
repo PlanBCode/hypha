@@ -47,6 +47,11 @@
 		abstract class for a page backed by datatype and xml file.
 	*/
 	abstract class HyphaDatatypePage extends HyphaPage {
+		const INDEX_TABLE_COLUMNS_TITLE = 'index_table_column_title';
+		const INDEX_TABLE_COLUMNS_AUTHOR = 'index_table_column_author';
+		const INDEX_TABLE_COLUMNS_DATE = 'index_table_column_date';
+		const INDEX_TABLE_COLUMNS_STATUS = 'index_table_column_status';
+
 		public $pageListNode, $language, $pagename, $privateFlag;
 
 		function __construct(HyphaDomElement $node, RequestContext $O_O) {
@@ -54,8 +59,58 @@
 			$this->replacePageListNode($node);
 		}
 
+		/**
+		 * @return string
+		 */
 		public static function getDatatypeName() {
 			return str_replace('_', ' ', get_called_class());
+		}
+
+		/**
+		 * @return array
+		 */
+		public static function getIndexTableColumns() {
+			return [
+				__(self::INDEX_TABLE_COLUMNS_TITLE),
+				__(self::INDEX_TABLE_COLUMNS_AUTHOR),
+				__(self::INDEX_TABLE_COLUMNS_DATE),
+			];
+		}
+
+		/**
+		 * @return array
+		 */
+		public function getIndexData() {
+			$id = $this->pageListNode->getAttribute('id');
+			$date = $this->getSortDateTime();
+			$data = [
+				__(self::INDEX_TABLE_COLUMNS_TITLE) => [
+					'class' => 'type_'.get_class($this).' '.($this->privateFlag ? 'is-private' : 'is-public'),
+					'sort' => preg_replace("/[^A-Za-z0-9]/", '', $this->getTitle()).'_'.$id,
+					'value' => '<a href="'.$this->language.'/'.$this->pagename.'">'.$this->getTitle().'</a>',
+				],
+				__(self::INDEX_TABLE_COLUMNS_AUTHOR) => $this->getAuthor(),
+				__(self::INDEX_TABLE_COLUMNS_DATE) => [
+					'sort' => $date ? $date->format('YmdHis') : '',
+					'value' => $date ? $date->format('Y-m-d') : '',
+				],
+			];
+			return $this->filterIndexData($data);
+		}
+
+		/**
+		 * @param array $data
+		 *
+		 * @return array
+		 */
+		protected function filterIndexData(array $data) {
+			$availableColumns = self::getIndexTableColumns();
+			foreach ($data as $column => $dataPerColumn) {
+				if (!in_array($column, $availableColumns)) {
+					unset($data[$column]);
+				}
+			}
+			return $data;
 		}
 
 		protected function deletePage() {
@@ -90,6 +145,32 @@
 			// TODO: Implement a meaningful title in all
 			// subclasses and make this function abstract?
 			return showPagename($this->pagename);
+		}
+
+		/**
+		 * @return null|string
+		 */
+		public function getAuthor() {
+			$v = $this->getLatestVersion();
+			return $v ? $v->getAttribute('author') : null;
+		}
+
+		/**
+		 * @return null|string
+		 */
+		public function getLatestVersion() {
+			if ($this->xml->hasVersions() && $this->xml->getElementById($this->language)) {
+				$history = [];
+				foreach($this->xml->getElementById($this->language)->getElementsByTagName('version') as $v) {
+					$timestamp = $v->getAttribute('xml:id');
+					$history[$timestamp] = $v;
+				}
+				if (!empty($history)) {
+					krsort($history);
+					return reset($history);
+				}
+			}
+			return null;
 		}
 
 		public function renderSingleLine(HyphaDomElement $container) {
