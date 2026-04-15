@@ -52,7 +52,7 @@
 
 			/**
 			 * in case of hypha instance in the root
-			 * request uri: http://www.my-org.net/en/my-page?foo=bar
+			 * request uri: https://www.my-org.net/en/my-page?foo=bar
 			 * $_SERVER['SCRIPT_NAME'] is expected to be "/index.php"
 			 * $_SERVER['REQUEST_URI'] is expected to be "/en/my-page?foo=bar"
 			 * $rootUrlPath will be "/"
@@ -60,7 +60,7 @@
 			 */
 			/**
 			 * in case of hypha instance in sub directory
-			 * request uri: http://www.my-org.net/my-hypha/en/my-page?foo=bar
+			 * request uri: https://www.my-org.net/my-hypha/en/my-page?foo=bar
 			 * $_SERVER['SCRIPT_NAME'] is expected to be "/my-hypha/index.php"
 			 * $_SERVER['REQUEST_URI'] is expected to be "/my-hypha/en/my-page?foo=bar"
 			 * $rootUrlPath will be "/my-hypha/"

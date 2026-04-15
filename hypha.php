@@ -1,7 +1,7 @@
 <?php
 	// HYPHA
 	// hypha is a simple and user friendly cms with wiki and mailinglist functionality
-	// it makes use of php5, javascript and xml and is distributed as a monolithic php script
+	// it makes use of php7, javascript and xml and is distributed as a monolithic php script
 	// the project homepage is www.hypha.net
 	//
 	// INSTALL
@@ -26,7 +26,7 @@
 	//
 	// LICENSE
 	// the script was written by Harmen G. Zijp and is distributed under the Simple Public License 2.0
-	// which can be found on http://www.opensource.org/licenses/simpl-2.0.html
+	// which can be found on https://opensource.org/license/SimPL-2.0
 	// acknowledgements:
 	// - xhtml compliant javascript editor: wymeditor - http://www.wymeditor.org
 	// - htmldiff routine by Paul Butler
@@ -255,7 +255,7 @@
 			$header = $xml->createElement('header', $_POST['setupTitle']);
 			$hypha->appendChild($header);
 			$footer = $xml->createElement('footer', '');
-			setNodeHtml($footer, '<a href="https://creativecommons.org/licenses/by-sa/3.0/"><img alt="Creative Commons License" style="border-width: 0pt; float: right; margin-left: 5px;" src="https://i.creativecommons.org/l/by-sa/3.0/88x31.png" /></a> This work is licensed under a <a href="https://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>. Website powered by <a href="http://www.hypha.net">hypha</a>.');
+			setNodeHtml($footer, '<a href="https://creativecommons.org/licenses/by-sa/3.0/"><img alt="Creative Commons License" style="border-width: 0pt; float: right; margin-left: 5px;" src="https://i.creativecommons.org/l/by-sa/3.0/88x31.png" /></a> This work is licensed under a <a href="https://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>. Website powered by <a href="https://www.hypha.net">hypha</a>.');
 			$hypha->appendChild($footer);
 			$menu = $xml->createElement('menu', '');
 			setNodeHtml($menu, '<a href="hypha:'.$id.'"/>');

@@ -48,7 +48,7 @@
 
 	/*
 		Group: Stage 3 - Get query and handle direct file requests
-		Here we extract our page query from the php $_SERVER data. Page requests should be formatted in a directory like structure, e.g. http://www.dom.ain/en/home/edit, the first level usually being a language id, the second level begin a page id, and the third level being an optional view.
+		Here we extract our page query from the php $_SERVER data. Page requests should be formatted in a directory like structure, e.g. https://www.dom.ain/en/home/edit, the first level usually being a language id, the second level begin a page id, and the third level being an optional view.
 		Some requests don't need the whole script to run. Certain file requests (css, javascript) can be handled directly here.
 	*/
 

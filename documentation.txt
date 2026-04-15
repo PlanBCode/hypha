@@ -26,7 +26,7 @@ Simple installation:
 Uploading one fully self contained file is the goal.
 
 Open source:
-All code is available under a <Simple Public License at http://opensource.org/licenses/Simple-2.0> at <http://git.giplt.nl>
+All code is available under a <Simple Public License at https://opensource.org/license/Simple-2.0> at <http://git.giplt.nl>
 
 No content license:
 Your data is not owned by some big company but by you (or by your webhosting provider, depending on your contract with them)

@@ -16,21 +16,21 @@ a community but scares off 90% is a bug, rather than a feature.
 
 ## Homepage
 
-The hypha homepage can be found at [hypha.net](http://hypha.net).
+The hypha homepage can be found at [hypha.net](https://hypha.net).
 
 ## Prerequisites
 
-Hypha needs Apache running, with php version 5.6 or above.
+Hypha needs Apache running, with php version 7.2 or above.
 
 ## Basic Installation
 
 The easiest way to install hypha is probably to follow the instructions on
-(http://hypha.net/hypha.php)[http://hypha.net/hypha.php]. This script packages a fully self-contained copy of hypha
+(https://hypha.net/hypha.php)[https://hypha.net/hypha.php]. This script packages a fully self-contained copy of hypha
 in a single monolithic php file. If you drop this file on a server and call it from a browser it will extract all
 necessary files and configure your site according to a few settings to have to enter. The script guides you through the
 installation process step by step.
 
-Your url should look like this `http://<address-of-your-apache>/index.php`
+Your url should look like this `https://<address-of-your-apache>/index.php`
 
 ## Advanced Install Though Git
 
@@ -39,4 +39,4 @@ Your url should look like this `http://<address-of-your-apache>/index.php`
    issuing a `git clone https://github.com/PlanBCode/hypha.git .` from the commandline in that folder.
 2. Set write permissions to the folder `data/`, e.g. by issuing a `chmod -R 777 .`
 3. Navigate to your web-folder in a browser to open `index.php` provided by hypha, and follow instructions from there.
-   Your url should look like this `http://<address-of-your-apache>/index.php`.
+   Your url should look like this `https://<address-of-your-apache>/index.php`.
