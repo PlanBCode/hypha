@@ -73,6 +73,21 @@
 	}
 
 	/*
+		Function: appendAsterisk
+		Append a 'golden' asterisk to the given DOM element. This can be used to indicate admin users or private pages.
+
+		Parameters:
+		$condition - when true (or omitted), the asterisk is added, otherwise nothing happens.
+	*/
+	function appendAsterisk(HyphaDomElement $parent, bool $condition = true) {
+		if ($condition) {
+			$span = $parent->createChild('span');
+			$span->setAttribute('style', "color:#b90;");
+			$span->setText("\u{2217}");
+		}
+	}
+
+	/*
 		Function: makeButton
 		Convenience function to generate HTML button input
 
