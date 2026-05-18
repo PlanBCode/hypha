@@ -145,8 +145,14 @@
 	foreach ($hyphaHtml->findXPath("//div[contains(@class, 'hyphaCommands') or @id='hyphaCommands']") as $container) {
 		foreach ($_cmds as $cmd)
 			$container->appendChild($cmd->cloneNode(true));
+		if ($O_O->isUser()) {
+			$container->createChild('br');
+			$div = $container->createChild('div');
+			$div->setAttribute('class', 'loggedIn');
+			$div->setText(__('logged-in-as') . ' `' . $O_O->getUser()->getAttribute('username') . '`');
+			appendAsterisk($div, isAdmin());
+		}
 	}
-	if ($O_O->isUser()) $hyphaHtml->writeToElement('hyphaCommands', '<br/><div id="loggedIn">'.__('logged-in-as').' `'.$O_O->getUser()->getAttribute('username').'`'.asterisk(isAdmin()).'</div>');
 
 	// obfuscate email addresses to strangers. It's ok to send readable addresses to logged in members. This also prevents conflicts in the editor.
 //	if (!$O_O->isUser()) registerPostProcessingFunction('obfuscateEmail');

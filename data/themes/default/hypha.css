@@ -196,6 +196,13 @@ a.nopagelink {
  padding-right: 10px;
 }
 
+.loggedIn {
+ color: #555;
+ margin-left: 10px;
+ padding: 5px;
+ display: inline-block;
+}
+
 /* ---- End Menu ---- */
 
 
@@ -242,13 +249,6 @@ a.nopagelink {
 
 #pageCommands {
  //display: inline-block;
-}
-
-#loggedIn {
- color: #555;
- margin-left: 10px;
- padding: 5px;
- display: inline-block;
 }
 
 /* ---- Languages ---- */
