@@ -79,7 +79,7 @@
 		$arg.val(arg);
 
 		if (callback) {
-			ajax(url, callback, true);
+			ajax(url, callback, form);
 			return;
 		}
 
@@ -110,7 +110,7 @@
 		resultCallback - pointer to javascript function. This function is called when the ajax http request reponds. The response text is passed as an argument to this function.
 		sendPostParams - optional flag to send form data. When this argument is set true the full hyphaForm data will be sent along through a http POST request. If omitted or set false a http GET request will be performed.
 	*/
-	function ajax(url, resultCallback, sendPostParams) {
+	function ajax(url, resultCallback, form = false) {
 		var request;  // The variable that makes Ajax possible!
 		try{
 			// Opera 8.0+, Firefox, Safari
@@ -132,9 +132,8 @@
 		request.onreadystatechange = function() {
 			if(request.readyState == 4) resultCallback(request.responseText);
 		}
-		if (sendPostParams) {
+		if (form) {
 			var params = "";
-			var form = document.forms['hyphaForm'];
 			for (var i=0; i < form.elements.length; i++) if (form.elements[i].hasAttribute('name')) {
 				params+= (params ? "&" : "") + form.elements[i].getAttribute('name') + "=";
 				if (form.elements[i].tagName=='textarea') params+= encodeURIComponent(form.elements[i].innerHTML);
