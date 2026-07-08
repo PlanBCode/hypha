@@ -143,7 +143,7 @@
 
 		This should be used whenever including a string variable in an xpath expression. E.g.
 
-		$node->findXPath('//button[name='.xpath_encode($name).']');
+		$node->findXPath('.//button[name='.xpath_encode($name).']');
 
 		The name is picked in symmetry with e.g. json_encode.
 
