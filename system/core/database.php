@@ -285,9 +285,9 @@
 			unique within the xml:id attributes in this
 			document.
 		*/
-		function generateId() {
+		function generateId($prefix = 'id') {
 			do {
-				$id = 'id' . uniqid();
+				$id = $prefix . uniqid();
 			} while ($this->document()->getElementById($id));
 			$this->setAttribute($this->getIdAttribute(), $id);
 		}
