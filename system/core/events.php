@@ -204,7 +204,27 @@
 		return false;
 	}
 
-	function makeAction($langPageView, $command, $argument, HTMLForm $form = null, $jsCallBackAsString='null') {
+	/*
+		Function: makeAction
+		Creates a javascript snippet that triggers a POST request to
+		perform the given command.
+
+		To handle the request, either:
+		 - Use registerCommandCallback() to register a callback for a
+		   single command value. The argument value will be passed to
+		   the callback.
+		 - From the page's process function, use
+		   HyphaRequest::getCommand() to get the command value and
+		   handle it accordingly.
+
+		Parameters:
+		$langPageView - the path to the page to perform the action on (full path, including language)
+		$command - the command to pass to the server
+		$argument - an optional argument to pass to the server
+		$form - the form whose values to include in the request. If null, the default form will be used.
+		$jsCallbackAsString - the name of a javascript callback function to call after the requests completes, passing the response text
+	*/
+	function makeAction($langPageView, $command, $argument = '', HTMLForm $form = null, $jsCallBackAsString='null') {
 		if (null === $form) {
 			global $hyphaHtml;
 			$form = $hyphaHtml->getDefaultForm();
