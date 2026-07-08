@@ -779,7 +779,7 @@
 		}
 	}
 
-	class HTMLTable extends DOMWrap\Element {
+	class HTMLTable extends HyphaDomElement {
 		/** @var HTMLTableRow */
 		private $currentRow;
 
@@ -804,7 +804,7 @@
 		}
 	}
 
-	class HTMLTableRow extends DOMWrap\Element {
+	class HTMLTableRow extends HyphaDomElement {
 		private $celltype;
 
 		function __construct($celltype) {
@@ -813,7 +813,7 @@
 		}
 
 		function addCell($text = null) {
-			$cell = new DOMWrap\Element($this->celltype);
+			$cell = new HyphaDomElement($this->celltype);
 			$this->appendChild($cell);
 			if ($text)
 				$cell->setText((string)$text);
