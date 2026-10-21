@@ -315,6 +315,8 @@
 			@param $data - Any (POST) data to apply to this form.
 		*/
 		function __construct(HTMLDocument $doc, string|HyphaDomElement|DOMNodeList|null $form, $data = []) {
+			global $O_O;
+
 			if (is_string($form)) {
 				$form = $doc->createFromHtml($form);
 				if ($form->length == 1 && $form->item(0)->tagName == 'form') {
@@ -359,6 +361,14 @@
 				$this->form_element->setAttribute('enctype', 'multipart/form-data');
 
 			$this->scanForm($this->form_element);
+
+			$csrf = $this->form_element->findOneXPath('input[name=csrfToken]');
+			if (!$csrf) {
+				$csrf = $this->form_element->createChild('input');
+				$csrf->setAttribute('name', "csrfToken");
+			}
+			$csrf->setAttribute('type', "hidden");
+			$csrf->setAttribute('value', $O_O->getOrGenerateCsrfToken());
 		}
 
 		/*

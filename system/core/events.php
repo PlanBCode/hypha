@@ -253,23 +253,6 @@
 		return '<input type="button" class="button" value="'.$label.'" onclick="hypha(\''.$langPageView.'\', \''.$command.'\', \''.$argument.'\');" />';
 	}
 
-	// Automatically insert the CSRF token into all forms in the
-	// generated document
-	registerPostProcessingFunction('injectCsrf');
-	function injectCsrf(HTMLDocument $html) {
-		global $O_O;
-		$forms = $html->findXPath('//form');
-		foreach ($forms as $form) {
-			// if form does not have a csrf field, inject csrf field.
-			if (!$form->findOneXPath('input[name=csrfToken]')) {
-				$input = $form->createChild('input');
-				$input->setAttribute('name', "csrfToken");
-				$input->setAttribute('type', "hidden");
-				$input->setAttribute('value', $O_O->getOrGenerateCsrfToken());
-			}
-		}
-	}
-
 	// execute posted commands
 	function executePostedCommand($O_O) {
 		static $processed = false;
