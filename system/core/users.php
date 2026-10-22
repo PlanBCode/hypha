@@ -121,7 +121,7 @@
 		Function: addLoginRoutine
 		add javascript needed for the login procedure to function
 	*/
-	function addLoginRoutine($html) {
+	function addLoginRoutine($hyphaHtml) {
 		global $O_O;
 		$currentUrlPath = $O_O->getRequest()->getRelativeUrlPath(false);
 		ob_start();
@@ -134,14 +134,49 @@
 		*/
 ?>
 	function login() {
-		html = '<div class="login-wrapper">';
-		html+= '<div class="username"><label class="username" for="loginUsername"><?=__('login-username')?>:</label><input name="loginUsername" id="loginUsername" type="text" /></div>';
-		html+= '<div class="password"><label class="password" for="loginPassword"><?=__('login-password')?>:</label><input name="loginPassword" id="loginPassword" type="password" /></td></div>';
-		html+= '<div class="submit"><input class="button" type="submit" name="login" value="<?=__('login')?>" onclick="hypha(\'<?=$currentUrlPath?>\', \'login\', \'\', $(this).closest(\'form\'));" /></div>';
-		html+= '<div class="cancel"><input class="button" type="button" name="cancel" value="<?=__('cancel')?>" onclick="document.getElementById(\'popup\').style.display=\'none\';" /></div>';
-		html+= '<div class="forgot-password"><?=__('forgot-password')?><a href="javascript:reregister();"><?=__('reregister')?></a></div>';
-		html+= '</div>';
-		document.getElementById('popup').innerHTML = html;
+<?php
+		$html = <<<EOF
+		<div class="login-wrapper">
+			<div class="username">
+				<label class="username" for="loginUsername">
+					[[login-username]]
+				</label>
+				<input name="loginUsername" id="loginUsername" type="text" />
+			</div>
+			<div class="password">
+				<label class="password" for="loginPassword">
+					[[login-password]]
+				</label>
+				<input name="loginPassword" id="loginPassword" type="password" />
+			</div>
+			<div class="submit">
+				<input class="button" type="submit" name="login" value="[[login]]" onclick="hypha('[[currentUrlPath]]', 'login', '', $(this).closest('form'));" />
+			</div>
+			<div class="cancel">
+				<input class="button" type="button" name="cancel" value="[[cancel]]" onclick="document.getElementById('popup').style.display='none';" />
+			</div>
+			<div class="forgot-password">
+				[[forgot-password]]
+				<a href="javascript:reregister();">
+					[[reregister]]
+				</a>
+			</div>
+		</div>
+EOF;
+		$vars = [
+			'cancel' => __('cancel'),
+			'forgot-password' => __('forgot-password'),
+			'login' => __('login'),
+			'login-password' => __('login-password'),
+			'login-username' => __('login-username'),
+			'reregister' => __('reregister'),
+			'currentUrlPath' => $currentUrlPath,
+		];
+		// TODO: This does not work, this does not get the CSRF token...
+		$form = $hyphaHtml->createForm(hypha_substitute($html, $vars));
+?>
+		form = <?= json_encode($form->getOuterHtml()) ?>;
+		document.getElementById('popup').innerHTML = form;
 		document.getElementById('popup').style.display = 'block';
 		document.getElementById('loginUsername').focus();
 	}
@@ -155,7 +190,7 @@
 		document.getElementById('searchLogin').focus();
 	}
 <?php
-		$html->writeScript(ob_get_clean());
+		$hyphaHtml->writeScript(ob_get_clean());
 	}
 
 	/*

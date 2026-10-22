@@ -205,7 +205,7 @@ class mailinglist extends HyphaDatatypePage {
 		$form->appendTo($main);
 
 		$formContainer = $main->childNodes->item($main->childNodes->length - 1);
-		$formContainer->appendChild($this->makeActionButton(__('subscribe'), null, self::CMD_SUBSCRIBE));
+		$formContainer->appendChild($this->makeActionButton(__('subscribe'), null, self::CMD_SUBSCRIBE, '', $form));
 
 		// display archive (non-users only get to see sent items)
 		$main->appendHtml('<div><h3>' . htmlspecialchars(__('archive')) . '</h3></div>');
@@ -271,7 +271,7 @@ class mailinglist extends HyphaDatatypePage {
 
 		/** @var HyphaDomElement $commands */
 		$commands = $this->html->getElementById('pageCommands');
-		$commands->appendChild($this->makeActionButton(__('save'), self::PATH_EDIT, self::CMD_SAVE));
+		$commands->appendChild($this->makeActionButton(__('save'), self::PATH_EDIT, self::CMD_SAVE, '', $form));
 		$commands->appendChild($this->makeActionButton(__('cancel'), ''));
 
 		return null;
@@ -732,7 +732,7 @@ EOF;
 		/** @var HyphaDomElement $commands */
 		$commands = $this->html->getElementById('pageCommands');
 		$commands->appendChild($this->makeActionButton(__('cancel'), self::PATH_ADDRESSES));
-		$commands->appendChild($this->makeActionButton(__('add'), self::PATH_ADDRESSES, self::CMD_ADD));
+		$commands->appendChild($this->makeActionButton(__('add'), self::PATH_ADDRESSES, self::CMD_ADD, '', $form));
 	}
 
 	protected function getNumberOfAddresses(){
@@ -876,7 +876,7 @@ EOF;
 		/** @var HyphaDomElement $commands */
 		$commands = $this->html->getElementById('pageCommands');
 		$commands->appendChild($this->makeActionButton(__('cancel'), $cancelPath));
-		$commands->appendChild($this->makeActionButton(__('save'), $submitPath, self::CMD_SAVE));
+		$commands->appendChild($this->makeActionButton(__('save'), $submitPath, self::CMD_SAVE, '', $form));
 	}
 
 	/**
@@ -1404,11 +1404,13 @@ EOF;
 	 * @param null|string $path
 	 * @param null|string $command
 	 * @param null|string $argument
+	 * @param null|HTMLForm $form
+	 *
 	 * @return HyphaDomElement
 	 */
-	protected function makeActionButton($label, $path = null, $command = null, $argument = null) {
+	protected function makeActionButton($label, $path = null, $command = null, $argument = null, HTMLForm $form = null) {
 		$path = $this->language . '/' . $this->pagename . ($path ? '/' . $path : '');
-		$_action = makeAction($path, ($command ? $command : ''), ($argument ? $argument : ''));
+		$_action = makeAction($path, ($command ? $command : ''), ($argument ? $argument : ''), $form);
 
 		return makeButton($label, $_action);
 	}

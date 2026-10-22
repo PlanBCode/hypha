@@ -42,6 +42,7 @@
 	abstract class HyphaSystemPage extends HyphaPage {
 	}
 
+
 	/*
 		Class: HyphaDatatypePage
 		abstract class for a page backed by datatype and xml file.
@@ -122,7 +123,7 @@
 		query - page query containing language and pagename
 		types - array with available page types (i.e. 'text', 'blog' etc)
 	*/
-	function addNewPageRoutine($html, $query, $types) {
+	function addNewPageRoutine($hyphaHtml, $query, $types) {
 		global $hyphaContentLanguage;
 		// If a pagename is specified that does not exist yet,
 		// prefill that page name
@@ -143,7 +144,7 @@
 	}
 	function newPage() {
 <?php
-		$popup = <<<EOF
+		$html = <<<EOF
 			<table class="section">
 				<tr>
 					<th colspan="2">[[create-new-page]]<br/>[[instruction-new-page]]</th>
@@ -173,7 +174,7 @@
 				</tr>
 			</table>
 EOF;
-		$pagetype_options = $html->create('<dummy/>');
+		$pagetype_options = $hyphaHtml->create('<dummy/>');
 		foreach($types as $type => $datatypeName) {
 			$option = $pagetype_options->createChild('option')->setAttr('value', $type)->setText($datatypeName);
 			if ($type==hypha_getDefaultNewPageType())
@@ -197,16 +198,18 @@ EOF;
 			'submit-disabled' => $pagename ? 'disabled="disabled"' : '',
 			'content-language-js' => htmlspecialchars(json_encode($hyphaContentLanguage)),
 		];
-?>
-		popup = <?= json_encode(hypha_substitute($popup, $vars)) ?>;
 
-		document.getElementById('popup').innerHTML = popup;
+		$form = $hyphaHtml->createForm(hypha_substitute($html, $vars));
+?>
+		form = <?= json_encode($form->getOuterHtml()) ?>;
+
+		document.getElementById('popup').innerHTML = form;
 		document.getElementById('popup').style.display = 'block';
 		document.getElementById('newPagename').focus();
 	}
 </script>
 <?php
-		$html->writeScript(ob_get_clean());
+		$hyphaHtml->writeScript(ob_get_clean());
 	}
 
 	/*

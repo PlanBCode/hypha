@@ -352,8 +352,8 @@ EOF;
 			$form->appendTo($this->html->getElementById('main'));
 
 			$commands = $this->html->getElementById('pageCommands');
-			$commands->appendChild($this->makeActionButton(__('save'), self::PATH_SETTINGS, self::CMD_SAVE));
-			$commands->appendChild($this->makeActionButton(__('cancel'), ''));
+			$commands->appendChild($this->makeActionButton(__('save'), self::PATH_SETTINGS, self::CMD_SAVE, '', $form));
+			$commands->appendChild($this->makeActionButton(__('cancel')));
 			return null;
 		}
 
@@ -450,7 +450,7 @@ EOF;
 			$this->html->getElementById('pagename')->text(__('festival-signup-for') . $this->getConfig(self::CONFIG_ID_TITLE));
 
 			$commands = $this->html->getElementById('pageEndCommands');
-			$commands->appendChild($this->makeActionButton(__('signup'), self::PATH_SIGNUP, self::CMD_SIGNUP));
+			$commands->appendChild($this->makeActionButton(__('signup'), self::PATH_SIGNUP, self::CMD_SIGNUP, '', $form));
 
 			return null;
 		}
@@ -770,7 +770,7 @@ EOF;
 
 			$commands = $this->html->getElementById('pageEndCommands');
 			$title = $editing ? __('festival-modify') : __('festival-contribute');
-			$commands->appendChild($this->makeActionButton($title, join('/',$request->getArgs()), self::CMD_SAVE));
+			$commands->appendChild($this->makeActionButton($title, join('/',$request->getArgs()), self::CMD_SAVE, '', $form));
 			return null;
 		}
 
@@ -1265,12 +1265,13 @@ EOF;
 		 * @param null|string $path
 		 * @param null|string $command
 		 * @param null|string $argument
+		 * @param null|HTMLForm $form
 		 *
-		 * @return hyphaDomElement
+		 * @return HyphaDomElement
 		 */
-		protected function makeActionButton($label, $path = null, $command = null, $argument = null) {
+		protected function makeActionButton($label, $path = null, $command = null, $argument = null, HTMLForm $form = null) {
 			$path = $this->language . '/' . $this->pagename . ($path ? '/' . $path : '');
-			$_action = makeAction($path, ($command ? $command : ''), ($argument ? $argument : ''));
+			$_action = makeAction($path, ($command ? $command : ''), ($argument ? $argument : ''), $form);
 
 			return makeButton($label, $_action);
 		}

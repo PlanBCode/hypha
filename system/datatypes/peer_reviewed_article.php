@@ -678,11 +678,11 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		/** @var HyphaDomElement $commands */
 		$commands = $this->html->getElementById('pageCommands');
 		$commands->appendChild($this->makeActionButton(__('art-cancel')));
-		$commands->appendChild($this->makeActionButton(__('art-save'), self::PATH_EDIT, self::CMD_SAVE));
+		$commands->appendChild($this->makeActionButton(__('art-save'), self::PATH_EDIT, self::CMD_SAVE, '', $form));
 		/** @var HyphaDomElement $commandsAtEnd */
 		$commandsAtEnd = $this->html->getElementById('pageEndCommands');
 		$commandsAtEnd->appendChild($this->makeActionButton(__('art-cancel')));
-		$commandsAtEnd->appendChild($this->makeActionButton(__('art-save'), self::PATH_EDIT, self::CMD_SAVE));
+		$commandsAtEnd->appendChild($this->makeActionButton(__('art-save'), self::PATH_EDIT, self::CMD_SAVE, '', $form));
 
 		return null;
 	}
@@ -866,14 +866,14 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		$main = $this->html->getElementById('main');
 		$form->appendTo($main);
 
-		$actionButton = $this->makeDiscussionActionButton($type, $discussion);
+		$actionButton = $this->makeDiscussionActionButton($type, $form, $discussion);
 
 		$main->appendChild($actionButton);
 
 		return null;
 	}
 
-	protected function makeDiscussionActionButton($type, HyphaDomElement $discussion = null) {
+	protected function makeDiscussionActionButton($type, HTMLForm $form, HyphaDomElement $discussion = null) {
 		$new = $discussion === null;
 		$review = self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER === $type;
 
@@ -887,7 +887,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 
 		$label = $review ? __('art-add-review-comment') : __('art-add-comment');
 
-		return $this->makeActionButton($label, $path, $command);
+		return $this->makeActionButton($label, $path, $command, '', $form);
 	}
 
 	/**
@@ -1075,13 +1075,13 @@ EOF;
 		// and then hide).
 		if (!$deleted) {
 			$hide_title = $hidden ? __('art-moderate-change-reason') : __('art-moderate-hide-comment');
-			$commands->appendChild($this->makeActionButton($hide_title, $path, self::CMD_COMMENT_MODERATE_HIDE ));
+			$commands->appendChild($this->makeActionButton($hide_title, $path, self::CMD_COMMENT_MODERATE_HIDE, '', $form));
 		}
 		$delete_title = $deleted ? __('art-moderate-change-reason') : __('art-moderate-delete-comment');
 		$commands->appendChild($this->makeActionButton($delete_title, $path, self::CMD_COMMENT_MODERATE_DELETE ));
 
 		if ($hidden || $deleted) {
-			$commands->appendChild($this->makeActionButton(__('art-unmoderate-comment'), $path, self::CMD_COMMENT_UNMODERATE ));
+			$commands->appendChild($this->makeActionButton(__('art-unmoderate-comment'), $path, self::CMD_COMMENT_UNMODERATE, '', $form));
 		}
 
 		return null;
@@ -1619,8 +1619,8 @@ EOF;
 				];
 				$replyForm = $this->createCommentForm($type, $formData, $discussion);
 				$replyForm->updateDom();
-				$commentList->appendChild($replyForm);
-				$commentList->appendChild($this->makeDiscussionActionButton($type, $discussion));
+				$replyForm->appendTo($commentList);
+				$commentList->appendChild($this->makeDiscussionActionButton($type, $replyForm, $discussion));
 			}
 
 			$reviewCommentContainersSorted[(int)$closed][(int)!$blocking][] = $discussionHtml;
@@ -1642,7 +1642,7 @@ EOF;
 		$commentForm = $this->createCommentForm($type, $formData);
 		$commentForm->updateDom();
 		$commentForm->appendTo($discussionsDomElement);
-		$discussionsDomElement->appendChild($this->makeDiscussionActionButton($type));
+		$discussionsDomElement->appendChild($this->makeDiscussionActionButton($type, $commentForm));
 
 		$title = $review ? __('art-review-comments') : __('art-comments');
 		$discussionsDomElement->appendHtml('<h2>' . $title . '</h2>');
@@ -2115,15 +2115,14 @@ EOF;
 	 * @param string $label
 	 * @param null|string $path
 	 * @param null|string $command
-	 * @param null|string|array $argument
+	 * @param null|string $argument
+	 * @param null|HTMLForm $form
+	 *
 	 * @return HyphaDomElement
 	 */
-	protected function makeActionButton($label, $path = null, $command = null, $argument = null) {
-		if (is_array($argument)) {
-			$argument = json_encode($argument);
-		}
+	protected function makeActionButton($label, $path = null, $command = null, $argument = null, HTMLForm $form = null) {
 		$path = $this->language . '/' . $this->pagename . ($path ? '/' . $path : '');
-		$_action = makeAction($path, ($command ? $command : ''), ($argument ? $argument : ''));
+		$_action = makeAction($path, ($command ? $command : ''), ($argument ? $argument : ''), $form);
 
 		return makeButton($label, $_action);
 	}

@@ -57,8 +57,6 @@
 			if (isAdmin() || $hyphaUser->getAttribute('username') == $username) {
 				$account = hypha_getUserByName($username);
 				$this->html->writeToElement('pagename', __('change-account').' `'.$username.'`');
-				$this->html->writeToElement('pageCommands', makeButton(__('cancel'), makeAction('settings', '', '')));
-				$this->html->writeToElement('pageCommands', makeButton(__('save'), makeAction('settings', 'settingsSaveAccount', $username)));
 				if ($account->getAttribute('rights')=='admin') $this->html->writeToElement('pageCommands', makeButton(__('unadmin'), makeAction('settings', 'settingsUnadmin', $username)));
 				ob_start();
 ?>
@@ -83,14 +81,15 @@
 	</tr>
 </table>
 <?php
-				$this->html->writeToElement('main', ob_get_clean());
+				$form = $this->html->createForm(ob_get_clean());
+				$form->appendTo($this->html->getElementById('main'));
+				$this->html->writeToElement('pageCommands', makeButton(__('cancel'), makeAction('settings', '', '')));
+				$this->html->writeToElement('pageCommands', makeButton(__('save'), makeAction('settings', 'settingsSaveAccount', $username, $form)));
 			}
 		}
 
 		function editInvitation() {
 			$this->html->writeToElement('pagename', __('invite-to-project'));
-			$this->html->writeToElement('pageCommands', makeButton(__('cancel'), makeAction('settings', '', '')));
-			$this->html->writeToElement('pageCommands', makeButton(__('send'), makeAction('settings', 'settingsInvite', '')));
 			ob_start();
 ?>
 <table class="section">
@@ -104,7 +103,10 @@
 	</tr>
 </table>
 <?php
-			$this->html->writeToElement('main', ob_get_clean());
+			$form = $this->html->createForm(ob_get_clean());
+			$form->appendTo($this->html->getElementById('main'));
+			$this->html->writeToElement('pageCommands', makeButton(__('cancel'), makeAction('settings', '', '')));
+			$this->html->writeToElement('pageCommands', makeButton(__('send'), makeAction('settings', 'settingsInvite', '', $form)));
 		}
 
 		function invite() {
@@ -131,8 +133,6 @@
 
 		function editQuitMessage() {
 			$this->html->writeToElement('pagename', __('quit'));
-			$this->html->writeToElement('pageCommands', makeButton(__('cancel'), makeAction('settings', '', '')));
-			$this->html->writeToElement('pageCommands', makeButton(__('send'), 'if(confirm(\''.__('sure-to-quit').'\'))'.makeAction('settings', 'settingsQuit', '')));
 			ob_start();
 ?>
 <table class="section">
@@ -145,7 +145,10 @@
 	</tr>
 </table>
 <?php
-			$this->html->writeToElement('main', ob_get_clean());
+			$form = $this->html->createForm(ob_get_clean());
+			$form->appendTo($this->html->getElementById('main'));
+			$this->html->writeToElement('pageCommands', makeButton(__('cancel'), makeAction('settings', '', '')));
+			$this->html->writeToElement('pageCommands', makeButton(__('send'), 'if(confirm(\''.__('sure-to-quit').'\'))'.makeAction('settings', 'settingsQuit', '', $form)));
 		}
 
 		function quit() {
@@ -177,7 +180,6 @@
 			$isoLangList = Language::getIsoList();
 			foreach(hypha_getUserList() as $user) if ($user->hasAttribute('key') && $user->getAttribute('key')==$key) {
 				$this->html->writeToElement('pagename', __('register'));
-				$this->html->writeToElement('pageCommands', makeButton(__('submit'), makeAction('settings/register', 'settingsRegister', $key)));
 				ob_start();
 ?>
 <table class="section">
@@ -201,7 +203,9 @@
 	</tr>
 </table>
 <?php
-				$this->html->writeToElement('main', ob_get_clean());
+				$form = $this->html->createForm(ob_get_clean());
+				$form->appendTo($this->html->getElementById('main'));
+				$this->html->writeToElement('pageCommands', makeButton(__('submit'), makeAction('settings/register', 'settingsRegister', $key, $form)));
 				return;
 			}
 			notify('error', __('unknown-registration'));
@@ -252,8 +256,6 @@
 				$seconds-= $hours * 3600;
 				$minutes = floor($seconds / 60);
 				$this->html->writeToElement('pagename', __('change-project-settings'));
-				$this->html->writeToElement('pageCommands', makeButton(__('cancel'), makeAction('settings', '', '')));
-				$this->html->writeToElement('pageCommands', makeButton(__('save'), makeAction('settings', 'settingsSaveHyphaSettings', '')));
 				ob_start();
 ?>
 <table class="section">
@@ -283,7 +285,10 @@
 	</tr>
 </table>
 <?php
-			$this->html->writeToElement('main', ob_get_clean());
+				$form = $this->html->createForm(ob_get_clean());
+				$form->appendTo($this->html->getElementById('main'));
+				$this->html->writeToElement('pageCommands', makeButton(__('cancel'), makeAction('settings', '', '')));
+				$this->html->writeToElement('pageCommands', makeButton(__('save'), makeAction('settings', 'settingsSaveHyphaSettings', '', $form)));
 			}
 		}
 
@@ -316,7 +321,6 @@
 <?php
 				} else {
 					$this->html->writeToElement('pagename', __('edit-html-of-theme', ['theme' => $this->O_O->getThemeName()]));
-					$this->html->writeToElement('pageCommands', makeButton(__('save'), makeAction('settings', 'settingsSaveMarkup', '')));
 ?>
 <table class="section">
 	<tr>
@@ -325,7 +329,10 @@
 </table>
 <?php
 				}
-				$this->html->writeToElement('main', ob_get_clean());
+				$form = $this->html->createForm(ob_get_clean());
+				$form->appendTo($this->html->getElementById('main'));
+				if ($this->O_O->getThemeName() != 'default')
+					$this->html->writeToElement('pageCommands', makeButton(__('save'), makeAction('settings', 'settingsSaveMarkup', '', $form)));
 			}
 		}
 
@@ -349,12 +356,16 @@
 					echo '<option' . ($normalTheme === $theme ? ' selected' : '') . '>' . htmlspecialchars($theme) . '</option>';
 				}
 				echo '</select>';
-				echo makeButton(__('save'), makeAction('settings/theme', 'settingsSaveTheme', ''))->getOuterHtml();
-				echo makeButton(__('preview-theme'), makeAction('settings/theme', 'settingsPreviewTheme', ''))->getOuterHtml();
-				$this->html->writeToElement('main', ob_get_clean());
+				$main = $this->html->getElementById('main');
+				$select_form = $this->html->createForm(ob_get_clean());
+				$select_form->appendTo($main);
+				$main->appendChild(makeButton(__('save'), makeAction('settings/theme', 'settingsSaveTheme', '', $select_form)));
+				$main->appendChild(makeButton(__('preview-theme'), makeAction('settings/theme', 'settingsPreviewTheme', '', $select_form)));
 
-				$this->html->writeToElement('main', '<div id="copy-theme"></div>');
-				$this->html->writeToElement('copy-theme', '<h2>'.__('copy-theme').'</h2>');
+				$copy_theme = $main->createChild('div');
+				$copy_theme->setId('copy-theme');
+				$copy_theme->appendHtml('<h2>'.__('copy-theme').'</h2>');
+
 				ob_start();
 				echo '<div class="theme-options">' . "\n";
 				foreach ($themes as $theme) {
@@ -363,10 +374,10 @@
 				}
 				echo '</div>' . "\n";
 				echo '<div class="new-theme-name"><input type="text" name="dstTheme" placeholder="'.__('new-theme-name').'"></div>';
-				echo makeButton(__('copy-theme'), makeAction('settings/theme', 'settingsCopyTheme', ''))->getOuterHtml();
-				echo makeButton(__('copy-theme-and-activate'), makeAction('settings/theme', 'settingsCopyThemeAndActivate', ''))->getOuterHtml();
-				$this->html->writeToElement('copy-theme', ob_get_clean());
-
+				$copy_form = $this->html->createForm(ob_get_clean());
+				$copy_form->appendTo($copy_theme);
+				$copy_theme->appendChild(makeButton(__('copy-theme'), makeAction('settings/theme', 'settingsCopyTheme', '', $copy_form)));
+				$copy_theme->appendChild(makeButton(__('copy-theme-and-activate'), makeAction('settings/theme', 'settingsCopyThemeAndActivate', '', $copy_form)));
 			}
 		}
 
@@ -513,12 +524,14 @@
 <?php
 				} else {
 					$this->html->writeToElement('pagename', __('edit-css-of-theme', ['theme' => $this->O_O->getThemeName()]));
-					$this->html->writeToElement('pageCommands', makeButton(__('save'), makeAction('settings', 'settingsSaveStyles', '')));
 ?>
 <textarea class="section" name="editCss" id="editCss" cols="100%" rows="18" wrap="off"><?=hypha_getCss();?></textarea>
 <?php
 				}
-				$this->html->writeToElement('main', ob_get_clean());
+				$form = $this->html->createForm(ob_get_clean());
+				$form->appendTo($this->html->getElementById('main'));
+				if ($this->O_O->getThemeName() !== 'default')
+					$this->html->writeToElement('pageCommands', makeButton(__('save'), makeAction('settings', 'settingsSaveStyles', '', $form)));
 			}
 		}
 
@@ -532,8 +545,6 @@
 		function editSiteElements() {
 			if (isAdmin()) {
 				$this->html->writeToElement('pagename', __('site-elements'));
-				$this->html->writeToElement('pageCommands', makeButton(__('cancel'), makeAction('settings', '', '')));
-				$this->html->writeToElement('pageCommands', makeButton(__('save'), makeAction('settings', 'settingsSaveSiteElements', '')));
 				ob_start();
 ?>
 <table class="section">
@@ -551,7 +562,10 @@
 	</tr>
 </table>
 <?php
-				$this->html->writeToElement('main', ob_get_clean());
+				$form = $this->html->createForm(ob_get_clean());
+				$form->appendTo($this->html->getElementById('main'));
+				$this->html->writeToElement('pageCommands', makeButton(__('cancel'), makeAction('settings', '', '')));
+				$this->html->writeToElement('pageCommands', makeButton(__('save'), makeAction('settings', 'settingsSaveSiteElements', '', $form)));
 			}
 		}
 		function saveSiteElements($argument) {
@@ -568,8 +582,6 @@
 
 		function editMenu() {
 			$this->html->writeToElement('pagename', __('edit-menu'));
-			$this->html->writeToElement('pageCommands', makeButton(__('cancel'), makeAction('settings', '', '')));
-			$this->html->writeToElement('pageCommands', makeButton(__('save'), makeAction('settings', 'settingsSaveMenu', '')));
 			ob_start();
 ?>
 <table class="section">
@@ -578,7 +590,10 @@
 	</tr>
 </table>
 <?php
-			$this->html->writeToElement('main', ob_get_clean());
+			$form = $this->html->createForm(ob_get_clean());
+			$form->appendTo($this->html->getElementById('main'));
+			$this->html->writeToElement('pageCommands', makeButton(__('cancel'), makeAction('settings', '', '')));
+			$this->html->writeToElement('pageCommands', makeButton(__('save'), makeAction('settings', 'settingsSaveMenu', '', $form)));
 		}
 
 		function saveMenu($argument) {

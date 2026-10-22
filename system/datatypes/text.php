@@ -140,8 +140,8 @@ EOF;
 			$form->appendTo($this->html->getElementById('main'));
 
 			$commands = $this->html->getElementById('pageCommands');
-			$commands->appendChild($this->makeActionButton(__('save'), self::PATH_EDIT, self::CMD_SAVE));
-			$commands->appendChild($this->makeActionButton(__('cancel'), ''));
+			$commands->appendChild($this->makeActionButton(__('save'), self::PATH_EDIT, self::CMD_SAVE, '', $form));
+			$commands->appendChild($this->makeActionButton(__('cancel')));
 
 			return null;
 		}
@@ -202,7 +202,7 @@ EOF;
 			// buttons
 			$commands = $this->html->getElementById('pageCommands');
 			$commands->appendChild($this->makeActionButton(__('cancel')));
-			$commands->appendChild($this->makeActionButton(__('save'), self::PATH_TRANSLATE, self::CMD_TRANSLATE));
+			$commands->appendChild($this->makeActionButton(__('save'), self::PATH_TRANSLATE, self::CMD_TRANSLATE, '', $form));
 
 			return null;
 		}
@@ -356,12 +356,13 @@ EOF;
 		 * @param null|string $path
 		 * @param null|string $command
 		 * @param null|string $argument
+		 * @param null|HTMLForm $form
 		 *
 		 * @return HyphaDomElement
 		 */
-		protected function makeActionButton($label, $path = null, $command = null, $argument = null) {
+		protected function makeActionButton($label, $path = null, $command = null, $argument = null, HTMLForm $form = null) {
 			$path = $this->language . '/' . $this->pagename . ($path ? '/' . $path : '');
-			$_action = makeAction($path, ($command ? $command : ''), ($argument ? $argument : ''));
+			$_action = makeAction($path, ($command ? $command : ''), ($argument ? $argument : ''), $form);
 
 			return makeButton($label, $_action);
 		}
