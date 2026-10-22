@@ -212,7 +212,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 
 		$excerptBody = $doc->createElement('div')->appendTo($excerpt);
 		$excerptBody->addClass('excerpt_body');
-		$excerptBody->append($this->getExcerpt()->children());
+		$excerptBody->appendImportedChildren($this->getExcerpt()->children());
 	}
 
 	/**
@@ -375,21 +375,21 @@ class peer_reviewed_article extends HyphaDatatypePage {
 			$this->renderExcerptBody($preview);
 		}
 
-		$text = $content->find(self::FIELD_NAME_TEXT)->children();
+		$text_nodes = $content->find(self::FIELD_NAME_TEXT)->children();
 		/** @var HyphaDomElement $div */
 		$div = $this->html->createElement('div');
 		$div->setAttribute('class', 'article');
-		$div->append($text);
+		$div->appendImportedChildren($text_nodes);
 		$main->append($div);
 
 		/** @var NodeList $method */
-		$method = $this->xml->find(self::FIELD_NAME_METHOD)->children();
-		if ($method->count() > 0) {
+		$method_nodes = $this->xml->find(self::FIELD_NAME_METHOD)->children();
+		if ($method_nodes->count() > 0) {
 			/** @var HyphaDomElement $methodContainer */
 			$methodContainer = $this->html->createElement('div');
 			$methodContainer->attr('class', 'method');
 			$methodContainer->appendHtml('<h2>' . __('art-method') . '</h2>');
-			$methodContainer->append($method);
+			$methodContainer->appendImportedChildren($method_nodes);
 			$main->append($methodContainer);
 		}
 
@@ -400,7 +400,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 			$div = $this->html->createElement('div');
 			$div->setAttribute('class', 'sources');
 			$div->appendHtml('<h2>' . __('art-sources') . '</h2>');
-			$div->append($sources);
+			$div->appendImportedChildren($sources);
 			$main->append($div);
 		}
 

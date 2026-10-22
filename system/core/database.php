@@ -365,6 +365,15 @@
 			foreach ($nodes as $node)
 				$this->appendChild($node);
 		}
+
+		/*
+		 * Append the given iterable of DOMNodes to the current node,
+		 * importing (copying) the nodes into the current document.
+		 */
+		function appendImportedChildren(Traversable|array $nodes) {
+			foreach ($nodes as $node)
+				$this->appendChild($this->ownerDocument->importNode($node, true));
+		}
 	}
 
 	/*
