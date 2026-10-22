@@ -370,7 +370,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		if (isUser()) {
 			if ($checks) {
 				$checklist = $this->renderChecklist($checkStatus, $checks);
-				$checklist->appendTo($main);
+				$main->appendChild($checklist);
 			}
 
 			$preview = $main->createChild('div')->addClass('excerpt-preview');
@@ -1063,7 +1063,7 @@ EOF;
 			$prefix->setText(__('art-comment-to-moderate'));
 		}
 
-		$this->createCommentDomElement($comment)->appendTo($commentDiv);
+		$commentDiv->appendChildren($this->createCommentDomElement($comment));
 
 		$form->appendTo($main);
 
@@ -1534,7 +1534,7 @@ EOF;
 						$li->addClass('hidden');
 						$details = $li->createChild('details');
 						$placeholder = $details->createChild('summary');
-						$commentHtml->appendTo($details);
+						$details->appendChildren($commentNodes);
 					}
 					$placeholder->addClass('moderated-placeholder');
 					$statusSpan = $placeholder->createChild('span');
