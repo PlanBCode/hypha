@@ -482,7 +482,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 			'has-no-blocks' => [
 				'statuses' => [self::STATUS_REVIEW, self::STATUS_APPROVED],
 				'checker' => function() {
-					$xpath = '//' . self::FIELD_NAME_DISCUSSION_CONTAINER . '//' . self::FIELD_NAME_DISCUSSION . '[@' . self::FIELD_NAME_DISCUSSION_BLOCKING . '="1" and @' . self::FIELD_NAME_DISCUSSION_BLOCK_RESOLVED . '!="1"]';
+					$xpath = self::FIELD_NAME_DISCUSSION_CONTAINER . '//' . self::FIELD_NAME_DISCUSSION . '[@' . self::FIELD_NAME_DISCUSSION_BLOCKING . '="1" and @' . self::FIELD_NAME_DISCUSSION_BLOCK_RESOLVED . '!="1"]';
 					$blockingCount = $this->xml->findXPath($xpath)->length;
 					return [$blockingCount === 0, ['left' => $blockingCount]];
 				},
@@ -1224,7 +1224,7 @@ EOF;
 		$this->xml->lockAndReload();
 
 		/** @var NodeList $subscriberContainer */
-		$xpath = '//' . self::FIELD_NAME_DISCUSSION_CONTAINER . '//' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER . '[@' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER_UNSUBSCRIBE_CODE . '=' . xpath_encode($code) . ']';
+		$xpath = self::FIELD_NAME_DISCUSSION_CONTAINER . '//' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER . '[@' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER_UNSUBSCRIBE_CODE . '=' . xpath_encode($code) . ']';
 		/** @var HyphaDomElement $subscriber */
 		$subscriber = $this->xml->findOneXPath($xpath);
 		if (!$subscriber instanceof HyphaDomElement) {
@@ -1360,7 +1360,7 @@ EOF;
 					$subscriberEmail = trim(strtolower($userEmail));
 
 					// get or create subscriber element by email
-					$xpath = './/' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER .
+					$xpath = self::FIELD_NAME_DISCUSSION_SUBSCRIBER .
 						'[@' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER_EMAIL . '=' . xpath_encode($subscriberEmail) .
 						' and @' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER_STATUS . '!=' . xpath_encode(self::SUBSCRIBER_STATUS_UNSUBSCRIBED) .
 						']';
@@ -1944,7 +1944,7 @@ EOF;
 		$discussion = $comment->parentNode;
 
 		/** @var NodeList|HyphaDomElement[] $subscriberElements */
-		$xpath = './/' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER_CONTAINER . '/' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER . '[@ ' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER_STATUS . '=' . xpath_encode(self::SUBSCRIBER_STATUS_CONFIRMED) . ']';
+		$xpath = self::FIELD_NAME_DISCUSSION_SUBSCRIBER_CONTAINER . '/' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER . '[@ ' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER_STATUS . '=' . xpath_encode(self::SUBSCRIBER_STATUS_CONFIRMED) . ']';
 		$subscriberElements = $discussion->findXPath($xpath);
 
 		$subscribers = [];
@@ -2079,7 +2079,7 @@ EOF;
 		/** @var HyphaDomElement $approves */
 		$approves = $this->xml->findOneXPath('//' . self::FIELD_NAME_APPROVE_CONTAINER);
 		/** @var NodeList $approveCollection */
-		$xpath = './/' . self::FIELD_NAME_APPROVE . '[@' . self::FIELD_NAME_USER . '="' . $userId . '"]';
+		$xpath = self::FIELD_NAME_APPROVE . '[@' . self::FIELD_NAME_USER . '="' . $userId . '"]';
 		$approveCollection = $approves->findXPath($xpath);
 		return $approveCollection->length >= 1;
 	}
