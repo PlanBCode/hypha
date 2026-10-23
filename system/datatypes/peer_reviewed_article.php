@@ -1063,7 +1063,7 @@ EOF;
 			$prefix->setText(__('art-comment-to-moderate'));
 		}
 
-		$commentDiv->appendChildren($this->createCommentDomElement($comment));
+		$commentDiv->appendChildren($this->createCommentDomNodes($comment));
 
 		$form->appendTo($main);
 
@@ -1441,7 +1441,7 @@ EOF;
 	 * @param bool $resolved
 	 * @return DomNodeList
 	 */
-	protected function createCommentDomElement(HyphaDomElement $comment, $review = false, $firstAndBlocking = false, $resolved = false) {
+	protected function createCommentDomNodes(HyphaDomElement $comment, $review = false, $firstAndBlocking = false, $resolved = false) {
 		$createdAt = date('j-m-y, H:i', ltrim($comment->getAttribute(self::FIELD_NAME_CREATED_AT), 't'));
 		$committerName = $this->getCommentCommenter($comment);
 		$commentText = $comment->getText();
@@ -1523,7 +1523,7 @@ EOF;
 				}
 
 				$li = $commentList->createChild('li');
-				$commentHtml = $this->createCommentDomElement($comment, $review, $firstComment && $blocking, $resolved);
+				$commentNodes = $this->createCommentDomNodes($comment, $review, $firstComment && $blocking, $resolved);
 				$hidden = $comment->getAttribute(self::FIELD_NAME_DISCUSSION_MODERATION_STATUS) === self::MODERATION_STATUS_HIDDEN;
 				$deleted = $comment->getAttribute(self::FIELD_NAME_DISCUSSION_MODERATION_STATUS) === self::MODERATION_STATUS_DELETED;
 				if ($hidden || $deleted) {
@@ -1556,7 +1556,7 @@ EOF;
 						$showSpan->addClass('show-moderated');
 					}
 				} else {
-					$li->appendChildren($commentHtml);
+					$li->appendChildren($commentNodes);
 				}
 
 				if ($firstComment) {
