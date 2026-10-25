@@ -161,11 +161,8 @@ END;
 	function writeToDigest($message, $type, $id = false) {
 		global $hyphaXml;
 		hypha_addDigest('<div'.($type=='settings' ? ' style="color:#840;"' : '').'>'.date('j-m-y, H:i ', time()).$message.($id ? ' - <a href="#'.$id.'">view changes</a>' : '').'</div>'."\n");
-		if (!hypha_getLastDigestTime()) {
-			$hyphaXml->lockAndReload();
-			hypha_setLastDigestTime(time());
-			$hyphaXml->saveAndUnlock();
-		}
+		// Ensure a we have a last digest time
+		hypha_getLastDigestTime();
 	}
 
 	/*

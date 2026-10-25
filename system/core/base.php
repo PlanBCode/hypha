@@ -204,7 +204,14 @@
 	*/
 	function hypha_getLastDigestTime() {
 		global $hyphaXml;
-		return $hyphaXml->documentElement->getAttribute('lastDigestTime');
+		$time = $hyphaXml->documentElement->getAttribute('lastDigestTime');
+		if (!$time) {
+			$time = time();
+			$hyphaXml->lockAndReload();
+			hypha_setLastDigestTime($time);
+			$hyphaXml->saveAndUnlock();
+		}
+		return $time;
 	}
 
 	/*
