@@ -6,8 +6,6 @@
  * Article features.
  */
 
-use DOMWrap\NodeList;
-
 /*
  * Class: peer_reviewed_article
  */
@@ -334,7 +332,6 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		/** @var HyphaDomElement $discussions */
 		$discussions = $this->xml->findOneXPath(self::FIELD_NAME_DISCUSSION_CONTAINER . '/' . self::FIELD_NAME_DISCUSSION_PUBLIC_CONTAINER);
 
-		/** @var NodeList $commentCollection */
 		$xpath = './/' . self::FIELD_NAME_DISCUSSION_COMMENT . '[@' . self::FIELD_NAME_DISCUSSION_COMMENT_PENDING . '!="1"]';
 		$commentCollection = $discussions->findXPath($xpath);
 
@@ -387,7 +384,6 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		$div->setAttribute('class', 'article');
 		$div->appendImportedChildren($text_nodes);
 
-		/** @var NodeList $method */
 		$method_nodes = $context->findOneXPath(self::FIELD_NAME_METHOD)->childNodes;
 		if ($method_nodes->length > 0) {
 			/** @var HyphaDomElement $methodContainer */
@@ -397,7 +393,6 @@ class peer_reviewed_article extends HyphaDatatypePage {
 			$methodContainer->appendImportedChildren($method_nodes);
 		}
 
-		/** @var NodeList $sources */
 		$sources = $content->findOneXPath(self::FIELD_NAME_SOURCES)->childNodes;
 		if ($sources->length > 0) {
 			/** @var HyphaDomElement $div */
@@ -781,7 +776,6 @@ class peer_reviewed_article extends HyphaDatatypePage {
 
 		$this->xml->lockAndReload();
 
-		/** @var NodeList $approves */
 		$approves = $this->xml->findOneXPath('//' . self::FIELD_NAME_APPROVE_CONTAINER);
 
 		$userId = $this->O_O->getUser()->getAttribute('id');
@@ -1166,7 +1160,6 @@ EOF;
 
 		$this->xml->lockAndReload();
 
-		/** @var NodeList $commentNodeList */
 		$xpath = '//' . self::FIELD_NAME_DISCUSSION_COMMENT . '[@' . self::FIELD_NAME_DISCUSSION_COMMENT_CONFIRM_CODE . '=' . xpath_encode($code) . ']';
 		$comment = $this->xml->findOneXPath($xpath);
 		if (!$comment instanceof HyphaDomElement) {
@@ -1192,7 +1185,6 @@ EOF;
 			$subscriber->setAttribute(self::FIELD_NAME_DISCUSSION_SUBSCRIBER_UNSUBSCRIBE_CODE, $this->constructCode());
 
 			// no need anymore for other confirmation codes
-			/** @var NodeList $confirmations */
 			foreach ($subscriber->findXPath(self::FIELD_NAME_DISCUSSION_SUBSCRIBER_CONFIRM_CODE) as $confirm)
 				$subscriber->removeChild($confirm);
 			$confirmedSubscriber = true;
@@ -1225,7 +1217,6 @@ EOF;
 
 		$this->xml->lockAndReload();
 
-		/** @var NodeList $subscriberContainer */
 		$xpath = self::FIELD_NAME_DISCUSSION_CONTAINER . '//' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER . '[@' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER_UNSUBSCRIBE_CODE . '=' . xpath_encode($code) . ']';
 		/** @var HyphaDomElement $subscriber */
 		$subscriber = $this->xml->findOneXPath($xpath);
@@ -1291,7 +1282,7 @@ EOF;
 	/**
 	 * Adds a discussion DOM element to the database.
 	 *
-	 * @param NodeList|HyphaDomElement $discussionContainer
+	 * @param HyphaDomElement $discussionContainer
 	 * @param HTMLForm $form
 	 * @param string dataFieldSuffix
 	 * @return HyphaDomElement
@@ -1366,7 +1357,6 @@ EOF;
 						'[@' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER_EMAIL . '=' . xpath_encode($subscriberEmail) .
 						' and @' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER_STATUS . '!=' . xpath_encode(self::SUBSCRIBER_STATUS_UNSUBSCRIBED) .
 						']';
-					/** @var NodeList $subscriberNodeList */
 					$subscriber = $subscriberContainer->findOneXPath($xpath);
 					if (!$subscriber instanceof HyphaDomElement) {
 						$subscriber = $subscriberContainer->createChild(self::FIELD_NAME_DISCUSSION_SUBSCRIBER);
@@ -1945,7 +1935,6 @@ EOF;
 		/** @var HyphaDomElement $discussion */
 		$discussion = $comment->parentNode;
 
-		/** @var NodeList|HyphaDomElement[] $subscriberElements */
 		$xpath = self::FIELD_NAME_DISCUSSION_SUBSCRIBER_CONTAINER . '/' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER . '[@ ' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER_STATUS . '=' . xpath_encode(self::SUBSCRIBER_STATUS_CONFIRMED) . ']';
 		$subscriberElements = $discussion->findXPath($xpath);
 
@@ -2080,7 +2069,6 @@ EOF;
 	protected function hasUserApproved($userId) {
 		/** @var HyphaDomElement $approves */
 		$approves = $this->xml->findOneXPath('//' . self::FIELD_NAME_APPROVE_CONTAINER);
-		/** @var NodeList $approveCollection */
 		$xpath = self::FIELD_NAME_APPROVE . '[@' . self::FIELD_NAME_USER . '="' . $userId . '"]';
 		$approveCollection = $approves->findXPath($xpath);
 		return $approveCollection->length >= 1;

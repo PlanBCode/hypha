@@ -6,8 +6,6 @@
  * Mailing list features.
  */
 
-use DOMWrap\NodeList;
-
 /*
  * Class: mailinglist
  */
@@ -899,7 +897,6 @@ EOF;
 		$this->xml->lockAndReload();
 
 		// create mailing with given data
-		/** @var HyphaDomElement|NodeList $mailingsContainer */
 		$mailingsContainer = $this->getDoc()->get(self::FIELD_NAME_MAILINGS_CONTAINER);
 
 		/** @var HyphaDomElement $mailing */
@@ -1314,8 +1311,6 @@ EOF;
 
 	/**
 	 * Creates archive index table and appends it to the given container.
-	 *
-	 * @param NodeList $container
 	 */
 		protected function appendMailingsList(HyphaDomElement $container) {
 		/** @var HyphaDomElement $mailingsContainer */
@@ -1370,7 +1365,6 @@ EOF;
 	 * Find addresses by xpath.
 	 *
 	 * @param string $xpath
-	 * @return NodeList
 	 */
 	protected function findAddresses($xpath) {
 		/** @var HyphaDomElement $addressesContainer */

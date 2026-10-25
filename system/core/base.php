@@ -639,7 +639,6 @@
 
 	function hypha_setBodyClass(RequestContext $O_O, $hyphaPage) {
 		$hyphaRequest = $O_O->getRequest();
-		/** @var \DOMWrap\NodeList $bodyElement */
 		$bodyElement = $hyphaPage->html->findOneXPath('body');
 		$classes = explode(' ', $bodyElement->getAttribute('class'));
 		if (isset($hyphaPage->pagename)) {
@@ -673,7 +672,6 @@
 	function hypha_setPreviewPanel($O_O, $hyphaPage) {
 		$previewTheme = $O_O->getPreviewThemeName();
 		if (null !== $previewTheme) {
-			/** @var \DOMWrap\NodeList $bodyElement */
 			$bodyElement = $hyphaPage->html->findOneXPath('body');
 			$panel = '<div class="preview_panel" style="position:fixed; bottom:0; background-color: rgba(0, 0, 0, 0.8);">';
 			$panel .= '<div class="panel_text">' . __('previewing').': '.$previewTheme . '</div>';

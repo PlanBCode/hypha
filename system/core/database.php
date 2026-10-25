@@ -27,7 +27,6 @@
 		- A property 'filename' which is used as default when saving
 	*/
 	require_once 'various.php';
-	require_once dirname(__FILE__).'/../php-dom-wrapper/All.php';
 
 	/*
 	 * Some helper methods for accessing DOM children that are
@@ -87,7 +86,7 @@
 	/*
 	 * Shared superclass for Hypha's XML and HTMLDocument class.
 	 */
-	class HyphaDomDocument extends DOMWrap\Document {
+	class HyphaDomDocument extends DOMDocument {
 		use HyphaDomAccessors;
 
 		function __construct() {
@@ -235,10 +234,10 @@
 	/*
 		Class: HyphaDomElement
 
-		Extension of the DOMWrap\Element class (which again
-		extends the PHP DOMElement class). This adds a few extra helper methods.
+		Extension of the DOMElement class. This adds a few extra helper
+		methods.
 	*/
-	class HyphaDomElement extends DOMWrap\Element {
+	class HyphaDomElement extends DOMElement {
 		use HyphaDomAccessors;
 
 		/* For HyphaDomAccessors */
