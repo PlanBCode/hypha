@@ -75,6 +75,25 @@
 		protected function thisElement() : HyphaDomElement {
 			return $this->documentElement;
 		}
+
+		/*
+			Function: createFromHtml
+
+			Parses the given HTML string and returns the parsed results.
+		*/
+		public function createFromHtml(string $html) {
+			$class = get_class($this);
+			$newdoc = new $class();
+			if (!$newdoc->loadHTML('<?xml encoding="utf-8"?' . '>' . $html))
+				throw new InvalidArgumentException("Failed to parse HTML: $html");
+			if ($newdoc->documentElement === null) {
+				throw new InvalidArgumentException("Failed to parse HTML: $html");
+			}
+			$body = $newdoc->documentElement->childNodes->item(0);
+			if ($body->tagName != 'body')
+				throw new InvalidArgumentException("First child of parsed HTML is not body, but {$body->tagName}");
+			return $this->importNode($body, true)->childNodes;
+		}
 	}
 
 	class Xml extends HyphaDomDocument {
