@@ -722,6 +722,7 @@
 			global $hyphaXml;
 			if (isAdmin()) {
 				$hyphaXml->lockAndReload();
+				$admins = 0;
 				foreach(hypha_getUserList() as $user) if ($user->getAttribute('rights') == 'admin') $admins++;
 				if ($admins>1) {
 					$user = hypha_getUserById($userId);
