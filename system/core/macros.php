@@ -160,7 +160,8 @@ class HyphaMacros {
 				$xml = $macro->document()->saveXml($macro);
 				$msg = $e->getMessage();
 				trigger_error("Failed to invoke macro $xml: $msg", E_USER_WARNING);
-				$replacement = $element->document()->createElement('span')->addClass('macro-error');
+				$replacement = $element->document()->createElement('span');
+				$replacement->addClass('macro-error');
 				if ($O_O->isUser())
 					$replacement->setText("Macro failed: $msg");
 				else

@@ -511,7 +511,8 @@
 				// have native proper class matching)
 				$list = $this->form_element->findOneXPath(".//ul[class='form-errors']");
 				if (!$list) {
-					$list = $this->form_element->ownerDocument->createElement('ul')->addClass('form-errors');
+					$list = $this->form_element->ownerDocument->createElement('ul');
+					$list->addClass('form-errors');
 					$list = $this->form_element->insertBefore($list, $this->form_element->childNodes->item(0));
 				}
 

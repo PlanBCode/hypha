@@ -476,6 +476,24 @@
 				$this->removeChild($this->childNodes->item(0));
 			$this->appendChild($this->ownerDocument->createTextNode($text));
 		}
+
+		/**
+		 * Add a class to the "class" attribute if not already present, observing usual space-separation semantics.
+		 */
+		function addClass($class) {
+			$current = $this->getAttribute('class');
+			if (!in_array($class, explode(' ', $current)))
+				$this->setAttribute('class', $current . ' ' . $class);
+		}
+
+		/**
+		 * Remove a class to the "class" attribute if present, observing usual space-separation semantics.
+		 */
+		function removeClass($class) {
+			$classes = explode(' ', $this->getAttribute('class'));
+			$updated = array_filter($classes, function($c) use ($class) { return $c != $class; });
+			$this->setAttribute('class', implode(' ', $updated));
+		}
 	}
 
 	/*

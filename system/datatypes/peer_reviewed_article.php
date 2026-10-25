@@ -373,8 +373,11 @@ class peer_reviewed_article extends HyphaDatatypePage {
 				$main->appendChild($checklist);
 			}
 
-			$preview = $main->createChild('div')->addClass('excerpt-preview');
-			$preview->createChild('span')->addClass('prefix')->setText(__('art-excerpt-preview'));
+			$preview = $main->createChild('div');
+			$preview->addClass('excerpt-preview');
+			$span = $preview->createChild('span');
+			$span->addClass('prefix');
+			$span->setText(__('art-excerpt-preview'));
 			$this->renderExcerptBody($preview);
 		}
 
