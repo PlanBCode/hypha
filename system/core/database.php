@@ -54,9 +54,30 @@
 		abstract protected function thisElement() : HyphaDomElement;
 	}
 
-	class Xml extends DOMWrap\Document {
+
+	/*
+	 * Shared superclass for Hypha's XML and HTMLDocument class.
+	 */
+	class HyphaDomDocument extends DOMWrap\Document {
 		use HyphaDomAccessors;
 
+		function __construct() {
+			parent::__construct('1.0', 'UTF-8');
+
+			$this->preserveWhiteSpace = false;
+			$this->formatOutput = true;
+
+			$this->registerNodeClass('DOMDocument', get_class($this));
+			$this->registerNodeClass('DOMElement', 'HyphaDomElement');
+		}
+
+		/* For HyphaDomAccessors */
+		protected function thisElement() : HyphaDomElement {
+			return $this->documentElement;
+		}
+	}
+
+	class Xml extends HyphaDomDocument {
 		public $file;
 		const versionsOn = true;
 		const versionsOff = false;
@@ -68,9 +89,8 @@
 			Initializes the object
 		*/
 		function __construct($type=null, $multiLingual=false, $versions=false) {
-			parent::__construct('1.0', 'UTF-8');
-			$this->preserveWhiteSpace = false;
-			$this->formatOutput = true;
+			parent::__construct();
+
 			// When no type is passed, just create an empty
 			// document
 			if ($type !== null) {
@@ -82,11 +102,6 @@
 				$this->appendChild($rootElement);
 			}
 			$this->registerNodeClass('DOMElement', 'HyphaDomElement');
-		}
-
-		/* For HyphaDomAccessors */
-		protected function thisElement() : HyphaDomElement {
-			return $this->documentElement;
 		}
 
 		/*

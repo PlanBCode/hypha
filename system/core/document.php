@@ -33,9 +33,7 @@
 		extension of the DOMDocument class
 	*/
 
-	class HTMLDocument extends DOMWrap\Document {
-		use HyphaDomAccessors;
-
+	class HTMLDocument extends HyphaDomDocument {
 		const XML_HTML_UNKNOWN_TAG = 801;
 
 		/** @var null|HTMLForm */
@@ -49,9 +47,8 @@
 			$file - optional parameter of HTML template file (HyphaFile instance).
 		*/
 		public function __construct($file = false) {
-			parent::__construct('1.0', 'UTF-8');
-			$this->preserveWhiteSpace = false;
-			$this->formatOutput = true;
+			parent::__construct();
+
 			if ($file)
 				$contents = $file->read();
 			else
@@ -66,13 +63,6 @@
 				}
 			}
 			libxml_use_internal_errors($previousSetting);
-			$this->registerNodeClass('DOMDocument', 'HTMLDocument');
-			$this->registerNodeClass('DOMElement', 'HyphaDomElement');
-		}
-
-		/* For HyphaDomAccessors */
-		protected function thisElement() : HyphaDomElement {
-			return $this->documentElement;
 		}
 
 		public function initForBrowser($base_url = null) {
