@@ -347,7 +347,7 @@ EOF;
 		}
 
 		protected function getContent($version = '') {
-			return getWikiContent($this->xml->documentElement, $this->language, $version);
+			return getWikiContent($this->xml->documentElement, $this->language, $version) ?? '';
 		}
 
 		/**
