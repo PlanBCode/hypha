@@ -176,10 +176,11 @@
 EOF;
 		$pagetype_options = $hyphaHtml->createElement('dummy');
 		foreach($types as $type => $datatypeName) {
-			$option = $pagetype_options->createChild('option')->setAttr('value', $type);
+			$option = $pagetype_options->createChild('option');
+			$option->setAttribute('value', $type);
 			$option->setText($datatypeName);
 			if ($type==hypha_getDefaultNewPageType())
-				$option->setAttr('selected', 'selected');
+				$option->setAttribute('selected', 'selected');
 		}
 		$vars = [
 			'create-new-page' => __('create-new-page'),

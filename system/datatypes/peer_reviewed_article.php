@@ -392,7 +392,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		if ($method_nodes->length > 0) {
 			/** @var HyphaDomElement $methodContainer */
 			$methodContainer = $main->createChild('div');
-			$methodContainer->attr('class', 'method');
+			$methodContainer->setAttribute('class', 'method');
 			$methodContainer->appendHtml('<h2>' . __('art-method') . '</h2>');
 			$methodContainer->appendImportedChildren($method_nodes);
 		}
@@ -956,25 +956,25 @@ class peer_reviewed_article extends HyphaDatatypePage {
 			return null;
 		}
 
-		if ((bool)$discussion->attr(self::FIELD_NAME_DISCUSSION_CLOSED) === true) {
+		if ((bool)$discussion->getAttribute(self::FIELD_NAME_DISCUSSION_CLOSED) === true) {
 			$this->xml->unlock();
 			return null;
 		}
 
 		$userId = $this->O_O->getUser()->getAttribute('id');
 
-		$blocking = (bool)$discussion->attr(self::FIELD_NAME_DISCUSSION_BLOCKING);
+		$blocking = (bool)$discussion->getAttribute(self::FIELD_NAME_DISCUSSION_BLOCKING);
 		if ($blocking) {
 			if ($discussion->getAttribute(self::FIELD_NAME_USER) !== $userId && !isAdmin()) {
 				notify('error', __('art-insufficient-rights-to-set-as-closed'));
 				$this->xml->unlock();
 				return null;
 			}
-			$discussion->attr(self::FIELD_NAME_DISCUSSION_BLOCK_RESOLVED, true);
+			$discussion->setAttribute(self::FIELD_NAME_DISCUSSION_BLOCK_RESOLVED, true);
 		}
-		$discussion->attr(self::FIELD_NAME_DISCUSSION_CLOSED, true);
-		$discussion->attr(self::FIELD_NAME_DISCUSSION_CLOSED_BY, $userId);
-		$discussion->attr(self::FIELD_NAME_DISCUSSION_CLOSED_AT, 't' . time());
+		$discussion->setAttribute(self::FIELD_NAME_DISCUSSION_CLOSED, true);
+		$discussion->setAttribute(self::FIELD_NAME_DISCUSSION_CLOSED_BY, $userId);
+		$discussion->setAttribute(self::FIELD_NAME_DISCUSSION_CLOSED_AT, 't' . time());
 
 		$this->xml->saveAndUnlock();
 		if ($blocking) {
@@ -1183,7 +1183,6 @@ EOF;
 			$confirmedComment = true;
 		}
 
-		/** @var NodeList $confirmCodeNodeList */
 		$xpath = '//' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER_CONFIRM_CODE . '[@' . self::FIELD_NAME_DISCUSSION_SUBSCRIBER_CODE . '=' . xpath_encode($code) . ']';
 		$confirmCodeNodeList = $this->xml->findXPath($xpath);
 		if ($confirmCodeNodeList->length >= 1) {
@@ -1399,7 +1398,7 @@ EOF;
 	protected function createApprovesDomElement() {
 		/** @var HyphaDomElement $approvesDomElement */
 		$approvesDomElement = $this->html->createElement('div');
-		$approvesDomElement->attr('class', 'approves');
+		$approvesDomElement->setAttribute('class', 'approves');
 		$approves = $this->xml->findOneXPath('//' . self::FIELD_NAME_APPROVE_CONTAINER)->getElementsByTagName(self::FIELD_NAME_APPROVE);
 		$approvesDomElement->appendHtml('<h2>' . __('art-approves') . '</h2>');
 
@@ -1596,7 +1595,7 @@ EOF;
 					$class .= ' ' . $name;
 				}
 			}
-			$discussionHtml->attr('class', $class);
+			$discussionHtml->setAttribute('class', $class);
 			$discussionHtml->appendChild($commentList);
 
 			if ($review) {
@@ -1650,7 +1649,7 @@ EOF;
 
 		$title = $review ? __('art-review-comments') : __('art-comments');
 		$discussionsDomElement->appendHtml('<h2>' . $title . '</h2>');
-		$discussionsDomElement->attr('class', $type . '-comments-wrapper');
+		$discussionsDomElement->setAttribute('class', $type . '-comments-wrapper');
 
 		return $discussionsDomElement;
 	}

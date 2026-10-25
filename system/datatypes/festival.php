@@ -747,11 +747,11 @@ EOF;
 				$description = $obj->get(self::TAG_CONTRIBUTION_DESCRIPTION);
 				$notes = $obj->get(self::TAG_CONTRIBUTION_NOTES);
 				$formData = [
-					self::FIELD_NAME_NAME => $obj->getAttr(self::ATTR_CONTRIBUTION_NAME),
-					self::FIELD_NAME_TITLE => $obj->getAttr(self::ATTR_CONTRIBUTION_TITLE),
-					self::FIELD_NAME_CATEGORY => $obj->getAttr(self::ATTR_CONTRIBUTION_CATEGORY),
-					self::FIELD_NAME_IMAGE => $obj->getAttr(self::ATTR_CONTRIBUTION_IMAGE),
-					self::FIELD_NAME_WEBSITE => $obj->getAttr(self::ATTR_CONTRIBUTION_WEBSITE),
+					self::FIELD_NAME_NAME => $obj->getAttribute(self::ATTR_CONTRIBUTION_NAME),
+					self::FIELD_NAME_TITLE => $obj->getAttribute(self::ATTR_CONTRIBUTION_TITLE),
+					self::FIELD_NAME_CATEGORY => $obj->getAttribute(self::ATTR_CONTRIBUTION_CATEGORY),
+					self::FIELD_NAME_IMAGE => $obj->getAttribute(self::ATTR_CONTRIBUTION_IMAGE),
+					self::FIELD_NAME_WEBSITE => $obj->getAttribute(self::ATTR_CONTRIBUTION_WEBSITE),
 					self::FIELD_NAME_DESCRIPTION => $description ? $description->getText() : null,
 					self::FIELD_NAME_NOTES => $notes ? $notes->getText() : null,
 				];

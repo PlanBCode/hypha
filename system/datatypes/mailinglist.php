@@ -907,8 +907,8 @@ EOF;
 		$mailingsContainer->appendChild($mailing);
 
 		$mailing->generateId();
-		$mailing->setAttr(self::FIELD_NAME_STATUS, self::MAILING_STATUS_DRAFT);
-		$mailing->setAttr(self::FIELD_NAME_SUBJECT, $form->dataFor(self::FIELD_NAME_SUBJECT));
+		$mailing->setAttribute(self::FIELD_NAME_STATUS, self::MAILING_STATUS_DRAFT);
+		$mailing->setAttribute(self::FIELD_NAME_SUBJECT, $form->dataFor(self::FIELD_NAME_SUBJECT));
 		$mailing->setInnerHtml(wikify_html($form->dataFor(self::FIELD_NAME_MESSAGE)));
 
 		$this->xml->saveAndUnlock();
@@ -1000,7 +1000,7 @@ EOF;
 
 		/** @var HyphaDomElement $mailing */
 		$mailing = $this->xml->getElementById($mailingId);
-		$mailing->setAttr(self::FIELD_NAME_SUBJECT, $form->dataFor(self::FIELD_NAME_SUBJECT));
+		$mailing->setAttribute(self::FIELD_NAME_SUBJECT, $form->dataFor(self::FIELD_NAME_SUBJECT));
 		$mailing->setInnerHtml(wikify_html($form->dataFor(self::FIELD_NAME_MESSAGE)));
 
 		$this->xml->saveAndUnlock();

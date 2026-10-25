@@ -641,7 +641,7 @@
 		$hyphaRequest = $O_O->getRequest();
 		/** @var \DOMWrap\NodeList $bodyElement */
 		$bodyElement = $hyphaPage->html->findOneXPath('body');
-		$classes = explode(' ', $bodyElement->attr('class'));
+		$classes = explode(' ', $bodyElement->getAttribute('class'));
 		if (isset($hyphaPage->pagename)) {
 			$classes[] = $hyphaPage->pagename;
 			if ($hyphaPage->pagename === hypha_getDefaultPage()) {
@@ -663,11 +663,11 @@
 				if ($langNode) {
 					// This uses validatePageName to produce a clean copy of the
 					// tag label suitable as a CSS class.
-					$classes[] = 'tag_' .  validatePageName($langNode->attr('label'));
+					$classes[] = 'tag_' .  validatePageName($langNode->getAttribute('label'));
 				}
 			}
 		}
-		$bodyElement->attr('class', implode(' ', array_filter($classes)));
+		$bodyElement->setAttribute('class', implode(' ', array_filter($classes)));
 	}
 
 	function hypha_setPreviewPanel($O_O, $hyphaPage) {
