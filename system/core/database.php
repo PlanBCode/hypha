@@ -288,7 +288,7 @@
 		function generateId($prefix = 'id') {
 			do {
 				$id = $prefix . uniqid();
-			} while ($this->document()->getElementById($id));
+			} while ($this->ownerDocument->getElementById($id));
 			$this->setAttribute($this->getIdAttribute(), $id);
 		}
 
@@ -409,7 +409,7 @@
 		 * the current node and returns it.
 		 */
 		function createChild(string $tagname) {
-			$node = $this->document()->createElement($tagname);
+			$node = $this->ownerDocument->createElement($tagname);
 			$this->appendChild($node);
 			return $node;
 		}

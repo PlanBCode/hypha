@@ -563,7 +563,7 @@
 
 		protected function addFileShadowValueField($field, $value) {
 			$name = $field->getAttribute('name');
-			$newField = $field->document()->createElement('input');
+			$newField = $field->ownerDocument->createElement('input');
 			$newField->setAttribute('type', 'hidden');
 			$newField->setAttribute('value', $value);
 			$newField->setAttribute('name', 'file_shadow_' . $name);
@@ -739,7 +739,7 @@
 			if (!$value)
 				return true;
 
-			$dom = $this->form_element->document()->createElement('dummy');
+			$dom = $this->form_element->ownerDocument->createElement('dummy');
 			$dom->appendHtml($value);
 
 			// This forbids the presence of script tags,

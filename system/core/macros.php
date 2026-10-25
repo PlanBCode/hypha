@@ -34,7 +34,7 @@ abstract class HyphaMacro {
 	public function __construct(RequestContext $O_O, HyphaDomElement $macro_tag, array $macro_context) {
 		$this->O_O = $O_O;
 		$this->macro_tag = $macro_tag;
-		$this->doc = $macro_tag->document();
+		$this->doc = $macro_tag->ownerDocument;
 		$this->macro_context = $macro_context;
 	}
 
@@ -157,10 +157,10 @@ class HyphaMacros {
 			try {
 				$replacement = self::processMacro($macro, $macro_context);
 			} catch (Exception $e) {
-				$xml = $macro->document()->saveXml($macro);
+				$xml = $macro->ownerDocument->saveXml($macro);
 				$msg = $e->getMessage();
 				trigger_error("Failed to invoke macro $xml: $msg", E_USER_WARNING);
-				$replacement = $element->document()->createElement('span');
+				$replacement = $element->ownerDocument->createElement('span');
 				$replacement->addClass('macro-error');
 				if ($O_O->isUser())
 					$replacement->setText("Macro failed: $msg");

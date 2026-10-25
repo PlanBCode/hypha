@@ -486,7 +486,7 @@ EOF;
 		// pagename if the link would lead to an inaccessible
 		// page
 		if(!isUser() && $page->getAttribute('private') == 'on') {
-			$span = $node->document()->createElement('span');
+			$span = $node->ownerDocument->createElement('span');
 			$span->appendChildren($node->childNodes);
 			$node->parentNode->replaceChild($span, $node);
 			return;

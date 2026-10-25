@@ -38,7 +38,7 @@
 			if (!empty($idFilters)) {
 				$path = '/hypha/tagList/tag[' . implode(" or ", $idFilters) . "]";
 
-				foreach ($pageListNode->document()->findXPath($path) as $tagNode)
+				foreach ($pageListNode->ownerDocument->findXPath($path) as $tagNode)
 					$tags[$tagNode->getId()] = new HyphaTag($tagNode);
 			}
 			return $tags;

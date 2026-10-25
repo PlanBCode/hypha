@@ -187,7 +187,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	}
 
 	public function renderExcerpt(HyphaDomElement $container) {
-		$doc = $container->document();
+		$doc = $container->ownerDocument;
 		$h2 = $container->createChild('h2');
 		$h2->setText($this->getTitle());
 		$h2->addClass('title');
@@ -198,7 +198,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	}
 
 	public function renderExcerptBody(HyphaDomElement $container) {
-		$doc = $container->document();
+		$doc = $container->ownerDocument;
 		/** @var HyphaDomElement $excerpt */
 		$excerpt = $container->createChild('div');
 		$excerpt->addClass('excerpt');
@@ -591,7 +591,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	}
 
 	protected function appendAuthorAndTimestamp($container, $article) {
-		$doc = $container->document();
+		$doc = $container->ownerDocument;
 
 		$author = $article->getAttribute(self::FIELD_NAME_AUTHOR);
 		$publishedTimestamp = ltrim($article->getAttribute(self::FIELD_NAME_PUBLISHED_AT), 't');
@@ -905,7 +905,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 
 		$this->xml->lockAndReload();
 		/** @var HyphaDomElement $discussion */
-		$discussion = $this->xml->document()->getElementById($discussionId);
+		$discussion = $this->xml->getElementById($discussionId);
 		if (!$discussion instanceof HyphaDomElement) {
 			notify('error', __('not-found')); // 404
 			return null;
@@ -949,7 +949,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 
 		/** @var HyphaDomElement $discussion */
 		$discussionId = $request->getArg(1);
-		$discussion = $this->xml->document()->getElementById($discussionId);
+		$discussion = $this->xml->getElementById($discussionId);
 		if (!$discussion instanceof HyphaDomElement) {
 			$this->xml->unlock();
 			notify('error', __('not-found')); // 404
@@ -1107,7 +1107,7 @@ EOF;
 
 		/** @var HyphaDomElement|null $comment */
 		$commentId = $request->getArg(1);
-		$comment = $this->xml->document()->getElementById($commentId);
+		$comment = $this->xml->getElementById($commentId);
 		if (!$comment instanceof HyphaDomElement || $comment->tagName != self::FIELD_NAME_DISCUSSION_COMMENT) {
 			$this->xml->unlock();
 			notify('error', __('not-found')); // 404
