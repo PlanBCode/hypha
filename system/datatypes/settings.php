@@ -367,7 +367,6 @@
 				echo makeButton(__('copy-theme-and-activate'), makeAction('settings/theme', 'settingsCopyThemeAndActivate', ''));
 				$this->html->writeToElement('copy-theme', ob_get_clean());
 
-				$this->html->writeToElement('main', '<div id="preview-theme"></div>');
 			}
 		}
 
@@ -524,7 +523,6 @@
 		}
 
 		function saveStyles($argument) {
-			$hyphaUrl;
 			if (isAdmin()) {
 				hypha_setCss($_POST['editCss']);
 			}
