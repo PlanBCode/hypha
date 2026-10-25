@@ -192,7 +192,7 @@ class mailinglist extends HyphaDatatypePage {
 		$main = $this->html->find('#main');
 
 		// display page name and description
-		$description = $this->getDoc()->get(self::FIELD_NAME_DESCRIPTION)->getHtml();
+		$description = $this->getDoc()->get(self::FIELD_NAME_DESCRIPTION)->getInnerHtml();
 		$main->appendHtml($description);
 
 		// display form
@@ -254,8 +254,8 @@ class mailinglist extends HyphaDatatypePage {
 			self::FIELD_NAME_PRIVATE => $this->privateFlag,
 			self::FIELD_NAME_SENDER_EMAIL => $senderData['email'],
 			self::FIELD_NAME_SENDER_NAME => $senderData['name'],
-			self::FIELD_NAME_DESCRIPTION => $this->getDoc()->get(self::FIELD_NAME_DESCRIPTION)->getHtml(),
-			self::FIELD_NAME_EMAIL_WELCOME_TEXT => $this->getDoc()->get(self::FIELD_NAME_EMAIL_WELCOME_TEXT)->getHtml(),
+			self::FIELD_NAME_DESCRIPTION => $this->getDoc()->get(self::FIELD_NAME_DESCRIPTION)->getInnerHtml(),
+			self::FIELD_NAME_EMAIL_WELCOME_TEXT => $this->getDoc()->get(self::FIELD_NAME_EMAIL_WELCOME_TEXT)->getInnerHtml(),
 		];
 
 		$form = $this->createEditForm($formData);
@@ -440,7 +440,7 @@ class mailinglist extends HyphaDatatypePage {
 	protected function sendConfirmationMail($code, $email) {
 		$confirmUrl = $this->path(self::PATH_CONFIRM_CODE, ['code' => $code]);
 		$confirmLink = '<a href="' . htmlspecialchars($confirmUrl) . '">' . __('ml-please-confirm-email') . '</a>';
-		$welcomeText = $this->getDoc()->get(self::FIELD_NAME_EMAIL_WELCOME_TEXT)->getHtml();
+		$welcomeText = $this->getDoc()->get(self::FIELD_NAME_EMAIL_WELCOME_TEXT)->getInnerHtml();
 		$welcomeText .= '<br><br>' . $confirmLink;
 		$subject = hypha_getTitle() . ' - ' . __('ml-confirmation-email-subject');
 		return $this->sendMail($subject, $welcomeText, [$email]);
@@ -779,7 +779,7 @@ EOF;
 				$main->appendHtml('<div>' . htmlspecialchars(__('ml-received-by')) . ': ' . $receivers . '</div>');
 			}
 		}
-		$main->append($mailing->getHtml());
+		$main->append($mailing->getInnerHtml());
 
 		// buttons
 		/** @var HyphaDomElement $commands */
@@ -948,7 +948,7 @@ EOF;
 		// create form
 		$formData = [
 			self::FIELD_NAME_SUBJECT => $mailing->getAttribute('subject'),
-			self::FIELD_NAME_MESSAGE => $mailing->getHtml(),
+			self::FIELD_NAME_MESSAGE => $mailing->getInnerHtml(),
 		];
 		$form = $this->createMailingForm($formData);
 
@@ -1167,7 +1167,7 @@ EOF;
 			// include email for server record purposes
 			$linkToUnsubscribe = $this->path(self::PATH_UNSUBSCRIBE_CODE, ['address' => $email, 'code' => $code]);
 			$message = '<p><a href="' . $linkToMailing . '">' . __('ml-if-unreadable-use-link') . '</a></p>';
-			$message .= $mailing->getHtml();
+			$message .= $mailing->getInnerHtml();
 			$message .= '<p><a href="' . $linkToUnsubscribe . '">' . __('ml-unsubscribe') . '</a></p>';
 			$this->sendMail($mailing->getAttribute(self::FIELD_NAME_SUBJECT), $message, [$email], $senderData['email'], $senderData['name']);
 
@@ -1215,7 +1215,7 @@ EOF;
 		$linkToMailing = $this->path(self::PATH_MAILS_VIEW_ID, ['id' => $mailingId]);
 		$linkToUnsubscribe = $this->path(self::PATH_UNSUBSCRIBE_CODE, ['address' => $email, 'code' => $code]);
 		$message = '<p><a href="' . $linkToMailing . '">' . __('ml-if-unreadable-use-link') . '</a></p>';
-		$message .= $mailing->getHtml();
+		$message .= $mailing->getInnerHtml();
 		$message .= '<p><a href="' . $linkToUnsubscribe . '">' . __('ml-unsubscribe') . '</a></p>';
 
 		$senderData = $this->getSenderData();

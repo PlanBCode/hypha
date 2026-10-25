@@ -192,7 +192,7 @@ EOF;
 			'help-page-type' => makeInfoButton('help-page-type'),
 			'help-page-name' => makeInfoButton('help-page-name'),
 			'help-private' => makeInfoButton('help-private-page'),
-			'pagetype-options' => $pagetype_options->getHtml(),
+			'pagetype-options' => $pagetype_options->getInnerHtml(),
 			'language-options' => Language::getLanguageOptionList($hyphaContentLanguage, ''),
 			'pagename-value' => $pagename,
 			'submit-disabled' => $pagename ? 'disabled="disabled"' : '',
@@ -414,17 +414,17 @@ EOF;
 
 	/* Like dewikify, but accepts a HTML string instead of a document */
 	function dewikify_html($html) {
-		$doc = new DomWrap\Document();
+		global $hyphaHtml;
 		// Dewikify a separate element instead of the entire
 		// document, since loading html into a document adds
 		// <html><body>.
-		$elem = $doc->createElement('root');
-		$elem->html($html);
+		$elem = $hyphaHtml->createElement('dummy');
+		$elem->appendHtml($html);
 		dewikify($elem);
 
 		// TODO: This should probably not use getInnerHtml,
 		// probably just return the element instead.
-		return getInnerHtml($elem);
+		return $elem->getInnerHtml();
 	}
 
 	/*
@@ -476,7 +476,7 @@ EOF;
 
 		// Use the page name (in the appropriate language) as
 		// the link text
-		if ($node->html() == '')
+		if ($node->getInnerHtml() == '')
 			$node->text(showPagename($language->getAttribute('name')));
 
 		// Check permissions, replace by a span with just the
@@ -506,17 +506,17 @@ EOF;
 
 	/* Like wikify, but accepts a HTML string instead of a document */
 	function wikify_html($html) {
-		$doc = new DomWrap\Document();
+		global $hyphaHtml;
 		// Wikify a separate element instead of the entire
 		// document, since loading html into a document adds
 		// <html><body>.
-		$elem = $doc->createElement('root');
-		$elem->html($html);
+		$elem = $hyphaHtml->createElement('dummy');
+		$elem->appendHtml($html);
 		wikify($elem);
 
 		// TODO: This should probably not use getInnerHtml,
 		// probably just return the element instead.
-		return getInnerHtml($elem);
+		return $elem->getInnerHtml();
 	}
 
 	/*

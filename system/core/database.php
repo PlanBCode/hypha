@@ -384,6 +384,24 @@
 			$this->appendChild($node);
 			return $node;
 		}
+
+		/**
+		 * Return a HTML string for the children of this element,
+		 * excluding the element itself.
+		 */
+		function getInnerHtml() {
+			$html = '';
+			foreach ($this->childNodes as $child)
+				$html .= $this->ownerDocument->saveXML($child);
+			return $html;
+		}
+
+		/**
+		 * Return a HTML string for this element, including all of its descendents.
+		 */
+		function getOuterHtml() {
+			return $this->ownerDocument->saveXML($this);
+		}
 	}
 
 	/*

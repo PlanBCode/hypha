@@ -13,15 +13,7 @@
 		$node - XML node
 	*/
 	function getInnerHtml($node) {
-		$node->ownerDocument->formatOutput = false;
-		$content = '';
-		if ($node->childNodes) foreach($node->childNodes as $child) $content.= $node->ownerDocument->saveXML($child);
-		$node->ownerDocument->formatOutput = true;
-
-		$doc = new DOMDocument();
-		$doc->appendChild($text = $doc->createElement('text'));
-		$text->appendChild($doc->createTextNode($content));
-		return htmlspecialchars_decode($doc->saveXML($text->childNodes->Item(0)), ENT_NOQUOTES);
+		return $node->getInnerHtml();
 	}
 
 	/*
