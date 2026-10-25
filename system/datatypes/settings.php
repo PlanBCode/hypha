@@ -676,7 +676,7 @@
 						if ($user->getAttribute('rights')=='invitee') echo makeButton(__('remind'), makeAction('settings', 'settingsRemind', $user->getAttribute('id')), '', 'remind');
 						elseif ($user->getAttribute('rights') !== 'none') {
 							if ($user->getAttribute('rights') !== 'admin') echo makeButton(__('admin'), makeAction('settings', 'settingsAdmin', $user->getAttribute('id')), '', 'admin');
-							elseif ($numAdmins>1) echo makeButton(__('unadmin'), makeAction('settings', 'settingsUnadmin', $user->getAttribute('id')), '', 'unadmin');
+							elseif ($numAdmins>1) echo makeButton(__('unadmin'), makeAction('settings', 'settingsUnadmin', $user->getAttribute('username')), '', 'unadmin');
 						}
 					}
 					else {
@@ -716,7 +716,7 @@
 			return 'reload';
 		}
 
-		function unmakeAdmin($userId) {
+		function unmakeAdmin($username) {
 			global $hyphaUserList;
 			global $hyphaUser;
 			global $hyphaXml;
@@ -725,7 +725,7 @@
 				$admins = 0;
 				foreach(hypha_getUserList() as $user) if ($user->getAttribute('rights') == 'admin') $admins++;
 				if ($admins>1) {
-					$user = hypha_getUserById($userId);
+					$user = hypha_getUserByName($username);
 					hypha_setUser($user, '', '', '', '', '', 'user');
 					$hyphaXml->saveAndUnlock();
 					writeToDigest($hyphaUser->getAttribute('fullname').__('took-admin-rights-from').$user->getAttribute('fullname'), 'settings');
