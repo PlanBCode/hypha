@@ -188,7 +188,8 @@ class peer_reviewed_article extends HyphaDatatypePage {
 
 	public function renderExcerpt(HyphaDomElement $container) {
 		$doc = $container->document();
-		$h2 = $container->createChild('h2')->setText($this->getTitle());
+		$h2 = $container->createChild('h2');
+		$h2->setText($this->getTitle());
 		$h2->addClass('title');
 
 		$article = $this->xml->findOneXPath(self::FIELD_NAME_ARTICLE);
@@ -202,7 +203,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		$excerpt = $container->createChild('div');
 		$excerpt->addClass('excerpt');
 
-		$featuredImageSrc = $this->xml->documentElement->getOrCreate(self::FIELD_NAME_FEATURED_IMAGE)->text();
+		$featuredImageSrc = $this->xml->documentElement->getOrCreate(self::FIELD_NAME_FEATURED_IMAGE)->getText();
 		if ($featuredImageSrc) {
 			$featured_image = $excerpt->createChild('img');
 			$featured_image->addClass('featured_image');
@@ -604,11 +605,11 @@ class peer_reviewed_article extends HyphaDatatypePage {
 			/** @var HyphaDomElement $publishDate */
 			$publishDate = $publish_div->createChild('span');
 			$publishDate->setAttribute('class', 'date');
-			$publishDate->text(strftime(__('art-date-format-date'), $publishedTimestamp));
+			$publishDate->setText(strftime(__('art-date-format-date'), $publishedTimestamp));
 			/** @var HyphaDomElement $publishTime */
 			$publishTime = $publish_div->createChild('span');
 			$publishTime->setAttribute('class', 'time');
-			$publishTime->text(strftime(__('art-date-format-time'), $publishedTimestamp));
+			$publishTime->setText(strftime(__('art-date-format-time'), $publishedTimestamp));
 		}
 	}
 
@@ -646,11 +647,11 @@ class peer_reviewed_article extends HyphaDatatypePage {
 
 		// create form
 		$formData = [
-			self::FIELD_NAME_TITLE => html_entity_decode(strip_tags($this->xml->findOneXPath('//' . self::FIELD_NAME_TITLE)->text())),
+			self::FIELD_NAME_TITLE => html_entity_decode(strip_tags($this->xml->findOneXPath('//' . self::FIELD_NAME_TITLE)->getText())),
 			self::FIELD_NAME_AUTHOR => $this->xml->findOneXPath(self::FIELD_NAME_ARTICLE)->getAttribute(self::FIELD_NAME_AUTHOR),
 			self::FIELD_NAME_TEXT => $this->xml->findOneXPath('//' . self::FIELD_NAME_TEXT)->getInnerHtml(),
 			self::FIELD_NAME_EXCERPT => $this->xml->findOneXPath('//' . self::FIELD_NAME_EXCERPT)->getInnerHtml(),
-			self::FIELD_NAME_FEATURED_IMAGE => $this->xml->documentElement->getOrCreate(self::FIELD_NAME_FEATURED_IMAGE)->text(),
+			self::FIELD_NAME_FEATURED_IMAGE => $this->xml->documentElement->getOrCreate(self::FIELD_NAME_FEATURED_IMAGE)->getText(),
 			self::FIELD_NAME_METHOD => $this->xml->findOneXPath('//' . self::FIELD_NAME_METHOD)->getInnerHtml(),
 			self::FIELD_NAME_SOURCES => $this->xml->findOneXPath('//' . self::FIELD_NAME_SOURCES)->getInnerHtml(),
 		];
@@ -1497,7 +1498,7 @@ EOF;
 			/** @var HyphaDomElement $noCommentContainer */
 			$noCommentContainer = $discussionsDomElement->createChild('ul');
 			$noComment = $noCommentContainer->createChild('li');
-			$noComment->text(__('art-no-comments-yet'));
+			$noComment->setText(__('art-no-comments-yet'));
 		}
 
 		// [open => [blocking, non-blocking], closed => [blocking, non-blocking]]

@@ -348,7 +348,7 @@
 		 * @return bool
 		 */
 		function hasTextContent() {
-			return trim($this->getText()) !== "";
+			return trim($this->extractText()) !== "";
 		}
 
 		/**
@@ -440,6 +440,42 @@
 				$this->removeChild($this->childNodes->item(0));
 			$this->appendHtml($html);
 		}
+
+		/**
+		 * Return the text content of the current element. Raises an
+		 * exception of there is no-text content present.
+		 */
+		function getText() {
+			$text = '';
+			foreach ($this->childNodes as $child) {
+				if (!($child instanceof DOMText))
+					throw new TypeError("getText called on node with non-text children: " . $this->getOuterHtml());
+				$text .= $child->wholeText;
+			}
+			return $text;
+		}
+
+		/**
+		 * Return any text content inside the current element, ignoring
+		 * any markup (any text inside subelements is returned).
+		 */
+		function extractText() {
+			$text = '';
+			foreach ($this->childNodes as $child) {
+				$text .= $child->textContent;
+			}
+			return $text;
+		}
+
+		/**
+		 * Replace the contents of this element with the given text (as
+		 * a text node, so HTML in the given text is not interpreted).
+		 */
+		function setText($text) {
+			while ($this->childNodes->length > 0)
+				$this->removeChild($this->childNodes->item(0));
+			$this->appendChild($this->ownerDocument->createTextNode($text));
+		}
 	}
 
 	/*
@@ -505,8 +541,8 @@
 				krsort($versionList);
 				$content = getInnerHtml(reset($versionList));
 				if ($version) {
-					if ($version<0) for ($i=$version;$i<0;$i++) $content = patch($content, next($versionList)->text());
-					else while(key($versionList)>$version) $content = patch($content, next($versionList)->text());
+					if ($version<0) for ($i=$version;$i<0;$i++) $content = patch($content, next($versionList)->getText());
+					else while(key($versionList)>$version) $content = patch($content, next($versionList)->getText());
 				}
 				return $content;
 			}
@@ -559,7 +595,7 @@
 			// update current version into patch
 			if ($currentVersionNode) {
 				$diff = diff(getInnerHtml($newNode), getInnerHtml($currentVersionNode));
-				$currentVersionNode->text($diff);
+				$currentVersionNode->setText($diff);
 			}
 		} else {
 			setInnerHtml($langNode, $content);

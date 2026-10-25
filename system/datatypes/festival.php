@@ -281,7 +281,7 @@
 				$button = $this->makeActionButton(__('edit'), self::PATH_CONTRIBUTE . '/'.$contribution->getId());
 				$row->addCell()->appendChild($button);
 
-				$description = $contribution->getOrCreate(self::TAG_CONTRIBUTION_DESCRIPTION)->text();
+				$description = $contribution->getOrCreate(self::TAG_CONTRIBUTION_DESCRIPTION)->getText();
 				$imgfilename = $contribution->getAttribute(self::ATTR_CONTRIBUTION_IMAGE);
 				if ($description || $imgfilename) {
 					$cell = $table->addRow()->addCell(__('description') . ': ' . $description);
@@ -294,7 +294,7 @@
 						$imgtag->setAttribute('src', $image->getUrl(50, 50));
 					}
 				}
-				$notes = $contribution->getOrCreate(self::TAG_CONTRIBUTION_NOTES)->text();
+				$notes = $contribution->getOrCreate(self::TAG_CONTRIBUTION_NOTES)->getText();
 				if ($notes) {
 					$cell = $table->addRow()->addCell(__('notes') . ': ' . $notes);
 					$cell->setAttribute('colspan', 5);
@@ -447,7 +447,7 @@ EOF;
 			$form->updateDom();
 
 			$form->appendTo($this->html->getElementById('main'));
-			$this->html->getElementById('pagename')->text(__('festival-signup-for') . $this->getConfig(self::CONFIG_ID_TITLE));
+			$this->html->getElementById('pagename')->setText(__('festival-signup-for') . $this->getConfig(self::CONFIG_ID_TITLE));
 
 			$commands = $this->html->getElementById('pageEndCommands');
 			$commands->appendChild($this->makeActionButton(__('signup'), self::PATH_SIGNUP, self::CMD_SIGNUP, '', $form));
@@ -511,7 +511,7 @@ EOF;
 		 * confirmation is needed.
 		 */
 		protected function confirmationNeededView(HyphaRequest $request) {
-			$this->html->getElementById('pagename')->text(__('festival-confirmation-needed'));
+			$this->html->getElementById('pagename')->setText(__('festival-confirmation-needed'));
 			$main = $this->html->getElementById('main');
 			$message = __('festival-complete-by-confirming');
 			$main->appendText($message);
@@ -584,7 +584,7 @@ EOF;
 			}
 
 			// Render the page
-			$this->html->getElementById('pagename')->text(__('festival-pay-for') . $this->getConfig(self::CONFIG_ID_TITLE));
+			$this->html->getElementById('pagename')->setText(__('festival-pay-for') . $this->getConfig(self::CONFIG_ID_TITLE));
 			$main = $this->html->getElementById('main');
 			$message = __('festival-complete-by-paying');
 			$button = $this->makeActionButton(__('pay'), join('/', $request->getArgs()), self::CMD_PAY);
@@ -752,8 +752,8 @@ EOF;
 					self::FIELD_NAME_CATEGORY => $obj->getAttr(self::ATTR_CONTRIBUTION_CATEGORY),
 					self::FIELD_NAME_IMAGE => $obj->getAttr(self::ATTR_CONTRIBUTION_IMAGE),
 					self::FIELD_NAME_WEBSITE => $obj->getAttr(self::ATTR_CONTRIBUTION_WEBSITE),
-					self::FIELD_NAME_DESCRIPTION => $description ? $description->text() : null,
-					self::FIELD_NAME_NOTES => $notes ? $notes->text() : null,
+					self::FIELD_NAME_DESCRIPTION => $description ? $description->getText() : null,
+					self::FIELD_NAME_NOTES => $notes ? $notes->getText() : null,
 				];
 
 				$form->setData($formData);
@@ -765,7 +765,7 @@ EOF;
 			// Update the form to include any data
 			$form->updateDom();
 
-			$this->html->getElementById('pagename')->text(__('festival-contribute-to') . $this->getConfig(self::CONFIG_ID_TITLE));
+			$this->html->getElementById('pagename')->setText(__('festival-contribute-to') . $this->getConfig(self::CONFIG_ID_TITLE));
 			$form->appendTo($this->html->getElementById('main'));
 
 			$commands = $this->html->getElementById('pageEndCommands');
@@ -875,7 +875,7 @@ EOF;
 
 
 		protected function lineupView(HyphaRequest $request) {
-			$this->html->getElementById('pagename')->text(__('festival-lineup-for') . $this->getConfig(self::CONFIG_ID_TITLE));
+			$this->html->getElementById('pagename')->setText(__('festival-lineup-for') . $this->getConfig(self::CONFIG_ID_TITLE));
 			$main = $this->html->getElementById('main');
 			$description = $this->getConfig(self::CONFIG_ID_DESCRIPTION);
 			$main->createChild('p')->addClass('lineup-description')->setText($description);
@@ -924,7 +924,7 @@ EOF;
 				$html.= '<a href="'.htmlspecialchars($image->getUrl()).'"><img src="'.htmlspecialchars($image->getUrl($img_width, $img_height)).'"/></a>';
 			}
 			$description = $contribution->findOneXPath(self::TAG_CONTRIBUTION_DESCRIPTION);
-			if ($description) $html.= nl2br(htmlspecialchars($description->text()));
+			if ($description) $html.= nl2br(htmlspecialchars($description->getText()));
 
 			$days = $this->getConfigElement(self::CONFIG_ID_DAYS, self::CONFIG_TAG_DAYS)->childNodes;
 			$locations = $this->getConfigElement(self::CONFIG_ID_LOCATIONS, self::CONFIG_TAG_LOCATIONS)->childNodes;
@@ -1059,7 +1059,7 @@ EOF;
 				$html.= '</table>';
 				$d++;
 			}
-			$this->html->getElementById('pagename')->text(__('festival-timetable-for') . $this->getConfig(self::CONFIG_ID_TITLE));
+			$this->html->getElementById('pagename')->setText(__('festival-timetable-for') . $this->getConfig(self::CONFIG_ID_TITLE));
 			$this->html->getElementById('main')->appendHtml($html);
 		}
 

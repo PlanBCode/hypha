@@ -176,7 +176,8 @@
 EOF;
 		$pagetype_options = $hyphaHtml->create('<dummy/>');
 		foreach($types as $type => $datatypeName) {
-			$option = $pagetype_options->createChild('option')->setAttr('value', $type)->setText($datatypeName);
+			$option = $pagetype_options->createChild('option')->setAttr('value', $type);
+			$option->setText($datatypeName);
 			if ($type==hypha_getDefaultNewPageType())
 				$option->setAttr('selected', 'selected');
 		}
@@ -479,7 +480,7 @@ EOF;
 		// Use the page name (in the appropriate language) as
 		// the link text
 		if ($node->getInnerHtml() == '')
-			$node->text(showPagename($language->getAttribute('name')));
+			$node->setText(showPagename($language->getAttribute('name')));
 
 		// Check permissions, replace by a span with just the
 		// pagename if the link would lead to an inaccessible
@@ -599,8 +600,8 @@ EOF;
 		// Clear out the page name in the link text, but keep
 		// any custom link name
 		$lang = hypha_pageGetLanguage($page, $language);
-		if ($node->text() == showPagename($lang->getAttribute('name')))
-			$node->text('');
+		if ($node->extractText() == showPagename($lang->getAttribute('name')))
+			$node->setText('');
 	}
 
 	/*

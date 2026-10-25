@@ -430,7 +430,7 @@
 				if ($elem->tagName == 'label') {
 					$name = self::getNameAttr($elem, 'for');
 					if ($name)
-						$this->labels[$name] = $elem->text();
+						$this->labels[$name] = $elem->getText();
 				} else if ($elem->tagName == 'img') {
 					$name = self::getNameAttr($elem, 'data-preview-for');
 					if ($name)
