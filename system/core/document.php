@@ -393,6 +393,15 @@
 			$this->appendTo($parent);
 		}
 
+		/*
+		 * Function: getOuterHtml
+		 *
+		 * Returns the HTML string for this form (including form tag)
+		 */
+		public function getOuterHtml() {
+			return $this->form_element->getOuterHtml();
+		}
+
 		public function getId() {
 			return $this->form_element->getId();
 		}
