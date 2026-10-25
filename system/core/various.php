@@ -166,8 +166,19 @@
 		$value - the string value to encode
 	*/
 	function xpath_encode($value) {
-		// Let the CssSelector library (within php-dom-wrapper) do the hard work
-		return Symfony\Component\CssSelector\XPath\Translator::getXpathLiteral($value);
+		// XPath string literals can either be single- or double-quoted
+		// and contain anything except for their quotes. To support strings
+		// with quotes, you can use the other type of quotes, possibly
+		// concatening multiple parts if quotes are mixed.
+		// Here, we take the easy route and just always use double
+		// quotes (except for any double quotes in the string, which are
+		// single-quoted). This could be less verbose for strings containing
+		// double quotes but not single quotes, but well.
+		$parts = explode('"', $value);
+		$quoted = array_map(function($part) { return '"' . $part . '"'; }, $parts);
+		if (count($quoted) == 1)
+			return $quoted[0];
+		return "concat(" . implode("'\"'", $quoted) . ")";
 	}
 
 	/*
