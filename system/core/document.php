@@ -551,21 +551,9 @@
 				return $this->dataFor('file_shadow_' . $name, $default);
 			}
 
-			if (is_array($this->data)) {
-				if (array_key_exists($name, $this->data))
-					return $this->data[$name];
-			} else if ($this->data instanceof DOMElement)  {
-				// Look for an attribute
-				if ($this->data->hasAttribute($name))
-					return $this->data->getAttribute($name);
+			if (array_key_exists($name, $this->data))
+				return $this->data[$name];
 
-				// Look for a descendent node with the
-				// given name
-				$result = $this->data->find($name)->first();
-				// TODO: Use text or html?
-				if ($result)
-					return $result->text();
-			}
 			return $default;
 		}
 
