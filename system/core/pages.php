@@ -174,7 +174,7 @@
 				</tr>
 			</table>
 EOF;
-		$pagetype_options = $hyphaHtml->create('<dummy/>');
+		$pagetype_options = $hyphaHtml->createElement('dummy');
 		foreach($types as $type => $datatypeName) {
 			$option = $pagetype_options->createChild('option')->setAttr('value', $type);
 			$option->setText($datatypeName);
