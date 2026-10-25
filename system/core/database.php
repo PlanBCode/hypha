@@ -402,6 +402,15 @@
 		function getOuterHtml() {
 			return $this->ownerDocument->saveXML($this);
 		}
+
+		/**
+		 * Replace the contents of this element with the given HTML.
+		 */
+		function setInnerHtml(string $html) {
+			while ($this->childNodes->length > 0)
+				$this->removeChild($this->childNodes->item(0));
+			$this->appendHtml($html);
+		}
 	}
 
 	/*

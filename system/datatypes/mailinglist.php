@@ -310,8 +310,8 @@ class mailinglist extends HyphaDatatypePage {
 		$senderName = $form->dataFor(self::FIELD_NAME_SENDER_NAME);
 		$this->getDoc()->setAttribute('sender-email', $senderEmail);
 		$this->getDoc()->setAttribute('sender-name', $senderName);
-		$this->getDoc()->get(self::FIELD_NAME_DESCRIPTION)->setHtml($form->dataFor(self::FIELD_NAME_DESCRIPTION), true);
-		$this->getDoc()->get(self::FIELD_NAME_EMAIL_WELCOME_TEXT)->setHtml($form->dataFor(self::FIELD_NAME_EMAIL_WELCOME_TEXT), true);
+		$this->getDoc()->get(self::FIELD_NAME_DESCRIPTION)->setInnerHtml($form->dataFor(self::FIELD_NAME_DESCRIPTION), true);
+		$this->getDoc()->get(self::FIELD_NAME_EMAIL_WELCOME_TEXT)->setInnerHtml($form->dataFor(self::FIELD_NAME_EMAIL_WELCOME_TEXT), true);
 
 		$this->xml->saveAndUnlock();
 
@@ -911,7 +911,7 @@ EOF;
 		$mailing->generateId();
 		$mailing->setAttr(self::FIELD_NAME_STATUS, self::MAILING_STATUS_DRAFT);
 		$mailing->setAttr(self::FIELD_NAME_SUBJECT, $form->dataFor(self::FIELD_NAME_SUBJECT));
-		$mailing->setHtml(wikify_html($form->dataFor(self::FIELD_NAME_MESSAGE)));
+		$mailing->setInnerHtml(wikify_html($form->dataFor(self::FIELD_NAME_MESSAGE)));
 
 		$this->xml->saveAndUnlock();
 
@@ -1003,7 +1003,7 @@ EOF;
 		/** @var HyphaDomElement $mailing */
 		$mailing = $this->xml->getElementById($mailingId);
 		$mailing->setAttr(self::FIELD_NAME_SUBJECT, $form->dataFor(self::FIELD_NAME_SUBJECT));
-		$mailing->setHtml(wikify_html($form->dataFor(self::FIELD_NAME_MESSAGE)));
+		$mailing->setInnerHtml(wikify_html($form->dataFor(self::FIELD_NAME_MESSAGE)));
 
 		$this->xml->saveAndUnlock();
 
@@ -1357,7 +1357,7 @@ EOF;
 			}
 
 			$row = $table->addRow();
-			$row->addCell()->setHtml('<span style="color:#b90;">∗</span>');
+			$row->addCell()->setInnerHtml('<span style="color:#b90;">∗</span>');
 			$row->addCell($mailing->getAttribute(self::FIELD_NAME_SUBJECT));
 			$row->addCell(__('ml-mailing-status-' . $status));
 			$row->addCell($date);

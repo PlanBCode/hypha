@@ -457,7 +457,7 @@
 				// Editor tags must always contain valid
 				// HTML, so use setHtml rather than
 				// setText
-				$field->setHtml($value);
+				$field->setInnerHtml($value);
 			}
 		}
 

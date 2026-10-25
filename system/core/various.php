@@ -27,13 +27,7 @@
 		$content - strict XHTML content
 	*/
 	function setInnerHtml($node, $content) {
-		while ($node->childNodes->length) $node->removeChild($node->childNodes->item(0));
-		libxml_use_internal_errors(true);
-		$nodeXml = new DOMDocument('1.0', 'UTF-8');
-		if(!$nodeXml->loadHTML('<?xml encoding="UTF-8"><html><body><div xml:id="hyphaImport">'.preg_replace('/\r/i', '', $content).'</div></body></html>')) return __('error-loading-html');
-		libxml_clear_errors();
-		libxml_use_internal_errors(false);
-		foreach($nodeXml->getElementById('hyphaImport')->childNodes as $child) $node->appendChild($node->ownerDocument->importNode($child, true));
+		$node->setInnerHtml($content);
 	}
 
 	/*
