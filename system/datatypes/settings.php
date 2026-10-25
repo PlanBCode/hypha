@@ -544,9 +544,6 @@
 		<td><input name="siteTitle" type="text" size="20" value="<?=hypha_getTitle()?>" /></td>
 	</tr>
 	<tr>
-		<th><?=__('favicon')?></th>
-	</tr>
-	<tr>
 		<th><?=__('header')?></th>
 		<td><editor name="siteHeader"><?=hypha_getHeader();?></editor></td>
 	</tr>
