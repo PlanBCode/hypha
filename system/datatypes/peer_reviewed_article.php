@@ -1752,7 +1752,7 @@ EOF;
 		$html = <<<EOF
 			<div class="new-comment [[type]]">
 			<div>
-				<strong><label for="[[field-name-comment]]">[[comment]]</label></strong><textarea required name="[[field-name-comment]]" id="[[field-name-comment]]"></textarea>
+				<strong><label for="[[field-name-comment]]">[[comment]]</label></strong>[[info-button-comment-rules]]<textarea required name="[[field-name-comment]]" id="[[field-name-comment]]"></textarea>
 			</div>
 EOF;
 
@@ -1760,6 +1760,7 @@ EOF;
 		$vars['type'] = $type;
 		$vars['comment'] = $new ? __('art-comment-on-article') : __('art-comment-on-comment');
 		$vars['field-name-comment'] = self::FIELD_NAME_DISCUSSION_COMMENT . $dataFieldSuffix;
+		$vars['info-button-comment-rules'] = makeInfoButton('help-comment-rules');
 
 		if ($new && $review && !in_array($this->getStatus(), [self::STATUS_APPROVED, self::STATUS_PUBLISHED])) {
 			$html .= <<<EOF
@@ -1785,9 +1786,6 @@ EOF;
 				<strong><label for="[[field-name-subscribe]]">[[subscribe]]</label></strong> <input type="checkbox" id="[[field-name-subscribe]]" name="[[field-name-subscribe]]" /> [[info-button-subscribe]]
 			</div>
 EOF;
-			// make non-users aware why they need to enter their name
-			$vars['comment'] .= ' ' . makeInfoButton('help-comment-rules');
-
 			$vars['name'] = __('art-name');
 			$vars['field-name-name'] = self::FIELD_NAME_DISCUSSION_COMMENTER_NAME . $dataFieldSuffix;
 			$vars['un-anonymous'] = __('art-comment-unanonymous');
