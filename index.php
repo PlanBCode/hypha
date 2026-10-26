@@ -24,6 +24,42 @@
 	$DEBUG = file_exists('DEBUG');
 	ini_set('display_errors', $DEBUG ? true : false);
 
+	/*
+		Function: hypha_showErrorPage
+		Last resort when a request fails: answer with HTTP 500 and a
+		short page instead of leaving the browser with an empty
+		response. The full error goes to the PHP error log; it is only
+		shown on the page when a DEBUG file is present.
+	*/
+	function hypha_showErrorPage($detail) {
+		if (!headers_sent()) {
+			http_response_code(500);
+			header('Content-Type: text/html; charset=utf-8');
+		}
+		$path = isset($_SERVER['REQUEST_URI']) ? parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) : '';
+		echo '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Hypha down</title></head><body>';
+		echo '<h1>Hypha down</h1>';
+		echo '<p>The requested page can not be loaded.</p>';
+		echo '<p>Path: ' . htmlspecialchars((string)$path) . '</p>';
+		if ($detail !== null)
+			echo '<pre>' . htmlspecialchars($detail) . '</pre>';
+		echo '</body></html>';
+	}
+
+	// Errors thrown and not caught anywhere.
+	set_exception_handler(function (Throwable $e) use ($DEBUG) {
+		error_log('Hypha: uncaught ' . $e);
+		hypha_showErrorPage($DEBUG ? (string)$e : null);
+	});
+
+	// Fatal errors that are not exceptions (e.g. memory exhausted).
+	// PHP has already logged these.
+	register_shutdown_function(function () use ($DEBUG) {
+		$error = error_get_last();
+		if ($error !== null && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR]))
+			hypha_showErrorPage($DEBUG ? $error['message'] . ' in ' . $error['file'] . ':' . $error['line'] : null);
+	});
+
 	if (strnatcmp(phpversion(),'5.4') < 0) die('Error: you are running php version '.substr(phpversion(),0,strpos(phpversion(), '-')).'; Hypha works only with php version 5.4 and higher');
 	if (function_exists('apache_get_modules') && !in_array('mod_rewrite', apache_get_modules())) die ('Error: Apache should have mod_rewrite enabled');
 
