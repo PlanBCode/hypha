@@ -393,7 +393,7 @@
 		 * Append the given iterable of DOMNodes to the current
 		 * node.
 		 */
-		function appendChildren(Traversable|array $nodes) {
+		function appendChildren(iterable $nodes) {
 			// Convert to array, since we might be passed
 			// a DOMNodeList, which is dynamic and behaves
 			// unexpectedly when nodes are moved out of it
@@ -410,7 +410,7 @@
 		 * Append the given iterable of DOMNodes to the current node,
 		 * importing (copying) the nodes into the current document.
 		 */
-		function appendImportedChildren(Traversable|array $nodes) {
+		function appendImportedChildren(iterable $nodes) {
 			foreach ($nodes as $node)
 				$this->appendChild($this->ownerDocument->importNode($node, true));
 		}

@@ -223,7 +223,7 @@
 				       string containing either of those.
 			@param $data - Any (POST) data to apply to this form.
 		*/
-		public function createForm(string|HyphaDomElement|Traversable|array|null $form = null, array $data = []) {
+		public function createForm(string|HyphaDomElement|iterable|null $form = null, array $data = []) {
 			return new HTMLForm($this, $form, $data);
 		}
 
@@ -312,7 +312,7 @@
 			@param $form - The form, either as a string, a list of nodes (any iterable) or a single HyphaDomNode (will be wrapped in a <form> tag if needed).
 			@param $data - Any (POST) data to apply to this form.
 		*/
-		function __construct(HTMLDocument $doc, string|HyphaDomElement|Traversable|array|null $form, $data = []) {
+		function __construct(HTMLDocument $doc, string|HyphaDomElement|iterable|null $form, $data = []) {
 			global $O_O;
 
 			if (is_string($form)) {
