@@ -778,7 +778,14 @@
 	*/
 	function hypha_incrementStats($timestamp) {
 		global $O_O;
-		$contents = $O_O->data->stats->lockAndRead();
+		// Counting a view is not worth making the visitor wait:
+		// every anonymous page view gets here, and a blocking
+		// lock serialises all of them. When another request is
+		// updating the counter, skip this view. Under load the
+		// count is a small undercount; without load it is exact.
+		if (!$O_O->data->stats->tryLock())
+			return;
+		$contents = $O_O->data->stats->read();
 		if (!$contents)
 			$stats = Array();
 		else

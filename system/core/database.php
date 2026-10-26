@@ -984,6 +984,29 @@
 		}
 
 		/*
+			Function: tryLock
+
+			Like lock(), but does not wait: when another
+			process holds the lock, returns false at once
+			instead of blocking. Returns true when the lock
+			was taken.
+		*/
+		function tryLock() {
+			if ($this->fileHandle)
+				throw new LogicException('Cannot lock file ' . $this->filename . ', already locked');
+
+			$fileHandle = fopen($this->filename, 'c+');
+			if ($fileHandle === false)
+				return false;
+			if (!flock($fileHandle, LOCK_EX | LOCK_NB) || fstat($fileHandle)['nlink'] == 0) {
+				fclose($fileHandle);
+				return false;
+			}
+			$this->fileHandle = $fileHandle;
+			return true;
+		}
+
+		/*
 			Function: write
 
 			Write the given string to the file, replacing any
