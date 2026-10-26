@@ -223,7 +223,7 @@
 				       string containing either of those.
 			@param $data - Any (POST) data to apply to this form.
 		*/
-		public function createForm(string|HyphaDomElement|DOMNodeList|null $form = null, array $data = []) {
+		public function createForm(string|HyphaDomElement|Traversable|array|null $form = null, array $data = []) {
 			return new HTMLForm($this, $form, $data);
 		}
 
@@ -309,16 +309,16 @@
 
 			Parameters:
 			@param $doc - The document this form should be associated with.
-			@param $form - The form, either as a string, DOMNodeList or a single HyphaDomNode (will be wrapped in a <form> tag if needed).
+			@param $form - The form, either as a string, a list of nodes (any iterable) or a single HyphaDomNode (will be wrapped in a <form> tag if needed).
 			@param $data - Any (POST) data to apply to this form.
 		*/
-		function __construct(HTMLDocument $doc, string|HyphaDomElement|DOMNodeList|null $form, $data = []) {
+		function __construct(HTMLDocument $doc, string|HyphaDomElement|Traversable|array|null $form, $data = []) {
 			global $O_O;
 
 			if (is_string($form)) {
 				$form = $doc->createFromHtml($form);
-				if ($form->length == 1 && $form->item(0)->tagName == 'form') {
-					$form = $form->item(0);
+				if (count($form) == 1 && $form[0] instanceof HyphaDomElement && $form[0]->tagName == 'form') {
+					$form = $form[0];
 				}
 			}
 
