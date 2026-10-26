@@ -27,6 +27,7 @@
 		- A property 'filename' which is used as default when saving
 	*/
 	require_once 'various.php';
+	require_once 'pagecache.php';
 
 	/*
 	 * Some helper methods for accessing DOM children that are
@@ -1058,6 +1059,9 @@
 				unlink($tmpfilename);
 				throw new RuntimeException('Failed to write to file ' . $this->filename . ', rename from ' . $tmpfilename . ' failed: ' . error_get_last()['message']);
 			}
+
+			if (HyphaCacheGeneration::affects($this->filename))
+				HyphaCacheGeneration::bump();
 
 			// Close the old file, but only after the
 			// rename, since this unlocks the old file and

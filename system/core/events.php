@@ -57,6 +57,12 @@
 		// if no cmd or arg is given, redirect to url
 		if (!cmd && !arg) { window.location = url; return; }
 
+		// Anonymous pages hold no CSRF token; fetch it first.
+		if (hyphaNeedsCsrfToken(form)) {
+			hyphaFetchCsrfToken(function() { hypha(url, cmd, arg, form, callback); });
+			return;
+		}
+
 		var $form = $(form);
 		$form.attr('action', url);
 
@@ -110,7 +116,28 @@
 		resultCallback - pointer to javascript function. This function is called when the ajax http request reponds. The response text is passed as an argument to this function.
 		sendPostParams - optional flag to send form data. When this argument is set true the full hyphaForm data will be sent along through a http POST request. If omitted or set false a http GET request will be performed.
 	*/
+	function hyphaNeedsCsrfToken(form) {
+		return form && $(form).find('input[name="csrfToken"]').filter(function() { return !this.value; }).length > 0;
+	}
+
+	function hyphaFetchCsrfToken(done) {
+		var request = new XMLHttpRequest();
+		request.onreadystatechange = function() {
+			if (request.readyState != 4) return;
+			var token = request.status == 200 ? JSON.parse(request.responseText).token : '';
+			if (!token) { alert("<?=__('csrf-error')?>"); return; }
+			$('input[name="csrfToken"]').val(token);
+			done();
+		};
+		request.open('POST', 'csrf-token', true);
+		request.send();
+	}
+
 	function ajax(url, resultCallback, form = false) {
+		if (hyphaNeedsCsrfToken(form)) {
+			hyphaFetchCsrfToken(function() { ajax(url, resultCallback, form); });
+			return;
+		}
 		var request;  // The variable that makes Ajax possible!
 		try{
 			// Opera 8.0+, Firefox, Safari

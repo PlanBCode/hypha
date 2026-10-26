@@ -127,6 +127,20 @@
 	}
 
 	/*
+		Function: invalidateCache
+		Gives data/cache/generation a new value, so that the page cache
+		of index.php (system/core/pagecache.php) renders every page
+		again. Called after this script changed files, since it does not
+		write through HyphaFile.
+	*/
+	function invalidateCache() {
+		if (!is_dir('data/cache')) return;
+		$tmp = 'data/cache/generation.' . getmypid();
+		if (@file_put_contents($tmp, bin2hex(random_bytes(8))) !== false)
+			@rename($tmp, 'data/cache/generation');
+	}
+
+	/*
 		Function: tools
 		generates a html table with all the system files and actions on them depending on possible changes between the local file and the version on a remote hypha
 
@@ -148,6 +162,7 @@
 				unlink($_POST['argument']);
 				break;
 		}
+		if (isset($_POST['command'])) invalidateCache();
 		$localIndex = index();
 		$serverIndex = unserialize(file_get_contents($hyphaServer.'?file=index'));
 		ksort($serverIndex);
@@ -284,6 +299,7 @@
 			$hypha->appendChild($xml->createElement('digest', ''));
 			$xml->appendChild($hypha);
 			$xml->save('data/hypha.xml');
+			invalidateCache();
 
 			// goto hypha site
 			header('Location: '.$_POST['setupBaseUrl']);

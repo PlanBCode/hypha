@@ -166,9 +166,22 @@
 			yet, it will be generated automatically.
 		*/
 		public function getOrGenerateCsrfToken() {
+			// Anonymous pages carry no token, so they are the same
+			// for every visitor and can be cached; hypha() fetches
+			// the token from /csrf-token (a POST) before submitting.
+			if (!$this->isUser() && !$this->getRequest()->isPost())
+				return '';
 			if (!$this->csrfToken)
 				$this->regenerateCsrfToken();
 
+			return $this->csrfToken;
+		}
+
+		/*
+			Function: peekCsrfToken
+			The token from the cookie, without generating one.
+		*/
+		public function peekCsrfToken() {
 			return $this->csrfToken;
 		}
 

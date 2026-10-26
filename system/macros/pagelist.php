@@ -44,6 +44,8 @@
  */
 class PagelistMacro extends HyphaMacro {
 	public function invoke() {
+		if (in_array(ltrim($this->macro_tag->getAttribute('sort'), '-'), ['', 'date']))
+			return $this->renderPages($this->getPagesIndexed());
 		$pages = $this->getPages();
 		$pages = $this->sortPages($pages);
 		$pages = $this->paginatePages($pages);
@@ -115,7 +117,7 @@ class PagelistMacro extends HyphaMacro {
 		return $tags;
 	}
 
-	private function getPages() {
+	private function findPageNodes() {
 		// Allow filtering by tag
 		$tagsattr = $this->macro_tag->getAttribute("tags");
 		$tags = self::lookupTags($tagsattr);
@@ -166,13 +168,17 @@ class PagelistMacro extends HyphaMacro {
 			throw new UnexpectedValueException("Filtering by other languages than the current page language not yet supported");
 		$languages = [$this->O_O->getContentLanguage()];
 
-		$pageNodes = hypha_findPages([
+		return hypha_findPages([
 			'tags' => $tags,
 			'exclude_tags' => $excludeTags,
 			'page_types' => $pageTypes,
 			'include_private' => $includePrivate,
 			'languages' => $languages,
 		]);
+	}
+
+	private function getPages() {
+		$pageNodes = $this->findPageNodes();
 
 		// These use ! to set the time part to midnight (in the
 		// default timezone), rather than using the current
@@ -198,6 +204,37 @@ class PagelistMacro extends HyphaMacro {
 		return $pages;
 	}
 
+	/*
+		Same result as getPages + sortPages + paginatePages for the
+		date sort, but reads the sort dates from HyphaPageIndex and
+		instantiates only the pages that are shown.
+	*/
+	private function getPagesIndexed() {
+		$nodes = iterator_to_array($this->findPageNodes());
+		$dates = HyphaPageIndex::getSortTimestamps($this->O_O, $nodes);
+		$dateFrom = $this->getDateTimeAttribute('date-from', '!Y-m-d', 'YYYY-MM-DD');
+		$dateUntil = $this->getDateTimeAttribute('date-until', '!Y-m-d', 'YYYY-MM-DD');
+		if ($dateUntil) $dateUntil->modify('tomorrow');
+		if ($dateFrom || $dateUntil) {
+			$nodes = array_values(array_filter($nodes, function($node) use ($dates, $dateFrom, $dateUntil) {
+				$ts = $dates[$node->getAttribute('id')];
+				return $ts && (!$dateFrom || $ts >= $dateFrom->getTimestamp()) && (!$dateUntil || $ts < $dateUntil->getTimestamp());
+			}));
+		}
+		$sortattr = $this->macro_tag->getAttribute('sort');
+		if ($sortattr) {
+			$keys = array_map(function($node) use ($dates) { return $dates[$node->getAttribute('id')]; }, $nodes);
+			$order = $sortattr[0] == '-' ? SORT_DESC : SORT_ASC;
+			// Stable on ties, like array_multisort on the page objects.
+			$positions = array_keys($nodes);
+			array_multisort($keys, $order, SORT_NUMERIC, $positions, SORT_ASC, $nodes);
+		}
+		$limit = intval($this->macro_tag->getAttribute("limit"));
+		if ($limit) $nodes = array_slice($nodes, 0, $limit);
+		if (HyphaMemoryDb::enabled()) return $nodes;
+		return array_map(function($node) { return createPageInstance($this->O_O, $node); }, $nodes);
+	}
+
 	private function renderPages($pages) {
 		/** @var HyphaDomElement $ul */
 		$ul = $this->doc->createElement('ul');
@@ -206,7 +243,7 @@ class PagelistMacro extends HyphaMacro {
 			$ul->addClass('pagelist');
 
 		foreach ($pages as $page) {
-			$li = $this->renderPage($page);
+			$li = $page instanceof HyphaDomElement ? $this->renderNode($page) : $this->renderPage($page);
 			$ul->appendChild($li);
 		}
 		return $ul;
@@ -224,6 +261,24 @@ class PagelistMacro extends HyphaMacro {
 		$page->renderExcerpt($a);
 
 		return $li;
+	}
+
+	/*
+		Same markup as renderPage, but the excerpt comes from the
+		memory db; the page file is opened only to render a missing
+		excerpt.
+	*/
+	private function renderNode(HyphaDomElement $node) {
+		$language = $this->O_O->getContentLanguage();
+		$id = $node->getAttribute('id');
+		$html = HyphaExcerpts::get($id, $language);
+		if ($html === null) {
+			$a = $this->renderPage(createPageInstance($this->O_O, $node));
+			HyphaExcerpts::set($id, $language, $this->doc->saveHTML($a));
+			return $a;
+		}
+		$fragment = $this->doc->createFromHtml($html);
+		return $fragment[0];
 	}
 }
 
