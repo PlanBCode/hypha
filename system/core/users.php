@@ -27,8 +27,10 @@
 			$sess->changeSessionId();
 			$sess->set('hyphaLogin', $user->getAttribute('id'));
 			$O_O->regenerateCsrfToken();
+			hypha_audit('HYP-1001', 'info', 'Login succeeded', ['user_id' => $user->getAttribute('id')]);
 		}
 		else {
+			hypha_audit('HYP-1002', 'warning', 'Login failed', ['user_known' => $user ? true : false]);
 			$sess->remove('hyphaLogin');
 			notify('error', __('login-failed').'. <a href="javascript:reregister();">'.__('reregister').'</a>');
 		}
@@ -59,6 +61,7 @@
 			if ($page) $hyphaQuery = $language.'/'.$page->getAttribute('name');
 			else $hyphaQuery = hypha_getDefaultLanguage().'/'.hypha_getDefaultPage();
 		}
+		hypha_audit('HYP-1003', 'info', 'Logout');
 		$sess = $O_O->getSession();
 		$sess->lockAndReload();
 		$sess->remove('hyphaLogin');
