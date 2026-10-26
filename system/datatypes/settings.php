@@ -122,7 +122,7 @@
 					hypha_addUserRegistrationKey($newUser, $key);
 					hypha_addUser('', '', '', $email, 'en', 'invitee');
 					$hyphaXml->saveAndUnlock();
-					writeToDigest($hyphaUser->getAttribute('fullname').' '.__('invited').' '.$email, 'settings');
+					writeToDigest(htmlspecialchars($hyphaUser->getAttribute('fullname')).' '.__('invited').' '.htmlspecialchars($email), 'settings');
 					$mailBody = '<a href="mailto:'.$newUser->getAttribute('email').'">'.$hyphaUser->getAttribute('username').'</a>'.__('invites-to-join').'\''.hypha_getTitle().'\'. '.__('follow-link-to-register').'<br /><a href="'.$hyphaUrl.'settings/register/'.$key.'">'.$hyphaUrl.'settings/register/'.$key.'</a><hr/>'.$_POST['inviteWelcome'];
 					$result = sendMail($email, __('invitation').'\''.hypha_getTitle().'\'', nl2br($mailBody));
 					notify('success', $result ? $result : $email.__('was-invited'));
@@ -228,7 +228,7 @@
 
 				if (!hypha_setUser($user, $_POST['settingsUsername'], $_POST['settingsPassword1'], $_POST['settingsFullname'], $_POST['settingsEmail'], $_POST['settingsUiLang'], $rights)) {
 					hypha_removeUserRegistrationKey($user);
-					writeToDigest($user->getAttribute('fullname').' '.__('has-joined'), 'settings');
+					writeToDigest(htmlspecialchars($user->getAttribute('fullname')).' '.__('has-joined'), 'settings');
 					notify('success', __('registration-successful'));
 					$hyphaXml->saveAndUnlock();
 					return ['redirect', $hyphaUrl];
@@ -726,7 +726,7 @@
 				$user = hypha_getUserById($userId);
 				hypha_setUser($user, '', '', '', '', '', 'admin');
 				$hyphaXml->saveAndUnlock();
-				writeToDigest($hyphaUser->getAttribute('fullname').__('granted-admin-rights-to').$user->getAttribute('fullname'), 'settings');
+				writeToDigest(htmlspecialchars($hyphaUser->getAttribute('fullname')).__('granted-admin-rights-to').htmlspecialchars($user->getAttribute('fullname')), 'settings');
 			}
 			return 'reload';
 		}
@@ -743,7 +743,7 @@
 					$user = hypha_getUserByName($username);
 					hypha_setUser($user, '', '', '', '', '', 'user');
 					$hyphaXml->saveAndUnlock();
-					writeToDigest($hyphaUser->getAttribute('fullname').__('took-admin-rights-from').$user->getAttribute('fullname'), 'settings');
+					writeToDigest(htmlspecialchars($hyphaUser->getAttribute('fullname')).__('took-admin-rights-from').htmlspecialchars($user->getAttribute('fullname')), 'settings');
 				} else {
 					$hyphaXml->unlock();
 					notify('error', __('error-last-admin'));
@@ -773,9 +773,9 @@
 					notify($error);
 				} else {
 					$msg = __('admin-reincarnated-user', [
-						'admin' => $hyphaUser->getAttribute('fullname'),
-						'username' => $user->getAttribute('username'),
-						'fullname' => $user->getAttribute('fullname'),
+						'admin' => htmlspecialchars($hyphaUser->getAttribute('fullname')),
+						'username' => htmlspecialchars($user->getAttribute('username')),
+						'fullname' => htmlspecialchars($user->getAttribute('fullname')),
 					]);
 
 					writeToDigest($msg, 'settings');
