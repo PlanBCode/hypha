@@ -563,7 +563,7 @@
 			$name = $field->getAttribute('name');
 			$newField = $field->ownerDocument->createElement('input');
 			$newField->setAttribute('type', 'hidden');
-			$newField->setAttribute('value', $value);
+			$newField->setAttribute('value', $value ?? '');
 			$newField->setAttribute('name', 'file_shadow_' . $name);
 			$newField->setAttribute('data-file-shadow-value-for', $name);
 			$field->after($newField);

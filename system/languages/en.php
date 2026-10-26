@@ -511,8 +511,20 @@
 		"art-start-review" => "start review",
 		"art-approve(s)" => "approve(s)",
 		"art-unresolved-block(s)" => "unresolved block(s)",
-		"art-date-format-date" => "%B %e, %Y", // see for format: https://www.php.net/manual/en/function.date.php
-		"art-date-format-time" => "at %l:%M%p", // see for format: https://www.php.net/manual/en/function.date.php
+		"art-date-format-date" => "%B %e, %Y", // strftime format, see peer_reviewed_article::formatTimestamp()
+		"art-date-format-time" => "at %l:%M%p", // strftime format, see peer_reviewed_article::formatTimestamp()
+		"art-month-1" => "January",
+		"art-month-2" => "February",
+		"art-month-3" => "March",
+		"art-month-4" => "April",
+		"art-month-5" => "May",
+		"art-month-6" => "June",
+		"art-month-7" => "July",
+		"art-month-8" => "August",
+		"art-month-9" => "September",
+		"art-month-10" => "October",
+		"art-month-11" => "November",
+		"art-month-12" => "December",
 		"art-read-more" => "Read more",
 	
 		// sharing links
