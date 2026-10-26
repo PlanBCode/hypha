@@ -181,18 +181,6 @@
 		return "concat(" . implode("'\"'", $quoted) . ")";
 	}
 
-	/*
-		Function: is_iterable
-
-		Implementation of PHP's builtin is_iterable for PHP < 7.1.
-		Taken from https://www.php.net/manual/en/function.is-iterable.php#122574
-	*/
-	if (!function_exists('is_iterable')) {
-	    function is_iterable($obj) {
-		return is_array($obj) || (is_object($obj) && ($obj instanceof \Traversable));
-	    }
-	}
-
 	/**
 	 * Convert a unix timestamp (int or string) to a DateTime object
 	 * set to the default timezone.
