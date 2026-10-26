@@ -179,7 +179,9 @@
 			session starts, such as during login.
 		*/
 		public function regenerateCsrfToken() {
-			$this->csrfToken = bin2hex(openssl_random_pseudo_bytes(8));
+			// 128 bits from the CSPRNG, the usual minimum for
+			// a token that must not be guessable.
+			$this->csrfToken = bin2hex(random_bytes(16));
 			// Store the token in a cookie that is limited
 			// to our root path, secure (not sent over HTTP)
 			// if appropriate, and *only* sent on http(s)
@@ -212,7 +214,9 @@
 		public function validCsrfToken() {
 			$received = $this->getRequest()->getPostValue('csrfToken');
 			$expected = $this->getOrGenerateCsrfToken();
-			return $received === $expected;
+			// Compare in constant time, so response times do
+			// not reveal how much of a guessed token is right.
+			return is_string($received) && is_string($expected) && hash_equals($expected, $received);
 		}
 
 		/**
