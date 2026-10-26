@@ -26,6 +26,10 @@
 			// Use a brand new session id for extra security
 			$sess->changeSessionId();
 			$sess->set('hyphaLogin', $user->getAttribute('id'));
+			// Used by RequestContext to end the login after
+			// a period of inactivity or a maximum duration.
+			$sess->set('hyphaLoginTime', time());
+			$sess->set('hyphaLastSeen', time());
 			$O_O->regenerateCsrfToken();
 		}
 		else {
@@ -62,7 +66,14 @@
 		$sess = $O_O->getSession();
 		$sess->lockAndReload();
 		$sess->remove('hyphaLogin');
+		$sess->remove('hyphaLoginTime');
+		$sess->remove('hyphaLastSeen');
+		// Give the browser a new session id and delete the old
+		// session, so a copy of the old session id (or CSRF
+		// token) is of no use after logging out.
+		$sess->changeSessionId();
 		$sess->writeAndUnlock();
+		$O_O->regenerateCsrfToken();
 		return ['redirect', $O_O->getRequest()->getRootUrl() . $hyphaQuery];
 	}
 
