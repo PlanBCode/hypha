@@ -221,7 +221,7 @@ class mailinglist extends HyphaDatatypePage {
 	protected function deleteAction(HyphaRequest $request) {
 		if (!isAdmin()) {
 			notify('error', __(isUser() ? 'admin-rights-needed-to-perform-action' : 'login-to-perform-action'));
-			return null;
+			return 'reload';
 		}
 
 		$this->deletePage();
@@ -446,7 +446,7 @@ class mailinglist extends HyphaDatatypePage {
 		$code = isset($_GET['code']) ? $_GET['code'] : null;
 		if (null == $code) {
 			notify('error', __('missing-arguments'));
-			return null;
+			return 'reload';
 		}
 
 		$this->xml->lockAndReload();
@@ -457,7 +457,7 @@ class mailinglist extends HyphaDatatypePage {
 		if (!$address instanceof HyphaDomElement) {
 			$this->xml->unlock();
 			notify('error', __('invalid-code'));
-			return null;
+			return 'reload';
 		}
 
 		if ($address->getAttribute(self::FIELD_NAME_STATUS) !== self::ADDRESS_STATUS_CONFIRMED) {
@@ -476,7 +476,7 @@ class mailinglist extends HyphaDatatypePage {
 		$code = isset($_GET['code']) ? $_GET['code'] : null;
 		if (null == $code) {
 			notify('error', __('missing-arguments'));
-			return null;
+			return 'reload';
 		}
 
 		try {
@@ -485,7 +485,7 @@ class mailinglist extends HyphaDatatypePage {
 		} catch (\Exception $e) {
 			$msg = $e->getCode() === 404 ? __('invalid-code') : $e->getMessage();
 			notify('error', $msg);
-			return null;
+			return 'reload';
 		}
 
 		notify('success', ucfirst(__('ml-successfully-unsubscribed')));
@@ -508,7 +508,7 @@ class mailinglist extends HyphaDatatypePage {
 		$email = isset($_GET['email']) ? $_GET['email'] : null;
 		if (null == $email) {
 			notify('error', __('missing-arguments'));
-			return null;
+			return 'reload';
 		}
 
 		try {
@@ -516,7 +516,7 @@ class mailinglist extends HyphaDatatypePage {
 			$this->unsubscribe($xpath);
 		} catch (\Exception $e) {
 			notify('error', $e->getMessage());
-			return null;
+			return 'reload';
 		}
 
 		notify('success', ucfirst(__('ml-successfully-unsubscribed-by-admin', ['email' => $email])));
@@ -566,7 +566,7 @@ class mailinglist extends HyphaDatatypePage {
 		$email = isset($_GET['email']) ? $_GET['email'] : null;
 		if (null == $email) {
 			notify('error', __('missing-arguments'));
-			return null;
+			return 'reload';
 		}
 
 		$this->xml->lockAndReload();
@@ -577,13 +577,13 @@ class mailinglist extends HyphaDatatypePage {
 		if (!$address instanceof HyphaDomElement) {
 			$this->xml->unlock();
 			notify('error', __('not-found'));
-			return null;
+			return 'reload';
 		}
 
 		if ($address->getAttribute(self::FIELD_NAME_STATUS) !== self::ADDRESS_STATUS_PENDING) {
 			$this->xml->unlock();
 			notify('error', __('ml-no-reminder-address-no-longer-pending'));
-			return null;
+			return 'reload';
 		}
 
 		if ($address->getAttribute(self::FIELD_NAME_REMINDED) != true) {
@@ -615,7 +615,7 @@ class mailinglist extends HyphaDatatypePage {
 		$email = isset($_GET['email']) ? $_GET['email'] : null;
 		if (null == $email) {
 			notify('error', __('missing-arguments'));
-			return null;
+			return 'reload';
 		}
 
 		$this->xml->lockAndReload();
@@ -626,13 +626,13 @@ class mailinglist extends HyphaDatatypePage {
 		if (!$address instanceof HyphaDomElement) {
 			$this->xml->unlock();
 			notify('error', __('not-found'));
-			return null;
+			return 'reload';
 		}
 
 		if ($address->getAttribute(self::FIELD_NAME_STATUS) !== self::ADDRESS_STATUS_PENDING) {
 			$this->xml->unlock();
 			notify('error', __('ml-cannot-delete-address-no-longer-pending'));
-			return null;
+			return 'reload';
 		}
 
 		/** @var HyphaDomElement $addressesContainer */
@@ -856,7 +856,7 @@ EOF;
 	protected function mailingNewView(HyphaRequest $request) {
 		if (!isUser()) {
 			notify('error', __('login-to-perform-action'));
-			return null;
+			return 'reload';
 		}
 
 		// create form
@@ -886,7 +886,7 @@ EOF;
 	protected function mailingNewAction(HyphaRequest $request) {
 		if (!isUser()) {
 			notify('error', __('login-to-perform-action'));
-			return null;
+			return 'reload';
 		}
 
 		// create form
@@ -925,7 +925,7 @@ EOF;
 		if (!isUser()) {
 			notify('error', __('login-to-perform-action'));
 
-			return null;
+			return 'reload';
 		}
 
 		$mailingId = $request->getArg(1);
@@ -939,7 +939,7 @@ EOF;
 
 		if (self::MAILING_STATUS_DRAFT != $mailing->getAttribute('status')) {
 			notify('error', __('unable-to-edit'));
-			return null;
+			return 'reload';
 		}
 
 		// create form
@@ -968,7 +968,7 @@ EOF;
 		// throw error if edit is requested without client logged in
 		if (!isUser()) {
 			notify('error', __('login-to-edit'));
-			return null;
+			return 'reload';
 		}
 
 		$mailingId = $request->getArg(1);
@@ -983,7 +983,7 @@ EOF;
 		$status = $mailing->getAttribute('status');
 		if (self::MAILING_STATUS_DRAFT !== $status) {
 			notify('error', __('unable-to-edit'));
-			return null;
+			return 'reload';
 		}
 
 		// create form
@@ -1115,12 +1115,12 @@ EOF;
 	protected function mailingSendAction(HyphaRequest $request) {
 		if (!isUser()) {
 			notify('error', __('login-to-perform-action'));
-			return null;
+			return 'reload';
 		}
 
 		if (!$this->hasSender()) {
 			notify('error', __('ml-no-sender'));
-			return null;
+			return 'reload';
 		}
 
 		$mailingId = $request->getArg(1);
@@ -1136,7 +1136,7 @@ EOF;
 		$status = $mailing->getAttribute(self::FIELD_NAME_STATUS);
 		if (self::MAILING_STATUS_DRAFT !== $status) {
 			notify('error', __('ml-mail-has-invalid-status'));
-			return null;
+			return 'reload';
 		}
 
 		$senderData = $this->getSenderData();
@@ -1157,7 +1157,7 @@ EOF;
 		$receivers = $this->findAddresses($xpath);
 		if (count($receivers) === 0) {
 			notify('error', __('ml-mail-has-invalid-status'));
-			return null;
+			return 'reload';
 		}
 
 		$linkToMailing = $this->path(self::PATH_MAILS_VIEW_ID, ['id' => $mailingId]);
@@ -1200,12 +1200,12 @@ EOF;
 	protected function mailingSendTestAction(HyphaRequest $request) {
 		if (!isUser()) {
 			notify('error', __('login-to-perform-action'));
-			return null;
+			return 'reload';
 		}
 
 		if (!$this->hasSender()) {
 			notify('error', __('ml-no-sender'));
-			return null;
+			return 'reload';
 		}
 
 		$mailingId = $request->getArg(1);
