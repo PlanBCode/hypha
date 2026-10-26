@@ -179,6 +179,12 @@
 	registerCommandCallback('tagNew', 'tagNewCallback');
 
 	function tagSelectCallback($id) {
+		if (!isUser()) {
+			http_response_code(403);
+			echo htmlspecialchars(__('login-to-perform-action'));
+			exit;
+		}
+
 		global $hyphaXml;
 		global $O_O;
 
@@ -195,6 +201,12 @@
 	}
 
 	function tagDeselectCallback($id) {
+		if (!isUser()) {
+			http_response_code(403);
+			echo htmlspecialchars(__('login-to-perform-action'));
+			exit;
+		}
+
 		global $hyphaXml;
 		global $O_O;
 		$lang = $O_O->getContentLanguage();
@@ -209,6 +221,12 @@
 	}
 
 	function tagNewCallback($json) {
+		if (!isAdmin()) {
+			http_response_code(403);
+			echo htmlspecialchars(__(isUser() ? 'admin-rights-needed-to-perform-action' : 'login-to-perform-action'));
+			exit;
+		}
+
 		global $hyphaXml;
 		global $O_O;
 
@@ -224,6 +242,8 @@
 		$tagList = $hyphaXml->findXPath('tagList');
 		if ($tagList->length === 0) {
 			$tagList = $hyphaXml->documentElement->createChild('tagList');
+		} else {
+			$tagList = $tagList->item(0);
 		}
 
 		// Check if tag exists
