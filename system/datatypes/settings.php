@@ -118,8 +118,8 @@
 					$hyphaXml->lockAndReload();
 					hypha_addUser('', '', '', $email, 'en', 'invitee');
 					$newUser = hypha_getUserByEmail($email);
-					$key = uniqid(rand(), true);
-					hypha_addUserRegistrationKey($newUser, $key);
+					$key = hypha_generateRegistrationKey();
+					hypha_addUserRegistrationKey($newUser, $key, HYPHA_INVITATION_KEY_VALIDITY);
 					hypha_addUser('', '', '', $email, 'en', 'invitee');
 					$hyphaXml->saveAndUnlock();
 					writeToDigest($hyphaUser->getAttribute('fullname').' '.__('invited').' '.$email, 'settings');
@@ -178,7 +178,8 @@
 		function editRegistration($key) {
 			$uiLangList = Language::getInterfaceLanguageList();
 			$isoLangList = Language::getIsoList();
-			foreach(hypha_getUserList() as $user) if ($user->hasAttribute('key') && $user->getAttribute('key')==$key) {
+			$user = hypha_getUserByRegistrationKey($key);
+			if ($user) {
 				$this->html->writeToElement('pagename', __('register'));
 				ob_start();
 ?>
@@ -214,7 +215,8 @@
 		function register($key) {
 			global $hyphaUrl, $hyphaXml;
 			$hyphaXml->lockAndReload();
-			foreach(hypha_getUserList() as $user) if ($user->hasAttribute('key') && $user->getAttribute('key')==$key) {
+			$user = hypha_getUserByRegistrationKey($key);
+			if ($user) {
 				$otheruser = hypha_getUserByName($_POST['settingsUsername']);
 				if ($otheruser && $otheruser != $user) {
 					notify('error', __('error-user-exists'));
@@ -786,10 +788,21 @@
 
 		function remindNewUser($userId) {
 			global $hyphaUrl;
+			global $hyphaXml;
 			if (isAdmin()) {
+				// Issue a fresh key, since the old one may have
+				// expired.
+				$hyphaXml->lockAndReload();
 				$user = hypha_getUserById($userId);
+				if (!$user || $user->getAttribute('rights') != 'invitee') {
+					$hyphaXml->unlock();
+					return 'reload';
+				}
+				$key = hypha_generateRegistrationKey();
+				hypha_addUserRegistrationKey($user, $key, HYPHA_INVITATION_KEY_VALIDITY);
+				$hyphaXml->saveAndUnlock();
 				$email = $user->getAttribute('email');
-				$url = $hyphaUrl.'settings/register/'.$user->getAttribute('key');
+				$url = $hyphaUrl.'settings/register/'.$key;
 				$mailBody = __('remind-to-join').'\''.hypha_getTitle().'\'. '.__('follow-link-to-register').'<br /><a href="'.$url.'">'.$url.'</a>';
 				$result = sendMail($email, __('invitation').'\''.hypha_getTitle().'\'', nl2br($mailBody));
 				notify('success', $result ? $result : $email.__('was-invited'));
