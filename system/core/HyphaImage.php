@@ -119,7 +119,6 @@
 			}
 			if ($testImage === false)
 				return __('failed-to-process-image') . error_get_last();
-			imagedestroy($testImage);
 
 			// Generate a filename and create the file using
 			// fopen. This ensure that the file is actually
@@ -172,7 +171,5 @@
 			$src_y = ($orig_h - $src_h) / 2;
 			imagecopyresampled($result, $image, 0, 0, $src_x, $src_y, $width, $height, $src_w, $src_h);
 			imagejpeg($result, $destination, 90);
-			imagedestroy($result);
-			imagedestroy($image);
 		}
 	}
