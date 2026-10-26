@@ -145,11 +145,15 @@
 		}
 
 		public function getScheme() {
+			// Check HTTPS first. When TLS ends at a reverse proxy, the
+			// operator can set it in the Apache configuration
+			// (SetEnv HTTPS on), while REQUEST_SCHEME is set by Apache
+			// itself and then says "http".
+			if ($this->isSecure())
+				return 'https';
 			// Apache 2.4+ has REQUEST_SCHEME
 			if (array_key_exists('REQUEST_SCHEME', $_SERVER))
 				return $_SERVER['REQUEST_SCHEME'];
-			if ($this->isSecure())
-				return 'https';
 			return 'http';
 		}
 
