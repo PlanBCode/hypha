@@ -450,9 +450,21 @@
 
 	// handle login/logout requests
 	$cmd = isset($_POST['command']) ? $_POST['command'] : false;
+	// A fresh git checkout has an empty superuser name and password. Never accept those, since that
+	// would open the installer and the maintenance tools to anyone who opens this script.
+	$credentialsSet = $username !== '' && $password !== '';
 	if ($cmd == 'login' || $cmd == 'continue') {
-		if ($_POST['username'] === $username && $_POST['password'] === $password) $_SESSION['hyphaSetupLoggedIn'] = true;
-		else $errorMessage.= 'Sorry, wrong user id / password<br/>';
+		if (!$credentialsSet) {
+			$errorMessage.= 'Please first set a superuser name and password at the top of hypha.php on the server<br/>';
+		}
+		else if (is_string($_POST['username'] ?? null) && is_string($_POST['password'] ?? null) && hash_equals($username, $_POST['username']) && hash_equals($password, $_POST['password'])) {
+			// new session id, so a session id planted before the login does not gain superuser rights
+			session_regenerate_id(true);
+			$_SESSION['hyphaSetupLoggedIn'] = true;
+		}
+		else {
+			$errorMessage.= 'Sorry, wrong user id / password<br/>';
+		}
 	}
 	if ($cmd == 'back') {
 		unset($_SESSION['hyphaSetupLoggedIn']);
@@ -460,7 +472,7 @@
 	}
 	if ($cmd == 'build') buildzip();
 
-	$login = (isset($_SESSION['hyphaSetupLoggedIn']) && ($_SESSION['hyphaSetupLoggedIn'] == true)) ? true : false;
+	$login = ($credentialsSet && isset($_SESSION['hyphaSetupLoggedIn']) && ($_SESSION['hyphaSetupLoggedIn'] == true)) ? true : false;
 
 	// if hypha.xml is absent present superuser login and present hypha installer
 	// else if maintenance request present superuser login and present hypha system tools
