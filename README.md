@@ -60,6 +60,10 @@ As a second line of defence, also deny `data/` in the virtual host, except for t
         Require all denied
     </LocationMatch>
 
-Adjust the path when Hypha is not installed at the root of the site. Do not use `<Directory .../data>` with
+Adjust the path when Hypha is not installed at the root of the site.
+
+Hypha checks this itself: on the first request and then every ten minutes it requests a probe file
+in `data/` from its own web server. When that file can be downloaded, Hypha stops with HTTP 503 and a
+message in the log, until the configuration is fixed. Do not use `<Directory .../data>` with
 `Require all denied`: Apache checks it before the rewrite in `.htaccess` runs, so it also blocks the theme
 stylesheets.
