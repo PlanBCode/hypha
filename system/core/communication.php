@@ -31,7 +31,7 @@
 		$headers .= 'Content-type: text/html; charset=utf-8' . "\r\n";
 		$headers .= 'From: ' . $senderName . ' <' . $senderEmail . '>' . "\r\n";
 		$headers .= 'Reply-To: ' . $senderEmail . "\r\n";
-		$headers .= 'X-Mailer: PHP/' . phpversion() . "\r\n";
+		// no X-Mailer header: it would only tell every recipient the exact PHP version of the server
 
 		$messageHtml = '<!DOCTYPE HTML>' . "\r\n";
 		$messageHtml .= '<html>' . "\r\n";
