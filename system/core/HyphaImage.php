@@ -17,7 +17,11 @@
 		 * To import a new image, see importUploadedImage().
 		 */
 		function __construct($filename) {
-			$this->filename = $filename;
+			// The filename can come from a hidden form
+			// field (file_shadow_*), so keep only the last
+			// path component: an image always lives
+			// directly in ROOT_PATH.
+			$this->filename = basename((string)$filename);
 		}
 
 		/**
@@ -63,8 +67,8 @@
 			$filename .= '_crop';
 			$filename .= '.jpg';
 
-			if (!file_exists(self::ROOT_PATH . $filename))
-				$this->resizeTo($width, $height, self::ROOT_PATH . $filename);
+			if (!file_exists(self::ROOT_PATH . $filename) && !$this->resizeTo($width, $height, self::ROOT_PATH . $filename))
+				return $this->filename;
 
 			return $filename;
 		}
@@ -144,12 +148,23 @@
 		/**
 		 * Create a resized version of this image and store it
 		 * in the given destination filename.
+		 *
+		 * Returns false when the original is missing or cannot
+		 * be decoded, instead of failing on a false image.
 		 */
 		private function resizeTo($width, $height, $destination) {
-			if (substr($this->filename, -3) == "png")
-				$image = imagecreatefrompng($this->getPath());
+			if (!is_file($this->getPath()))
+				return false;
+
+			$extension = strtolower(substr($this->filename, -3));
+			if ($extension == "png")
+				$image = @imagecreatefrompng($this->getPath());
+			else if ($extension == "gif")
+				$image = @imagecreatefromgif($this->getPath());
 			else
-				$image = imagecreatefromjpeg($this->getPath());
+				$image = @imagecreatefromjpeg($this->getPath());
+			if ($image === false)
+				return false;
 
 			$orig_w = imagesx($image);
 			$orig_h = imagesy($image);
@@ -174,5 +189,6 @@
 			imagejpeg($result, $destination, 90);
 			imagedestroy($result);
 			imagedestroy($image);
+			return true;
 		}
 	}
