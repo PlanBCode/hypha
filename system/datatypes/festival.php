@@ -946,9 +946,15 @@ EOF;
 				}
 				if ($timesHtml) $html.= '<div class="event"><div class="date">'.htmlspecialchars($day->getAttribute(self::ATTR_DAY_DISPLAY)).'</div>'.$timesHtml.'</div>';
 			}
-			$website = htmlspecialchars($contribution->getAttribute(self::ATTR_CONTRIBUTION_WEBSITE));
-			if ($website)
-				$html.= "<div class=\"website\"><a href=\"$website\">$website</a></div>";
+			// The website is entered by contributors without
+			// an account, so only link http(s) addresses;
+			// another scheme (such as javascript:) would run
+			// when clicked. Anything else is shown as text.
+			$website = $contribution->getAttribute(self::ATTR_CONTRIBUTION_WEBSITE);
+			if ($website && preg_match('#^https?://#i', $website))
+				$html.= '<div class="website"><a href="'.htmlspecialchars($website).'">'.htmlspecialchars($website).'</a></div>';
+			else if ($website)
+				$html.= '<div class="website">'.htmlspecialchars($website).'</div>';
 			$html.= '</div>';
 
 			return $html;
