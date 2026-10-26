@@ -305,6 +305,14 @@ EOF;
 				break;
 			case HyphaRequest::HYPHA_SYSTEM_PAGE_UPLOAD:
 				if ($args[0]=='image') {
+					// The response is read as text/html by the editor's
+					// upload iframe, so encode any markup characters.
+					$jsonFlags = JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT;
+					if (!isUser()) {
+						http_response_code(403);
+						echo json_encode([['error' => __('login-to-perform-action')]], $jsonFlags);
+						exit;
+					}
 					$return = null;
 					if(!$_FILES['uploadedfile']) $response = __('too-big-file', ['upload-max-filesize' => ini_get('upload_max_filesize')]);
 					else {
@@ -340,7 +348,7 @@ EOF;
 					}
 					if ($return === null)
 						$return = [['error' => $response]];
-					echo json_encode($return);
+					echo json_encode($return, $jsonFlags);
 				}
 				exit;
 			case HyphaRequest::HYPHA_SYSTEM_PAGE_CHOOSER:
