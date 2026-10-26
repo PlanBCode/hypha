@@ -232,6 +232,11 @@ class peer_reviewed_article extends HyphaDatatypePage {
 				self::FIELD_NAME_CONTEXT => [
 					self::FIELD_NAME_TITLE => [],
 					self::FIELD_NAME_EXCERPT => [],
+					// TODO: This is not actually used, the
+					// rest of the code puts the featured
+					// image at the highest level by
+					// mistake. Might need fixing while
+					// keeping compatibility.
 					self::FIELD_NAME_FEATURED_IMAGE => [],
 					self::FIELD_NAME_METHOD => [],
 				],
@@ -458,7 +463,8 @@ class peer_reviewed_article extends HyphaDatatypePage {
 			'has-featured-image' => [
 				'statuses' => [self::STATUS_DRAFT, self::STATUS_REVIEW, self::STATUS_APPROVED],
 				'checker' => function() {
-					return [$this->xml->findOneXPath('//' . self::FIELD_NAME_FEATURED_IMAGE)->getText() !== "", []];
+					$featuredImage = $this->xml->findOneXPath(self::FIELD_NAME_FEATURED_IMAGE);
+					return [$featuredImage !== null && $featuredImage->getText() !== "", []];
 				},
 				'level' => self::CHECK_LEVEL_RECOMMENDED,
 			],
