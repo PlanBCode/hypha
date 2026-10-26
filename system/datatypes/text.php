@@ -250,7 +250,7 @@ EOF;
 			$this->xml->lockAndReload();
 			storeWikiContent($this->xml->documentElement, $this->language, $this->getContent($version), $hyphaUser->getAttribute('username'));
 			$this->xml->saveAndUnlock();
-			writeToDigest($hyphaUser->getAttribute('fullname').__('reverted-page').'<a href="'.$this->language.'/'.$this->pagename.'">'.$this->language.'/'.$this->pagename.'</a>', 'page update', $this->pageListNode->getAttribute('id'));
+			writeToDigest(htmlspecialchars($hyphaUser->getAttribute('fullname')).__('reverted-page').'<a href="'.htmlspecialchars($this->language.'/'.$this->pagename).'">'.htmlspecialchars($this->language.'/'.$this->pagename).'</a>', 'page update', $this->pageListNode->getAttribute('id'));
 
 			notify('success', ucfirst(__('page-successfully-updated')));
 			return ['redirect', $this->constructFullPath($this->pagename)];

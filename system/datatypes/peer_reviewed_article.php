@@ -1108,10 +1108,12 @@ EOF;
 			return null;
 		}
 
+		// The digest is HTML and the commenter name comes from
+		// anonymous visitors, so escape every value.
 		$digestArgs = [
-			'commenter' => $comment->getAttribute(self::FIELD_NAME_DISCUSSION_COMMENTER_NAME),
-			'moderator' => $this->O_O->getUser()->getAttribute('fullname'),
-			'title' => $this->getTitle(),
+			'commenter' => htmlspecialchars($comment->getAttribute(self::FIELD_NAME_DISCUSSION_COMMENTER_NAME)),
+			'moderator' => htmlspecialchars($this->O_O->getUser()->getAttribute('fullname')),
+			'title' => htmlspecialchars($this->getTitle()),
 		];
 
 		if ($request->getCommand() === self::CMD_COMMENT_UNMODERATE) {
@@ -1125,7 +1127,7 @@ EOF;
 			}
 
 			$reason = $form->dataFor(self::FIELD_NAME_MODERATE_REASON);
-			$digestArgs['reason'] = $reason;
+			$digestArgs['reason'] = htmlspecialchars($reason);
 
 			if ($request->getCommand() === self::CMD_COMMENT_MODERATE_HIDE) {
 				$status = self::MODERATION_STATUS_HIDDEN;

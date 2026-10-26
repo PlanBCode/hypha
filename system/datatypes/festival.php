@@ -628,7 +628,7 @@ EOF;
 				// rewrites by the payment provider.
 				// TODO: 403 in a more generic place?
 				http_response_code(403);
-				writeToDigest('Invalid participant id or key in payment hook: ' . $_SERVER['REQUEST_URI'] . '?' . $_SERVER['QUERY_STRING'], 'error');
+				writeToDigest('Invalid participant id or key in payment hook: ' . htmlspecialchars($_SERVER['REQUEST_URI'] . '?' . $_SERVER['QUERY_STRING']), 'error');
 				exit;
 			}
 
@@ -637,7 +637,7 @@ EOF;
 				// rewrites by the payment provider.
 				// TODO: 403 in a more generic place?
 				http_response_code(403);
-				writeToDigest('Invalid payment id in payment hook: ' . $_SERVER['REQUEST_URI'] . '?' . $_SERVER['QUERY_STRING'], 'error');
+				writeToDigest('Invalid payment id in payment hook: ' . htmlspecialchars($_SERVER['REQUEST_URI'] . '?' . $_SERVER['QUERY_STRING']), 'error');
 				exit;
 			}
 
@@ -1189,7 +1189,7 @@ EOF;
 
 					// Add to digest
 					$digest = htmlspecialchars($participant->getAttribute(self::ATTR_PARTICIPANT_NAME) . __('festival-payed-for') . $this->getConfig(self::CONFIG_ID_TITLE));
-					$digest .= ' (€' . $participant->getAttribute(self::ATTR_PARTICIPANT_PAYMENT_AMOUNT) . ')';
+					$digest .= ' (€' . htmlspecialchars($participant->getAttribute(self::ATTR_PARTICIPANT_PAYMENT_AMOUNT)) . ')';
 					$digest .= ' (<a href="' . $contribute_url . '">Add contribution</a>)';
 					writeToDigest($digest, 'festival-payment');
 				}
