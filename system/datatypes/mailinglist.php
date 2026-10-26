@@ -775,7 +775,9 @@ EOF;
 				$main->appendHtml('<div>' . htmlspecialchars(__('ml-received-by')) . ': ' . $receivers . '</div>');
 			}
 		}
-		$main->appendChildren($mailing->childNodes);
+		// The mailing lives in the page's XML document, so copy
+		// its content into the HTML document.
+		$main->appendImportedChildren($mailing->childNodes);
 
 		// buttons
 		/** @var HyphaDomElement $commands */
