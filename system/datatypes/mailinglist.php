@@ -1144,6 +1144,7 @@ EOF;
 		$mailings = $this->getDoc()->getOrCreate(self::FIELD_NAME_MAILINGS_CONTAINER);
 		$mailings->appendChild($mailing);
 		$this->xml->saveAndUnlock();
+		hypha_audit('HYP-4001', 'notice', 'Mailing sending started', ['page_id' => $this->pageListNode->getAttribute('id'), 'mailing_id' => $mailingId]);
 
 		// iterate over the confirmed addresses and send the mailing
 		$xpath = './/' . self::FIELD_NAME_ADDRESS . '[@' . self::FIELD_NAME_STATUS . '="' . self::ADDRESS_STATUS_CONFIRMED . '"]';
