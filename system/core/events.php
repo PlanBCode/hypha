@@ -281,8 +281,12 @@
 		$command = $request->getPostValue('command');
 		if (!$processed && $command) {
 			if (!$O_O->validCsrfToken()) {
+				// Do not continue with this POST: the page's
+				// process() would still handle its command.
+				// Reload the page with a GET to show the error.
 				notify('error', __('csrf-error'));
 				$processed = true;
+				processCommandResult('reload'); // Exits
 				return;
 			}
 
