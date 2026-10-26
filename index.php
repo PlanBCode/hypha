@@ -55,6 +55,9 @@
 	$hyphaQuery = $hyphaRequest->getRelativeUrlPath();
 	$hyphaUrl = $hyphaRequest->getRootUrl();
 
+	// Do not run when data/ can be downloaded directly (see selfcheck.php).
+	hypha_selfCheckGuard($hyphaRequest->getRootUrlPath());
+
 	// Shortcut for direct file requests
 	if (startsWith($hyphaQuery, 'data/themes/')) serveFile($hyphaQuery, 'data/themes');
 	if (startsWith($hyphaQuery, 'system/wymeditor')) serveFile($hyphaQuery, 'system/wymeditor');
