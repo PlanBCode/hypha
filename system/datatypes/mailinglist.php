@@ -842,7 +842,8 @@ EOF;
 			if ($num > 0){ // hide send button if no addresses available
 				$commands->appendChild(makeButton(__('send'), $action));
 			}
-			$action = 'hypha('.json_encode($linkToMailing).', '.json_encode(self::CMD_SEND_TEST).', prompt(' . json_encode(__('email')) . '), $(this).closest(\'form\'));';
+			$form = $this->html->getDefaultForm();
+			$action = 'hypha('.json_encode($linkToMailing).', '.json_encode(self::CMD_SEND_TEST).', prompt(' . json_encode(__('email')) . '), document.getElementById(' . json_encode($form->getId()) . '));';
 			$commands->appendChild(makeButton(__('ml-test-send'), $action));
 		}
 
