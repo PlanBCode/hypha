@@ -370,7 +370,7 @@
 				echo '<div class="theme-options">' . "\n";
 				foreach ($themes as $theme) {
 					$value = htmlspecialchars($theme);
-					echo '<div class="theme-option"><input type="radio" id="'.$value.'" name="srcTheme" value="'.$value.'"' . ($this->O_O->getThemeName() === $theme ? ' checked' : '') . '><label for="'.$value.'">'.$theme.'</label></div>' . "\n";
+					echo '<div class="theme-option"><input type="radio" id="'.$value.'" name="srcTheme" value="'.$value.'"' . ($this->O_O->getThemeName() === $theme ? ' checked' : '') . '><label for="'.$value.'">'.$value.'</label></div>' . "\n";
 				}
 				echo '</div>' . "\n";
 				echo '<div class="new-theme-name"><input type="text" name="dstTheme" placeholder="'.__('new-theme-name').'"></div>';
@@ -384,9 +384,13 @@
 		function saveTheme($argument) {
 			if (isAdmin()) {
 				global $hyphaUrl, $hyphaXml;
-				$hyphaXml->lockAndReload();
-				hypha_setTheme($_POST['editTheme']);
-				$hyphaXml->saveAndUnlock();
+				// The theme name becomes part of file paths,
+				// so only accept an existing theme.
+				if (in_array($_POST['editTheme'], $this->getThemes(), true)) {
+					$hyphaXml->lockAndReload();
+					hypha_setTheme($_POST['editTheme']);
+					$hyphaXml->saveAndUnlock();
+				}
 			}
 			return 'reload';
 		}
@@ -465,7 +469,9 @@
 			// validate dstTheme
 			if (empty($_POST['dstTheme'])) {
 				$errors[] = __('destination-theme-name-required');
-			} elseif (strpbrk($_POST['dstTheme'], "\\/?%*:|\"<>") !== false) {
+			} elseif (strpbrk($_POST['dstTheme'], "\\/?%*:|\"<>") !== false || $_POST['dstTheme'][0] === '.' || preg_match('/[\x00-\x1f\x7f]/', $_POST['dstTheme'])) {
+				// A leading dot would allow "." and ".."
+				// (the data directory itself) as target.
 				$errors[] = __('destination-theme-not-valid');
 			} elseif (in_array($_POST['dstTheme'], $themes)) {
 				$errors[] = __('destination-theme-name-already-taken');
