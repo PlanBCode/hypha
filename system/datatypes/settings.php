@@ -79,6 +79,12 @@
 		<th><?=__('interface-language')?>:</th>
 		<td><select name="settingsUiLang" id="settingsUiLang"><?php foreach($uiLangList as $lang) echo '<option value="'.$lang.'"'.($account->getAttribute('language')==$lang?' selected':'').'>'.$isoLangList[$lang].'</option>'; ?></select></td>
 	</tr>
+<?php if ($account->getAttribute('id') === $hyphaUser->getAttribute('id')) { ?>
+	<tr>
+		<th><?=__('current-password')?>:</th>
+		<td colspan="3"><input name="settingsCurrentPassword" id="settingsCurrentPassword" type="password" size="20" autocomplete="current-password" /></td>
+	</tr>
+<?php } ?>
 </table>
 <?php
 				$form = $this->html->createForm(ob_get_clean());
@@ -711,7 +717,22 @@
 			global $hyphaUser, $hyphaXml;
 			if (isAdmin() || $hyphaUser->getAttribute('username') == $account) {
 				$hyphaXml->lockAndReload();
-				$error = hypha_setUser(hypha_getUserByName($account), $_POST['settingsUsername'], $_POST['settingsPassword1'], $_POST['settingsFullname'], $_POST['settingsEmail'], $_POST['settingsUiLang'], '');
+				$user = hypha_getUserByName($account);
+				// Changing the password or e-mail address of one's
+				// own account needs the current password, so an
+				// unattended browser or a stolen session cannot be
+				// turned into permanent control of the account.
+				$ownAccount = $user && $user->getAttribute('id') === $hyphaUser->getAttribute('id');
+				$newPassword = isset($_POST['settingsPassword1']) ? (string)$_POST['settingsPassword1'] : '';
+				$newEmail = isset($_POST['settingsEmail']) ? (string)$_POST['settingsEmail'] : '';
+				$changesCredentials = $newPassword !== '' || ($newEmail !== '' && $user && $newEmail !== $user->getAttribute('email'));
+				$currentPassword = isset($_POST['settingsCurrentPassword']) ? (string)$_POST['settingsCurrentPassword'] : '';
+				if ($ownAccount && $changesCredentials && !verifyPassword($currentPassword, $user->getAttribute('password'))) {
+					$hyphaXml->unlock();
+					notify('error', __('error-save-settings').' '.__('error-current-password'));
+					return 'reload';
+				}
+				$error = hypha_setUser($user, $_POST['settingsUsername'], $_POST['settingsPassword1'], $_POST['settingsFullname'], $_POST['settingsEmail'], $_POST['settingsUiLang'], '');
 				$hyphaXml->saveAndUnlock();
 				if ($error) notify('error', __('error-save-settings').' '.$error);
 				else notify('success', __('user-settings-saved'));
