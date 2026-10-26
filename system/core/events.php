@@ -59,6 +59,7 @@
 
 		// Anonymous pages hold no CSRF token; fetch it first.
 		if (hyphaNeedsCsrfToken(form)) {
+			hyphaStopNativeSubmit();
 			hyphaFetchCsrfToken(function() { hypha(url, cmd, arg, form, callback); });
 			return;
 		}
@@ -120,12 +121,20 @@
 		return form && $(form).find('input[name="csrfToken"]').filter(function() { return !this.value; }).length > 0;
 	}
 
+	// When hypha() runs from the onclick of a submit button, the
+	// browser submits the form itself right after it, without the
+	// token that is still being fetched. Cancel that submit.
+	function hyphaStopNativeSubmit() {
+		var event = window.event;
+		if (event && event.type == 'click' && event.preventDefault) event.preventDefault();
+	}
+
 	function hyphaFetchCsrfToken(done) {
 		var request = new XMLHttpRequest();
 		request.onreadystatechange = function() {
 			if (request.readyState != 4) return;
 			var token = request.status == 200 ? JSON.parse(request.responseText).token : '';
-			if (!token) { alert("<?=__('csrf-error')?>"); return; }
+			if (!token) { alert(<?=json_encode(__('csrf-error'))?>); return; }
 			$('input[name="csrfToken"]').val(token);
 			done();
 		};
@@ -135,6 +144,7 @@
 
 	function ajax(url, resultCallback, form = false) {
 		if (hyphaNeedsCsrfToken(form)) {
+			hyphaStopNativeSubmit();
 			hyphaFetchCsrfToken(function() { ajax(url, resultCallback, form); });
 			return;
 		}

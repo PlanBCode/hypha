@@ -134,7 +134,7 @@
 		write through HyphaFile.
 	*/
 	function invalidateCache() {
-		if (!is_dir('data/cache')) return;
+		if (!is_dir('data/cache')) @mkdir('data/cache', 0775, true);
 		$tmp = 'data/cache/generation.' . getmypid();
 		if (@file_put_contents($tmp, bin2hex(random_bytes(8))) !== false)
 			@rename($tmp, 'data/cache/generation');

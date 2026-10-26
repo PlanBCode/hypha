@@ -1004,6 +1004,11 @@
 			// before PHP 7.4).
 			error_clear_last();
 
+			// Only a real change invalidates the page cache:
+			// some code saves on every request without
+			// changing anything (e.g. a mailing list view).
+			$invalidatesCache = HyphaCacheGeneration::affects($this->filename) && @file_get_contents($this->filename) !== $content;
+
 			// Write data to a tempfile first and then
 			// rename the tempfile over the existing file. This:
 			//  - Ensures that file reading can be done
@@ -1060,7 +1065,7 @@
 				throw new RuntimeException('Failed to write to file ' . $this->filename . ', rename from ' . $tmpfilename . ' failed: ' . error_get_last()['message']);
 			}
 
-			if (HyphaCacheGeneration::affects($this->filename))
+			if ($invalidatesCache)
 				HyphaCacheGeneration::bump();
 
 			// Close the old file, but only after the

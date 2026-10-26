@@ -82,6 +82,10 @@
 			return $enabled;
 		}
 
+		static function prefixed($key) {
+			return self::key($key);
+		}
+
 		private static function key($key) {
 			if (self::$prefix === null) self::$prefix = 'hypha:' . md5((string)realpath('data')) . ':';
 			return self::$prefix . $key;
@@ -361,17 +365,32 @@
 			}
 			// Count in memory and add to data/hypha.stats once a minute.
 			HyphaMemoryDb::inc('views:' . $bucket);
+			HyphaMemoryDb::set('views-buckets:' . $bucket, true, 86400 * 30);
 			if (HyphaMemoryDb::lock('stats-flush', 60)) {
-				$count = HyphaMemoryDb::take('views:' . $bucket);
-				if ($count) {
-					require_once 'system/core/database.php';
-					$stats = new HyphaFile('data/hypha.stats');
-					$contents = $stats->lockAndRead();
-					$data = $contents ? json_decode($contents, true) : [];
-					$data[$bucket] = ($data[$bucket] ?? 0) + $count;
-					$stats->writeAndUnlock(json_encode($data));
-				}
+				require_once 'system/core/database.php';
+				$stats = new HyphaFile('data/hypha.stats');
+				$contents = $stats->lockAndRead();
+				$data = self::addPendingViews($contents ? json_decode($contents, true) : []);
+				$stats->writeAndUnlock(json_encode($data));
 			}
+		}
+
+		/*
+			Function: addPendingViews
+			Adds the views counted in memory to the given stats
+			array and resets them. Also called by
+			hypha_incrementStats(), so the counts are written with
+			any write of data/hypha.stats, for every period (bucket)
+			that has views pending.
+		*/
+		static function addPendingViews(array $data) {
+			if (!HyphaMemoryDb::enabled()) return $data;
+			foreach (new APCUIterator('/^' . preg_quote(HyphaMemoryDb::prefixed('views-buckets:'), '/') . '/', APC_ITER_KEY) as $item) {
+				$bucket = substr($item['key'], strlen(HyphaMemoryDb::prefixed('views-buckets:')));
+				$count = HyphaMemoryDb::take('views:' . $bucket);
+				if ($count) $data[$bucket] = ($data[$bucket] ?? 0) + $count;
+			}
+			return $data;
 		}
 
 		static function sendHeaders($state, $created) {

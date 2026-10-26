@@ -797,6 +797,8 @@
 			$stats[$timestamp] = 0;
 
 		$stats[$timestamp]++;
+		// Add the views of cached pages counted in memory.
+		$stats = HyphaPageCache::addPendingViews($stats);
 		$O_O->data->stats->writeAndUnlock(json_encode($stats));
 	}
 
