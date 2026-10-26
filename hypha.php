@@ -426,7 +426,9 @@
 
 	session_start();
 
-	$DEBUG = true;
+	// as in index.php: only show errors when a file named DEBUG exists, never on a production site
+	$DEBUG = file_exists('DEBUG');
+	ini_set('display_errors', $DEBUG ? '1' : '0');
 	error_reporting($DEBUG ? E_ALL ^ E_NOTICE : NULL);
 	$errorMessage = '';
 
@@ -443,8 +445,16 @@
 	// push (encoded) file if we get a file request
 	$file = isset($_GET['file']) ? $_GET['file'] : false;
 	if ($file) {
+		// Only a site that serves files to other hypha installs (such as www.hypha.net) needs this; it
+		// is marked by a file named FILESERVER next to this script. Elsewhere the index would tell
+		// anyone which modules a site runs and when they were last changed.
+		if (!file_exists('FILESERVER')) {
+			http_response_code(404);
+			exit;
+		}
 		if ($file=='index') echo serialize(index());
-		else if (isAllowedFile($file)) if (file_exists($file)) echo base64_encode(gzencode(file_get_contents($file), 9));
+		// isAllowedFile() strips a leading '/' or '../' from the folder, so refuse those to stay inside this hypha
+		else if (is_string($file) && !preg_match('#^/|(^|/)\.\.(/|$)#', $file) && isAllowedFile($file)) if (file_exists($file)) echo base64_encode(gzencode(file_get_contents($file), 9));
 		exit;
 	}
 
