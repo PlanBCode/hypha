@@ -102,49 +102,6 @@
 	}
 
 	/*
-		Function: obfuscateEmail
-		Adds spambot protection for published email addresses.
-		This is done by inserting the email addresses in reverse character order, and fixing this client-sided with javascript and a CSS fallback mechanism.
-
-		Parameters:
-			$html - HTMLDocument instance
-	*/
-//	registerPostProcessingFunction('obfuscateEmail');
-	function obfuscateEmail($html) {
-		// reverse the character order of all email addresses in href attributes
-		$body = $html->findOneXPath('body');
-		setInnerHtml($body, preg_replace('/[\'|\"]mailto:([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4})[\'|\"]/ie', "'mailto:'.strrev('$1')", getInnerHtml($body)));
-
-		// replace all email addresses by a span element containing the address in reverse order
-		setInnerHtml($body, preg_replace('/\b([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4})\b/ie', "'<span class=\"obfuscate\">'.strrev('$1').'</span>'", getInnerHtml($body)));
-
-		// add a javascript function to undo these operations on the client side
-		$js = <<<'EOD'
-	function unobfuscateEmail(elem) {
-		// reverse visible name
-		elem.innerHTML = elem.innerHTML.replace(/(<span class="obfuscate">(.*?)<\/span>)/g, function(str, span, email) {return email.split('').reverse().join('')});
-		// for some reason within the textarea the tags get parsed with character encoding. Is WYMeditor doing this? Anyway, let's do the previous statement again again
-		elem.innerHTML = elem.innerHTML.replace(/(&lt;span class="obfuscate"&gt;(.*?)&lt;\/span&gt;)/g, function(str, span, email) {return email.split('').reverse().join('')});
-		// reverse the href mailto attribute
-		elem.innerHTML = elem.innerHTML.replace(/([\'|\"]mailto:([A-Za-z0-9\._%\+-@]+?)[\'|\"])/g, function(str, href, email) {return 'mailto:'+email.split('').reverse().join('')});
-	}
-EOD;
-		$html->writeScript($js);
-
-		// invoke the unobfuscateEmail routine only after the document is fully loaded. To avoid jQuery onload when it's not strictly needed we deploy a <script> element at the end of the HTML document
-		$html->writeToElement('main', '<script>unobfuscateEmail(document.body);</script>');
-
-		// add CSS fallback in case javascript is not available
-		$css = <<<'END'
-.obfuscate {
-	unicode-bidi: bidi-override;
-	direction: rtl;
-}
-END;
-		$html->writeStyle($css);
-	}
-
-	/*
 		Title: Digest
 
 		On keeping everyone up to date.
