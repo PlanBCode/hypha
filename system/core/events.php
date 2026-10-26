@@ -309,7 +309,9 @@
 		// Command requests a reload
 		if ($result === 'reload') {
 			preserveDumps();
-			$url = preserveNotifications($_SERVER['REQUEST_URI']);
+			// REQUEST_URI is a path on this site. Collapse leading slashes and backslashes, because a
+			// browser reads a Location starting with '//' or '/\' as an address on another host.
+			$url = preserveNotifications('/' . ltrim($_SERVER['REQUEST_URI'], '/\\'));
 			header('Location: ' . $url);
 			exit;
 		}
