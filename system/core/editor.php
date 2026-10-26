@@ -143,9 +143,13 @@
 				// align Containers/Styles dropdown menu next to the tools box
 				jQuery(wym._box).find(".wym_area_top .wym_section").css("float", "left").css("margin-right", "5px");
 
-				// set focus to the first editor
+				// set focus to the first editor; wait until WYMeditor has finished its
+				// initialisation, as the focus handler of the editor body needs
+				// wym.undoRedo, which is only created after postInit
 				if (!this.isFocusSet) {
-					$(wym._iframe).focus();
+					jQuery(wym.element).one(WYMeditor.EVENTS.postIframeInitialization, function() {
+						$(wym._iframe).trigger('focus');
+					});
 					this.isFocusSet = true;
 				}
 
