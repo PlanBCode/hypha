@@ -43,6 +43,9 @@
 		/** @var array */
 		private $args = [];
 
+		/** @var null|string */
+		private $configuredRootUrl = null;
+
 		/**
 		 * @param null|string $rootUrlPath If it is not given it will be determined.
 		 * @param null|string $relativeUrlPath If it is not given it will be determined.
@@ -127,7 +130,48 @@
 			];
 		}
 
+		/**
+		 * Sets the absolute root url configured by the site
+		 * operator (e.g. "https://www.example.org/"). When set,
+		 * getRootUrl() returns it instead of building the url from
+		 * the Host header, which is chosen by the client and
+		 * would otherwise end up in links that are mailed to
+		 * users (e.g. account recovery and invitations).
+		 *
+		 * @param null|string $url Empty or null to not use one.
+		 */
+		/**
+		 * Checks and normalises the address of a site as entered
+		 * by an administrator, e.g. "https://www.example.org" or
+		 * "https://example.org/hypha/". Only http(s) with a host,
+		 * an optional port and an optional path is accepted; no
+		 * user, query or fragment. The result ends in a slash.
+		 *
+		 * @param string $url
+		 * @return string|false|null The normalised url, null for
+		 *         an empty value, false when it is not valid.
+		 */
+		public static function normaliseRootUrl($url) {
+			$url = trim((string)$url);
+			if ($url === '')
+				return null;
+			if (!preg_match('#^https?://[^/?\#@\s]+(/[^?\#\s]*)?$#i', $url) || !filter_var($url, FILTER_VALIDATE_URL))
+				return false;
+			return rtrim($url, '/') . '/';
+		}
+
+		public function setConfiguredRootUrl($url) {
+			if (!$url) {
+				$this->configuredRootUrl = null;
+				return;
+			}
+			$this->configuredRootUrl = rtrim($url, '/') . '/';
+		}
+
 		public function getRootUrl() {
+			if (null !== $this->configuredRootUrl)
+				return $this->configuredRootUrl;
+
 			$scheme = $this->getScheme();
 			$host = $this->getHost();
 
@@ -154,7 +198,16 @@
 		}
 
 		public function getHost() {
-			return $_SERVER['HTTP_HOST'];
+			// The Host header is chosen by the client. Accept
+			// only a syntactically valid host name or IP
+			// address with an optional port, so no markup or
+			// path can end up in generated urls. Note that this
+			// does not stop another, valid host name; configure
+			// baseUrl in hypha.xml for that.
+			$host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
+			if (preg_match('/^(?:[A-Za-z0-9](?:[A-Za-z0-9.-]*[A-Za-z0-9])?|\[[0-9A-Fa-f:.]+\])(?::[0-9]{1,5})?$/D', $host))
+				return $host;
+			return $_SERVER['SERVER_NAME'];
 		}
 
 		public function getPort() {

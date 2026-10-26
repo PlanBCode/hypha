@@ -177,6 +177,36 @@
 	}
 
 	/*
+		Function: hypha_getBaseUrl
+		returns the configured address of the site (hypha baseUrl
+		attribute), e.g. "https://www.example.org/", or '' when none
+		is set. When set, it is used for absolute links (also in
+		mails) instead of the Host header of the request, and as the
+		canonical address of every page.
+	*/
+	function hypha_getBaseUrl() {
+		global $hyphaXml;
+		return $hyphaXml->documentElement->getAttribute('baseUrl');
+	}
+
+	/*
+		Function: hypha_setBaseUrl
+		sets or removes the hypha baseUrl attribute
+
+		Parameters:
+		$url - normalised address, see HyphaRequest::normaliseRootUrl(),
+		       or null to remove it
+	*/
+	function hypha_setBaseUrl($url) {
+		global $hyphaXml;
+		$hyphaXml->requireLock();
+		if ($url)
+			$hyphaXml->documentElement->setAttribute('baseUrl', $url);
+		else
+			$hyphaXml->documentElement->removeAttribute('baseUrl');
+	}
+
+	/*
 		Function: hypha_getDigestInterval
 		returns hypha digestInterval attribute
 	*/
