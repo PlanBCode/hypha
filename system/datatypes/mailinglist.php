@@ -1113,6 +1113,11 @@ EOF;
 	 * @return string|null
 	 */
 	protected function mailingSendAction(HyphaRequest $request) {
+		if (!isUser()) {
+			notify('error', __('login-to-perform-action'));
+			return null;
+		}
+
 		if (!$this->hasSender()) {
 			notify('error', __('ml-no-sender'));
 			return null;
@@ -1193,6 +1198,11 @@ EOF;
 	}
 
 	protected function mailingSendTestAction(HyphaRequest $request) {
+		if (!isUser()) {
+			notify('error', __('login-to-perform-action'));
+			return null;
+		}
+
 		if (!$this->hasSender()) {
 			notify('error', __('ml-no-sender'));
 			return null;
