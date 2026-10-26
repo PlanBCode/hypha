@@ -378,6 +378,13 @@ EOF;
 
 		$newName = validatePagename($newName);
 		if (isUser()) {
+			// The type is stored and later instantiated as a class,
+			// so only accept the known datatypes.
+			if (!is_string($type) || !array_key_exists($type, hypha_getDataTypes())) {
+				notify('error', __('invalid-argument'));
+				return 'reload';
+			}
+
 			$hyphaXml->lockAndReload();
 			$error = hypha_addPage($type, $language, $newName, $private);
 			$hyphaXml->saveAndUnlock();
