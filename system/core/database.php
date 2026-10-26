@@ -107,7 +107,9 @@
 		/*
 			Function: createFromHtml
 
-			Parses the given HTML string and returns the parsed results.
+			Parses the given HTML string and returns the parsed
+			nodes, imported into this document, as an array of
+			detached nodes.
 		*/
 		public function createFromHtml(string $html) {
 			$class = get_class($this);
@@ -120,7 +122,17 @@
 			$body = $newdoc->documentElement->childNodes->item(0);
 			if ($body->tagName != 'body')
 				throw new InvalidArgumentException("First child of parsed HTML is not body, but {$body->tagName}");
-			return $this->importNode($body, true)->childNodes;
+			// Detach the children from the imported body before
+			// returning them. On PHP 8.2 the libxml nodes of a
+			// detached subtree are freed together with the PHP
+			// object of its root, so returning the childNodes of
+			// the temporary body leaves dangling node objects
+			// ("Couldn't fetch HyphaDomElement").
+			$imported = $this->importNode($body, true);
+			$nodes = [];
+			while ($imported->firstChild)
+				$nodes[] = $imported->removeChild($imported->firstChild);
+			return $nodes;
 		}
 	}
 
@@ -381,7 +393,7 @@
 		 * Append the given iterable of DOMNodes to the current
 		 * node.
 		 */
-		function appendChildren(Traversable|array $nodes) {
+		function appendChildren(iterable $nodes) {
 			// Convert to array, since we might be passed
 			// a DOMNodeList, which is dynamic and behaves
 			// unexpectedly when nodes are moved out of it
@@ -398,7 +410,7 @@
 		 * Append the given iterable of DOMNodes to the current node,
 		 * importing (copying) the nodes into the current document.
 		 */
-		function appendImportedChildren(Traversable|array $nodes) {
+		function appendImportedChildren(iterable $nodes) {
 			foreach ($nodes as $node)
 				$this->appendChild($this->ownerDocument->importNode($node, true));
 		}
