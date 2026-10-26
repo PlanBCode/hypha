@@ -431,7 +431,7 @@
 	$errorMessage = '';
 
 	// sanity check
-	if (strnatcmp(phpversion(),'5.4') < 0) die('Error: you are running php version '.substr(phpversion(),0,strpos(phpversion(), '-')).'; Hypha works only with php version 5.4 and higher');
+	if (strnatcmp(phpversion(),'8.2') < 0) print('Warning: you are running php version '.phpversion().'; Hypha is only tested to work with php version 8.2 and higher.');
 	if (function_exists('apache_get_modules')) {
 		if (!in_array('mod_rewrite', apache_get_modules())) die ('Error: Apache should have mod_rewrite enabled');
 	} else {
