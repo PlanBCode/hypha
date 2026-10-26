@@ -18,7 +18,6 @@
 		- *errors* Switch off php error reporting to the client.
 		- *sanity check* Check if the version of php is compatible with our script.
 		- *code scan* Client data sent through $_GET or $_POST variables are scanned for malicious code injection before continuing to the main script.
-		- *email obfuscation* Email addresses are obfuscated to prevent spambots from harvesting published email addresses. This function is actually registered later on once all core scripts are loaded. See below...
 	*/
 
 	$DEBUG = file_exists('DEBUG');
@@ -62,7 +61,10 @@
 	if (startsWith($hyphaQuery, 'system/assets')) serveFile($hyphaQuery, 'system/assets');
 
 	// jump to installation procedure when hypha.xml is missing
-	if (!is_file('data/hypha.xml')) header('Location: ' . $hyphaUrl . 'hypha.php');
+	if (!is_file('data/hypha.xml')) {
+		header('Location: ' . $hyphaUrl . 'hypha.php');
+		exit;
+	}
 
 	/*
 		Group: Stage 4 - Load website data
@@ -153,9 +155,6 @@
 			appendAsterisk($div, isAdmin());
 		}
 	}
-
-	// obfuscate email addresses to strangers. It's ok to send readable addresses to logged in members. This also prevents conflicts in the editor.
-//	if (!$O_O->isUser()) registerPostProcessingFunction('obfuscateEmail');
 
 	if ($hyphaPage) hypha_setBodyClass($O_O, $hyphaPage);
 	if ($hyphaPage) hypha_setPreviewPanel($O_O, $hyphaPage);
