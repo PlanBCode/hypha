@@ -216,7 +216,7 @@
 			$hyphaXml->lockAndReload();
 			foreach(hypha_getUserList() as $user) if ($user->hasAttribute('key') && $user->getAttribute('key')==$key) {
 				$otheruser = hypha_getUserByName($_POST['settingsUsername']);
-				if ($otheruser && $otheruser != $user) {
+				if ($otheruser && !$otheruser->isSameNode($user)) {
 					notify('error', __('error-user-exists'));
 					$hyphaXml->unlock();
 					return 'reload';
