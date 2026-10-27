@@ -93,7 +93,7 @@
 			$html.= '<span class="prefix">' . __('tags') . ': </span>';
 			$html.= '<div class="selectedTags">';
 			foreach ($selectedTags as $id => $tag) {
-				$html.= '<div class="tagSel_'.htmlspecialchars($id).'" class="tag">';
+				$html.= '<div class="tagSel_'.htmlspecialchars($id).' tag">';
 
 				$tag_index_url = HyphaRequest::HYPHA_SYSTEM_PAGE_TAG_INDEX . '/' . $tag['lang'] . '/' . $tag['label'];
 				$html.= '<a href="'.htmlspecialchars($tag_index_url).'">';
