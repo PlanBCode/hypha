@@ -40,11 +40,19 @@
 		"remind" => "remind",
 		"invited" => "invited",
 		"remove" => "remove",
+		"restore" => "restore",
+		"reincarnate" => "reinstate",
+		"theme" => "theme",
+		"login-as-admin-to-delete" => "log in as administrator to delete this page",
 		"interface-language" => "interface language",
 		"new" => "new",
 		"new-page" => "new page",
 		"new-page-icon" => "<i class=\"fa fa-file\" aria-hidden=\"true\"></i>",
 		"index" => "index",
+		"page-index" => "page index",
+		"image-index" => "image index",
+		"file-index" => "file index",
+		"tag-index-for" => "Index for tag: ",
 		"index-icon" => "<i class=\"fa fa-list\" aria-hidden=\"true\"></i>",
 		"settings" => "settings",
 		"settings-icon" => "<i class=\"fa fa-cog\" aria-hidden=\"true\"></i>",
@@ -119,6 +127,7 @@
 		"translated-page" => " translated the following page: ",
 		"reverted-page" => " reverted the following page to an older version: ",
 		"granted-admin-rights-to" => " granted admin rights to ",
+		"took-admin-rights-from" => " took admin rights from ",
 		"has-invited" => " sent an invitation to join the project to ",
 		"invites-to-join" => " invites you to join the project ",
 		"invitation" => "Invitation to join the project ",
@@ -220,6 +229,7 @@
 		"enter-tag-description" => "Enter short description (required)",
 		"login-to-perform-action" => "you need to be logged on in order to perform this action",
 		"page-successfully-updated" => "Page successfully updated",
+		"page-successfully-deleted" => "Page successfully deleted",
 		'cannot-edit-default-theme-explanation' => 'The default theme cannot be edited. At the <a href="[[link]]">theme selection page</a>, the default theme can be copied and activated, that copy can be edited.',
 
 		// settings copy theme
@@ -237,6 +247,7 @@
 		'preview-theme' => 'preview theme',
 		'apply-preview-theme' => 'apply preview theme',
 		'cancel-preview-theme' => 'cancel preview',
+		'preview-theme-set-successful' => 'preview theme is set',
 
 		// textpage
 		"datatype.name.textpage" => 'web page',
@@ -310,6 +321,20 @@
 
 		// festival - other
 		"festival-participant-status" => "status",
+		"signup" => "sign up",
+		"pay" => "pay",
+
+		// festival - table headings
+		"amount" => "amount",
+		"attending" => "attending",
+		"category" => "category",
+		"count" => "count",
+		"location" => "location",
+		"notes" => "notes",
+		"phone" => "phone",
+		"price" => "price",
+		"time" => "time",
+		"website" => "website",
 
 		// mailing list
 		"datatype.name.mailinglist" => "mailing list",

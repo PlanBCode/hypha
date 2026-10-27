@@ -1258,7 +1258,7 @@ EOF;
 			} else if ($allow_user && $this->O_O->isUser()) {
 				return $this->O_O->getUser();
 			}
-			notify('error', __('invalid-or-no-key'));
+			notify('error', __('festival-invalid-or-no-key'));
 			return false;
 		}
 
