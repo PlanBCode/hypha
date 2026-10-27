@@ -27,6 +27,16 @@
 	if (strnatcmp(phpversion(),'5.4') < 0) die('Error: you are running php version '.substr(phpversion(),0,strpos(phpversion(), '-')).'; Hypha works only with php version 5.4 and higher');
 	if (function_exists('apache_get_modules') && !in_array('mod_rewrite', apache_get_modules())) die ('Error: Apache should have mod_rewrite enabled');
 
+	// Posted text ends up in hypha.xml and the page files. XML 1.0 does not allow control characters other than tab,
+	// line feed and carriage return, nor U+FFFE and U+FFFF, nor invalid UTF-8: one such character in a comment or a
+	// full name makes the file unreadable, and with it the article or the whole site. Remove them from every posted
+	// value before anything reads it (a vertical tab comes along when text is pasted from a word processor).
+	array_walk_recursive($_POST, function (&$value) {
+		if (!is_string($value)) return;
+		if (function_exists('mb_scrub')) $value = mb_scrub($value, 'UTF-8');
+		$value = str_replace(["\xEF\xBF\xBE", "\xEF\xBF\xBF"], '', preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F]/', '', $value));
+	});
+
 	/*
 		Group: Stage 2 - Build hypha script
 		Additional scripts and data are included.
