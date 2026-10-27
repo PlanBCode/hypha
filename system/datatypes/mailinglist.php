@@ -512,7 +512,9 @@ class mailinglist extends HyphaDatatypePage {
 		}
 
 		try {
-			$xpath = './/' . self::FIELD_NAME_ADDRESS . '[@' . self::FIELD_NAME_EMAIL . '=' . xpath_encode($email) . ']';
+			// An address that unsubscribed and subscribed again has an
+			// element per subscription, so only look at the confirmed one.
+			$xpath = './/' . self::FIELD_NAME_ADDRESS . '[@' . self::FIELD_NAME_EMAIL . '=' . xpath_encode($email) . ' and @' . self::FIELD_NAME_STATUS . '="' . self::ADDRESS_STATUS_CONFIRMED . '"]';
 			$this->unsubscribe($xpath);
 		} catch (\Exception $e) {
 			notify('error', $e->getMessage());
