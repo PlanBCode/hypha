@@ -146,7 +146,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	 * @return array|string|null
 	 */
 	public function process(HyphaRequest $request) {
-		$this->html->writeToElement('pagename', $this->getTitle() . ' ' . asterisk($this->privateFlag));
+		$this->html->writeToElement('pagename', htmlspecialchars($this->getTitle()) . ' ' . asterisk($this->privateFlag));
 
 		$this->ensureStructure();
 
