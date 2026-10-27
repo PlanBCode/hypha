@@ -98,7 +98,24 @@
 		// bit tricky to implement. See
 		// https://github.com/PlanBCode/hypha/pull/346#issuecomment-703561118
 		// https://stackoverflow.com/q/20806154/740048
-		return '=?UTF-8?B?'.base64_encode($subject).'?=';
+		//
+		// RFC 2047 allows at most 75 characters per encoded
+		// word, so a longer subject is split into several,
+		// each of at most 45 bytes (60 characters of base64),
+		// on folded lines. A character is never split.
+		$chars = preg_split('//u', $subject, -1, PREG_SPLIT_NO_EMPTY);
+		if ($chars === false) return '=?UTF-8?B?'.base64_encode($subject).'?=';
+		$words = [];
+		$chunk = '';
+		foreach ($chars as $char) {
+			if ($chunk !== '' && strlen($chunk . $char) > 45) {
+				$words[] = '=?UTF-8?B?'.base64_encode($chunk).'?=';
+				$chunk = '';
+			}
+			$chunk .= $char;
+		}
+		$words[] = '=?UTF-8?B?'.base64_encode($chunk).'?=';
+		return implode("\r\n ", $words);
 	}
 
 	/*
