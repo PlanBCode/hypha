@@ -808,9 +808,14 @@
 		}
 		$bytesize = $end - $start;
 		header('Content-Type: ' . getMimeType($filename));
-		header('Content-Length: ' . (string)($bytesize));
-		header('Content-Range: bytes ' . $start . '-' . $end. '/' . $filesize);
 		header('Accept-Ranges: bytes');
+		// Content-Range only on an answer to a Range request: Apache
+		// (mod_deflate) does not compress an answer that has one, so
+		// every theme file and script went out uncompressed.
+		if ($start !== 0 || $end !== $filesize) {
+			header('Content-Length: ' . (string)($bytesize));
+			header('Content-Range: bytes ' . $start . '-' . $end. '/' . $filesize);
+		}
 
 		// Allow caching of the response (overriding default PHP
 		// headers that disallow all caching).
