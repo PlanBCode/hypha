@@ -446,7 +446,7 @@ class mailinglist extends HyphaDatatypePage {
 		$code = isset($_GET['code']) ? $_GET['code'] : null;
 		if (null == $code) {
 			notify('error', __('missing-arguments'));
-			return 'reload';
+			return ['redirect', $this->path()];
 		}
 
 		$this->xml->lockAndReload();
@@ -457,7 +457,7 @@ class mailinglist extends HyphaDatatypePage {
 		if (!$address instanceof HyphaDomElement) {
 			$this->xml->unlock();
 			notify('error', __('invalid-code'));
-			return 'reload';
+			return ['redirect', $this->path()];
 		}
 
 		if ($address->getAttribute(self::FIELD_NAME_STATUS) !== self::ADDRESS_STATUS_CONFIRMED) {
@@ -476,7 +476,7 @@ class mailinglist extends HyphaDatatypePage {
 		$code = isset($_GET['code']) ? $_GET['code'] : null;
 		if (null == $code) {
 			notify('error', __('missing-arguments'));
-			return 'reload';
+			return ['redirect', $this->path()];
 		}
 
 		try {
@@ -485,7 +485,7 @@ class mailinglist extends HyphaDatatypePage {
 		} catch (\Exception $e) {
 			$msg = $e->getCode() === 404 ? __('invalid-code') : $e->getMessage();
 			notify('error', $msg);
-			return 'reload';
+			return ['redirect', $this->path()];
 		}
 
 		notify('success', ucfirst(__('ml-successfully-unsubscribed')));
@@ -508,7 +508,7 @@ class mailinglist extends HyphaDatatypePage {
 		$email = isset($_GET['email']) ? $_GET['email'] : null;
 		if (null == $email) {
 			notify('error', __('missing-arguments'));
-			return 'reload';
+			return ['redirect', $this->path(self::PATH_ADDRESSES)];
 		}
 
 		try {
@@ -516,7 +516,7 @@ class mailinglist extends HyphaDatatypePage {
 			$this->unsubscribe($xpath);
 		} catch (\Exception $e) {
 			notify('error', $e->getMessage());
-			return 'reload';
+			return ['redirect', $this->path(self::PATH_ADDRESSES)];
 		}
 
 		notify('success', ucfirst(__('ml-successfully-unsubscribed-by-admin', ['email' => $email])));
@@ -566,7 +566,7 @@ class mailinglist extends HyphaDatatypePage {
 		$email = isset($_GET['email']) ? $_GET['email'] : null;
 		if (null == $email) {
 			notify('error', __('missing-arguments'));
-			return 'reload';
+			return ['redirect', $this->path(self::PATH_ADDRESSES)];
 		}
 
 		$this->xml->lockAndReload();
@@ -577,13 +577,13 @@ class mailinglist extends HyphaDatatypePage {
 		if (!$address instanceof HyphaDomElement) {
 			$this->xml->unlock();
 			notify('error', __('not-found'));
-			return 'reload';
+			return ['redirect', $this->path(self::PATH_ADDRESSES)];
 		}
 
 		if ($address->getAttribute(self::FIELD_NAME_STATUS) !== self::ADDRESS_STATUS_PENDING) {
 			$this->xml->unlock();
 			notify('error', __('ml-no-reminder-address-no-longer-pending'));
-			return 'reload';
+			return ['redirect', $this->path(self::PATH_ADDRESSES)];
 		}
 
 		if ($address->getAttribute(self::FIELD_NAME_REMINDED) != true) {
@@ -615,7 +615,7 @@ class mailinglist extends HyphaDatatypePage {
 		$email = isset($_GET['email']) ? $_GET['email'] : null;
 		if (null == $email) {
 			notify('error', __('missing-arguments'));
-			return 'reload';
+			return ['redirect', $this->path(self::PATH_ADDRESSES)];
 		}
 
 		$this->xml->lockAndReload();
@@ -626,13 +626,13 @@ class mailinglist extends HyphaDatatypePage {
 		if (!$address instanceof HyphaDomElement) {
 			$this->xml->unlock();
 			notify('error', __('not-found'));
-			return 'reload';
+			return ['redirect', $this->path(self::PATH_ADDRESSES)];
 		}
 
 		if ($address->getAttribute(self::FIELD_NAME_STATUS) !== self::ADDRESS_STATUS_PENDING) {
 			$this->xml->unlock();
 			notify('error', __('ml-cannot-delete-address-no-longer-pending'));
-			return 'reload';
+			return ['redirect', $this->path(self::PATH_ADDRESSES)];
 		}
 
 		/** @var HyphaDomElement $addressesContainer */
@@ -857,7 +857,7 @@ EOF;
 	protected function mailingNewView(HyphaRequest $request) {
 		if (!isUser()) {
 			notify('error', __('login-to-perform-action'));
-			return 'reload';
+			return ['redirect', $this->path()];
 		}
 
 		// create form
@@ -926,7 +926,7 @@ EOF;
 		if (!isUser()) {
 			notify('error', __('login-to-perform-action'));
 
-			return 'reload';
+			return ['redirect', $this->path()];
 		}
 
 		$mailingId = $request->getArg(1);
@@ -940,7 +940,7 @@ EOF;
 
 		if (self::MAILING_STATUS_DRAFT != $mailing->getAttribute('status')) {
 			notify('error', __('unable-to-edit'));
-			return 'reload';
+			return ['redirect', $this->path(self::PATH_MAILS_VIEW_ID, ['id' => $mailingId])];
 		}
 
 		// create form
