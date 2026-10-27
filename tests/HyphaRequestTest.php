@@ -17,7 +17,7 @@ class HyphaRequestTest {
 		foreach ($data as $item) {
 			$relativeUrlPath = $item['relativeUrlPath'];
 			$request = new HyphaRequest(null, $relativeUrlPath);
-			$this->assertSame($request->getRelativeUrlPath(false), $relativeUrlPath, $relativeUrlPath, 'relativeUrlPath');
+			$this->assertSame($request->getRelativeUrlPath(false), $item['decoded'] ?? $relativeUrlPath, $relativeUrlPath, 'relativeUrlPath');
 			$this->assertSame($request->isSystemPage(), $item['system'], $relativeUrlPath, 'isSystem');
 			$this->assertSame($request->getLanguage(), $item['lang'], $relativeUrlPath, 'getLanguage');
 			$this->assertSame($request->getPageName(), $item['name'], $relativeUrlPath, 'getPageName');
@@ -138,6 +138,26 @@ class HyphaRequestTest {
 				'args' => [],
 				'parts' => ['index'],
 				'partsInclude' => ['en', 'index'],
+			],
+			[
+				'relativeUrlPath' => 'nl/Caf%C3%A9_de_Kroon/edit',
+				'decoded' => 'nl/Café_de_Kroon/edit',
+				'system' => false,
+				'lang' => 'nl',
+				'name' => 'Café_de_Kroon',
+				'args' => ['edit'],
+				'parts' => ['Café_de_Kroon', 'edit'],
+				'partsInclude' => ['nl', 'Café_de_Kroon', 'edit'],
+			],
+			[
+				'relativeUrlPath' => 'tag/nl/Cultuur%20%26%20C%2B%2B',
+				'decoded' => 'tag/nl/Cultuur & C++',
+				'system' => true,
+				'lang' => null,
+				'name' => null,
+				'args' => ['nl', 'Cultuur & C++'],
+				'parts' => ['tag', 'nl', 'Cultuur & C++'],
+				'partsInclude' => ['tag', 'nl', 'Cultuur & C++'],
 			],
 		];
 	}
