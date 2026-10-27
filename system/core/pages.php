@@ -74,6 +74,21 @@
 			writeToDigest($hyphaUser->getAttribute('fullname').__('deleted-page').$this->language.'/'.$this->pagename, 'page delete');
 		}
 
+		/*
+		 * Finds the page list node of this page again in hypha.xml, which
+		 * must have been reloaded (and locked) just before. The node is
+		 * looked up by its id, since another request may have renamed the
+		 * page since this request started. Returns false, and keeps the old
+		 * node, when the page was deleted in the meanwhile.
+		 */
+		protected function reloadPageListNode() {
+			$node = hypha_getPageById($this->pageListNode->getAttribute('id'));
+			if (!$node)
+				return false;
+			$this->replacePageListNode($node);
+			return true;
+		}
+
 		protected function replacePageListNode(HyphaDomElement $node) {
 			global $O_O;
 			$this->pageListNode = $node;

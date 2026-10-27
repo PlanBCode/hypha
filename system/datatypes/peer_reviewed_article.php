@@ -255,10 +255,13 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		if (!$this->privateFlag) {
 			global $hyphaXml;
 			$hyphaXml->lockAndReload();
-			$this->replacePageListNode(hypha_getPage($this->language, $this->pagename));
-			hypha_setPage($this->pageListNode, $this->language, $this->pagename, 'on');
-			$this->privateFlag = true;
-			$hyphaXml->saveAndUnlock();
+			if ($this->reloadPageListNode()) {
+				hypha_setPage($this->pageListNode, $this->language, $this->pagename, 'on');
+				$this->privateFlag = true;
+				$hyphaXml->saveAndUnlock();
+			} else {
+				$hyphaXml->unlock();
+			}
 		}
 
 		$user = $this->O_O->getUser();
@@ -1268,10 +1271,13 @@ EOF;
 		if ($newStatus === self::STATUS_PUBLISHED && $this->privateFlag) {
 			global $hyphaXml;
 			$hyphaXml->lockAndReload();
-			$this->replacePageListNode(hypha_getPage($this->language, $this->pagename));
-			hypha_setPage($this->pageListNode, $this->language, $this->pagename, 'off');
-			$this->privateFlag = false;
-			$hyphaXml->saveAndUnlock();
+			if ($this->reloadPageListNode()) {
+				hypha_setPage($this->pageListNode, $this->language, $this->pagename, 'off');
+				$this->privateFlag = false;
+				$hyphaXml->saveAndUnlock();
+			} else {
+				$hyphaXml->unlock();
+			}
 		}
 
 		$this->sendStatusChangeMail();
