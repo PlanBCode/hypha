@@ -1250,12 +1250,15 @@ EOF;
 	 * @return bool
 	 */
 	protected function updateToNewStatus($newStatus) {
+		// Check the change under the lock: another request may have
+		// changed the status since this request read the article.
+		$this->xml->lockAndReload();
 		$currentStatus = $this->getStatus();
 		if (!isset($this->statusMtx[$currentStatus]) || !isset($this->statusMtx[$currentStatus][$newStatus])) {
+			$this->xml->unlock();
 			return false;
 		}
 
-		$this->xml->lockAndReload();
 		/** @var HyphaDomElement $article */
 		$article = $this->xml->findOneXPath(self::FIELD_NAME_ARTICLE);
 		$article->setAttribute(self::FIELD_NAME_STATUS, $newStatus);
