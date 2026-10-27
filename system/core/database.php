@@ -570,8 +570,9 @@
 				krsort($versionList);
 				$content = getInnerHtml(reset($versionList));
 				if ($version) {
-					if ($version<0) for ($i=$version;$i<0;$i++) $content = patch($content, next($versionList)->getText());
-					else while(key($versionList)>$version) $content = patch($content, next($versionList)->getText());
+					// Stop at the oldest version: an unknown version (from a request) must not run past the list.
+					if ($version<0) for ($i=$version;$i<0 && ($older = next($versionList));$i++) $content = patch($content, $older->getText());
+					else while(key($versionList)>$version && ($older = next($versionList))) $content = patch($content, $older->getText());
 				}
 				return $content;
 			}
