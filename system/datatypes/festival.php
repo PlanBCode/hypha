@@ -984,7 +984,7 @@ EOF;
 				}
 
 				// output date header
-				$html.= '<br/><br/><h1>'.$day->getAttribute(self::ATTR_DAY_DISPLAY).'</h1><br/>';
+				$html.= '<br/><br/><h1>'.htmlspecialchars($day->getAttribute(self::ATTR_DAY_DISPLAY)).'</h1><br/>';
 				$html.= "<table class=\"festivalTimetable\">";
 
 				// output row of invisible images to force a more or less regular time grid
@@ -1041,7 +1041,7 @@ EOF;
 						// output events
 						$id = 'a'.$d.'_'.$l;
 						$html.= '<tr class="'.($line%2 ? 'tableRowOdd' : 'tableRowEven').'">';
-						$html.= '<td id="'.$id.'" class="hover tableRowHeading '.($line%2 ? 'tableRowHeadingOdd' : 'tableRowHeadingEven').'" >'.$location->getAttribute(self::ATTR_LOCATION_DISPLAY).'</td>';
+						$html.= '<td id="'.$id.'" class="hover tableRowHeading '.($line%2 ? 'tableRowHeadingOdd' : 'tableRowHeadingEven').'" >'.htmlspecialchars($location->getAttribute(self::ATTR_LOCATION_DISPLAY)).'</td>';
 						$t = 0;
 						for ($r=0; $r<count($row); $r++) {
 							$timeslot = $row[$r];
@@ -1050,7 +1050,7 @@ EOF;
 							$lineup_url = $this->constructFullPath($this->pagename . '/lineup');
 							$html.= '<td id="'.$id.'" class="hover tableAct '.($line%2 ? 'tableRowOddAct' : 'tableRowEvenAct').'" colspan="'.($timeslot[1] - $timeslot[0]).'"><a href="'.htmlspecialchars($lineup_url).'#'.htmlspecialchars($timeslot[3]).'">'.htmlspecialchars($timeslot[2]);
 							if ($timeslot[2] && $timeslot[4]) $html.= ' - ';
-							$html.= '<i>'.$timeslot[4].'</i></a></td>';
+							$html.= '<i>'.htmlspecialchars($timeslot[4]).'</i></a></td>';
 							$t = htmlspecialchars($timeslot[1]);
 						}
 						if ($this->timetocols($daybegin, $dayend) - $t) $html.= '<td class="'.($line%2 ? 'tableRowOdd' : 'tableRowEven').'" colspan="'.($this->timetocols($daybegin, $dayend) - $t).'"></td>';
