@@ -145,12 +145,12 @@
 		any of the pages.
 	*/
 	function hypha_getUsedContentLanguages() {
+		global $hyphaXml;
+		// One query for all pages instead of one per page (#675).
 		$langList = array();
-		foreach(hypha_getPageList() as $_page) {
-			foreach($_page->findXPath('language') as $_lang)
-				if (!in_array($_lang->getAttribute('id'), $langList))
-					$langList[] = $_lang->getAttribute('id');
-		}
+		foreach($hyphaXml->findXPath('pageList/page/language') as $_lang)
+			if (!in_array($_lang->getAttribute('id'), $langList))
+				$langList[] = $_lang->getAttribute('id');
 		return $langList;
 	}
 
@@ -544,12 +544,24 @@
 	}
 
 	function hypha_getPage($language, $name) {
-		foreach(hypha_getPageList() as $page) {
-			foreach($page->findXPath('language') as $lang) {
-				if(($lang->getAttribute('id')==$language) && (strtolower($lang->getAttribute('name'))==strtolower($name))) return $page;
-			}
-		}
-		return false;
+		global $hyphaXml;
+		// One query instead of a loop over every page; translate()
+		// lowers A-Z only, as strtolower() does since PHP 8.2 (#675).
+		$upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+		$lower = 'abcdefghijklmnopqrstuvwxyz';
+		$page = $hyphaXml->findXPath('pageList/page[language[@id=' . hypha_xpathLiteral((string)$language) . ' and translate(@name, "' . $upper . '", "' . $lower . '")=' . hypha_xpathLiteral(strtolower((string)$name)) . ']]')->item(0);
+		return $page ?: false;
+	}
+
+	/*
+		Function: hypha_xpathLiteral
+		Returns the string as an XPath 1.0 string literal, also when it
+		holds both kinds of quotes.
+	*/
+	function hypha_xpathLiteral($string) {
+		if (strpos($string, '"') === false) return '"' . $string . '"';
+		if (strpos($string, "'") === false) return "'" . $string . "'";
+		return 'concat("' . str_replace('"', '", \'"\', "', $string) . '")';
 	}
 
 	function hypha_getPageById($id) {

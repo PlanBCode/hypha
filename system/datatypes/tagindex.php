@@ -43,12 +43,16 @@
 		}
 
 		protected function sortPages($pages) {
-			// TODO: This should cache sort dates
-			$compare = function($a, $b) {
-				$aDate = $a->getSortDateTime();
-				$bDate = $b->getSortDateTime();
+			// The sort date of every page once, not in every
+			// comparison (#675).
+			$times = [];
+			foreach ($pages as $page) {
+				$date = $page->getSortDateTime();
 				// TODO Can we better handle null here?
-				return ($bDate ? $bDate->getTimestamp() : 0) - ($aDate ? $aDate->getTimestamp() : 0);
+				$times[spl_object_id($page)] = $date ? $date->getTimestamp() : 0;
+			}
+			$compare = function($a, $b) use ($times) {
+				return $times[spl_object_id($b)] - $times[spl_object_id($a)];
 			};
 			usort($pages, $compare);
 			return $pages;
