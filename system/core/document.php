@@ -360,7 +360,7 @@
 
 			$this->scanForm($this->form_element);
 
-			$csrf = $this->form_element->findOneXPath('input[name=csrfToken]');
+			$csrf = $this->form_element->findOneXPath('input[@name=csrfToken]');
 			if (!$csrf) {
 				$csrf = $this->form_element->createChild('input');
 				$csrf->setAttribute('name', "csrfToken");
@@ -507,7 +507,7 @@
 				// Note this does exact class matching, so
 				// breaks if another class is added (xpath does not
 				// have native proper class matching)
-				$list = $this->form_element->findOneXPath(".//ul[class='form-errors']");
+				$list = $this->form_element->findOneXPath(".//ul[@class='form-errors']");
 				if (!$list) {
 					$list = $this->form_element->ownerDocument->createElement('ul');
 					$list->addClass('form-errors');
