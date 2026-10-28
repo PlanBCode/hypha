@@ -308,9 +308,15 @@ EOF;
 					$return = null;
 					if(!$_FILES['uploadedfile']) $response = __('too-big-file', ['upload-max-filesize' => ini_get('upload_max_filesize')]);
 					else {
-						$ext = strtolower(substr(strrchr($_FILES['uploadedfile']['name'], '.'), 1));
+						// The type is that of the content, not of the name
+						// the browser sends: the file is served with the type
+						// finfo finds in it, so a TIFF called .png would be
+						// sent as image/tiff, which a browser does not show.
+						// The stored name gets the extension of that type.
+						$types = [IMAGETYPE_JPEG => 'jpg', IMAGETYPE_PNG => 'png', IMAGETYPE_GIF => 'gif', IMAGETYPE_BMP => 'bmp'];
 						@$size = getimagesize($_FILES['uploadedfile']['tmp_name']);
-						if(!$size || !in_array($ext, array('jpg','jpeg','png','gif','bmp'))) $response = __('invalid-image-file').ini_get('upload_max_filesize');
+						$ext = $size && array_key_exists($size[2], $types) ? $types[$size[2]] : null;
+						if(!$ext) $response = __('invalid-image-file').ini_get('upload_max_filesize');
 						else {
 							$maxSize = [1120, 800];
 							$needResize = $size[0] > $maxSize[0] || $size[1] > $maxSize[1];
