@@ -572,8 +572,10 @@
 	}
 
 	function hypha_pageGetLanguage($page, $language) {
-		foreach($page->findXPath('language') as $lang) {
-			if($lang->getAttribute('id')==$language) return $lang;
+		// The children themselves instead of an XPath query: the
+		// page index asks this for every page (#675).
+		foreach($page->childNodes as $lang) {
+			if($lang instanceof DOMElement && $lang->tagName == 'language' && $lang->getAttribute('id')==$language) return $lang;
 		}
 		return false;
 	}
