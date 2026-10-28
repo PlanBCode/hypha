@@ -676,6 +676,31 @@
 		$bodyElement->setAttribute('class', implode(' ', array_filter($classes)));
 	}
 
+	/*
+		Function: hypha_setAlternateLinks
+		Tells search engines which pages are translations of the
+		current page: a link rel="alternate" with hreflang for
+		every language of the page, its own included, and
+		x-default for the version in the default language. Only
+		for the page itself, not a view such as edit, and only
+		when the page has more than one language.
+	*/
+	function hypha_setAlternateLinks(RequestContext $O_O, $hyphaPage) {
+		if (!isset($hyphaPage->pageListNode) || $O_O->getRequest()->getArgs())
+			return;
+		$languages = $hyphaPage->pageListNode->findXPath('language');
+		if ($languages->length < 2)
+			return;
+		$rootUrl = $O_O->getRequest()->getRootUrl();
+		foreach ($languages as $language) {
+			$id = $language->getAttribute('id');
+			$url = $rootUrl . $id . '/' . rawurlencode($language->getAttribute('name'));
+			$hyphaPage->html->linkAlternate($url, $id);
+			if ($id === hypha_getDefaultLanguage())
+				$hyphaPage->html->linkAlternate($url, 'x-default');
+		}
+	}
+
 	function hypha_setPreviewPanel($O_O, $hyphaPage) {
 		$previewTheme = $O_O->getPreviewThemeName();
 		if (null !== $previewTheme) {
@@ -812,8 +837,8 @@
 		foreach($langList as $lang) {
 			if ($lang == $language) $index.= '<span class="language selected">'.$lang.'</span>';
 			elseif (!$page || array_key_exists($lang, $pageLangList)) {
-				if ($page) $index.= '<span class="language"><a href="'.$lang.'/'.$pageLangList[$lang].'">'.$lang.'</a></span>';
-				else $index.= '<span class="language"><a href="index/'.$lang.'">'.$lang.'</a></span>';
+				if ($page) $index.= '<span class="language"><a hreflang="'.$lang.'" href="'.$lang.'/'.$pageLangList[$lang].'">'.$lang.'</a></span>';
+				else $index.= '<span class="language"><a hreflang="'.$lang.'" href="index/'.$lang.'">'.$lang.'</a></span>';
 			}
 			else $index.= '<span class="language disabled">'.$lang.'</span>';
 		}
