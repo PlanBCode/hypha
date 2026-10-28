@@ -306,11 +306,27 @@ EOF;
 			case HyphaRequest::HYPHA_SYSTEM_PAGE_UPLOAD:
 				if ($args[0]=='image') {
 					$return = null;
-					if(!$_FILES['uploadedfile']) $response = __('too-big-file', ['upload-max-filesize' => ini_get('upload_max_filesize')]);
+					// An error is answered with a 4xx or 5xx status code
+					// (RFC 9110, section 15), not with 200 OK. The editor
+					// reads the answer in an iframe, whatever the code.
+					// PHP drops a request larger than post_max_size, and
+					// keeps no file larger than upload_max_filesize.
+					$uploadError = empty($_FILES['uploadedfile']) ? UPLOAD_ERR_INI_SIZE : $_FILES['uploadedfile']['error'];
+					if(in_array($uploadError, [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE])) {
+						http_response_code(413); // Content Too Large
+						$response = __('too-big-file', ['upload-max-filesize' => ini_get('upload_max_filesize')]);
+					}
+					else if($uploadError !== UPLOAD_ERR_OK) {
+						http_response_code(400);
+						$response = __('invalid-image-file').ini_get('upload_max_filesize');
+					}
 					else {
 						$ext = strtolower(substr(strrchr($_FILES['uploadedfile']['name'], '.'), 1));
 						@$size = getimagesize($_FILES['uploadedfile']['tmp_name']);
-						if(!$size || !in_array($ext, array('jpg','jpeg','png','gif','bmp'))) $response = __('invalid-image-file').ini_get('upload_max_filesize');
+						if(!$size || !in_array($ext, array('jpg','jpeg','png','gif','bmp'))) {
+							http_response_code(415); // Unsupported Media Type
+							$response = __('invalid-image-file').ini_get('upload_max_filesize');
+						}
 						else {
 							$maxSize = [1120, 800];
 							$needResize = $size[0] > $maxSize[0] || $size[1] > $maxSize[1];
@@ -334,6 +350,7 @@ EOF;
 									'thumbUrl'          => $hyphaUrl . $destinationPaths['img'],        // The URL to be used, it's called a Thumb URL because you may have used $_POST['thumbnailSize'] to resize it. This is used by site_links but not image_upload
 								]];
 							} else {
+								http_response_code(500);
 								$response = __('server-error');
 							}
 						}
@@ -341,6 +358,8 @@ EOF;
 					if ($return === null)
 						$return = [['error' => $response]];
 					echo json_encode($return);
+				} else {
+					http_response_code(404);
 				}
 				exit;
 			case HyphaRequest::HYPHA_SYSTEM_PAGE_CHOOSER:
