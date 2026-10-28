@@ -530,7 +530,7 @@ EOF;
 	*/
 	function addSeoMeta($doc) {
 		global $O_O, $hyphaPage, $hyphaContentLanguage;
-		$head = $doc->findOneXPath('//head');
+		$head = $doc->findXPath('//head')->item(0);
 		if (!$head) return;
 		// Not for the settings, nor for edit and other views of a page.
 		$request = $O_O->getRequest();
@@ -543,13 +543,13 @@ EOF;
 			return rtrim(mb_substr($cut, 0, $space ?: $length), ' ,.;:') . '…';
 		};
 		$siteTitle = hypha_getTitle();
-		$pagename = $doc->findOneXPath('//*[@id="pagename"]');
+		$pagename = $doc->findXPath('//*[@id="pagename"]')->item(0);
 		$title = $pagename ? trim($clean($pagename->textContent), ' *') : '';
 		if ($title === '') $title = $siteTitle;
 		$text = '';
 		if ($hyphaPage instanceof peer_reviewed_article && $hyphaPage->getExcerpt()) $text = $clean($hyphaPage->getExcerpt()->textContent);
 		if ($text === '') {
-			$main = $doc->findOneXPath('//*[@id="main"]');
+			$main = $doc->findXPath('//*[@id="main"]')->item(0);
 			if ($main) {
 				$copy = $main->cloneNode(true);
 				foreach (iterator_to_array($copy->getElementsByTagName('script')) as $script) $script->parentNode->removeChild($script);
@@ -562,7 +562,8 @@ EOF;
 		if ($request->isSystemPage()) $text = $title . ' – ' . $siteTitle . ($text !== '' ? ': ' . $text : '');
 		$description = $short($text !== '' ? $text : $siteTitle, 155);
 		$url = $request->getRootUrl() . $request->getRelativeUrlPath(false);
-		$image = $doc->findOneXPath('//*[@id="main"]//img[@src]');
+		// The first image; findOneXPath() refuses a page with more (#521).
+		$image = $doc->findXPath('//*[@id="main"]//img[@src]')->item(0);
 		$imageUrl = null;
 		if ($image) {
 			$src = $image->getAttribute('src');
