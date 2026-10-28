@@ -206,6 +206,10 @@ class peer_reviewed_article extends HyphaDatatypePage {
 			$featured_image = $excerpt->createChild('img');
 			$featured_image->addClass('featured_image');
 			$featured_image->setAttribute('src', (new HyphaImage($featuredImageSrc))->getUrl());
+			// The title says what the teaser is about; textContent,
+			// since the title of an older article can hold markup (#664).
+			$title = $this->xml->findOneXPath('//' . self::FIELD_NAME_TITLE);
+			$featured_image->setAttribute('alt', $title ? trim($title->textContent) : showPagename($this->pagename));
 		}
 
 		$excerptBody = $excerpt->createChild('div');
@@ -1675,7 +1679,7 @@ EOF;
 			</div>
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
 				<div class="input-wrapper field_type_editor field_name_[[field-name-featured-image]]">
-					<img data-preview-for="[[field-name-featured-image]]">
+					<img data-preview-for="[[field-name-featured-image]]" alt="[[image-preview]]">
 					<strong><label for="[[field-name-featured-image]]">[[featured-image]]</label></strong><br>
 					<input type="file" id="[[field-name-featured-image]]" name="[[field-name-featured-image]]" accept="image/png,image/jpeg,image/jpg,image/gif,image/bmp" />
 				</div>
@@ -1707,6 +1711,7 @@ EOF;
 
 			'featured-image' => __('art-featured-image'),
 			'field-name-featured-image' => self::FIELD_NAME_FEATURED_IMAGE,
+			'image-preview' => __('image-preview'),
 
 			'info-button-excerpt' => makeInfoButton('help-art-excerpt')->getOuterHtml(),
 			'text' => __('art-article'),

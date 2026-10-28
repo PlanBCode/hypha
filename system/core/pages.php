@@ -516,6 +516,22 @@ EOF;
 		$node->setAttribute('href', $url);
 	}
 
+	/*
+		Function: addImageAlts
+		Gives every image without an alt attribute one: the caption of
+		its figure, else an empty alt that marks it as decoration, so
+		screen readers do not read the file name (#664).
+
+		Parameters:
+		element - A DomWrap\Element to process
+	*/
+	function addImageAlts($element) {
+		foreach ($element->findXPath(".//img[not(@alt)]") as $img) {
+			$figure = $img->findOneXPath('ancestor::figure[1]/figcaption');
+			$img->setAttribute('alt', $figure ? trim(preg_replace('/\s+/u', ' ', $figure->textContent)) : '');
+		}
+	}
+
 	/* Like wikify, but accepts a HTML string instead of a document */
 	function wikify_html($html) {
 		global $hyphaHtml;
