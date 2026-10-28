@@ -516,6 +516,20 @@ EOF;
 		$node->setAttribute('href', $url);
 	}
 
+	/*
+		Function: addHeaderHomeLink
+		A link in the header of the site without an address, usually
+		around the logo, leads to the home page. Saving such a link to
+		the site itself left it without one (#669).
+
+		Parameters:
+		element - A DomWrap\Element to process
+	*/
+	function addHeaderHomeLink($element) {
+		foreach ($element->findXPath("//*[@id='header']//a[not(@href) or normalize-space(@href)='']") as $link)
+			$link->setAttribute('href', './');
+	}
+
 	/* Like wikify, but accepts a HTML string instead of a document */
 	function wikify_html($html) {
 		global $hyphaHtml;
