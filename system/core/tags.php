@@ -239,8 +239,8 @@
 
 
 		// Check if tagList exists
-		$tagList = $hyphaXml->findXPath('tagList');
-		if ($tagList->length === 0) {
+		$tagList = $hyphaXml->findOneXPath('tagList');
+		if (!$tagList) {
 			$tagList = $hyphaXml->documentElement->createChild('tagList');
 		}
 
