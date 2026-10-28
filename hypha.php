@@ -344,6 +344,30 @@
 	}
 
 	/*
+		Function: installationNotice
+		Tells that the site is in installation mode because data/hypha.xml is missing, and what to check when an
+		existing site was expected: a data folder with pages but without a readable hypha.xml is a wrong mount or
+		wrong file permissions, and installing then starts a new, empty site.
+	*/
+	function installationNotice() {
+		$existingData = is_dir('data/pages') || is_dir('data/images');
+		ob_start();
+?>
+			<div class="notice<?=$existingData ? ' warning' : ''?>">
+				<h1>Installation mode</h1>
+				<p>Hypha is not installed in this folder yet: the file <code>data/hypha.xml</code>, which holds the settings, users and pages of a site, is missing. Every page of this site therefore leads here.</p>
+<?php if ($existingData) { ?>
+				<p><strong>The folder <code>data/</code> does hold pages or images, so this looks like an existing site whose <code>data/hypha.xml</code> cannot be found or read.</strong> Do not install in that case, because it starts a new, empty site. Check instead that the data folder is in the right place (for a container: the volume) and that the web server may read and write it.</p>
+<?php } else { ?>
+				<p>To set up a new site, log in below with the superuser account from the top of <code>hypha.php</code> and fill out the settings. To move an existing site here, copy its <code>data/</code> folder into this folder instead.</p>
+<?php } ?>
+				<p>Documentation and help: <a href="https://github.com/PlanBCode/hypha">github.com/PlanBCode/hypha</a>.</p>
+			</div>
+<?php
+		return ob_get_clean();
+	}
+
+	/*
 		Function: build
 		produces html page for selecting hypha modules and languages to package in a new hypha.php install script
 	*/
@@ -465,7 +489,7 @@
 	// if hypha.xml is absent present superuser login and present hypha installer
 	// else if maintenance request present superuser login and present hypha system tools
 	// else present hypha builder
-	if (!file_exists('data/hypha.xml')) $html = $login ? install($hyphaServer) : login();
+	if (!file_exists('data/hypha.xml')) $html = installationNotice() . ($login ? install($hyphaServer) : login());
 	else if (key($_GET)=='maintenance') $html = $login ? tools($hyphaServer) : login();
 	else $html = build();
 
@@ -475,15 +499,55 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-		<title id="hypha setup"></title>
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="robots" content="noindex" />
+		<title>Hypha setup</title>
 		<style type="text/css">
 			html body {
-				font-family: sans-serif;
+				font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
 				font-size: 11pt;
-				letter-spacing: 0.07em;
-				text-align: justify;
 				color: #222;
-				line-height: 1.35;
+				line-height: 1.45;
+				background-color: #f4f5f2;
+				margin: 0;
+				padding: 2em 1em;
+			}
+			body > div {
+				max-width: 800px;
+				margin: 0 auto;
+				background-color: #fff;
+				border-radius: 8px;
+				box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+				padding: 1.5em 2em;
+			}
+			h1 {
+				font-size: 1.5em;
+				margin: 0 0 0.5em 0;
+			}
+			code {
+				background-color: #eee;
+				padding: 0 0.25em;
+				border-radius: 3px;
+			}
+			a {
+				color: #2a6a3a;
+			}
+			.notice {
+				border-left: 6px solid #2a6a3a;
+				background-color: #eef5ef;
+				padding: 1em 1.25em;
+				margin-bottom: 1.5em;
+				border-radius: 4px;
+			}
+			.notice.warning {
+				border-left-color: #b35c00;
+				background-color: #fdf1e3;
+			}
+			.notice p {
+				margin: 0.5em 0;
+			}
+			form div, form table {
+				max-width: 100%;
 			}
 			tr {
 				vertical-align: top;
@@ -492,8 +556,9 @@
 				padding: 5px 5px 20px 5px;
 			}
 			.section {
-				border:1px solid #000;
-				background-color:#eee;
+				border: 1px solid #ccc;
+				border-radius: 4px;
+				background-color: #f7f7f7;
 			}
 			.help {
 				font-size: 10pt;
