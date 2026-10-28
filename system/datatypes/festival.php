@@ -968,6 +968,9 @@ EOF;
 				);
 			}
 			header("Content-Type: application/json");
+			// Allow other webpages to scrape this info. Added for peertube import plugin.
+			header("Access-Control-Allow-Origin: *");
+			header("Access-Control-Allowed-Methods: GET");
 			echo json_encode($index);
 			exit;
 		}
