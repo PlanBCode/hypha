@@ -149,9 +149,8 @@
 		// One query for all pages instead of one per page (#675).
 		$langList = array();
 		foreach($hyphaXml->findXPath('pageList/page/language') as $_lang)
-			if (!in_array($_lang->getAttribute('id'), $langList))
-				$langList[] = $_lang->getAttribute('id');
-		return $langList;
+			$langList[$_lang->getAttribute('id')] = true;
+		return array_keys($langList);
 	}
 
 	/*
@@ -549,7 +548,11 @@
 		// lowers A-Z only, as strtolower() does since PHP 8.2 (#675).
 		$upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 		$lower = 'abcdefghijklmnopqrstuvwxyz';
-		$page = $hyphaXml->findXPath('pageList/page[language[@id=' . hypha_xpathLiteral((string)$language) . ' and translate(@name, "' . $upper . '", "' . $lower . '")=' . hypha_xpathLiteral(strtolower((string)$name)) . ']]')->item(0);
+		// The exact name first: translate() over every page is slow,
+		// and the address nearly always has the name as stored.
+		$page = $hyphaXml->findXPath('pageList/page[language[@id=' . hypha_xpathLiteral((string)$language) . ' and @name=' . hypha_xpathLiteral((string)$name) . ']]')->item(0);
+		if (!$page)
+			$page = $hyphaXml->findXPath('pageList/page[language[@id=' . hypha_xpathLiteral((string)$language) . ' and translate(@name, "' . $upper . '", "' . $lower . '")=' . hypha_xpathLiteral(strtolower((string)$name)) . ']]')->item(0);
 		return $page ?: false;
 	}
 
