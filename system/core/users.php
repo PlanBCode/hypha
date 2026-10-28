@@ -185,19 +185,20 @@ EOF;
 		// Without a form around it, hypha() had nothing to submit
 		// and the request had no CSRF token (issue #643).
 		$html = <<<EOF
-		<table class="section">
-			<tr>
-				<th><label for="searchLogin">[[name-or-email]]</label></th>
-				<td><input name="searchLogin" id="searchLogin" type="text" size="10" /></td>
-			</tr>
-			<tr>
-				<td></td>
-				<td>
-					<input type="submit" name="submit" value="[[submit]]" onclick="hypha('[[currentUrlPath]]', 'reregister', document.getElementById('searchLogin').value, $(this).closest('form'));" />
-					<input type="button" name="cancel" value="[[cancel]]" onclick="login();" />
-				</td>
-			</tr>
-		</table>
+		<div class="login-wrapper">
+			<div class="username">
+				<label class="username" for="searchLogin">
+					[[name-or-email]]
+				</label>
+				<input name="searchLogin" id="searchLogin" type="text" />
+			</div>
+			<div class="cancel">
+				<input class="button" type="button" name="cancel" value="[[cancel]]" onclick="login();" />
+			</div>
+			<div class="submit">
+				<input class="button" type="submit" name="submit" value="[[submit]]" onclick="hypha('[[currentUrlPath]]', 'reregister', document.getElementById('searchLogin').value, $(this).closest('form'));" />
+			</div>
+		</div>
 EOF;
 		$vars = [
 			'cancel' => __('cancel'),
