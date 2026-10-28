@@ -45,7 +45,7 @@
 				]);
 			}
 			$html = hypha_substitute($htmlOptgroup, [
-				'optgroupLabel' => 'in use',
+				'optgroupLabel' => htmlspecialchars(__('languages-in-use')),
 				'options' => $inUse,
 			]);
 
@@ -58,7 +58,7 @@
 				]);
 			}
 			$html .= hypha_substitute($htmlOptgroup, [
-				'optgroupLabel' => 'add new',
+				'optgroupLabel' => htmlspecialchars(__('languages-add-new')),
 				'options' => $new,
 			]);
 
