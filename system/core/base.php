@@ -727,6 +727,11 @@
 		if (substr($url, 0, $len) == $remove)
 			return substr($url, $len);
 
+		// A protocol-relative url (//host/path) points to another
+		// site; for a site at / the code below would make it /host/path.
+		if (substr($url, 0, 2) == '//')
+			return $url;
+
 		// Handle urls like /path/en/pagename
 		$remove = $O_O->getRequest()->getRootUrlPath();
 		$len = strlen($remove);
