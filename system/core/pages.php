@@ -226,6 +226,13 @@ EOF;
 	*/
 	function createPageInstance(RequestContext $O_O, HyphaDomElement $node) {
 		$type = $node->getAttribute('type');
+		// A page can refer to a datatype that is no longer
+		// installed. Report it instead of failing on the
+		// whole request.
+		if (!class_exists($type, false) || !is_subclass_of($type, HyphaDatatypePage::class)) {
+			error_log('Hypha: page ' . $node->getAttribute('id') . ' has unknown type "' . $type . '"');
+			return null;
+		}
 		return new $type($node, $O_O);
 	}
 
@@ -254,9 +261,15 @@ EOF;
 			$_node = hypha_getPage($O_O->getContentLanguage(), $_name);
 
 			$isPrivate = $_node && in_array($_node->getAttribute('private'), ['true', '1', 'on']);
-			if ($_node && (!$isPrivate || isUser())) {
+			$hyphaPage = false;
+			if (!$_node)
+				notify('error', __('no-page'));
+			else if ($isPrivate && !isUser())
+				notify('error', __('login-to-view'));
+			else
 				$hyphaPage = createPageInstance($O_O, $_node);
 
+			if ($hyphaPage) {
 				// add tag list to all non-system pages
 				$hyphaHtml->writeToElement('tagList', hypha_indexTags($_node, $hyphaPage->language));
 
@@ -265,11 +278,6 @@ EOF;
 					hypha_incrementStats(hypha_getLastDigestTime() + hypha_getDigestInterval());
 			} else {
 				http_response_code(404);
-				if ($isPrivate && !isUser()) {
-					notify('error', __('login-to-view'));
-				} else {
-					notify('error', __('no-page'));
-				}
 				if (isUser()) $hyphaHtml->writeToElement('main', '<span class="right"><input type="button" class="button" value="' . __('create') . '" onclick="newPage();"></span>');
 				$hyphaPage = false;
 			}
