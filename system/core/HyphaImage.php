@@ -70,6 +70,55 @@
 		}
 
 		/**
+		 * Return the url to this image scaled down to the given
+		 * width, keeping its proportions, or the original when
+		 * it is not wider. A teaser no longer loads a photo of
+		 * several MB for a few hundred pixels (#672).
+		 */
+		function getScaledUrl($width) {
+			return self::ROOT_URL . $this->getScaledFilename($width);
+		}
+
+		/**
+		 * Return the width and height of getScaledUrl($width),
+		 * or null when the image cannot be read.
+		 */
+		function getScaledSize($width) {
+			$size = @getimagesize($this->getPath());
+			if (!$size || !$size[0]) return null;
+			if ($size[0] <= $width) return [$size[0], $size[1]];
+			return [$width, max(1, (int)round($size[1] * $width / $size[0]))];
+		}
+
+		function getScaledFilename($width) {
+			$size = $this->getScaledSize($width);
+			if (!$size || $size[0] >= ($this->getOriginalWidth() ?: 0))
+				return $this->filename;
+			$filename = substr_replace($this->filename, '', -4) . '_' . $width . 'w.jpg';
+			if (!file_exists(self::ROOT_PATH . $filename) && !$this->scaleTo($size[0], $size[1], self::ROOT_PATH . $filename))
+				return $this->filename;
+			return $filename;
+		}
+
+		private function getOriginalWidth() {
+			$size = @getimagesize($this->getPath());
+			return $size ? $size[0] : null;
+		}
+
+		private function scaleTo($width, $height, $destination) {
+			$image = @imagecreatefromstring((string)@file_get_contents($this->getPath()));
+			if ($image === false)
+				return false;
+			// JPEG has no transparency: a transparent PNG gets a
+			// white background instead of a black one.
+			$result = imagecreatetruecolor($width, $height);
+			imagefill($result, 0, 0, imagecolorallocate($result, 255, 255, 255));
+			imagecopyresampled($result, $image, 0, 0, 0, 0, $width, $height, imagesx($image), imagesy($image));
+			$written = imagejpeg($result, $destination, 85);
+			return $written;
+		}
+
+		/**
 		 * Take an uploaded image file, move it into the data
 		 * directory and return the corresponding HyphaImage
 		 * instance.
