@@ -10,6 +10,10 @@ RewriteEngine On
 	# A page of Hypha opens no window of another site that needs it back, so
 	# it can keep its own browsing context (#432).
 	Header always set Cross-Origin-Opener-Policy "same-origin"
+	# Hypha uses no camera, microphone, location, payment or USB, so pages and
+	# the frames they embed may not ask for them (#432). Fullscreen stays
+	# allowed for embedded video.
+	Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()"
 	# A first Content-Security-Policy that Hypha does not break: no framing by
 	# other sites, no plugins. A policy for scripts needs the inline scripts and
 	# onclick handlers moved to files first; base-uri and form-action are left
