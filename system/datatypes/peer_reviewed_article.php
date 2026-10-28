@@ -1839,15 +1839,17 @@ EOF;
 				"author" => htmlspecialchars($author)
 			]);
 		} else {
+			// the name of the status in the language of the site, not its key
+			$statusName = __('art-status-' . $newStatus);
 			$subject = __('art-status-update-subject', [
-				"status" => $newStatus,
+				"status" => $statusName,
 				"title" => $title
 			]);
 			$message = __('art-status-update-body', [
 				"link" => htmlspecialchars($linkToPage),
 				"title" => htmlspecialchars($title),
 				"author" => htmlspecialchars($author),
-				"status" => htmlspecialchars($newStatus)
+				"status" => htmlspecialchars($statusName)
 			]);
 		}
 
