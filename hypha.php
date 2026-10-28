@@ -347,10 +347,27 @@
 		Function: installationNotice
 		Tells that the site is in installation mode because data/hypha.xml is missing, and what to check when an
 		existing site was expected: a data folder with pages but without a readable hypha.xml is a wrong mount or
-		wrong file permissions, and installing then starts a new, empty site.
+		wrong file permissions, and installing then starts a new, empty site. A list shows what Hypha found: the full path
+		of data/, whether the user PHP runs as may read and write it, what it holds, and whether hypha.xml is there.
 	*/
 	function installationNotice() {
 		$existingData = is_dir('data/pages') || is_dir('data/images');
+		$dataDir = getcwd() . '/data';
+		// The user PHP runs as, which needs to read and write data/.
+		$user = function_exists('posix_geteuid') ? (posix_getpwuid(posix_geteuid())['name'] ?? 'uid ' . posix_geteuid()) : 'the web server';
+		// Docker makes /.dockerenv, Podman /run/.containerenv.
+		$container = file_exists('/.dockerenv') || file_exists('/run/.containerenv');
+		$contents = is_dir('data') && is_readable('data') ? array_values(array_diff(scandir('data'), ['.', '..'])) : [];
+		$checks = [];
+		$checks[] = [is_dir('data'), 'The folder <code>' . htmlspecialchars($dataDir) . '</code> exists.', $container ? 'Mount the volume with the data of the site on exactly this path.' : 'Create it, or copy the data/ folder of an existing site here.'];
+		if (is_dir('data')) {
+			$checks[] = [is_readable('data'), 'User ' . htmlspecialchars($user) . ' may read it.', 'Give this user read access, for example with chown or chmod.'];
+			$checks[] = [is_writable('data'), 'User ' . htmlspecialchars($user) . ' may write in it.', 'Hypha stores pages, images and statistics here; give this user write access.'];
+			// The image or package brings data/themes, so only themes/ is as good as empty.
+			$listed = array_slice($contents, 0, 10);
+			if (is_readable('data')) $checks[] = [array_diff($contents, ['themes']) !== [], 'It holds: ' . ($contents ? '<code>' . implode('</code>, <code>', array_map('htmlspecialchars', $listed)) . '</code>' . (count($contents) > count($listed) ? ', ...' : '') : 'nothing') . '.', $container ? 'Nothing or only themes/ in a container usually means the volume with the data is not mounted on this path.' : 'Nothing or only themes/ means a new site.'];
+		}
+		$checks[] = [file_exists('data/hypha.xml'), 'The file <code>' . htmlspecialchars($dataDir) . '/hypha.xml</code> exists.', $existingData ? 'Restore hypha.xml from a backup, or check that this is the right data folder.' : 'It is made by the installation below.'];
 		ob_start();
 ?>
 			<div class="notice<?=$existingData ? ' warning' : ''?>">
@@ -359,8 +376,14 @@
 <?php if ($existingData) { ?>
 				<p><strong>The folder <code>data/</code> does hold pages or images, so this looks like an existing site whose <code>data/hypha.xml</code> cannot be found or read.</strong> Do not install in that case, because it starts a new, empty site. Check instead that the data folder is in the right place (for a container: the volume) and that the web server may read and write it.</p>
 <?php } else { ?>
-				<p>To set up a new site, log in below with the superuser account from the top of <code>hypha.php</code> and fill out the settings. To move an existing site here, copy its <code>data/</code> folder into this folder instead.</p>
+				<p>To set up a new site, log in below with the superuser account from the top of <code>hypha.php</code> and fill out the settings. To move an existing site here, copy its <code>data/</code> folder into this folder instead<?=$container ? ', or mount it as a volume on that path' : ''?>.</p>
 <?php } ?>
+				<p>What Hypha found<?=$container ? ' (in a container)' : ''?>:</p>
+				<ul class="checks">
+<?php foreach ($checks as list($ok, $text, $advice)) { ?>
+					<li class="<?=$ok ? 'ok' : 'nok'?>"><span><?=$ok ? '&#10003;' : '&#10007;'?></span> <?=$text?><?=$ok ? '' : '<br/><em>' . htmlspecialchars($advice) . '</em>'?></li>
+<?php } ?>
+				</ul>
 				<p>Documentation and help: <a href="https://github.com/PlanBCode/hypha">github.com/PlanBCode/hypha</a>.</p>
 			</div>
 <?php
@@ -545,6 +568,29 @@
 			}
 			.notice p {
 				margin: 0.5em 0;
+			}
+			.checks {
+				list-style: none;
+				padding: 0;
+				margin: 0.5em 0;
+			}
+			.checks li {
+				margin: 0.35em 0;
+				padding-left: 1.6em;
+				text-indent: -1.6em;
+				overflow-wrap: anywhere;
+			}
+			.checks span {
+				display: inline-block;
+				width: 1.6em;
+				text-indent: 0;
+				font-weight: bold;
+			}
+			.checks .ok span {
+				color: #2a6a3a;
+			}
+			.checks .nok span, .checks em {
+				color: #a33;
 			}
 			form div, form table {
 				max-width: 100%;
