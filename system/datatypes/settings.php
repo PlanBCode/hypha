@@ -550,7 +550,7 @@
 <table class="section">
 	<tr>
 		<th><?=__('title')?>:</th>
-		<td><input name="siteTitle" type="text" size="20" value="<?=hypha_getTitle()?>" /></td>
+		<td><input name="siteTitle" type="text" size="20" value="<?=htmlspecialchars(hypha_getTitle())?>" /></td>
 	</tr>
 	<tr>
 		<th><?=__('header')?></th>
