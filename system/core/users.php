@@ -118,23 +118,14 @@
 	}
 
 	/*
-		Function: addLoginRoutine
-		add javascript needed for the login procedure to function
+		Function: loginForm
+		Returns the login form. It posts the login command itself, so
+		it works without JavaScript. It posts to the page with ?login,
+		so after a failed attempt the reload shows the form again.
 	*/
-	function addLoginRoutine($hyphaHtml) {
+	function loginForm($hyphaHtml) {
 		global $O_O;
 		$currentUrlPath = $O_O->getRequest()->getRelativeUrlPath(false);
-		ob_start();
-		/*
-			Function: login
-			writes login element
-
-			Function: reregister
-			writes login element
-		*/
-?>
-	function login() {
-<?php
 		$html = <<<EOF
 		<div class="login-wrapper">
 			<div class="username">
@@ -150,10 +141,11 @@
 				<input name="loginPassword" id="loginPassword" type="password" />
 			</div>
 			<div class="submit">
-				<input class="button" type="submit" name="login" value="[[login]]" onclick="hypha('[[currentUrlPath]]', 'login', '', $(this).closest('form'));" />
+				<input type="hidden" name="command" value="login" />
+				<input class="button" type="submit" name="login" value="[[login]]" />
 			</div>
 			<div class="cancel">
-				<input class="button" type="button" name="cancel" value="[[cancel]]" onclick="document.getElementById('popup').style.display='none';" />
+				<a class="button" href="[[currentUrlPath]]">[[cancel]]</a>
 			</div>
 			<div class="forgot-password">
 				[[forgot-password]]
@@ -172,10 +164,29 @@ EOF;
 			'reregister' => __('reregister'),
 			'currentUrlPath' => $currentUrlPath,
 		];
-		// TODO: This does not work, this does not get the CSRF token...
 		$form = $hyphaHtml->createForm(hypha_substitute($html, $vars));
+		$form->form_element->setAttribute('action', $currentUrlPath . '?login');
+		return $form;
+	}
+
+	/*
+		Function: addLoginRoutine
+		add javascript needed for the login procedure to function
+	*/
+	function addLoginRoutine($hyphaHtml) {
+		global $O_O;
+		$currentUrlPath = $O_O->getRequest()->getRelativeUrlPath(false);
+		ob_start();
+		/*
+			Function: login
+			writes login element
+
+			Function: reregister
+			writes login element
+		*/
 ?>
-		form = <?= json_encode($form->getOuterHtml()) ?>;
+	function login() {
+		form = <?= json_encode(loginForm($hyphaHtml)->getOuterHtml()) ?>;
 		document.getElementById('popup').innerHTML = form;
 		document.getElementById('popup').style.display = 'block';
 		document.getElementById('loginUsername').focus();
