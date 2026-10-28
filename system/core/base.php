@@ -470,8 +470,8 @@
 	function hypha_setUser($user, $username, $password, $fullname, $email, $language, $rights) {
 		global $hyphaXml;
 		$hyphaXml->requireLock();
-		if ($username && hypha_getUserByName($username)
-		    && hypha_getUserByName($username) != $user && !isAdmin()) {
+		$other = $username ? hypha_getUserByName($username) : false;
+		if ($other && !$other->isSameNode($user)) {
 			return __('user-exists');
 		} else if (($username == 'hypha')
 		           || (strpos($username, 'newUser_') !== false)) {
