@@ -21,6 +21,8 @@
 		"quit-explain-message" => "Let op! Enkel een admin kan een gedeactiveerd account heractiveren.\nHet bericht wat je hieronder achterlaat wordt gestuurd naar de overgebleven gebruikers.",
 		"logged-in-as" => "Aangemeld als",
 		"page-index" => "Pagina-index",
+		"reincarnate" => "weer actief maken",
+		"restore" => "terugzetten",
 		"forgot-password" => "Klik hier als je je gebruikersnaam of wachtwoord bent vergeten: ",
 		"login-failed" => "inloggen mislukt. Klik hier als je je wachtwoord bent vergeten: ",
 		"reregister" => "heraanmelden",
