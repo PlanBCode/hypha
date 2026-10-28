@@ -299,6 +299,13 @@
 		if (!$result)
 			return;
 
+		// After a POST, 303 See Other tells the client to get the
+		// next page with GET (RFC 9110, section 15.4.4). header()
+		// keeps a 3xx code that is already set. A redirect from a
+		// GET stays 302 Found.
+		if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($result === 'reload' || is_array($result) && count($result) == 2 && $result[0] == 'redirect'))
+			http_response_code(303);
+
 		if ($result === '404') {
 			http_response_code(404);
 			// TODO: Show a nicer error message
