@@ -110,6 +110,10 @@
 	 */
 	$hyphaContentLanguage = $O_O->getContentLanguage();
 
+	// /, /<language> and /<language>/ redirect to the preferred
+	// url of the home page, <language>/<pagename>.
+	hypha_redirectToPreferredUrl($O_O); // Might redirect and exit
+
 	// Load page and execute the posted command. This
 	// is tried twice, since some commands need to run before
 	// loading the page, and some commands need to run after.
@@ -124,6 +128,7 @@
 	*/
 
 	if ($hyphaPage) processCommandResult($hyphaPage->process($O_O->getRequest()));
+	if ($hyphaPage) hypha_setCanonicalLink($O_O, $hyphaPage);
 
 	registerPostProcessingFunction('dewikify');
 

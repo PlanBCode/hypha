@@ -737,6 +737,79 @@
 	}
 
 	/*
+		Function: hypha_getHomePageName
+		returns the name of the default page in the given language, or
+		false when the default page has no translation in that
+		language. The defaultPage attribute holds the name in the
+		default language; a translation has a name of its own.
+
+		Parameters:
+		$language - language code, e.g. 'en'
+	*/
+	function hypha_getHomePageName($language) {
+		$home = hypha_getPage(hypha_getDefaultLanguage(), hypha_getDefaultPage());
+		$lang = $home ? hypha_pageGetLanguage($home, $language) : false;
+		return $lang ? $lang->getAttribute('name') : false;
+	}
+
+	/*
+		Function: hypha_redirectToPreferredUrl
+		Gives every page one preferred url, <language>/<pagename>,
+		the form that menus, the index and tags link to. The root
+		(/) and the root of a language (/en, /en/) redirect with a
+		301 to the home page in that language, so search engines do
+		not split the ranking of the home page over several urls.
+		Only GET and HEAD are redirected: commands are posted to the
+		url of the page. A language without a translation of the
+		home page is left as it is.
+
+		Parameters:
+		RequestContext $O_O
+	*/
+	function hypha_redirectToPreferredUrl(RequestContext $O_O) {
+		$request = $O_O->getRequest();
+		if (!in_array($_SERVER['REQUEST_METHOD'], ['GET', 'HEAD'])) return;
+		if ($request->isSystemPage() || $request->getPageName() !== null || $request->getArgs()) return;
+		$language = $request->getLanguage();
+		if ($language === null) {
+			// Only the root itself; other paths without a
+			// language are not touched (#604).
+			if ($request->getRelativeUrlPathParts(false)) return;
+			$language = hypha_getDefaultLanguage();
+		}
+		$name = hypha_getHomePageName($language);
+		if ($name === false) return;
+		$url = $request->getRootUrl() . $language . '/' . rawurlencode($name);
+		if (isset($_SERVER['QUERY_STRING']) && $_SERVER['QUERY_STRING'] !== '')
+			$url.= '?' . $_SERVER['QUERY_STRING'];
+		header('Location: ' . $url, true, 301);
+		exit;
+	}
+
+	/*
+		Function: hypha_setCanonicalLink
+		Adds <link rel="canonical"> with the absolute preferred url
+		(<language>/<pagename>) of the page in its content language,
+		so a page reached through another url (other case, a query,
+		index.php, a post) is counted once by search engines. Only
+		for the page itself: a view such as edit or translate and
+		system pages such as the index get none, and neither does a
+		page that is not found.
+
+		Parameters:
+		RequestContext $O_O
+		$hyphaPage - the page being shown
+	*/
+	function hypha_setCanonicalLink(RequestContext $O_O, $hyphaPage) {
+		if (!isset($hyphaPage->pageListNode) || $O_O->getRequest()->getArgs()) return;
+		$lang = hypha_pageGetLanguage($hyphaPage->pageListNode, $hyphaPage->language);
+		if (!$lang) return;
+		$link = $hyphaPage->html->findOneXPath('head')->createChild('link');
+		$link->setAttribute('rel', 'canonical');
+		$link->setAttribute('href', $O_O->getRequest()->getRootUrl() . $hyphaPage->language . '/' . rawurlencode($lang->getAttribute('name')));
+	}
+
+	/*
 		Function: hypha_getAndClearDigest
 		returns hypha digest file contents, and empties it
 	*/

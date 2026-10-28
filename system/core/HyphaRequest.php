@@ -79,7 +79,8 @@
 			if (null === $relativeUrlPath) {
 				$relativeUrlPath = substr($_SERVER['REQUEST_URI'], strlen($this->rootUrlPath));
 				// Strip off any query parameters
-				if (($paramPos = strpos($relativeUrlPath, '?')) && $paramPos !== false){
+				// (also at position 0, a query on the root url)
+				if (($paramPos = strpos($relativeUrlPath, '?')) !== false){
 					$relativeUrlPath = substr($relativeUrlPath, 0, $paramPos);
 				}
 			}
