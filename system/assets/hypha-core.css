@@ -9,3 +9,12 @@
     display: inline-block;
     margin-right: 15px;
 }
+
+/*
+    The label of recover account is longer than the space a theme gives the
+    labels of the login form: above the field instead (#643).
+*/
+.login-wrapper label[for="searchLogin"] {
+    display: block;
+    width: auto;
+}
