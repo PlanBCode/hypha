@@ -10,6 +10,8 @@
 		const ROOT_PATH = 'data/images/';
 		const ROOT_URL = 'images/';
 
+		private $originalSize;
+
 		/**
 		 * Create a HyphaImage for an existing image with the
 		 * given filename.
@@ -84,7 +86,7 @@
 		 * or null when the image cannot be read.
 		 */
 		function getScaledSize($width) {
-			$size = @getimagesize($this->getPath());
+			$size = $this->getOriginalSize();
 			if (!$size || !$size[0]) return null;
 			if ($size[0] <= $width) return [$size[0], $size[1]];
 			return [$width, max(1, (int)round($size[1] * $width / $size[0]))];
@@ -101,8 +103,16 @@
 		}
 
 		private function getOriginalWidth() {
-			$size = @getimagesize($this->getPath());
+			$size = $this->getOriginalSize();
 			return $size ? $size[0] : null;
+		}
+
+		// The size of the original, read once: a teaser asks for it
+		// three times (#675).
+		private function getOriginalSize() {
+			if (!isset($this->originalSize))
+				$this->originalSize = @getimagesize($this->getPath()) ?: false;
+			return $this->originalSize;
 		}
 
 		private function scaleTo($width, $height, $destination) {
