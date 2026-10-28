@@ -721,17 +721,19 @@
 	function hypha_make_relative($url) {
 		global $O_O;
 
-		// Handle urls like https://mydomain.tld/path/en/pagename
+		// Handle urls like https://mydomain.tld/path/en/pagename. A
+		// link to the site itself becomes ./ instead of an empty
+		// href, which browsers and search engines see as no link (#669).
 		$remove = $O_O->getRequest()->getRootUrl();
 		$len = strlen($remove);
 		if (substr($url, 0, $len) == $remove)
-			return substr($url, $len);
+			return substr($url, $len) === '' ? './' : substr($url, $len);
 
 		// Handle urls like /path/en/pagename
 		$remove = $O_O->getRequest()->getRootUrlPath();
 		$len = strlen($remove);
 		if (substr($url, 0, $len) == $remove)
-			return substr($url, $len);
+			return substr($url, $len) === '' ? './' : substr($url, $len);
 
 		return $url;
 	}
