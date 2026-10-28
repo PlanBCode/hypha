@@ -354,11 +354,9 @@ EOF;
 					}
 				}
 				asort($pageList);
-				$html = '[';
-				foreach($pageList as $page) $html.= '"'.$page.'",';
-				$html = rtrim($html, ",");
-				$html.= ']';
-				echo $html;
+				// A JSON answer, not HTML (RFC 8259, section 11).
+				header('Content-Type: application/json');
+				echo json_encode(array_values($pageList));
 				exit;
 		}
 	}
