@@ -29,6 +29,7 @@
 		}
 		$headers = 'MIME-Version: 1.0' . "\r\n";
 		$headers .= 'Content-type: text/html; charset=utf-8' . "\r\n";
+		$headers .= 'Content-Transfer-Encoding: quoted-printable' . "\r\n";
 		$headers .= 'From: ' . $senderName . ' <' . $senderEmail . '>' . "\r\n";
 		$headers .= 'Reply-To: ' . $senderEmail . "\r\n";
 		$headers .= 'X-Mailer: PHP/' . phpversion() . "\r\n";
@@ -45,13 +46,17 @@
 		}
 		$messageHtml .= '	</head>' . "\r\n";
 		$messageHtml .= '	<body>' . "\r\n";
-		// RFC5322 specifies lines must not be longer than 998
-		// characters, so wrap them (a bit conservativelly).
-		// Wrapping should be safe for HTML content.
-		// https://tools.ietf.org/html/rfc5322#section-2.1.1
-		$messageHtml .= wordwrap(addBaseUrl(dewikify_html($message)), 900, "\r\n");
+		$messageHtml .= addBaseUrl(dewikify_html($message));
 		$messageHtml .= '	</body>' . "\r\n";
 		$messageHtml .= '</html>' . "\r\n";
+
+		// The message is UTF-8, so it has bytes above 127, which
+		// a message without Content-Transfer-Encoding may not
+		// contain (RFC 2045, section 6.1: the default is 7bit).
+		// Quoted-printable keeps it 7-bit and also keeps every
+		// line below 76 characters, well within the 998 of RFC
+		// 5322 (section 2.1.1), without changing the HTML.
+		$messageHtml = quoted_printable_encode($messageHtml);
 
 		$error = array();
 
