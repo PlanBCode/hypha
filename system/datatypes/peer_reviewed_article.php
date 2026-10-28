@@ -2011,7 +2011,7 @@ EOF;
 		if ($title instanceof HyphaDomElement) {
 			$title = $title->getText();
 		}
-		if ('' === $title) {
+		if (!$title) {
 			$title = showPagename($this->pagename);
 		}
 
