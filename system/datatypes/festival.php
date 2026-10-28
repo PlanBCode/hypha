@@ -13,6 +13,7 @@
 		protected $xml;
 
 		const FIELD_NAME_AMOUNT = 'amount';
+		const FIELD_NAME_ATTENDING = 'attending';
 		const FIELD_NAME_CATEGORY = 'category';
 		const FIELD_NAME_DESCRIPTION = 'description';
 		const FIELD_NAME_EMAIL = 'email';
@@ -498,7 +499,7 @@ EOF;
 			$participant->setAttribute(self::ATTR_PARTICIPANT_EMAIL, $form->dataFor(self::FIELD_NAME_EMAIL));
 			$participant->setAttribute(self::ATTR_PARTICIPANT_PHONE, $form->dataFor(self::FIELD_NAME_PHONE));
 			$participant->setAttribute(self::ATTR_PARTICIPANT_KEY, bin2hex(openssl_random_pseudo_bytes(8)));
-			$participant->setAttribute(self::ATTR_PARTICIPANT_ATTENDING, implode(',', $form->dataFor('attending', [])));
+			$participant->setAttribute(self::ATTR_PARTICIPANT_ATTENDING, implode(',', (array)$form->dataFor(self::FIELD_NAME_ATTENDING, [])));
 			$this->xml->documentElement->getOrCreate(self::TAG_PARTICIPANTS_CONTAINER)->appendChild($participant);
 			if ((float)$form->dataFor(self::FIELD_NAME_AMOUNT, 0) > 0)
 				$this->setupPayment($participant, $form->dataFor(self::FIELD_NAME_AMOUNT, 0));
