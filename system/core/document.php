@@ -125,8 +125,7 @@
 		public function setFavicon($href) {
 			$style = $this->findOneXPath('head')->createChild('link');
 			$style->setAttribute('href', $href);
-			$style->setAttribute('rel', 'shortcut icon');
-			$style->setAttribute('type', 'text/ico');
+			$style->setAttribute('rel', 'icon');
 		}
 
 		/*
