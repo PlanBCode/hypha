@@ -239,7 +239,7 @@
 
 		function requireLock() {
 			if (!$this->file->isLocked())
-				throw new LogicException('File ' . $this->filename . ' should be locked');
+				throw new LogicException('File ' . $this->file->getFilename() . ' should be locked');
 		}
 	}
 

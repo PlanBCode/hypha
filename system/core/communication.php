@@ -181,7 +181,10 @@ END;
 			$t = time() - hypha_getLastDigestTime();
 			if ($t > 86400) $s = floor($t / 86400).' '.__('days');
 			elseif ($t > 3600) $s = floor($t / 3600).' '.__('hours');
-			elseif ($t > 60) $s = floor($t / 60).' '.__('minutes');
+			//
+			// Also with a digest interval of a minute or less, so $s is always set.
+			//
+			else $s = max(1, floor($t / 60)).' '.__('minutes');
 			$message = '<div style="font-family: sans; font-size: 12pt;">';
 			$message.= '<div style="font-size: 14pt;"><b>'.hypha_getTitle().'</b>: '.__('hypha-summary-of-the-last').' '.$s.'</div>';
 			$message.= hypha_getStats(hypha_getLastDigestTime()+hypha_getDigestInterval());
