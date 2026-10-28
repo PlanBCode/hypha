@@ -516,6 +516,39 @@ EOF;
 		$node->setAttribute('href', $url);
 	}
 
+	/*
+		Function: addLandmarks
+		Mark the header, the content and the footer of the theme as
+		landmarks, so screen readers, search engines and AI agents can
+		tell the content from what is around it, and add a link to skip
+		to the content (#682). A theme with its own <header>, <main> or
+		<footer>, or the role, keeps it.
+
+		Parameters:
+		element - A DomWrap\Element to process
+	*/
+	function addLandmarks($element) {
+		global $hyphaRequest;
+		foreach (['header' => 'banner', 'footer' => 'contentinfo'] as $name => $role) {
+			if ($element->findXPath("//$name | //*[@role='$role']")->length) continue;
+			$node = $element->findXPath("//*[@id='$name']")->item(0);
+			if ($node) $node->setAttribute('role', $role);
+		}
+		if ($element->findXPath("//main | //*[@role='main']")->length) return;
+		$main = $element->findXPath("//*[@id='page']")->item(0) ?: $element->findXPath("//*[@id='main']")->item(0);
+		$body = $element->findXPath("//body")->item(0);
+		if (!$main || !$body) return;
+		$main->setAttribute('role', 'main');
+		if (!$main->hasAttribute('tabindex')) $main->setAttribute('tabindex', '-1');
+		// The page sets <base href>, so the link names the page itself.
+		$query = isset($_SERVER['QUERY_STRING']) && $_SERVER['QUERY_STRING'] !== '' ? '?' . $_SERVER['QUERY_STRING'] : '';
+		$link = $body->ownerDocument->createElement('a');
+		$link->setAttribute('class', 'skip-link');
+		$link->setAttribute('href', $hyphaRequest->getRelativeUrlPath(false) . $query . '#' . $main->getAttribute('id'));
+		$link->appendChild($body->ownerDocument->createTextNode(__('skip-to-content')));
+		$body->insertBefore($link, $body->firstChild);
+	}
+
 	/* Like wikify, but accepts a HTML string instead of a document */
 	function wikify_html($html) {
 		global $hyphaHtml;
