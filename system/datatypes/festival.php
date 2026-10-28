@@ -29,7 +29,9 @@
 		const PATH_CONFIRM = 'confirm';
 		const PATH_CONTRIBUTE = 'contribute';
 		const PATH_CONTRIBUTIONS = 'contributions';
+		const PATH_CONTRIBUTION = 'contribution';
 		const PATH_LINEUP = 'lineup';
+		const PATH_INDEX = 'index';
 		const PATH_PARTICIPANTS = 'participants';
 		const PATH_PAYMENTHOOK = 'paymenthook';
 		const PATH_PAY = 'pay';
@@ -133,6 +135,7 @@
 				case [self::PATH_CONTRIBUTE,          null]:             return $this->contributeView($request);
 				case [self::PATH_CONTRIBUTE,          self::CMD_SAVE]:   return $this->contributionSaveAction($request);
 				case [self::PATH_CONTRIBUTIONS,       null]:             return $this->contributionsView($request);
+				case [self::PATH_CONTRIBUTION,        null]:             return $this->contributionView($request);
 				case [self::PATH_LINEUP,              null]:             return $this->lineupView($request);
 				case [self::PATH_PARTICIPANTS,        null]:             return $this->participantsView($request);
 				case [self::PATH_PAYMENTHOOK,         null]:             return $this->paymenthookView($request);
@@ -310,6 +313,13 @@
 				}
 			}
 			return null;
+		}
+
+		protected function contributionView(HyphaRequest $request) {
+			$id = $request->getArg(1);
+			$contribution = $this->xml->getElementById($id);
+			echo $this->buildContribution($contribution);
+			exit();
 		}
 
 		/**
@@ -976,6 +986,45 @@ EOF;
 		}
 
 		protected function timetableView(HyphaRequest $request) {
+			// add javascript code to handle contribution popups when hovering over timetable
+			$script = <<<'EOF'
+				var cursor = {x:0, y:0};
+				document.onmousemove = updateMousePosition;
+
+				function updateMousePosition(e) {
+					e = e || window.event;
+					if (e.pageX || e.pageY) {
+						cursor.x = e.pageX;
+						cursor.y = e.pageY;
+					}
+					else {
+						cursor.x = e.clientX + (document.documentElement.scrollLeft || document.body.scrollLeft) - document.documentElement.clientLeft;
+						cursor.y = e.clientY + (document.documentElement.scrollTop || document.body.scrollTop) - document.documentElement.clientTop;
+					}
+				}
+				function popupContribution(anchor, url) {
+					var popup = document.getElementById('popup');
+					if (anchor) ajax(url, function(response) {
+						var elem = document.getElementById(anchor);
+						var tagname = "";
+						y = elem.offsetHeight;
+						x = cursor.x - 120;
+						while (elem&&(typeof(elem)=="object")&&(typeof(elem.tagName)!="undefined")) {
+							y+= elem.offsetTop;
+							tagname = elem.tagName.toUpperCase();
+							if (tagname=="BODY") elem = 0;
+							if (typeof(elem)=="object") if (typeof(elem.offsetParent)=="object") elem = elem.offsetParent;
+						}
+						popup.style.left = x + 'px';
+						popup.style.top = y + 'px';
+						popup.innerHTML = response;
+						popup.style.visibility = 'visible';
+					});
+					else popup.style.visibility = 'hidden';
+				}
+EOF;
+			$this->html->writeScript($script);
+
 			// Make a list of all days, and per day all
 			// locations and the begin and end time.
 			$contributions = $this->xml->documentElement->getOrCreate(self::TAG_CONTRIBUTION_CONTAINER)->childNodes;
@@ -1069,7 +1118,7 @@ EOF;
 							$id = "a".$d.'_'.$l.'_'.$r;
 							if ($timeslot[0] - $t) $html.= '<td class="'.($line%2 ? 'tableRowOdd' : 'tableRowEven').'" colspan="'.($timeslot[0] - $t).'"></td>';
 							$lineup_url = $this->constructFullPath($this->pagename . '/lineup');
-							$html.= '<td id="'.$id.'" class="hover tableAct '.($line%2 ? 'tableRowOddAct' : 'tableRowEvenAct').'" colspan="'.($timeslot[1] - $timeslot[0]).'"><a href="'.htmlspecialchars($lineup_url).'#'.htmlspecialchars($timeslot[3]).'">'.htmlspecialchars($timeslot[2]);
+							$html.= '<td id="'.$id.'" class="hover tableAct '.($line%2 ? 'tableRowOddAct' : 'tableRowEvenAct').'" colspan="'.($timeslot[1] - $timeslot[0]).'"><a href="'.htmlspecialchars($lineup_url).'#'.htmlspecialchars($timeslot[3]).'" onmouseover="popupContribution(\''.$id.'\',\''.$this->constructFullPath($this->pagename.'/'.self::PATH_CONTRIBUTION.'/'.$timeslot[3]).'\');" onmouseout="popupContribution();">'.htmlspecialchars($timeslot[2]);
 							if ($timeslot[2] && $timeslot[4]) $html.= ' - ';
 							$html.= '<i>'.$timeslot[4].'</i></a></td>';
 							$t = htmlspecialchars($timeslot[1]);
