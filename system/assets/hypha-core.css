@@ -29,3 +29,9 @@ table.hypha-fit {
     width: 100%;
     table-layout: fixed;
 }
+table.hypha-fit th, table.hypha-fit td {
+    overflow-wrap: anywhere;
+}
+table.hypha-fit label {
+    white-space: normal;
+}
