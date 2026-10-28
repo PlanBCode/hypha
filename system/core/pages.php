@@ -126,8 +126,9 @@
 	function addNewPageRoutine($hyphaHtml, $query, $types) {
 		global $hyphaContentLanguage;
 		// If a pagename is specified that does not exist yet,
-		// prefill that page name
-		if (count($query) >= 2 && !hypha_getPage($query[0], $query[1]))
+		// prefill that page name. Only for a path of a language
+		// and a page: on index/nl, nl is no page name (#656).
+		if (count($query) >= 2 && array_key_exists($query[0], Language::getIsoList()) && !hypha_getPage($query[0], $query[1]))
 			$pagename = $query[1];
 		else
 			$pagename = '';
