@@ -63,19 +63,19 @@
 <table class="section" width="100%">
 	<tr>
 		<th><?=__('username')?>:</th>
-		<td><input name="settingsUsername" id="settingsUsername" type="text" size="20" value="<?=$account->getAttribute('username')?>" /></td>
+		<td><input name="settingsUsername" id="settingsUsername" type="text" size="20" autocomplete="username" value="<?=$account->getAttribute('username')?>" /></td>
 		<th><?=__('fullname')?>:</th>
-		<td><input name="settingsFullname" id="settingsFullname" type="text" size="20" value="<?=$account->getAttribute('fullname')?>" /></td>
+		<td><input name="settingsFullname" id="settingsFullname" type="text" size="20" autocomplete="name" value="<?=$account->getAttribute('fullname')?>" /></td>
 	</tr>
 	<tr>
 		<th><?=__('password')?>:</th>
-		<td><input name="settingsPassword1" id="settingsPassword1" type="password" size="20" /></td>
+		<td><input name="settingsPassword1" id="settingsPassword1" type="password" size="20" autocomplete="new-password" /></td>
 		<th><?=__('confirm-password')?>:</th>
-		<td><input name="settingsPassword2" id="settingsPassword2" type="password" size="20" /></td>
+		<td><input name="settingsPassword2" id="settingsPassword2" type="password" size="20" autocomplete="new-password" /></td>
 	</tr>
 	<tr>
 		<th><?=__('email')?>:</th>
-		<td><input name="settingsEmail" id="settingsEmail" type="text" size="20" value="<?=$account->getAttribute('email')?>" /></td>
+		<td><input name="settingsEmail" id="settingsEmail" type="text" size="20" autocomplete="email" value="<?=$account->getAttribute('email')?>" /></td>
 		<th><?=__('interface-language')?>:</th>
 		<td><select name="settingsUiLang" id="settingsUiLang"><?php foreach($uiLangList as $lang) echo '<option value="'.$lang.'"'.($account->getAttribute('language')==$lang?' selected':'').'>'.$isoLangList[$lang].'</option>'; ?></select></td>
 	</tr>
@@ -185,19 +185,19 @@
 <table class="section">
 	<tr>
 		<th><?=__('username')?>:</th>
-		<td><input name="settingsUsername" id="settingsUsername" type="text" size="20" value="<?=$user->getAttribute('username')?>" /></td>
+		<td><input name="settingsUsername" id="settingsUsername" type="text" size="20" autocomplete="username" value="<?=$user->getAttribute('username')?>" /></td>
 		<th><?=__('fullname')?>:</th>
-		<td><input name="settingsFullname" id="settingsFullname" type="text" size="20" value="<?=$user->getAttribute('fullname')?>" /></td>
+		<td><input name="settingsFullname" id="settingsFullname" type="text" size="20" autocomplete="name" value="<?=$user->getAttribute('fullname')?>" /></td>
 	</tr>
 	<tr>
 		<th><?=__('password')?>:</th>
-		<td><input name="settingsPassword1" id="settingsPassword1" type="password" size="20" /></td>
+		<td><input name="settingsPassword1" id="settingsPassword1" type="password" size="20" autocomplete="new-password" /></td>
 		<th><?=__('confirm-password')?>:</th>
-		<td><input name="settingsPassword2" id="settingsPassword2" type="password" size="20" /></td>
+		<td><input name="settingsPassword2" id="settingsPassword2" type="password" size="20" autocomplete="new-password" /></td>
 	</tr>
 	<tr>
 		<th><?=__('email')?>:</th>
-		<td><input name="settingsEmail" id="settingsEmail" type="text" size="20" value="<?=$user->getAttribute('email')?>" /></td>
+		<td><input name="settingsEmail" id="settingsEmail" type="text" size="20" autocomplete="email" value="<?=$user->getAttribute('email')?>" /></td>
 		<th><?=__('interface-language')?>:</th>
 		<td><select name="settingsUiLang" id="settingsUiLang"><?php foreach($uiLangList as $lang) echo '<option value="'.$lang.'"'.($user->getAttribute('language')==$lang?' selected':'').'>'.$isoLangList[$lang].'</option>'; ?></select></td>
 	</tr>
