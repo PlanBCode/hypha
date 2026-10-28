@@ -94,9 +94,11 @@
 		const ATTR_EVENT_END = 'end';
 
 		const ATTR_DAY_DISPLAY = 'display';
+		const ATTR_DAY_DATE = 'date';
 		const ATTR_DAY_BEGIN = 'begin';
 		const ATTR_DAY_END = 'end';
 		const ATTR_LOCATION_DISPLAY = 'display';
+		const ATTR_LOCATION_LIVESTREAM = 'livestream';
 
 		public function __construct($pageListNode, RequestContext $O_O) {
 			parent::__construct($pageListNode, $O_O);
@@ -137,6 +139,7 @@
 				case [self::PATH_CONTRIBUTIONS,       null]:             return $this->contributionsView($request);
 				case [self::PATH_CONTRIBUTION,        null]:             return $this->contributionView($request);
 				case [self::PATH_LINEUP,              null]:             return $this->lineupView($request);
+				case [self::PATH_INDEX,               null]:             return $this->contributionIndex($request);
 				case [self::PATH_PARTICIPANTS,        null]:             return $this->participantsView($request);
 				case [self::PATH_PAYMENTHOOK,         null]:             return $this->paymenthookView($request);
 				case [self::PATH_PAY,                 null]:             return $this->payView($request);
@@ -921,6 +924,52 @@ EOF;
 				$contributionsdiv->appendHtml($this->buildContribution($contribution));
 				$contributionsdiv->appendHtml('<div class="hbar"></div>');
 			}
+		}
+
+		protected function contributionIndex(HyphaRequest $request) {
+			$days = $this->getConfigElement(self::CONFIG_ID_DAYS, self::CONFIG_TAG_DAYS)->childNodes;
+			$daysmap = [];
+			foreach($days as $day)
+				$daysmap[$day->getId()] = $day->getAttribute(self::ATTR_DAY_DATE);
+
+			$streammap = [];
+			$locations = $this->getConfigElement(self::CONFIG_ID_LOCATIONS, self::CONFIG_TAG_LOCATIONS)->childNodes;
+			foreach($locations as $location)
+				$streammap[$location->getId()] = $location->getAttribute(self::ATTR_LOCATION_LIVESTREAM);
+
+			$events = $this->xml->documentElement->findXPath('//' . self::TAG_CONTRIBUTION_EVENT);
+			$festival_title = $this->getConfig(self::CONFIG_ID_TITLE);
+
+			$index = array();
+			foreach($events as $event) {
+				$day = $event->getAttribute(self::ATTR_EVENT_DAY);
+				$date = $daysmap[$day];
+				$begin = explode(':', $event->getAttribute(self::ATTR_EVENT_BEGIN));
+				$end = explode(':', $event->getAttribute(self::ATTR_EVENT_END));
+				$duration = 60*($end[0] - $begin[0]) + $end[1] - $begin[1];
+				$location = $event->getAttribute(self::ATTR_EVENT_LOCATION);
+				$stream = $streammap[$location];
+				$image_filename = $event->parentNode->getAttribute(self::ATTR_CONTRIBUTION_IMAGE);
+				$image = $image_filename ? new HyphaImage($image_filename) : false;
+				$image_url = $image ? $request->getRootUrl() . $image->getUrl() : "";
+
+				$index[] = array(
+					"festival_title" => $festival_title,
+					"contribution_id" => $event->parentNode->getId(),
+					"datetime" => $date.$begin[0].$begin[1],
+					"location" => $location,
+					"duration" => $duration,
+					"name" => $event->parentNode->getAttribute('name'),
+					"title" => $event->parentNode->getAttribute('title'),
+					"description" => $event->parentNode->findOneXPath(self::TAG_CONTRIBUTION_DESCRIPTION)->getText(),
+					"website" => $event->parentNode->getAttribute(self::ATTR_CONTRIBUTION_WEBSITE),
+					"image_url" => $image_url ? $image_url : "",
+					"livestream" => $stream,
+				);
+			}
+			header("Content-Type: application/json");
+			echo json_encode($index);
+			exit;
 		}
 
 		/**
