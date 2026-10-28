@@ -1478,6 +1478,10 @@ EOF;
 		$discussionsDomElement = $this->html->createElement('div');
 		$review = self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER === $type;
 
+		// the heading goes first, above the comments and the form
+		$title = $review ? __('art-review-comments') : __('art-comments');
+		$discussionsDomElement->appendHtml('<h2>' . $title . '</h2>');
+
 		/** @var HyphaDomElement $container */
 		$container = $this->xml->findOneXPath('//' . ($review ? self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER : self::FIELD_NAME_DISCUSSION_PUBLIC_CONTAINER));
 
@@ -1637,8 +1641,6 @@ EOF;
 		$commentForm->appendTo($discussionsDomElement);
 		$discussionsDomElement->appendChild($this->makeDiscussionActionButton($type, $commentForm));
 
-		$title = $review ? __('art-review-comments') : __('art-comments');
-		$discussionsDomElement->appendHtml('<h2>' . $title . '</h2>');
 		$discussionsDomElement->setAttribute('class', $type . '-comments-wrapper');
 
 		return $discussionsDomElement;
