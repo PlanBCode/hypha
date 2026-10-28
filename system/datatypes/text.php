@@ -217,12 +217,22 @@ EOF;
 			// create form
 			$form = $this->createTranslationForm($request->getPostData());
 
-			// TODO: validate that the language is a valid one
 			// process form if it was posted
 			if (!$form->isValid())
 				return $this->translateViewRender($request, $form);
 
 			$language = $form->dataFor(self::FIELD_NAME_LANGUAGE);
+			// A translation needs a valid language that the page
+			// does not have yet: saving into an existing language
+			// would rename and overwrite that translation.
+			if (!is_string($language) || !array_key_exists($language, Language::getIsoList())) {
+				notify('error', __('invalid-language'));
+				return $this->translateViewRender($request, $form);
+			}
+			if (hypha_pageGetLanguage($this->pageListNode, $language)) {
+				notify('error', __('translation-exists'));
+				return $this->translateViewRender($request, $form);
+			}
 			$pagename = validatePagename($form->dataFor(self::FIELD_NAME_PAGE_NAME));
 			$content = wikify_html($form->dataFor(self::FIELD_NAME_CONTENT));
 
