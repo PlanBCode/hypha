@@ -189,6 +189,11 @@
 				while ($attributes->length > 0) $wymeditorElement->setAttributeNode($attributes->item(0));
 
 				$wymeditorElement->setAttribute('class', 'wymeditor');
+				// A <label for="..."> names the field (HTMLForm), so give the field that id when the page has no
+				// other element with it; otherwise the label points to nothing (Issues panel of Chrome).
+				$name = $wymeditorElement->getAttribute('name');
+				if (!$wymeditorElement->hasAttribute('id') && $name !== '' && !$html->findXPath('//*[@id=' . xpath_encode($name) . ']')->length)
+					$wymeditorElement->setAttribute('id', $name);
 
 				$parentElement->removeChild($editorElement);
 			}

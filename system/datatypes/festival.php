@@ -418,22 +418,22 @@ EOF;
 					<table class="festivalForm">
 						<tr>
 							<th><label for="[[field-name-name]]">[[name]]</label></th>
-							<td><input required type="text" name="[[field-name-name]]"></td>
+							<td><input required type="text" id="[[field-name-name]]" name="[[field-name-name]]"></td>
 							<td>*</td>
 						</tr>
 						<tr>
 							<th><label for="[[field-name-email]]">[[email]]</label></th>
-							<td><input required type="email" name="[[field-name-email]]"></td>
+							<td><input required type="email" id="[[field-name-email]]" name="[[field-name-email]]"></td>
 							<td>*</td>
 						</tr>
 						<tr>
 							<th><label for="[[field-name-phone]]">[[phone]]</label></th>
-							<td><input type="text" name="[[field-name-phone]]"></td>
+							<td><input type="text" id="[[field-name-phone]]" name="[[field-name-phone]]"></td>
 							<td></td>
 						</tr>
 						<tr>
 							<th><label for="[[field-name-amount]]">[[amount]]</label></th>
-							<td><input type="text" name="[[field-name-amount]]"></td>
+							<td><input type="text" id="[[field-name-amount]]" name="[[field-name-amount]]"></td>
 							<td></td>
 						</tr>
 					</table>
@@ -680,35 +680,35 @@ EOF;
 					<table class="festivalForm">
 						<tr>
 							<th><label for="[[field-name-name]]">[[name]]</label></th>
-							<td><input required type="text" name="[[field-name-name]]"/></td>
+							<td><input required type="text" id="[[field-name-name]]" name="[[field-name-name]]"/></td>
 							<td>*</td>
 						</tr>
 						<tr>
 							<th><label for="[[field-name-title]]">[[title]]</label></th>
-							<td><input required type="text" name="[[field-name-title]]"/></td>
+							<td><input required type="text" id="[[field-name-title]]" name="[[field-name-title]]"/></td>
 							<td>*</td>
 						</tr>
 						<tr>
 							<th><label for="[[field-name-description]]">[[description]]</label></th>
-							<td><textarea name="[[field-name-description]]"></textarea></td>
+							<td><textarea id="[[field-name-description]]" name="[[field-name-description]]"></textarea></td>
 							<td/>
 						</tr>
 							<tr><th><label for="[[field-name-image]]">[[image]]</label></th>
 							<td>
 								<input type="hidden" name="[[field-name-image]]"/>
 								<img data-preview-for="[[field-name-image]]"/><br/>
-								<input type="file" name="[[field-name-image-upload]]"/>
+								<input type="file" id="[[field-name-image]]" name="[[field-name-image-upload]]"/>
 							</td>
 							<td/>
 						</tr>
 						<tr>
 							<th><label for="[[field-name-website]]">[[website]]</label></th>
-							<td><input type="text" name="[[field-name-website]]"/></td>
+							<td><input type="text" id="[[field-name-website]]" name="[[field-name-website]]"/></td>
 							<td/>
 						</tr>
 						<tr>
 							<th><label for="[[field-name-category]]">[[category]]</label></th>
-							<td><select required name="[[field-name-category]]">
+							<td><select required id="[[field-name-category]]" name="[[field-name-category]]">
 								<option disabled="disabled" selected="selected">select</option>
 								<option value="lecture">Lecture</option>
 								<option value="workshop">Workshop</option>
@@ -720,7 +720,7 @@ EOF;
 						</tr>
 						<tr>
 							<th><label for="[[field-name-notes]]">[[notes]]</label></th>
-							<td><textarea name="[[field-name-notes]]"></textarea></td>
+							<td><textarea id="[[field-name-notes]]" name="[[field-name-notes]]"></textarea></td>
 							<td/>
 						</tr>
 						</tr>
