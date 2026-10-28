@@ -140,12 +140,12 @@
 				</label>
 				<input name="loginPassword" id="loginPassword" type="password" />
 			</div>
+			<div class="cancel">
+				<a class="button" href="[[currentUrlPath]]">[[cancel]]</a>
+			</div>
 			<div class="submit">
 				<input type="hidden" name="command" value="login" />
 				<input class="button" type="submit" name="login" value="[[login]]" />
-			</div>
-			<div class="cancel">
-				<a class="button" href="[[currentUrlPath]]">[[cancel]]</a>
 			</div>
 			<div class="forgot-password">
 				[[forgot-password]]
