@@ -471,7 +471,7 @@
 		global $hyphaXml;
 		$hyphaXml->requireLock();
 		$other = $username ? hypha_getUserByName($username) : false;
-		if ($other && !$other->isSameNode($user) && !isAdmin()) {
+		if ($other && !$other->isSameNode($user)) {
 			return __('user-exists');
 		} else if (($username == 'hypha')
 		           || (strpos($username, 'newUser_') !== false)) {
