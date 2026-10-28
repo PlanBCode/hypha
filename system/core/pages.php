@@ -527,7 +527,7 @@ EOF;
 	*/
 	function addImageAlts($element) {
 		foreach ($element->findXPath(".//img[not(@alt)]") as $img) {
-			$figure = $img->findOneXPath('ancestor::figure[1]/figcaption');
+			$figure = $img->findXPath('ancestor::figure[1]/figcaption')->item(0);
 			$img->setAttribute('alt', $figure ? trim(preg_replace('/\s+/u', ' ', $figure->textContent)) : '');
 		}
 	}
