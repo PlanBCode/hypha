@@ -252,6 +252,13 @@ EOF;
 				$_name = hypha_getDefaultPage();
 			}
 			$_node = hypha_getPage($O_O->getContentLanguage(), $_name);
+			// Only the root (or index.php) without a language
+			// shows the default page. Any other path without a
+			// language and a page name, such as robots.txt or
+			// favicon.ico, does not exist.
+			$_parts = $request->getRelativeUrlPathParts(false);
+			if ($request->getPageName() === null && $request->getLanguage() === null && $_parts && $_parts !== ['index.php'])
+				$_node = false;
 
 			$isPrivate = $_node && in_array($_node->getAttribute('private'), ['true', '1', 'on']);
 			if ($_node && (!$isPrivate || isUser())) {
