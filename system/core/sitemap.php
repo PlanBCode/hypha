@@ -241,6 +241,82 @@
 		Parameters:
 		$rootUrl - the root url of the site, ending in a slash
 	*/
+	/*
+		Function: serveLlmsTxt
+		Answers /llms.txt (llmstxt.org): the site in Markdown for
+		language models and AI agents, with the same public pages as
+		the sitemap. Published articles first, newest first, with their
+		excerpt; then the other pages. A site that may not be indexed
+		answers 404, as for the sitemap.
+
+		Parameters:
+		$rootUrl - the root url of the site
+	*/
+	function serveLlmsTxt($rootUrl) {
+		if (!hypha_getSitemapAllowed()) {
+			http_response_code(404);
+			exit;
+		}
+		$plain = fn ($text) => trim(preg_replace('/\s+/u', ' ', (string)$text));
+		// A [ or ] in a title would end the Markdown link.
+		$label = fn ($text) => str_replace(['[', ']'], ['(', ')'], $plain($text));
+		$short = fn ($text, $length) => mb_strlen($text) > $length ? rtrim(mb_substr($text, 0, mb_strrpos(mb_substr($text, 0, $length), ' ') ?: $length), ' ,.;:') . '…' : $text;
+		$dataTypes = hypha_getDataTypes();
+		$articles = [];
+		$pages = [];
+		$summary = '';
+		foreach (hypha_getPageList() as $page) {
+			if (in_array($page->getAttribute('private'), ['true', '1', 'on'])) continue;
+			$type = $page->getAttribute('type');
+			if (!array_key_exists($type, $dataTypes)) continue;
+			$times = hypha_getSitemapLastModified($page);
+			if ($times === false) continue;
+			$xml = null;
+			if ($type === peer_reviewed_article::class || ($type === textpage::class && $page->findXPath('language[@name=' . hypha_sitemapQuote(hypha_getDefaultPage()) . ']')->length)) {
+				$xml = new Xml();
+				$xml->loadFromFile('data/pages/' . $page->getAttribute('id'));
+			}
+			foreach ($page->findXPath('language') as $language) {
+				$url = $rootUrl . $language->getAttribute('id') . '/' . rawurlencode($language->getAttribute('name'));
+				if ($type === peer_reviewed_article::class) {
+					$title = $xml && $xml->documentElement ? $xml->findXPath('//title')->item(0) : null;
+					$excerpt = $xml && $xml->documentElement ? $xml->findXPath('//excerpt')->item(0) : null;
+					$articles[] = [
+						'time' => isset($times[$language->getAttribute('id')]) ? $times[$language->getAttribute('id')] : 0,
+						'line' => '- [' . $label($title ? $title->textContent : showPagename($language->getAttribute('name'))) . '](' . $url . ')' . ($excerpt && $plain($excerpt->textContent) !== '' ? ': ' . $short($plain($excerpt->textContent), 200) : ''),
+					];
+				}
+				else {
+					$pages[] = '- [' . $label(showPagename($language->getAttribute('name'))) . '](' . $url . ')';
+					// The text of the default page summarises the site.
+					if ($summary === '' && $xml && $xml->documentElement && $language->getAttribute('name') === hypha_getDefaultPage()) {
+						$version = getCurrentVersionNode($xml->findXPath('language')->item(0));
+						if ($version) $summary = $short($plain($version->textContent), 300);
+					}
+				}
+			}
+		}
+		usort($articles, fn ($a, $b) => $b['time'] - $a['time']);
+		$out = '# ' . $label(hypha_getTitle()) . "\n\n";
+		if ($summary !== '') $out .= '> ' . $summary . "\n\n";
+		$out .= __('llms-intro', ['sitemap' => $rootUrl . 'sitemap.xml']) . "\n";
+		if ($articles) $out .= "\n## " . __('llms-articles') . "\n\n" . implode("\n", array_column($articles, 'line')) . "\n";
+		if ($pages) $out .= "\n## " . __('llms-pages') . "\n\n" . implode("\n", $pages) . "\n";
+		header('Content-Type: text/markdown; charset=utf-8');
+		echo $out;
+		exit;
+	}
+
+	/*
+		Function: hypha_sitemapQuote
+		Returns the string as an XPath 1.0 string literal.
+	*/
+	function hypha_sitemapQuote($string) {
+		if (strpos($string, '"') === false) return '"' . $string . '"';
+		if (strpos($string, "'") === false) return "'" . $string . "'";
+		return 'concat("' . str_replace('"', '", \'"\', "', $string) . '")';
+	}
+
 	function serveRobotsTxt($rootUrl) {
 		header('Content-Type: text/plain; charset=utf-8');
 		echo "User-agent: *\n";

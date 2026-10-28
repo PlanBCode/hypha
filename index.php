@@ -67,6 +67,7 @@
 	// Answer search engines before any page is looked up, see system/core/sitemap.php
 	$_path = $hyphaRequest->getRelativeUrlPath(false);
 	if ($_path === 'robots.txt') serveRobotsTxt($hyphaUrl);
+	if ($_path === 'llms.txt') serveLlmsTxt($hyphaUrl);
 	if (preg_match('/^sitemap(?:-([1-9][0-9]*))?\.xml$/', $_path, $_matches)) serveSitemap($hyphaUrl, isset($_matches[1]) ? (int)$_matches[1] : null);
 
 	/*
