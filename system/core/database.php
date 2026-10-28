@@ -786,31 +786,64 @@
 		}
 		$real = realpath($filename);
 		$root = realpath($root);
-		if ($real === false || $root && !startsWith($real, $root . DIRECTORY_SEPARATOR)) {
+		// A directory is not a file that can be served either.
+		if ($real === false || !is_file($real) || $root && !startsWith($real, $root . DIRECTORY_SEPARATOR)) {
 			http_response_code(404);
+			// The file name comes from the request, so do not
+			// let the browser read this message as HTML.
+			header('Content-Type: text/plain; charset=utf-8');
 			die("Invalid filename: $filename");
 		}
 		// TODO: Use X-Sendfile header to let Apache serve the file?
 		$filesize = filesize($filename);
-		$headers = getallheaders();
+		// Supports one range of bytes, as bytes=first-last,
+		// bytes=first- or bytes=-suffixlength (RFC 9110, section
+		// 14.1.2). The last position is included. A Range header
+		// with several ranges, another unit or an invalid range
+		// is ignored and the whole file is sent, as RFC 9110
+		// allows. $_SERVER is used instead of getallheaders(),
+		// because HTTP/2 sends the header name in lower case.
+		$start = 0;
+		$end = $filesize - 1;
+		$partial = false;
+		$range = isset($_SERVER['HTTP_RANGE']) ? trim($_SERVER['HTTP_RANGE']) : '';
 		$matches = [];
-		// Only supports fully-qualified bytes=start-end ranges,
-		// not `bytes=-suffixlength` or `bytes=start-` or
-		// multi-part ranges.
-		if (array_key_exists('Range', $headers) && preg_match('/bytes=(\d+)-(\d+)$/', $headers['Range'], $matches)) {
-			// https://developer.mozilla.org/en-US/docs/Web/HTTP/Range_requests
-			// https://stackoverflow.com/questions/9629223/audio-duration-returns-infinity-on-safari-when-mp3-is-served-from-php
-			$start = intval($matches[1]);
-			$end = intval($matches[2]);
-		} else {
-			$start = 0;
-			$end = $filesize;
+		if (preg_match('/^bytes=(\d*)-(\d*)$/', $range, $matches) && ($matches[1] !== '' || $matches[2] !== '')) {
+			if ($matches[1] === '') {
+				// The last bytes of the file.
+				$suffix = intval($matches[2]);
+				$satisfiable = $suffix > 0 && $filesize > 0;
+				$start = max(0, $filesize - $suffix);
+				$partial = true;
+			} else {
+				$start = intval($matches[1]);
+				$satisfiable = $start < $filesize;
+				if ($matches[2] !== '') {
+					// A last position before the first is
+					// invalid: ignore the range.
+					$partial = intval($matches[2]) >= $start;
+					if ($partial) $end = min(intval($matches[2]), $filesize - 1);
+				} else {
+					$partial = true;
+				}
+			}
+			if ($partial && !$satisfiable) {
+				// RFC 9110, section 15.5.17.
+				http_response_code(416);
+				header('Content-Range: bytes */' . $filesize);
+				exit;
+			}
+			if (!$partial) $start = 0;
 		}
-		$bytesize = $end - $start;
 		header('Content-Type: ' . getMimeType($filename));
-		header('Content-Length: ' . (string)($bytesize));
-		header('Content-Range: bytes ' . $start . '-' . $end. '/' . $filesize);
 		header('Accept-Ranges: bytes');
+		// Content-Range only on a partial answer (RFC 9110, section
+		// 14.4): Apache (mod_deflate) also does not compress an
+		// answer that has one.
+		if ($partial) {
+			header('Content-Length: ' . (string)($end - $start + 1));
+			header('Content-Range: bytes ' . $start . '-' . $end . '/' . $filesize);
+		}
 
 		// Allow caching of the response (overriding default PHP
 		// headers that disallow all caching).
@@ -822,13 +855,13 @@
 		header('Pragma: public');
 		header('Cache-Control: public, max-age=86400');
 
-		if ($start === 0 && $end === $filesize) {
+		if (!$partial) {
 			readfile($filename);
 		} else {
 			http_response_code(206); // Partial content
 			$handle = fopen($filename, "r");
 			fseek($handle, $start);
-			$left = $end - $start;
+			$left = $end - $start + 1;
 			$BLOCK_SIZE = 16*1024;
 			while (!feof($handle) && ($left > 0) && (connection_status() == CONNECTION_NORMAL)) {
 				print(fread($handle, min($BLOCK_SIZE, $left)));
