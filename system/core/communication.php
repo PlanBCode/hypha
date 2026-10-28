@@ -46,16 +46,31 @@
 		}
 		$messageHtml .= '	</head>' . "\r\n";
 		$messageHtml .= '	<body>' . "\r\n";
-		// RFC5322 specifies lines must not be longer than 998
-		// characters, so wrap them (a bit conservativelly).
-		// Wrapping should be safe for HTML content.
-		// https://tools.ietf.org/html/rfc5322#section-2.1.1
-		$messageHtml .= wordwrap(addBaseUrl(dewikify_html($message)), 900, "\r\n");
+		$messageHtml .= addBaseUrl(dewikify_html($message));
 		$messageHtml .= '	</body>' . "\r\n";
 		$messageHtml .= '</html>' . "\r\n";
 
+		if (preg_match("/[^\r\n\t\x20-\x7e]/", $messageHtml)) {
+			// Apply quoted_printable to allow non-ASCII content.
+			// This also handles wordwrapping to keep line lengths
+			// (well) within the RFC5322 max 998 chars.
+			$messageEncoded = mailEncodeQuotedPrintable($messageHtml);
+			$transferEncoding = 'quoted-printable';
+		} else {
+			// Just do wordwrapping to keep line lengths short
+			// enough (follow the quoted-printable max length
+			// instead of the RFC5322 998 bytes). Note that this
+			// only cuts at spaces (cut_long_words defaults to
+			// false), which prevents cutting up multi-byte utf-8,
+			// but can also produce lines longer than 76 chars
+			// (which is ok if they are shorter than 998 bytes).
+			$messageEncoded = wordwrap($messageHtml, 76, "\r\n");
+			$transferEncoding = '7bit';
+		}
+
 		$headers = 'MIME-Version: 1.0' . "\r\n";
 		$headers .= 'Content-type: text/html; charset=utf-8' . "\r\n";
+		$headers .= 'Content-Transfer-Encoding: ' . $transferEncoding . "\r\n";
 		$headers .= mailEncodeAddressHeader('From', $senderName, $senderEmail) . "\r\n";
 		$headers .= 'Reply-To: ' . $senderEmail . "\r\n";
 		$headers .= 'X-Mailer: PHP/' . phpversion() . "\r\n";
@@ -70,7 +85,7 @@
 				$error[] = $receiver;
 				continue;
 			}
-			$success = mail($receiver, $mailSubject, $messageHtml, $headers, '-f '.$senderEmail);
+			$success = mail($receiver, $mailSubject, $messageEncoded, $headers, '-f '.$senderEmail);
 			if (!$success) {
 				$error[] = $receiver;
 			}
@@ -216,6 +231,56 @@
 		else
 			$result .= ' ' . $suffix;
 
+		return $result;
+	}
+
+	/**
+	 * Encodes a email body as quoted-printable according to the rules of
+	 * RFC2045 section 6.7.
+	 *
+	 * Note that PHP has quoted_printable_encode which does exactly this,
+	 * but it is broken for some utf-8 strings
+	 * (https://github.com/php/php-src/issues/25284), so this reimplements
+	 * it.
+	 *
+	 * @param string $content The content to be encoded.
+	 *
+	 * @return string         The resulting header
+	 */
+        function mailEncodeQuotedPrintable($content) {
+		// Quoted-printable lines can be max 76 characters
+		$max_line_len = 76;
+
+		$result = '';
+		$room = $max_line_len;
+
+		// This splits on *characters*, since we cannot split a multi-byte char over multiple encoded-words.
+		foreach (mb_str_split(mb_scrub($content), 1, 'UTF-8') as $c) {
+			// Note that this matches *bytes*, since the output should be 7-bit ASCII
+			// Match printable ASCII except tab, space and =
+			// This does *not* encode any CR and LF, though the
+			// spec only specifies CRLF combinations to be passed
+			// through unencoded, but well.
+			// This *does* include space and tab, which is strictly
+			// only required when followed directly by a CRLF, but
+			// not encoding other space requires more complex code,
+			// so just encode everything.
+			if (preg_match("/[^\n\r\x21-\x3c\x3e-\x7e]|=/", $c))
+				$to_append = implode('', array_map(fn ($b) => sprintf('=%02X', ord($b)), str_split($c)));
+			else
+				$to_append = $c;
+
+			if ($c == "\n" || $c == "\r") {
+				$room = $max_line_len;
+			} else if ($room < strlen($to_append) + 1 /* = */) {
+				# This = creates a softwrap, where the CRLF will be removed on decode
+				$result .= "=\r\n";
+				$room = $max_line_len;
+			}
+
+			$result .= $to_append;
+			$room -= strlen($to_append);
+		}
 		return $result;
 	}
 
