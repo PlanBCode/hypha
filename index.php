@@ -64,6 +64,11 @@
 	// jump to installation procedure when hypha.xml is missing
 	if (!is_file('data/hypha.xml')) header('Location: ' . $hyphaUrl . 'hypha.php');
 
+	// Answer search engines before any page is looked up, see system/core/sitemap.php
+	$_path = $hyphaRequest->getRelativeUrlPath(false);
+	if ($_path === 'robots.txt') serveRobotsTxt($hyphaUrl);
+	if (preg_match('/^sitemap(?:-([1-9][0-9]*))?\.xml$/', $_path, $_matches)) serveSitemap($hyphaUrl, isset($_matches[1]) ? (int)$_matches[1] : null);
+
 	/*
 		Group: Stage 4 - Load website data
 		Website data is loaded, see chapter about <Base> functions. The HTMLDocument $hyphaHtml is loaded with the website default layout.
