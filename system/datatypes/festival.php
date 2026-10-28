@@ -20,6 +20,7 @@
 		const FIELD_NAME_IMAGE_UPLOAD = 'image_upload';
 		const FIELD_NAME_NAME = 'name';
 		const FIELD_NAME_NOTES = 'notes';
+		const FIELD_NAME_MOTIVATION = 'motivation';
 		const FIELD_NAME_PHONE = 'phone';
 		const FIELD_NAME_TITLE = 'title';
 		const FIELD_NAME_WEBSITE = 'website';
@@ -70,6 +71,7 @@
 		const ATTR_CONTRIBUTION_WEBSITE = 'website';
 		const TAG_CONTRIBUTION_DESCRIPTION = 'description';
 		const TAG_CONTRIBUTION_NOTES = 'notes';
+		const TAG_CONTRIBUTION_MOTIVATION = 'motivation';
 		const TAG_CONTRIBUTION_EVENT = 'event';
 
 		const ATTR_PARTICIPANT_EMAIL_CONFIRMED = 'email-confirmed';
@@ -299,6 +301,12 @@
 					$cell = $table->addRow()->addCell(__('notes') . ': ' . $notes);
 					$cell->setAttribute('colspan', 5);
 					$cell->addClass('notes');
+				}
+				$motivation = $contribution->getOrCreate(self::TAG_CONTRIBUTION_MOTIVATION)->getText();
+				if ($motivation) {
+					$cell = $table->addRow()->addCell(__('motivation') . ': ' . $motivation);
+					$cell->setAttribute('colspan', 5);
+					$cell->addClass('motivation');
 				}
 			}
 			return null;
@@ -701,6 +709,12 @@ EOF;
 							<td><textarea name="[[field-name-notes]]"></textarea></td>
 							<td/>
 						</tr>
+						</tr>
+						<tr>
+							<th><label for="[[field-name-motivation]]">[[motivation]]</label></th>
+							<td><textarea required name="[[field-name-motivation]]"></textarea></td>
+							<td/>
+						</tr>
 					</table>
 EOF;
 				$vars = [
@@ -719,6 +733,8 @@ EOF;
 					'field-name-category' => self::FIELD_NAME_CATEGORY,
 					'notes' => __('festival-field-contribution-notes'),
 					'field-name-notes' => self::FIELD_NAME_NOTES,
+					'motivation' => __('festival-field-contribution-motivation'),
+					'field-name-motivation' => self::FIELD_NAME_MOTIVATION,
 
 				];
 
@@ -746,6 +762,7 @@ EOF;
 				// create form
 				$description = $obj->get(self::TAG_CONTRIBUTION_DESCRIPTION);
 				$notes = $obj->get(self::TAG_CONTRIBUTION_NOTES);
+				$motivation = $obj->get(self::TAG_CONTRIBUTION_MOTIVATION);
 				$formData = [
 					self::FIELD_NAME_NAME => $obj->getAttribute(self::ATTR_CONTRIBUTION_NAME),
 					self::FIELD_NAME_TITLE => $obj->getAttribute(self::ATTR_CONTRIBUTION_TITLE),
@@ -754,6 +771,7 @@ EOF;
 					self::FIELD_NAME_WEBSITE => $obj->getAttribute(self::ATTR_CONTRIBUTION_WEBSITE),
 					self::FIELD_NAME_DESCRIPTION => $description ? $description->getText() : null,
 					self::FIELD_NAME_NOTES => $notes ? $notes->getText() : null,
+					self::FIELD_NAME_MOTIVATION => $motivation ? $motivation->getText() : null,
 				];
 
 				$form->setData($formData);
@@ -824,6 +842,9 @@ EOF;
 
 			$notes = $contribution->getOrCreate(self::TAG_CONTRIBUTION_NOTES);
 			$notes->setText($form->dataFor(self::FIELD_NAME_NOTES, ''));
+
+			$motivation = $contribution->getOrCreate(self::TAG_CONTRIBUTION_MOTIVATION);
+			$motivation->setText($form->dataFor(self::FIELD_NAME_MOTIVATION, ''));
 
 			$this->xml->saveAndUnlock();
 			$edit_url = $this->constructFullPath($this->pagename . '/' . self::PATH_CONTRIBUTE . '/' . $contribution->getId() . '/' . $contribution->getAttribute(self::ATTR_CONTRIBUTION_KEY));
