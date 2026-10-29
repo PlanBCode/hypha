@@ -522,7 +522,9 @@ EOF;
 		while they load, and let them load when they come into view
 		(#681). The size of an image in data/images/ comes from the file.
 		The logo in the header and the first image after it load at once:
-		they are in view. Attributes that are set already are kept.
+		they are in view, also when a datatype made that image lazy, such
+		as the featured image of the first teaser in a list (#698). Other
+		attributes that are set already are kept.
 
 		Parameters:
 		element - A DomWrap\Element to process
@@ -533,6 +535,7 @@ EOF;
 		foreach ($element->findXPath(".//img") as $img) {
 			$inHeader = $img->findXPath("ancestor::*[@id='header']")->length > 0;
 			if (!$inHeader && !$first && !$img->hasAttribute('loading')) $img->setAttribute('loading', 'lazy');
+			if (!$inHeader && $first && $img->getAttribute('loading') === 'lazy') $img->removeAttribute('loading');
 			if (!$inHeader) $first = false;
 			if (!$img->hasAttribute('decoding')) $img->setAttribute('decoding', 'async');
 			if ($img->hasAttribute('width') || $img->hasAttribute('height')) continue;
