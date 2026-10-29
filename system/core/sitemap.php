@@ -283,7 +283,7 @@
 					$excerpt = $xml && $xml->documentElement ? $xml->findXPath('//excerpt')->item(0) : null;
 					$articles[] = [
 						'time' => isset($times[$language->getAttribute('id')]) ? $times[$language->getAttribute('id')] : 0,
-						'line' => '- [' . $label($title ? $title->textContent : showPagename($language->getAttribute('name'))) . '](' . $url . ')' . ($excerpt && $plain($excerpt->textContent) !== '' ? ': ' . $short($plain($excerpt->textContent), 200) : ''),
+						'line' => '- [' . $label($title ? $title->textContent : showPagename($language->getAttribute('name'))) . '](' . $url . ')' . ($excerpt && hypha_plainText($excerpt) !== '' ? ': ' . $short(hypha_plainText($excerpt), 200) : ''),
 					];
 				}
 				else {
@@ -291,7 +291,7 @@
 					// The text of the default page summarises the site.
 					if ($summary === '' && $xml && $xml->documentElement && $language->getAttribute('name') === hypha_getDefaultPage()) {
 						$version = getCurrentVersionNode($xml->findXPath('language')->item(0));
-						if ($version) $summary = $short($plain($version->textContent), 300);
+						if ($version) $summary = $short(hypha_plainText($version), 300);
 					}
 				}
 			}
