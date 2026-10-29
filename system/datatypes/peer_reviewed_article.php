@@ -641,7 +641,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 			'mainEntityOfPage' => $this->constructFullPath($this->pagename),
 			'inLanguage' => $this->language,
 		];
-		$excerpt = trim(preg_replace('/\s+/', ' ', $this->getExcerpt()->textContent));
+		$excerpt = hypha_plainText($this->getExcerpt());
 		if ($excerpt)
 			$data['description'] = $excerpt;
 		$featuredImageSrc = $this->xml->documentElement->getOrCreate(self::FIELD_NAME_FEATURED_IMAGE)->getText();
