@@ -547,15 +547,10 @@ EOF;
 		$title = $pagename ? trim($clean($pagename->textContent), ' *') : '';
 		if ($title === '') $title = $siteTitle;
 		$text = '';
-		if ($hyphaPage instanceof peer_reviewed_article && $hyphaPage->getExcerpt()) $text = $clean($hyphaPage->getExcerpt()->textContent);
+		if ($hyphaPage instanceof peer_reviewed_article && $hyphaPage->getExcerpt()) $text = hypha_plainText($hyphaPage->getExcerpt());
 		if ($text === '') {
 			$main = $doc->findXPath('//*[@id="main"]')->item(0);
-			if ($main) {
-				$copy = $main->cloneNode(true);
-				foreach (iterator_to_array($copy->getElementsByTagName('script')) as $script) $script->parentNode->removeChild($script);
-				foreach (iterator_to_array($copy->getElementsByTagName('style')) as $style) $style->parentNode->removeChild($style);
-				$text = $clean($copy->textContent);
-			}
+			if ($main) $text = hypha_plainText($main);
 		}
 		// The page index is a list of names: its title says more.
 		if ($request->getSystemPage() == HyphaRequest::HYPHA_SYSTEM_PAGE_INDEX) $text = '';
