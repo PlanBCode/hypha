@@ -1470,7 +1470,7 @@ EOF;
 			$commentHtml .= ' | ' . ($resolved ? __('art-is-resolved') : __('art-is-blocking'));
 		}
 		$commentHtml .= '</p>';
-		return $this->html->createFromHtml($commentHtml);
+		return $this->html->createFromHtml($commentHtml, "rendering comments");
 	}
 
 	/**

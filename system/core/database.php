@@ -86,8 +86,10 @@
 	/*
 	 * Shared superclass for Hypha's XML and HTMLDocument class.
 	 */
-	class HyphaDomDocument extends DOMDocument {
+	abstract class HyphaDomDocument extends DOMDocument {
 		use HyphaDomAccessors;
+
+		const XML_HTML_UNKNOWN_TAG = 801;
 
 		function __construct() {
 			parent::__construct('1.0', 'UTF-8');
@@ -110,15 +112,16 @@
 			Parses the given HTML string and returns the parsed
 			nodes, imported into this document, as an array of
 			detached nodes.
+
+			$action is a string or callback that describes the
+			action being performed for the log in case of parse errors.
 		*/
-		public function createFromHtml(string $html) {
+		public function createFromHtml(string $html, string|callable $action = "") {
 			$class = get_class($this);
 			$newdoc = new $class();
-			if (!$newdoc->loadHTML('<?xml encoding="utf-8"?' . '>' . $html))
-				throw new InvalidArgumentException("Failed to parse HTML: $html");
-			if ($newdoc->documentElement === null) {
-				throw new InvalidArgumentException("Failed to parse HTML: $html");
-			}
+			$source = '<?xml encoding="utf-8"?' . '>' . $html;
+			if (!$newdoc->loadStringHandleErrors($source, $action))
+				throw new InvalidArgumentException("Failed to parse HTML while {$action()}: $html");
 			$body = $newdoc->documentElement->childNodes->item(0);
 			if ($body->tagName != 'body')
 				throw new InvalidArgumentException("First child of parsed HTML is not body, but {$body->tagName}");
@@ -134,6 +137,56 @@
 				$nodes[] = $imported->removeChild($imported->firstChild);
 			return $nodes;
 		}
+
+		/**
+			Function: loadStringHandleErrors
+
+			Loads HTML or XML (depending on subclass) from the
+			given string. Collects any errors during the loading
+			and logs them with additional detail.
+
+			$action is a string or callback that describes the
+			action being performed for the log in case of parse errors.
+
+			Returns true when the load was (somewhat) successful,
+			false when nothing was loaded.
+		*/
+		protected function loadStringHandleErrors(string $source, string|callable $action) : bool {
+			$previousSetting = libxml_use_internal_errors(true);
+			libxml_clear_errors();
+
+			$this->loadString($source, 0);
+			$errors = libxml_get_errors();
+			if (count($errors) > 0) {
+				$lines = explode("\n", $source);
+				foreach ($errors as $error) {
+					// Ignore warnings for unknown tags (e.g. macro or HTML5 tags), log the rest
+					if ($error->code !== self::XML_HTML_UNKNOWN_TAG) {
+						$trimmed = trim($error->message);
+						$action_string = is_string($action) ? $action : $action();
+						$line = $lines[$error->line - 1];
+						$map = [LIBXML_ERR_WARNING => "warning", LIBXML_ERR_ERROR => "error", LIBXML_ERR_FATAL => "fatal error"];
+						$level = $map[$error->level] ?? "unknown error level";
+						// Note that the column number is (documented to be) usually incorrect or zero, but log it just in case
+						$message = "While $action_string: libxml $level at line {$error->line} and column {$error->column}: $trimmed. Problematic line: $line";
+						trigger_error($message, E_USER_WARNING);
+					}
+				}
+				libxml_clear_errors();
+			}
+			libxml_use_internal_errors($previousSetting);
+			/*
+			Return value is not influenced by the presence of
+			errors, since the errors are typically minor and still
+			produce a working DOM, so instead only fail if nothing
+			was produced.
+			*/
+			return $this->documentElement !== null;
+		}
+
+
+		// Implementing classes should call loadXML or loadHTML as appropriate
+		abstract protected function loadString(string $source, int $options);
 	}
 
 	class Xml extends HyphaDomDocument {
@@ -181,8 +234,14 @@
 
 			$contents = $this->file->read();
 
-			if ($contents)
-				parent::loadXml($contents);
+			if ($contents) {
+				if (!$this->loadStringHandleErrors($contents, "loading Xml from $filename"))
+					throw new InvalidArgumentException("Failed to parse Xml from $filename");
+			}
+		}
+
+		protected function loadString(string $source, int $options) {
+			$this->loadXml($source, $options);
 		}
 
 		/*
@@ -385,8 +444,15 @@
 		 * to the current node.
 		 */
 		function appendHtml(string $html) {
-			if ($html)
-				$this->appendChildren($this->ownerDocument->createFromHtml($html));
+			if ($html) {
+				// This is a callback to not waste time in the common non-error case
+				$action = function() {
+					$id = $this->getId();
+					$class = $this->getAttribute('class');
+					return 'adding HTML to ' . $this->tagName . ($id ? '#' . $id : '') . ($class ? '.' . str_replace(' ', '.', $class) : '');
+				};
+				$this->appendChildren($this->ownerDocument->createFromHtml($html, $action));
+			}
 		}
 
 		/*
