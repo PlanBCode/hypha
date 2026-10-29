@@ -19,6 +19,7 @@
 		const PATH_EDIT = 'edit';
 		const PATH_TRANSLATE = 'translate';
 		const PATH_REVERT = 'revert';
+		const PATH_RSS = 'rss';
 
 		const CMD_SAVE = 'edit';
 		const CMD_TRANSLATE = 'translate';
@@ -43,6 +44,7 @@
 				case [self::PATH_TRANSLATE, null]:                return $this->translateView($request);
 				case [self::PATH_TRANSLATE, self::CMD_TRANSLATE]: return $this->translateAction($request);
 				case [self::PATH_REVERT,    self::CMD_REVERT]:    return $this->revertAction($request);
+				case [self::PATH_RSS,       null]:                return $this->rssView($request);
 			}
 
 			return '404';
@@ -62,6 +64,15 @@
 			// show content, and only allow access to previous revisions for logged in clients
 			$version = isUser() ? $request->getPostValue(self::FIELD_NAME_VERSION) : '';
 			$this->html->writeToElement('main', $this->getContent($version));
+
+			// advertise the feed of a page list on this page
+			if (!$this->privateFlag && $this->findFeedMacro($this->html->getElementById('main'))) {
+				$link = $this->html->findOneXPath('head')->createChild('link');
+				$link->setAttribute('rel', 'alternate');
+				$link->setAttribute('type', 'application/rss+xml');
+				$link->setAttribute('title', showPagename($this->pagename));
+				$link->setAttribute('href', $this->constructFullPath($this->pagename . '/' . self::PATH_RSS));
+			}
 
 			// setup addition widgets when client is logged in
 			if (isUser()) {
@@ -344,6 +355,47 @@ EOF;
 			}
 
 			return $message;
+		}
+
+		/**
+		 * Shows the pages of the first macro with rss="yes" on this
+		 * page as an RSS feed.
+		 *
+		 * @param HyphaRequest $request
+		 * @return array|string
+		 */
+		protected function rssView(HyphaRequest $request) {
+			if ($this->privateFlag)
+				return '404';
+			// The macro tag lives in $content, which must stay in scope until the macro has run.
+			$content = $this->html->createElement('div');
+			$content->setInnerHtml($this->getContent());
+			$macro = $this->findFeedMacro($content);
+			if (!$macro)
+				return '404';
+
+			$link = $this->constructFullPath($this->pagename);
+			$title = showPagename($this->pagename) . ' | ' . html_entity_decode(strip_tags(hypha_getTitle()), ENT_QUOTES | ENT_HTML5);
+			return ['rss', $macro->invokeRss($title, $link, $link . '/' . self::PATH_RSS, $this->language)];
+		}
+
+		/**
+		 * Returns the first macro with rss="yes" in the given element
+		 * that can render a feed, or null.
+		 *
+		 * @param HyphaDomElement $element
+		 * @return HyphaMacro|null
+		 */
+		protected function findFeedMacro(HyphaDomElement $element) {
+			$tag = $element->findXPath('.//macro[@rss="yes"][not(ancestor::editor or ancestor::textarea)]')->item(0);
+			if (!$tag)
+				return null;
+			try {
+				$macro = HyphaMacros::getMacro($tag->getAttribute('name'), $this->O_O, $tag, []);
+			} catch (UnexpectedValueException $e) {
+				return null;
+			}
+			return method_exists($macro, 'invokeRss') ? $macro : null;
 		}
 
 		protected function getContent($version = '') {
