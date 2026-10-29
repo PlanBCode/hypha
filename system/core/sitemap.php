@@ -24,6 +24,7 @@
 	const HYPHA_SITEMAP_PRIORITY_MAIN = '0.8';
 	const HYPHA_SITEMAP_PRIORITY_OTHER = '0.6';
 	const HYPHA_SITEMAP_CACHE_FILE = 'data/sitemap.cache';
+	const HYPHA_LLMS_CACHE_FILE = 'data/llms.cache';
 
 	/*
 		Function: hypha_getSitemapAllowed
@@ -124,25 +125,29 @@
 	}
 
 	/*
-		Function: hypha_getSitemapEntries
-		returns the entries of <hypha_buildSitemapEntries>, from a
-		cache in data/ while neither hypha.xml nor a page file has
-		changed. Every save replaces its file by a rename (see
-		HyphaFile), which also changes the time of data/pages, so the
-		times of hypha.xml and data/pages tell whether the cache is
-		still valid.
+		Function: hypha_getSitemapCached
+		returns the result of a build function, from a cache file in
+		data/ while neither hypha.xml nor a page file has changed.
+		Every save replaces its file by a rename (see HyphaFile), which
+		also changes the time of data/pages, so the times of hypha.xml
+		and data/pages tell whether the cache is still valid.
+
+		Parameters:
+		$file - the cache file
+		$build - function that returns the result, as JSON-encodable data
+		$variant - what else the result depends on, such as the root url
 	*/
-	function hypha_getSitemapEntries() {
+	function hypha_getSitemapCached($file, callable $build, $variant = '') {
 		clearstatcache();
-		$key = filemtime('data/hypha.xml') . '-' . filemtime('data/pages');
-		$cache = new HyphaFile(HYPHA_SITEMAP_CACHE_FILE);
-		if (file_exists(HYPHA_SITEMAP_CACHE_FILE)) {
+		$key = filemtime('data/hypha.xml') . '-' . filemtime('data/pages') . '-' . md5($variant);
+		$cache = new HyphaFile($file);
+		if (file_exists($file)) {
 			$cached = json_decode($cache->read(), true);
 			if (is_array($cached) && isset($cached['key'], $cached['entries']) && $cached['key'] === $key)
 				return $cached['entries'];
 		}
 
-		$entries = hypha_buildSitemapEntries();
+		$entries = $build();
 
 		// A change in the same second as this build would have the
 		// same key, so only keep a cache built after that second.
@@ -155,6 +160,15 @@
 			}
 		}
 		return $entries;
+	}
+
+	/*
+		Function: hypha_getSitemapEntries
+		returns the entries of <hypha_buildSitemapEntries>, from a
+		cache, see <hypha_getSitemapCached>.
+	*/
+	function hypha_getSitemapEntries() {
+		return hypha_getSitemapCached(HYPHA_SITEMAP_CACHE_FILE, 'hypha_buildSitemapEntries');
 	}
 
 	/*
@@ -233,15 +247,6 @@
 	}
 
 	/*
-		Function: serveRobotsTxt
-		answers /robots.txt and exits: it names the sitemap, or
-		disallows everything when the site is kept out of search
-		engines.
-
-		Parameters:
-		$rootUrl - the root url of the site, ending in a slash
-	*/
-	/*
 		Function: serveLlmsTxt
 		Answers /llms.txt (llmstxt.org): the site in Markdown for
 		language models and AI agents, with the same public pages as
@@ -257,9 +262,42 @@
 			http_response_code(404);
 			exit;
 		}
-		$plain = fn ($text) => trim(preg_replace('/\s+/u', ' ', (string)$text));
-		// A [ or ] in a title would end the Markdown link.
-		$label = fn ($text) => str_replace(['[', ']'], ['(', ')'], $plain($text));
+		// Reading every page takes long on a large site, so the lists
+		// come from a cache while no page has changed (#701).
+		$parts = hypha_getSitemapCached(HYPHA_LLMS_CACHE_FILE, fn () => hypha_buildLlmsParts($rootUrl), $rootUrl);
+		$out = '# ' . hypha_llmsLabel(hypha_getTitle()) . "\n\n";
+		if ($parts['summary'] !== '') $out .= '> ' . $parts['summary'] . "\n\n";
+		$out .= __('llms-intro', ['sitemap' => $rootUrl . 'sitemap.xml']) . "\n";
+		if ($parts['articles']) $out .= "\n## " . __('llms-articles') . "\n\n" . implode("\n", $parts['articles']) . "\n";
+		if ($parts['pages']) $out .= "\n## " . __('llms-pages') . "\n\n" . implode("\n", $parts['pages']) . "\n";
+		header('Content-Type: text/markdown; charset=utf-8');
+		echo $out;
+		exit;
+	}
+
+	/*
+		Function: hypha_llmsLabel
+		returns text as one line for the label of a Markdown link: a [
+		or ] would end the link.
+
+		Parameters:
+		$text - the text
+	*/
+	function hypha_llmsLabel($text) {
+		return str_replace(['[', ']'], ['(', ')'], trim(preg_replace('/\s+/u', ' ', (string)$text)));
+	}
+
+	/*
+		Function: hypha_buildLlmsParts
+		returns the parts of llms.txt that depend on the pages: the
+		summary, the lines of the published articles, newest first, and
+		the lines of the other pages.
+
+		Parameters:
+		$rootUrl - the root url of the site
+	*/
+	function hypha_buildLlmsParts($rootUrl) {
+		$label = 'hypha_llmsLabel';
 		$short = fn ($text, $length) => mb_strlen($text) > $length ? rtrim(mb_substr($text, 0, mb_strrpos(mb_substr($text, 0, $length), ' ') ?: $length), ' ,.;:') . '…' : $text;
 		$dataTypes = hypha_getDataTypes();
 		$articles = [];
@@ -297,14 +335,7 @@
 			}
 		}
 		usort($articles, fn ($a, $b) => $b['time'] - $a['time']);
-		$out = '# ' . $label(hypha_getTitle()) . "\n\n";
-		if ($summary !== '') $out .= '> ' . $summary . "\n\n";
-		$out .= __('llms-intro', ['sitemap' => $rootUrl . 'sitemap.xml']) . "\n";
-		if ($articles) $out .= "\n## " . __('llms-articles') . "\n\n" . implode("\n", array_column($articles, 'line')) . "\n";
-		if ($pages) $out .= "\n## " . __('llms-pages') . "\n\n" . implode("\n", $pages) . "\n";
-		header('Content-Type: text/markdown; charset=utf-8');
-		echo $out;
-		exit;
+		return ['summary' => $summary, 'articles' => array_column($articles, 'line'), 'pages' => $pages];
 	}
 
 	/*
@@ -317,6 +348,15 @@
 		return 'concat("' . str_replace('"', '", \'"\', "', $string) . '")';
 	}
 
+	/*
+		Function: serveRobotsTxt
+		answers /robots.txt and exits: it names the sitemap, or
+		disallows everything when the site is kept out of search
+		engines.
+
+		Parameters:
+		$rootUrl - the root url of the site, ending in a slash
+	*/
 	function serveRobotsTxt($rootUrl) {
 		header('Content-Type: text/plain; charset=utf-8');
 		echo "User-agent: *\n";
