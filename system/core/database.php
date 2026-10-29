@@ -513,8 +513,8 @@
 		 * Replace the contents of this element with the given HTML.
 		 */
 		function setInnerHtml(string $html) {
-			while ($this->childNodes->length > 0)
-				$this->removeChild($this->childNodes->item(0));
+			while ($this->firstChild !== null)
+				$this->removeChild($this->firstChild);
 			$this->appendHtml($html);
 		}
 
@@ -549,8 +549,8 @@
 		 * a text node, so HTML in the given text is not interpreted).
 		 */
 		function setText($text) {
-			while ($this->childNodes->length > 0)
-				$this->removeChild($this->childNodes->item(0));
+			while ($this->firstChild !== null)
+				$this->removeChild($this->firstChild);
 			$this->appendChild($this->ownerDocument->createTextNode($text));
 		}
 
