@@ -31,6 +31,34 @@
 	}
 
 	/*
+		Function: hypha_plainText
+		Returns the text of an HTML node as one line of plain text, for
+		a description, a feed or a summary. Unlike textContent, it puts
+		a space at a <br> and around a block, so "<p>a</p><p>b</p>"
+		gives "a b" and not "ab". Scripts and styles are left out, and
+		so are a byte-order mark and zero-width characters, which text
+		pasted from a word processor can hold (#697).
+
+		Parameters:
+		$node - DOMNode to take the text of
+	*/
+	function hypha_plainText(DOMNode $node) {
+		$blocks = ['address', 'article', 'aside', 'blockquote', 'dd', 'details', 'div', 'dl', 'dt', 'figcaption', 'figure', 'footer', 'form', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header', 'hr', 'li', 'main', 'nav', 'ol', 'p', 'pre', 'section', 'summary', 'table', 'td', 'th', 'tr', 'ul'];
+		$text = function (DOMNode $node) use (&$text, $blocks) {
+			if ($node instanceof DOMText) return $node->data;
+			if (!$node instanceof DOMElement && !$node instanceof DOMDocument && !$node instanceof DOMDocumentFragment) return '';
+			$name = $node instanceof DOMElement ? strtolower($node->nodeName) : '';
+			if (in_array($name, ['script', 'style', 'template'])) return '';
+			if ($name === 'br') return ' ';
+			$out = '';
+			foreach ($node->childNodes as $child) $out .= $text($child);
+			return in_array($name, $blocks) ? ' ' . $out . ' ' : $out;
+		};
+		$plain = preg_replace('/[\x{FEFF}\x{200B}-\x{200D}\x{2060}]/u', '', $text($node));
+		return trim(preg_replace('/[\s\x{00A0}]+/u', ' ', $plain));
+	}
+
+	/*
 		Function: addBaseUrl
 
 		Makes all internal links absolute.
