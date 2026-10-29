@@ -155,7 +155,7 @@
 			$previousSetting = libxml_use_internal_errors(true);
 			libxml_clear_errors();
 
-			$this->loadString($source, 0);
+			$this->loadString($source, LIBXML_NONET);
 			$errors = libxml_get_errors();
 			if (count($errors) > 0) {
 				$lines = explode("\n", $source);
