@@ -105,7 +105,7 @@ class PagelistMacro extends HyphaMacro {
 			if ($date)
 				$add($item, 'pubDate', $date->format(DATE_RSS));
 			$excerpt = method_exists($page, 'getExcerpt') ? $page->getExcerpt() : null;
-			$description = $excerpt ? trim(preg_replace('/\s+/', ' ', $excerpt->textContent)) : '';
+			$description = $excerpt ? hypha_plainText($excerpt) : '';
 			if ($description)
 				$add($item, 'description', $description);
 		}
