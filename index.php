@@ -73,7 +73,7 @@
 	$hyphaHtml->initForBrowser($hyphaUrl);
 	$hyphaHtml->linkStyle('system/assets/hypha-core.css');
 	$hyphaHtml->linkStyle($O_O->data->themeCss->getFilename());
-	$hyphaHtml->linkScript('system/assets/jquery-1.7.1.min.js');
+	$hyphaHtml->linkScript('system/assets/jquery-3.7.1.min.js');
 	$hyphaHtml->linkScript('system/assets/help.js');
 	$hyphaHtml->linkScript('system/assets/hypha-preview-image-file-field.js');
 	$hyphaHtml->setTitle(hypha_getTitle());
