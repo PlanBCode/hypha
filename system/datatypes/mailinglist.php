@@ -1000,6 +1000,13 @@ EOF;
 
 		/** @var HyphaDomElement $mailing */
 		$mailing = $this->xml->getElementById($mailingId);
+		// Check the status again under the lock: the mailing may have
+		// been sent or deleted since the check above.
+		if (!$mailing instanceof HyphaDomElement || self::MAILING_STATUS_DRAFT !== $mailing->getAttribute(self::FIELD_NAME_STATUS)) {
+			$this->xml->unlock();
+			notify('error', __('unable-to-edit'));
+			return null;
+		}
 		$mailing->setAttribute(self::FIELD_NAME_SUBJECT, $form->dataFor(self::FIELD_NAME_SUBJECT));
 		$mailing->setInnerHtml(wikify_html($form->dataFor(self::FIELD_NAME_MESSAGE)));
 
@@ -1142,9 +1149,24 @@ EOF;
 
 		$senderData = $this->getSenderData();
 
+		// Check for receivers before marking the mailing as sending,
+		// otherwise it would stay "sending" and could never be sent.
+		$xpath = './/' . self::FIELD_NAME_ADDRESS . '[@' . self::FIELD_NAME_STATUS . '="' . self::ADDRESS_STATUS_CONFIRMED . '"]';
+		if (count($this->findAddresses($xpath)) === 0) {
+			notify('error', __('ml-mail-has-invalid-status'));
+			return null;
+		}
+
 		// mark mailing as sending
 		$this->xml->lockAndReload();
 		$mailing = $this->xml->getElementById($mailingId);
+		// Check the status again under the lock: two requests that both
+		// saw "draft" above would otherwise both send the mailing.
+		if (!$mailing instanceof HyphaDomElement || self::MAILING_STATUS_DRAFT !== $mailing->getAttribute(self::FIELD_NAME_STATUS)) {
+			$this->xml->unlock();
+			notify('error', __('ml-mail-has-invalid-status'));
+			return null;
+		}
 		$mailing->setAttribute(self::FIELD_NAME_STATUS, self::MAILING_STATUS_SENDING);
 		$count = 0;
 		$mailing->setAttribute(self::FIELD_NAME_PROGRESS, $count);
@@ -1154,12 +1176,7 @@ EOF;
 		$this->xml->saveAndUnlock();
 
 		// iterate over the confirmed addresses and send the mailing
-		$xpath = './/' . self::FIELD_NAME_ADDRESS . '[@' . self::FIELD_NAME_STATUS . '="' . self::ADDRESS_STATUS_CONFIRMED . '"]';
 		$receivers = $this->findAddresses($xpath);
-		if (count($receivers) === 0) {
-			notify('error', __('ml-mail-has-invalid-status'));
-			return 'reload';
-		}
 
 		$linkToMailing = $this->path(self::PATH_MAILS_VIEW_ID, ['id' => $mailingId]);
 		/** @var HyphaDomElement $receiver */
