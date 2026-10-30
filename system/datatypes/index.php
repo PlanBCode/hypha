@@ -36,6 +36,9 @@
 			$isoLangList = Language::getIsoList();
 			if (!array_key_exists($language, $isoLangList))
 				return '404';
+			// A language that no page uses has no index
+			if (!in_array($language, hypha_getUsedContentLanguages()))
+				return '404';
 			$languageName = $isoLangList[$language];
 			$languageName = substr($languageName, 0, strpos($languageName, ' ('));
 
