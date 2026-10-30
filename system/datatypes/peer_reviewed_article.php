@@ -355,6 +355,10 @@ class peer_reviewed_article extends HyphaDatatypePage {
 			$this->html->getElementById('pagename')->before($countDiv);
 		}
 
+		if (self::STATUS_PUBLISHED === $status && !$this->privateFlag) {
+			$this->addStructuredData($article, $commentCount);
+		}
+
 		// Sharing links
 		$shareDiv = $main->createChild('div');
 	        $shareDiv->addClass('share-links');
@@ -622,6 +626,48 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	}
 
 
+
+	/**
+	 * Adds a NewsArticle in JSON-LD to the head, so search engines know
+	 * who wrote the article, when it was published and how many comments
+	 * it has.
+	 *
+	 * @param HyphaDomElement $article
+	 * @param int $commentCount
+	 */
+	protected function addStructuredData(HyphaDomElement $article, $commentCount) {
+		global $hyphaUrl;
+		$data = [
+			'@context' => 'https://schema.org',
+			'@type' => 'NewsArticle',
+			'headline' => $this->getTitle(),
+			'url' => $this->constructFullPath($this->pagename),
+			'mainEntityOfPage' => $this->constructFullPath($this->pagename),
+			'inLanguage' => $this->language,
+		];
+		$excerpt = hypha_plainText($this->getExcerpt());
+		if ($excerpt)
+			$data['description'] = $excerpt;
+		$featuredImageSrc = $this->xml->documentElement->getOrCreate(self::FIELD_NAME_FEATURED_IMAGE)->getText();
+		if ($featuredImageSrc)
+			$data['image'] = $hyphaUrl . (new HyphaImage($featuredImageSrc))->getUrl();
+		$author = $article->getAttribute(self::FIELD_NAME_AUTHOR);
+		if ($author)
+			$data['author'] = ['@type' => 'Person', 'name' => $author];
+		$published = timestampToDateTime($article->getAttribute(self::FIELD_NAME_PUBLISHED_AT));
+		if ($published)
+			$data['datePublished'] = $published->format(DATE_ATOM);
+		$updated = timestampToDateTime($article->getAttribute(self::FIELD_NAME_UPDATED_AT));
+		if ($updated || $published)
+			$data['dateModified'] = ($updated && $updated > $published ? $updated : $published)->format(DATE_ATOM);
+		$data['publisher'] = ['@type' => 'Organization', 'name' => html_entity_decode(strip_tags(hypha_getTitle()), ENT_QUOTES | ENT_HTML5), 'url' => $hyphaUrl];
+		$data['commentCount'] = $commentCount;
+
+		// JSON_HEX_TAG keeps a "</script>" in the text from ending the script.
+		$script = $this->html->findOneXPath('head')->createChild('script');
+		$script->setAttribute('type', 'application/ld+json');
+		$script->setText(json_encode($data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+	}
 
 	/**
 	 * Deletes the article.
