@@ -340,11 +340,13 @@ EOF;
 			$message = '';
 			foreach($langList as $lang) if (ltrim(getCurrentVersionNode($lang)->getAttribute('xml:id'), 't') > $timestamp) {
 				$language = $lang->getAttribute('xml:id');
-				$pagename = $this->pagename;
+				// the name of the page in the language of this translation
+				$pageLanguage = hypha_pageGetLanguage($this->pageListNode, $language);
+				$pagename = $pageLanguage ? $pageLanguage->getAttribute('name') : $this->pagename;
 
 				$lastVersion = getVersionBefore($lang, $timestamp);
 				$message.= '<hr />';
-				$message.= '<div style="font-size: 14pt; font-weight:bold;">'.$pagename.' ('.$language.') - '.($lastVersion ? 'update (last version '.date('j-m-y, H:i', ltrim($lastVersion, 't')).')' : 'new '.(count($langList) > 1 ? 'translation' : 'page')).'</div>';
+				$message.= '<div style="font-size: 14pt; font-weight:bold;">'.$pagename.' ('.$language.') - '.($lastVersion ? __('digest-update', ['date' => date('j-m-y, H:i', ltrim($lastVersion, 't'))]) : __(count($langList) > 1 ? 'digest-new-translation' : 'digest-new-page')).'</div>';
 				$node = $this->xml->documentElement;
 				$diff = $lastVersion ? htmlDiff(getWikiContent($node, $language, $lastVersion), getWikiContent($node, $language, '')) : getWikiContent($node, $language, '');
 				try {

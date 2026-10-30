@@ -21,12 +21,12 @@
 		}
 		public function imageIndexView(HyphaRequest $request) {
 			$this->html->writeToElement('pagename', __('image-index'));
-			$this->html->writeToElement('main', 'image index is not yet implemented');
+			$this->html->writeToElement('main', __('index-not-implemented'));
 		}
 
 		public function fileIndexView(HyphaRequest $request) {
 			$this->html->writeToElement('pagename', __('file-index'));
-			$this->html->writeToElement('main', 'file index is not yet implemented');
+			$this->html->writeToElement('main', __('index-not-implemented'));
 		}
 
 		public function pageIndexView(HyphaRequest $request) {
