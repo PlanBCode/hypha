@@ -162,7 +162,7 @@
 			// snippets, this also works for snippets, this also works for
 			// snippets.
 			if (!str_starts_with($source, "<?xml"))
-				$source = '<?xml encoding="utf-8"?' . '>' . $source;
+				$source = '<?xml version="1.0" encoding="utf-8"?' . '>' . "\n". $source;
 			$this->loadString($this->sanitizeString($source), LIBXML_NONET);
 			$errors = libxml_get_errors();
 			if (count($errors) > 0) {
