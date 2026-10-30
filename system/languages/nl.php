@@ -59,6 +59,8 @@
 		"default-interface-language" => "standaard interface taal",
 		"digest-interval" => "notificatie-interval",
 		"default-new-page-type" => "standaardtype voor nieuwe pagina's",
+		"allow-index" => "zoekmachines",
+		"allow-index-explain" => "mogen deze site indexeren (uitzetten voor een testkopie)",
 		"edit-icon" => "<i class=\"fa fa-pencil-square-o\" aria-hidden=\"true\"></i>",
 		"file" => "bestand",
 		"image" => "afbeelding",

@@ -177,6 +177,31 @@
 	}
 
 	/*
+		Function: hypha_getAllowIndex
+		returns whether search engines may index this site. True
+		unless the allowIndex attribute is "off", so existing sites
+		stay indexable.
+	*/
+	function hypha_getAllowIndex() {
+		global $hyphaXml;
+		return $hyphaXml->documentElement->getAttribute('allowIndex') !== 'off';
+	}
+
+	/*
+		Function: hypha_setAllowIndex
+		sets hypha allowIndex attribute
+
+		Parameters:
+		$allow - false to ask search engines not to index this site,
+		         e.g. on a test copy
+	*/
+	function hypha_setAllowIndex($allow) {
+		global $hyphaXml;
+		$hyphaXml->requireLock();
+		$hyphaXml->documentElement->setAttribute('allowIndex', $allow ? 'on' : 'off');
+	}
+
+	/*
 		Function: hypha_getDigestInterval
 		returns hypha digestInterval attribute
 	*/
