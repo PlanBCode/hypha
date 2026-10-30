@@ -60,6 +60,8 @@
 	if (startsWith($hyphaQuery, 'system/wymeditor')) serveFile($hyphaQuery, 'system/wymeditor');
 	if (startsWith($hyphaQuery, 'system/bowser')) serveFile($hyphaQuery, 'system/bowser');
 	if (startsWith($hyphaQuery, 'system/assets')) serveFile($hyphaQuery, 'system/assets');
+	// Icons that browsers request at the root come from the active theme
+	if (in_array($hyphaQuery, ['favicon.ico', 'favicon.svg', 'apple-touch-icon.png'])) serveFile('data/themes/' . $O_O->getThemeName() . '/' . $hyphaQuery, 'data/themes');
 
 	// jump to installation procedure when hypha.xml is missing
 	if (!is_file('data/hypha.xml')) header('Location: ' . $hyphaUrl . 'hypha.php');
