@@ -31,6 +31,10 @@
 			$this->xml->loadFromFile('data/pages/' . $pageListNode->getAttribute('id'));
 		}
 
+		public static function getDatatypeName() {
+			return __('datatype.name.textpage');
+		}
+
 		public function process(HyphaRequest $request) {
 			$this->html->writeToElement('pagename', showPagename($this->pagename) . ' ' . asterisk($this->privateFlag));
 
