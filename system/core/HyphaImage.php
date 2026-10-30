@@ -151,6 +151,9 @@
 			else
 				$image = imagecreatefromjpeg($this->getPath());
 
+			if ($image === false)
+				return;
+
 			$orig_w = imagesx($image);
 			$orig_h = imagesy($image);
 

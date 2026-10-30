@@ -187,6 +187,8 @@ class PagelistMacro extends HyphaMacro {
 		$pages = [];
 		foreach ($pageNodes as $node) {
 			$page = createPageInstance($this->O_O, $node);
+			if (!$page)
+				continue;
 			if ($dateFrom || $dateUntil) {
 				$datetime = $page->getSortDateTime();
 				if (!$datetime || ($dateFrom && $datetime < $dateFrom) || ($dateUntil && $datetime >= $dateUntil)) {

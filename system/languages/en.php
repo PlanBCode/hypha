@@ -257,6 +257,7 @@
 		"festival-field-contribution-website" => "Link to website",
 		"festival-field-contribution-category" => "Category",
 		"festival-field-contribution-notes" => "Notes for the organizers",
+		"festival-field-contribution-motivation" => "Why does the contribution fit the event",
 
 		// festival - digest
 		"festival-edited-contribution" => "[[name]] edited contribution: [[contribution]]",
