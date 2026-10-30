@@ -25,8 +25,25 @@
 			$senderEmail = hypha_getEmail();
 		}
 		if (null == $senderName) {
-			$senderName = addSlashes(hypha_getTitle());
+			$senderName = hypha_getTitle();
 		}
+
+		// The sender name and address can be set by members
+		// (mailing list settings) and end up in the From and
+		// Reply-To headers and the -f option, so a line break
+		// would add headers of their own. Only accept a valid
+		// address, drop control characters from the name and
+		// quote or encode the name, so a comma or angle bracket
+		// cannot add another address either.
+		if (!filter_var($senderEmail, FILTER_VALIDATE_EMAIL)) {
+			return __('error-sending-message') . ' ' . $receivers;
+		}
+		$senderName = trim(preg_replace('/[\x00-\x1f\x7f]+/', ' ', $senderName));
+		if (preg_match('/^[\x20-\x7e]*$/', $senderName))
+			$senderName = '"' . addcslashes($senderName, '"\\') . '"';
+		else
+			$senderName = getEncodedSubject($senderName);
+
 		$headers = 'MIME-Version: 1.0' . "\r\n";
 		$headers .= 'Content-type: text/html; charset=utf-8' . "\r\n";
 		$headers .= 'From: ' . $senderName . ' <' . $senderEmail . '>' . "\r\n";
