@@ -27,12 +27,25 @@
 			$sess->changeSessionId();
 			$sess->set('hyphaLogin', $user->getAttribute('id'));
 			$O_O->regenerateCsrfToken();
+			$hash = $user->getAttribute('password');
 		}
 		else {
 			$sess->remove('hyphaLogin');
 			notify('error', __('login-failed').'. <a href="javascript:reregister();">'.__('reregister').'</a>');
 		}
 		$sess->writeAndUnlock();
+
+		// Now that the password is known to be correct, replace a
+		// legacy md5 hash (or one with outdated parameters) by a
+		// current salted hash.
+		if (isset($hash) && passwordNeedsRehash($hash)) {
+			global $hyphaXml;
+			$hyphaXml->lockAndReload();
+			$storedUser = hypha_getUserById($user->getAttribute('id'));
+			if ($storedUser && $storedUser->getAttribute('password') === $hash)
+				$storedUser->setAttribute('password', hashPassword($password));
+			$hyphaXml->saveAndUnlock();
+		}
 		return 'reload';
 	}
 
