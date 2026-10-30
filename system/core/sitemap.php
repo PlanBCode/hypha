@@ -18,6 +18,9 @@
 		A site that is kept out of search engines (allowIndex="off" on
 		the root of hypha.xml, see #404) has no sitemap, and its
 		robots.txt disallows everything.
+
+		Both are answered from a cache in data/ while no page has
+		changed, before hypha.xml is read, as anonymous pages are.
 	*/
 
 	const HYPHA_SITEMAP_MAX_URLS = 50000;
@@ -125,12 +128,41 @@
 	}
 
 	/*
+		Function: hypha_sitemapCacheKey
+		returns the key of a cache of <hypha_getSitemapCached>. Every
+		save replaces its file by a rename (see HyphaFile), which also
+		changes the time of data/pages, so the times of hypha.xml and
+		data/pages tell whether a cache is still valid.
+
+		Parameters:
+		$variant - what else the result depends on, such as the root url
+	*/
+	function hypha_sitemapCacheKey($variant = '') {
+		clearstatcache();
+		return @filemtime('data/hypha.xml') . '-' . @filemtime('data/pages') . '-' . md5($variant);
+	}
+
+	/*
+		Function: hypha_readSitemapCache
+		returns the result in a cache file of <hypha_getSitemapCached>
+		while it is valid, else null. Reads neither hypha.xml nor a page
+		file, so it can answer before the site data is loaded.
+
+		Parameters:
+		$file - the cache file
+		$variant - what else the result depends on, such as the root url
+	*/
+	function hypha_readSitemapCache($file, $variant = '') {
+		$cached = json_decode((string)@file_get_contents($file), true);
+		if (is_array($cached) && isset($cached['key'], $cached['value']) && $cached['key'] === hypha_sitemapCacheKey($variant))
+			return $cached['value'];
+		return null;
+	}
+
+	/*
 		Function: hypha_getSitemapCached
 		returns the result of a build function, from a cache file in
 		data/ while neither hypha.xml nor a page file has changed.
-		Every save replaces its file by a rename (see HyphaFile), which
-		also changes the time of data/pages, so the times of hypha.xml
-		and data/pages tell whether the cache is still valid.
 
 		Parameters:
 		$file - the cache file
@@ -138,38 +170,59 @@
 		$variant - what else the result depends on, such as the root url
 	*/
 	function hypha_getSitemapCached($file, callable $build, $variant = '') {
-		clearstatcache();
-		$key = filemtime('data/hypha.xml') . '-' . filemtime('data/pages') . '-' . md5($variant);
-		$cache = new HyphaFile($file);
-		if (file_exists($file)) {
-			$cached = json_decode($cache->read(), true);
-			if (is_array($cached) && isset($cached['key'], $cached['entries']) && $cached['key'] === $key)
-				return $cached['entries'];
-		}
+		$value = hypha_readSitemapCache($file, $variant);
+		if ($value !== null) return $value;
 
-		$entries = $build();
+		$key = hypha_sitemapCacheKey($variant);
+		$value = $build();
 
 		// A change in the same second as this build would have the
 		// same key, so only keep a cache built after that second.
 		// A cache that cannot be written only costs time.
 		if (max(filemtime('data/hypha.xml'), filemtime('data/pages')) < time()) {
+			$cache = new HyphaFile($file);
 			try {
 				$cache->lock();
-				$cache->writeAndUnlock(json_encode(['key' => $key, 'entries' => $entries]));
+				$cache->writeAndUnlock(json_encode(['key' => $key, 'value' => $value]));
 			} catch (RuntimeException $e) {
 			}
 		}
-		return $entries;
+		return $value;
 	}
 
 	/*
-		Function: hypha_getSitemapEntries
-		returns the entries of <hypha_buildSitemapEntries>, from a
-		cache, see <hypha_getSitemapCached>.
+		Function: hypha_getSitemapCache
+		returns whether the site may be indexed (allowed) and the
+		entries of <hypha_buildSitemapEntries>, from a cache, see
+		<hypha_getSitemapCached>.
 	*/
-	function hypha_getSitemapEntries() {
-		return hypha_getSitemapCached(HYPHA_SITEMAP_CACHE_FILE, 'hypha_buildSitemapEntries');
+	function hypha_getSitemapCache() {
+		return hypha_getSitemapCached(HYPHA_SITEMAP_CACHE_FILE, function () {
+			$allowed = hypha_getSitemapAllowed();
+			return ['allowed' => $allowed, 'entries' => $allowed ? hypha_buildSitemapEntries() : []];
+		});
 	}
+
+	/*
+		Function: hypha_serveSitemapFast
+		Called at the top of index.php, before data/hypha.xml is
+		parsed, like the cache of anonymous pages: answers /robots.txt
+		and /sitemap.xml from the cache of <hypha_getSitemapCache> and
+		exits. Returns when the request is for something else or the
+		cache is missing or outdated, so the normal code path runs and
+		builds the cache.
+	*/
+	function hypha_serveSitemapFast() {
+		if (!in_array($_SERVER['REQUEST_METHOD'], ['GET', 'HEAD'], true)) return;
+		$request = new HyphaRequest();
+		$path = $request->getRelativeUrlPath(false);
+		if ($path !== 'robots.txt' && !preg_match('/^sitemap(?:-([1-9][0-9]*))?\.xml$/', $path, $matches)) return;
+		$sitemap = hypha_readSitemapCache(HYPHA_SITEMAP_CACHE_FILE);
+		if (!$sitemap) return;
+		if ($path === 'robots.txt') serveRobotsTxt($request->getRootUrl(), $sitemap['allowed']);
+		serveSitemap($request->getRootUrl(), isset($matches[1]) ? (int)$matches[1] : null, $sitemap);
+	}
+
 
 	/*
 		Function: hypha_sitemapUrlSet
@@ -177,7 +230,7 @@
 
 		Parameters:
 		$rootUrl - the root url of the site, ending in a slash
-		$entries - entries of <hypha_getSitemapEntries>
+		$entries - entries of <hypha_buildSitemapEntries>
 	*/
 	function hypha_sitemapUrlSet($rootUrl, array $entries) {
 		$xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
@@ -224,13 +277,14 @@
 		Parameters:
 		$rootUrl - the root url of the site, ending in a slash
 		$number - null for /sitemap.xml, else the number of the part
+		$sitemap - the result of <hypha_getSitemapCache>
 	*/
-	function serveSitemap($rootUrl, $number) {
-		if (!hypha_getSitemapAllowed()) {
+	function serveSitemap($rootUrl, $number, array $sitemap) {
+		if (!$sitemap['allowed']) {
 			http_response_code(404);
 			exit;
 		}
-		$chunks = array_chunk(hypha_getSitemapEntries(), HYPHA_SITEMAP_MAX_URLS);
+		$chunks = array_chunk($sitemap['entries'], HYPHA_SITEMAP_MAX_URLS);
 		if ($number === null && count($chunks) <= 1)
 			$xml = hypha_sitemapUrlSet($rootUrl, $chunks ? $chunks[0] : []);
 		else if ($number === null)
@@ -356,11 +410,12 @@
 
 		Parameters:
 		$rootUrl - the root url of the site, ending in a slash
+		$allowed - whether search engines may index the site
 	*/
-	function serveRobotsTxt($rootUrl) {
+	function serveRobotsTxt($rootUrl, $allowed) {
 		header('Content-Type: text/plain; charset=utf-8');
 		echo "User-agent: *\n";
-		if (hypha_getSitemapAllowed()) {
+		if ($allowed) {
 			echo "Allow: /\n";
 			echo "\n";
 			echo 'Sitemap: ' . $rootUrl . "sitemap.xml\n";
