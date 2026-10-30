@@ -634,10 +634,13 @@ EOF;
 		Parameters:
 		page - page node from hypha pagelist
 	*/
-	function versionSelector($page, $xml) {
+	function versionSelector($page, $xml) : HTMLForm | string {
 		if ($xml->hasVersions()) {
-			$_action = makeAction($page->language.'/'.$page->pagename, '', 'version');
-			$html = __('version').': '.'<select class="version" name="version" onchange="'.$_action.'">';
+			$form_tag = $page->html->createElement('form');
+			$form_tag->appendText(__('version').': ');
+			$select = $form_tag->createChild('select');
+			$select->addClass('version');
+			$select->setAttribute('name', 'version');
 
 			$history = array();
 			foreach($xml->getElementById($page->language)->findXPath('version') as $v) {
@@ -648,14 +651,26 @@ EOF;
 				krsort($history);
 				reset($history);
 				$current = key($history);
-				foreach($history as $id => $tag)
-					if ($id!=$current) $html.='<option value="'.$id.'"'.((isset($_POST['version']) && $id == $_POST['version']) ? ' selected="selected"' : '').'>'.$tag.'</option>';
-					else $html.='<option value=""'.(!isset($_POST['version']) ? ' selected="selected"' : '').'>'.$tag.'</option>';
+				foreach($history as $id => $tag) {
+					$option = $select->createChild('option');
+					$option->setText($tag);
+					if ($id != $current) {
+						$option->setAttribute('value', $id);
+					} else {
+						$option->setAttribute('value', '');
+						$option->setAttribute('selected', 'selected');
+					}
+				}
 			}
-			$html.= '</select>';
+
+			$form = $page->html->createForm($form_tag, $_POST);
+			$action = makeAction($page->language.'/'.$page->pagename, '', 'version', $form);
+			$select->setAttribute('onchange', $action);
+			$form->updateDom();
+			return $form;
+		} else {
+			return __('no-versions');
 		}
-		else $html = __('no-versions');
-		return $html;
 	}
 
 	function image_resize($src, $dst, $width, $height) {
