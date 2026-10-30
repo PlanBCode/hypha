@@ -774,19 +774,36 @@
 		$O_O->data->digest->writeAndUnlock($old . $contents);
 	}
 
+	const HYPHA_STATS_LOG = 'data/hypha.stats.log';
+
 	/*
 		Function: hypha_getStats
 		returns hypha stats for the given timestamp
 	*/
 	function hypha_getStats($timestamp) {
 		global $O_O;
+		// Counts of before #677 in hypha.stats, plus one line per
+		// view in hypha.stats.log.
 		$contents = $O_O->data->stats->read();
-		if (!$contents)
-			return 0;
-		$stats = json_decode($contents, true);
-		if (!array_key_exists($timestamp, $stats))
-			return 0;
-		return $stats[$timestamp];
+		$stats = $contents ? json_decode($contents, true) : [];
+		$count = array_key_exists($timestamp, $stats) ? $stats[$timestamp] : 0;
+		$log = HYPHA_STATS_LOG;
+		$handle = @fopen($log, 'c+');
+		if (!$handle) return $count;
+		flock($handle, LOCK_EX);
+		$lines = stream_get_contents($handle);
+		$count += substr_count("\n" . $lines, "\n" . $timestamp . "\n");
+		// Only the views of a later period are still needed: the
+		// digest asks for this period once, when it is over.
+		$keep = '';
+		foreach (explode("\n", $lines) as $line)
+			if ($line !== '' && (int)$line > (int)$timestamp) $keep .= $line . "\n";
+		ftruncate($handle, 0);
+		rewind($handle);
+		fwrite($handle, $keep);
+		flock($handle, LOCK_UN);
+		fclose($handle);
+		return $count;
 	}
 
 	/*
@@ -794,18 +811,11 @@
 		Increment the page view counter for the given timestamp
 	*/
 	function hypha_incrementStats($timestamp) {
-		global $O_O;
-		$contents = $O_O->data->stats->lockAndRead();
-		if (!$contents)
-			$stats = Array();
-		else
-			$stats = json_decode($contents, true);
-
-		if (!array_key_exists($timestamp, $stats))
-			$stats[$timestamp] = 0;
-
-		$stats[$timestamp]++;
-		$O_O->data->stats->writeAndUnlock(json_encode($stats));
+		// One short line per view, appended under a lock that lasts
+		// microseconds: reading, decoding and rewriting the whole
+		// counter file on every view made all requests wait for
+		// each other (#677).
+		file_put_contents(HYPHA_STATS_LOG, $timestamp . "\n", FILE_APPEND | LOCK_EX);
 	}
 
 	/*
