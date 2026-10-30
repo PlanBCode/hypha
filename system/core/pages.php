@@ -516,6 +516,81 @@ EOF;
 		$node->setAttribute('href', $url);
 	}
 
+	/*
+		Function: addSeoMeta
+		Adds a description and Open Graph and Twitter Card tags to the
+		head, so search engines and links shared on social media show
+		the page well (#521, #376). The description is the excerpt of
+		an article, else the start of the text of the page; the image
+		is the first image of the page. Tags that the theme or a
+		datatype set already are kept.
+
+		Parameters:
+		doc - the HTML document of the page
+	*/
+	function addSeoMeta($doc) {
+		global $O_O, $hyphaPage, $hyphaContentLanguage;
+		$head = $doc->findXPath('//head')->item(0);
+		if (!$head) return;
+		// Not for the settings, nor for edit and other views of a page.
+		$request = $O_O->getRequest();
+		if ($request->getSystemPage() == HyphaRequest::HYPHA_SYSTEM_PAGE_SETTINGS || (!$request->isSystemPage() && $request->getView() !== null)) return;
+		$clean = fn ($text) => trim(preg_replace('/\s+/u', ' ', $text));
+		$short = function ($text, $length) {
+			if (mb_strlen($text) <= $length) return $text;
+			$cut = mb_substr($text, 0, $length);
+			$space = mb_strrpos($cut, ' ');
+			return rtrim(mb_substr($cut, 0, $space ?: $length), ' ,.;:') . '…';
+		};
+		$siteTitle = hypha_getTitle();
+		$pagename = $doc->findXPath('//*[@id="pagename"]')->item(0);
+		$title = $pagename ? trim($clean($pagename->textContent), ' *') : '';
+		if ($title === '') $title = $siteTitle;
+		$text = '';
+		if ($hyphaPage instanceof peer_reviewed_article && $hyphaPage->getExcerpt()) $text = hypha_plainText($hyphaPage->getExcerpt());
+		if ($text === '') {
+			$main = $doc->findXPath('//*[@id="main"]')->item(0);
+			if ($main) $text = hypha_plainText($main);
+		}
+		// The page index is a list of names: its title says more.
+		if ($request->getSystemPage() == HyphaRequest::HYPHA_SYSTEM_PAGE_INDEX) $text = '';
+		if ($request->isSystemPage()) $text = $title . ' – ' . $siteTitle . ($text !== '' ? ': ' . $text : '');
+		$description = $short($text !== '' ? $text : $siteTitle, 155);
+		$url = $request->getRootUrl() . $request->getRelativeUrlPath(false);
+		// The first image; findOneXPath() refuses a page with more (#521).
+		$image = $doc->findXPath('//*[@id="main"]//img[@src]')->item(0);
+		$imageUrl = null;
+		if ($image) {
+			$src = $image->getAttribute('src');
+			$imageUrl = preg_match('#^(https?:)?//#i', $src) ? $src : $request->getRootUrl() . ltrim($src, '/');
+		}
+		$tags = [
+			['name', 'description', $description],
+			['property', 'og:title', $title],
+			['property', 'og:description', $description],
+			['property', 'og:type', $hyphaPage instanceof peer_reviewed_article ? 'article' : 'website'],
+			['property', 'og:site_name', $siteTitle],
+			['property', 'og:locale', $hyphaContentLanguage],
+			['property', 'og:url', $url],
+			['name', 'twitter:card', $imageUrl ? 'summary_large_image' : 'summary'],
+			['name', 'twitter:title', $title],
+			['name', 'twitter:description', $description],
+		];
+		if ($imageUrl) {
+			$alt = $image->getAttribute('alt') ?: $title;
+			$tags[] = ['property', 'og:image', $imageUrl];
+			$tags[] = ['property', 'og:image:alt', $alt];
+			$tags[] = ['name', 'twitter:image', $imageUrl];
+			$tags[] = ['name', 'twitter:image:alt', $alt];
+		}
+		foreach ($tags as [$attribute, $name, $content]) {
+			if ($head->findXPath('meta[@' . $attribute . '="' . $name . '"]')->length) continue;
+			$meta = $head->createChild('meta');
+			$meta->setAttribute($attribute, $name);
+			$meta->setAttribute('content', $content);
+		}
+	}
+
 	/* Like wikify, but accepts a HTML string instead of a document */
 	function wikify_html($html) {
 		global $hyphaHtml;
