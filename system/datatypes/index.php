@@ -54,20 +54,23 @@
 			$capital = 'A';
 			$first = true;
 			$htmlList = [];
-			if ($pageList) foreach($pageList as $pagename) {
-				while($capital < strtoupper($pagename[0])) $capital++;
-				if (strtoupper($pagename[0]) == $capital) {
-					if (!$first) {
-						$htmlList[] = '</div>';
+			if ($pageList) {
+				foreach($pageList as $pagename) {
+					while($capital < strtoupper($pagename[0])) $capital++;
+					if (strtoupper($pagename[0]) == $capital) {
+						if (!$first) {
+							$htmlList[] = '</div>';
+						}
+						$htmlList[] = '<div class="letter-wrapper">';
+						$htmlList[] = '<div class="letter">'.$capital.'</div>';
+						$capital++;
+						$first = false;
 					}
-					$htmlList[] = '<div class="letter-wrapper">';
-					$htmlList[] = '<div class="letter">'.$capital.'</div>';
-					$capital++;
-					$first = false;
+					$privatePos = strpos($pagename, '&#;');
+					if ($privatePos) $pagename = substr($pagename, 0, $privatePos);
+					$htmlList[] = '<div class="index-item type_'.$pageListDatatype[$pagename].' '.($privatePos ? 'is-private' : 'is-public').'"><a href="'.$language.'/'.$pagename.'">'.showPagename($pagename).'</a></div>';
 				}
-				$privatePos = strpos($pagename, '&#;');
-				if ($privatePos) $pagename = substr($pagename, 0, $privatePos);
-				$htmlList[] = '<div class="index-item type_'.$pageListDatatype[$pagename].' '.($privatePos ? 'is-private' : 'is-public').'"><a href="'.$language.'/'.$pagename.'">'.showPagename($pagename).'</a></div>';
+				$htmlList[] = '</div>';
 			}
 
 			$html = '<div class="index">';

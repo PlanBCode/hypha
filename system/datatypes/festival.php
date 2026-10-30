@@ -13,6 +13,7 @@
 		protected $xml;
 
 		const FIELD_NAME_AMOUNT = 'amount';
+		const FIELD_NAME_ATTENDING = 'attending';
 		const FIELD_NAME_CATEGORY = 'category';
 		const FIELD_NAME_DESCRIPTION = 'description';
 		const FIELD_NAME_EMAIL = 'email';
@@ -20,6 +21,7 @@
 		const FIELD_NAME_IMAGE_UPLOAD = 'image_upload';
 		const FIELD_NAME_NAME = 'name';
 		const FIELD_NAME_NOTES = 'notes';
+		const FIELD_NAME_MOTIVATION = 'motivation';
 		const FIELD_NAME_PHONE = 'phone';
 		const FIELD_NAME_TITLE = 'title';
 		const FIELD_NAME_WEBSITE = 'website';
@@ -28,7 +30,9 @@
 		const PATH_CONFIRM = 'confirm';
 		const PATH_CONTRIBUTE = 'contribute';
 		const PATH_CONTRIBUTIONS = 'contributions';
+		const PATH_CONTRIBUTION = 'contribution';
 		const PATH_LINEUP = 'lineup';
+		const PATH_INDEX = 'index';
 		const PATH_PARTICIPANTS = 'participants';
 		const PATH_PAYMENTHOOK = 'paymenthook';
 		const PATH_PAY = 'pay';
@@ -70,6 +74,7 @@
 		const ATTR_CONTRIBUTION_WEBSITE = 'website';
 		const TAG_CONTRIBUTION_DESCRIPTION = 'description';
 		const TAG_CONTRIBUTION_NOTES = 'notes';
+		const TAG_CONTRIBUTION_MOTIVATION = 'motivation';
 		const TAG_CONTRIBUTION_EVENT = 'event';
 
 		const ATTR_PARTICIPANT_EMAIL_CONFIRMED = 'email-confirmed';
@@ -90,9 +95,11 @@
 		const ATTR_EVENT_END = 'end';
 
 		const ATTR_DAY_DISPLAY = 'display';
+		const ATTR_DAY_DATE = 'date';
 		const ATTR_DAY_BEGIN = 'begin';
 		const ATTR_DAY_END = 'end';
 		const ATTR_LOCATION_DISPLAY = 'display';
+		const ATTR_LOCATION_LIVESTREAM = 'livestream';
 
 		public function __construct($pageListNode, RequestContext $O_O) {
 			parent::__construct($pageListNode, $O_O);
@@ -131,7 +138,9 @@
 				case [self::PATH_CONTRIBUTE,          null]:             return $this->contributeView($request);
 				case [self::PATH_CONTRIBUTE,          self::CMD_SAVE]:   return $this->contributionSaveAction($request);
 				case [self::PATH_CONTRIBUTIONS,       null]:             return $this->contributionsView($request);
+				case [self::PATH_CONTRIBUTION,        null]:             return $this->contributionView($request);
 				case [self::PATH_LINEUP,              null]:             return $this->lineupView($request);
+				case [self::PATH_INDEX,               null]:             return $this->contributionIndex($request);
 				case [self::PATH_PARTICIPANTS,        null]:             return $this->participantsView($request);
 				case [self::PATH_PAYMENTHOOK,         null]:             return $this->paymenthookView($request);
 				case [self::PATH_PAY,                 null]:             return $this->payView($request);
@@ -300,8 +309,21 @@
 					$cell->setAttribute('colspan', 5);
 					$cell->addClass('notes');
 				}
+				$motivation = $contribution->getOrCreate(self::TAG_CONTRIBUTION_MOTIVATION)->getText();
+				if ($motivation) {
+					$cell = $table->addRow()->addCell(__('motivation') . ': ' . $motivation);
+					$cell->setAttribute('colspan', 5);
+					$cell->addClass('motivation');
+				}
 			}
 			return null;
+		}
+
+		protected function contributionView(HyphaRequest $request) {
+			$id = $request->getArg(1);
+			$contribution = $this->xml->getElementById($id);
+			echo $this->buildContribution($contribution);
+			exit();
 		}
 
 		/**
@@ -477,7 +499,7 @@ EOF;
 			$participant->setAttribute(self::ATTR_PARTICIPANT_EMAIL, $form->dataFor(self::FIELD_NAME_EMAIL));
 			$participant->setAttribute(self::ATTR_PARTICIPANT_PHONE, $form->dataFor(self::FIELD_NAME_PHONE));
 			$participant->setAttribute(self::ATTR_PARTICIPANT_KEY, bin2hex(random_bytes(16)));
-			$participant->setAttribute(self::ATTR_PARTICIPANT_ATTENDING, implode(',', $form->dataFor('attending', [])));
+			$participant->setAttribute(self::ATTR_PARTICIPANT_ATTENDING, implode(',', (array)$form->dataFor(self::FIELD_NAME_ATTENDING, [])));
 			$this->xml->documentElement->getOrCreate(self::TAG_PARTICIPANTS_CONTAINER)->appendChild($participant);
 			if ((float)$form->dataFor(self::FIELD_NAME_AMOUNT, 0) > 0)
 				$this->setupPayment($participant, $form->dataFor(self::FIELD_NAME_AMOUNT, 0));
@@ -701,6 +723,12 @@ EOF;
 							<td><textarea name="[[field-name-notes]]"></textarea></td>
 							<td/>
 						</tr>
+						</tr>
+						<tr>
+							<th><label for="[[field-name-motivation]]">[[motivation]]</label></th>
+							<td><textarea required name="[[field-name-motivation]]"></textarea></td>
+							<td/>
+						</tr>
 					</table>
 EOF;
 				$vars = [
@@ -719,6 +747,8 @@ EOF;
 					'field-name-category' => self::FIELD_NAME_CATEGORY,
 					'notes' => __('festival-field-contribution-notes'),
 					'field-name-notes' => self::FIELD_NAME_NOTES,
+					'motivation' => __('festival-field-contribution-motivation'),
+					'field-name-motivation' => self::FIELD_NAME_MOTIVATION,
 
 				];
 
@@ -746,6 +776,7 @@ EOF;
 				// create form
 				$description = $obj->get(self::TAG_CONTRIBUTION_DESCRIPTION);
 				$notes = $obj->get(self::TAG_CONTRIBUTION_NOTES);
+				$motivation = $obj->get(self::TAG_CONTRIBUTION_MOTIVATION);
 				$formData = [
 					self::FIELD_NAME_NAME => $obj->getAttribute(self::ATTR_CONTRIBUTION_NAME),
 					self::FIELD_NAME_TITLE => $obj->getAttribute(self::ATTR_CONTRIBUTION_TITLE),
@@ -754,6 +785,7 @@ EOF;
 					self::FIELD_NAME_WEBSITE => $obj->getAttribute(self::ATTR_CONTRIBUTION_WEBSITE),
 					self::FIELD_NAME_DESCRIPTION => $description ? $description->getText() : null,
 					self::FIELD_NAME_NOTES => $notes ? $notes->getText() : null,
+					self::FIELD_NAME_MOTIVATION => $motivation ? $motivation->getText() : null,
 				];
 
 				$form->setData($formData);
@@ -825,6 +857,9 @@ EOF;
 			$notes = $contribution->getOrCreate(self::TAG_CONTRIBUTION_NOTES);
 			$notes->setText($form->dataFor(self::FIELD_NAME_NOTES, ''));
 
+			$motivation = $contribution->getOrCreate(self::TAG_CONTRIBUTION_MOTIVATION);
+			$motivation->setText($form->dataFor(self::FIELD_NAME_MOTIVATION, ''));
+
 			$this->xml->saveAndUnlock();
 			$edit_url = $this->constructFullPath($this->pagename . '/' . self::PATH_CONTRIBUTE . '/' . $contribution->getId() . '/' . $contribution->getAttribute(self::ATTR_CONTRIBUTION_KEY));
 
@@ -892,6 +927,55 @@ EOF;
 			}
 		}
 
+		protected function contributionIndex(HyphaRequest $request) {
+			$days = $this->getConfigElement(self::CONFIG_ID_DAYS, self::CONFIG_TAG_DAYS)->childNodes;
+			$daysmap = [];
+			foreach($days as $day)
+				$daysmap[$day->getId()] = $day->getAttribute(self::ATTR_DAY_DATE);
+
+			$streammap = [];
+			$locations = $this->getConfigElement(self::CONFIG_ID_LOCATIONS, self::CONFIG_TAG_LOCATIONS)->childNodes;
+			foreach($locations as $location)
+				$streammap[$location->getId()] = $location->getAttribute(self::ATTR_LOCATION_LIVESTREAM);
+
+			$events = $this->xml->documentElement->findXPath('//' . self::TAG_CONTRIBUTION_EVENT);
+			$festival_title = $this->getConfig(self::CONFIG_ID_TITLE);
+
+			$index = array();
+			foreach($events as $event) {
+				$day = $event->getAttribute(self::ATTR_EVENT_DAY);
+				$date = $daysmap[$day];
+				$begin = explode(':', $event->getAttribute(self::ATTR_EVENT_BEGIN));
+				$end = explode(':', $event->getAttribute(self::ATTR_EVENT_END));
+				$duration = 60*($end[0] - $begin[0]) + $end[1] - $begin[1];
+				$location = $event->getAttribute(self::ATTR_EVENT_LOCATION);
+				$stream = $streammap[$location];
+				$image_filename = $event->parentNode->getAttribute(self::ATTR_CONTRIBUTION_IMAGE);
+				$image = $image_filename ? new HyphaImage($image_filename) : false;
+				$image_url = $image ? $request->getRootUrl() . $image->getUrl() : "";
+
+				$index[] = array(
+					"festival_title" => $festival_title,
+					"contribution_id" => $event->parentNode->getId(),
+					"datetime" => $date.$begin[0].$begin[1],
+					"location" => $location,
+					"duration" => $duration,
+					"name" => $event->parentNode->getAttribute('name'),
+					"title" => $event->parentNode->getAttribute('title'),
+					"description" => $event->parentNode->findOneXPath(self::TAG_CONTRIBUTION_DESCRIPTION)->getText(),
+					"website" => $event->parentNode->getAttribute(self::ATTR_CONTRIBUTION_WEBSITE),
+					"image_url" => $image_url ? $image_url : "",
+					"livestream" => $stream,
+				);
+			}
+			header("Content-Type: application/json");
+			// Allow other webpages to scrape this info. Added for peertube import plugin.
+			header("Access-Control-Allow-Origin: *");
+			header("Access-Control-Allowed-Methods: GET");
+			echo json_encode($index);
+			exit;
+		}
+
 		/**
 		 * Build the HTML for a single contribution in the
 		 * lineup.
@@ -955,6 +1039,45 @@ EOF;
 		}
 
 		protected function timetableView(HyphaRequest $request) {
+			// add javascript code to handle contribution popups when hovering over timetable
+			$script = <<<'EOF'
+				var cursor = {x:0, y:0};
+				document.onmousemove = updateMousePosition;
+
+				function updateMousePosition(e) {
+					e = e || window.event;
+					if (e.pageX || e.pageY) {
+						cursor.x = e.pageX;
+						cursor.y = e.pageY;
+					}
+					else {
+						cursor.x = e.clientX + (document.documentElement.scrollLeft || document.body.scrollLeft) - document.documentElement.clientLeft;
+						cursor.y = e.clientY + (document.documentElement.scrollTop || document.body.scrollTop) - document.documentElement.clientTop;
+					}
+				}
+				function popupContribution(anchor, url) {
+					var popup = document.getElementById('popup');
+					if (anchor) ajax(url, function(response) {
+						var elem = document.getElementById(anchor);
+						var tagname = "";
+						y = elem.offsetHeight;
+						x = cursor.x - 120;
+						while (elem&&(typeof(elem)=="object")&&(typeof(elem.tagName)!="undefined")) {
+							y+= elem.offsetTop;
+							tagname = elem.tagName.toUpperCase();
+							if (tagname=="BODY") elem = 0;
+							if (typeof(elem)=="object") if (typeof(elem.offsetParent)=="object") elem = elem.offsetParent;
+						}
+						popup.style.left = x + 'px';
+						popup.style.top = y + 'px';
+						popup.innerHTML = response;
+						popup.style.visibility = 'visible';
+					});
+					else popup.style.visibility = 'hidden';
+				}
+EOF;
+			$this->html->writeScript($script);
+
 			// Make a list of all days, and per day all
 			// locations and the begin and end time.
 			$contributions = $this->xml->documentElement->getOrCreate(self::TAG_CONTRIBUTION_CONTAINER)->childNodes;
@@ -1048,7 +1171,7 @@ EOF;
 							$id = "a".$d.'_'.$l.'_'.$r;
 							if ($timeslot[0] - $t) $html.= '<td class="'.($line%2 ? 'tableRowOdd' : 'tableRowEven').'" colspan="'.($timeslot[0] - $t).'"></td>';
 							$lineup_url = $this->constructFullPath($this->pagename . '/lineup');
-							$html.= '<td id="'.$id.'" class="hover tableAct '.($line%2 ? 'tableRowOddAct' : 'tableRowEvenAct').'" colspan="'.($timeslot[1] - $timeslot[0]).'"><a href="'.htmlspecialchars($lineup_url).'#'.htmlspecialchars($timeslot[3]).'">'.htmlspecialchars($timeslot[2]);
+							$html.= '<td id="'.$id.'" class="hover tableAct '.($line%2 ? 'tableRowOddAct' : 'tableRowEvenAct').'" colspan="'.($timeslot[1] - $timeslot[0]).'"><a href="'.htmlspecialchars($lineup_url).'#'.htmlspecialchars($timeslot[3]).'" onmouseover="popupContribution(\''.$id.'\',\''.$this->constructFullPath($this->pagename.'/'.self::PATH_CONTRIBUTION.'/'.$timeslot[3]).'\');" onmouseout="popupContribution();">'.htmlspecialchars($timeslot[2]);
 							if ($timeslot[2] && $timeslot[4]) $html.= ' - ';
 							$html.= '<i>'.$timeslot[4].'</i></a></td>';
 							$t = htmlspecialchars($timeslot[1]);

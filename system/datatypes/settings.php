@@ -218,7 +218,7 @@
 			$user = hypha_getUserByRegistrationKey($key);
 			if ($user) {
 				$otheruser = hypha_getUserByName($_POST['settingsUsername']);
-				if ($otheruser && $otheruser != $user) {
+				if ($otheruser && !$otheruser->isSameNode($user)) {
 					notify('error', __('error-user-exists'));
 					$hyphaXml->unlock();
 					return 'reload';
@@ -573,10 +573,12 @@
 		function saveSiteElements($argument) {
 			global $hyphaXml;
 			if (isAdmin()) {
+				$header = wikify_html($_POST['siteHeader']);
+				$footer = wikify_html($_POST['siteFooter']);
 				$hyphaXml->lockAndReload();
 				hypha_setTitle($_POST['siteTitle']);
-				hypha_setHeader(wikify_html($_POST['siteHeader']));
-				hypha_setFooter(wikify_html($_POST['siteFooter']));
+				hypha_setHeader($header);
+				hypha_setFooter($footer);
 				$hyphaXml->saveAndUnlock();
 			}
 			return 'reload';
