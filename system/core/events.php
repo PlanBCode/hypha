@@ -321,6 +321,13 @@
 			header('Location: ' . $url);
 			exit;
 		}
+
+		// Command returns a feed
+		if (count($result) == 2 && $result[0] == 'rss') {
+			header('Content-Type: application/rss+xml; charset=utf-8');
+			echo $result[1];
+			exit;
+		}
 	}
 
 //	/*
