@@ -42,6 +42,31 @@ Your url should look like this `http://<address-of-your-apache>/index.php`
 1. Pull in a git clone, either by downloading a [zip file](https://github.com/PlanBCode/hypha/archive/master.zip)
    and extracting it in your web-folder of choice, or by
    issuing a `git clone https://github.com/PlanBCode/hypha.git .` from the commandline in that folder.
-2. Set write permissions to the folder `data/`, e.g. by issuing a `chmod -R 777 .`
+2. Give the user that the web server runs as (often `www-data` or `apache`) write access to the folder `data/`
+   only, e.g. `chgrp -R www-data data && chmod -R g+w data`. The installer also checks that it can write to the
+   installation folder itself; grant that for the duration of the installation only (e.g. `chgrp www-data . &&
+   chmod g+w .`) and take it away afterwards (`chmod g-w .`). Do not use `chmod -R 777`: it lets every local user
+   and every process on the server change the code and read the data.
 3. Navigate to your web-folder in a browser to open `index.php` provided by hypha, and follow instructions from there.
    Your url should look like this `http://<address-of-your-apache>/index.php`.
+
+## Web Server Configuration
+
+Hypha keeps all site data, including user accounts and password hashes, in `data/`, below the web root. The
+`.htaccess` file routes every request for `data/` through `index.php`, which only serves the theme files. This only
+works when Apache reads `.htaccess` (`AllowOverride FileInfo` or `All` for the Hypha folder) and has `mod_rewrite`
+enabled. With `AllowOverride None`, `data/hypha.xml` can be downloaded by anyone.
+
+As a second line of defence, also deny `data/` in the virtual host, except for the themes:
+
+    <LocationMatch "^/data/(?!themes/)">
+        Require all denied
+    </LocationMatch>
+
+Adjust the path when Hypha is not installed at the root of the site.
+
+Hypha checks this itself: on the first request and then every ten minutes it requests a probe file
+in `data/` from its own web server. When that file can be downloaded, Hypha stops with HTTP 503 and a
+message in the log, until the configuration is fixed. Do not use `<Directory .../data>` with
+`Require all denied`: Apache checks it before the rewrite in `.htaccess` runs, so it also blocks the theme
+stylesheets.
