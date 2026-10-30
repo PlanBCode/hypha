@@ -1609,7 +1609,7 @@ EOF;
 				}
 				if (null !== $msgId) {
 					$path = str_replace('{id}', $discussion->getId(), self::PATH_DISCUSSIONS_CLOSED);
-					$commentList->createChild('p')->appendChild($this->makeActionButton(__($msgId), $path, self::CMD_DISCUSSION_CLOSED));
+					$discussionHtml->createChild('p')->appendChild($this->makeActionButton(__($msgId), $path, self::CMD_DISCUSSION_CLOSED));
 				}
 			}
 
@@ -1622,8 +1622,9 @@ EOF;
 				];
 				$replyForm = $this->createCommentForm($type, $formData, $discussion);
 				$replyForm->updateDom();
-				$replyForm->appendTo($commentList);
-				$commentList->appendChild($this->makeDiscussionActionButton($type, $replyForm, $discussion));
+				// After the list: a list holds only its items (#696).
+				$replyForm->appendTo($discussionHtml);
+				$discussionHtml->appendChild($this->makeDiscussionActionButton($type, $replyForm, $discussion));
 			}
 
 			$reviewCommentContainersSorted[(int)$closed][(int)!$blocking][] = $discussionHtml;
