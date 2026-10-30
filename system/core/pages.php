@@ -65,6 +65,7 @@
 			$hyphaXml->lockAndReload();
 			hypha_deletePage($id);
 			$hyphaXml->saveAndUnlock();
+			hypha_audit('HYP-3001', 'notice', 'Page deleted', ['page_id' => $id, 'language' => $this->language]);
 
 			$file = 'data/pages/' . $id;
 			if (file_exists($file)) {

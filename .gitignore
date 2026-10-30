@@ -5,6 +5,7 @@
 /data/hypha.xml
 /data/digest
 /data/hypha.stats
+/data/hypha.audit
 /mockup/node_modules
 DEBUG
 /data/themes/*/
