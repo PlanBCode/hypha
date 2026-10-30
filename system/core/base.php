@@ -724,6 +724,8 @@
 			"/path/en/pagename" becomes "en/pagename"
 			"/path" becomes ""
 			"/path/images/abc" becomes "images/abc"
+			"/path/en/pagename#anchor" becomes "en/pagename#anchor"
+			"#anchor" stays "#anchor"
 		With / as rootUrlPath
 			"https://mydomain.tld/en/pagename" becomes "en/pagename"
 			"/en/pagename" becomes "en/pagename"
@@ -735,11 +737,21 @@
 		global $O_O;
 
 		$parsed = parse_url($url);
+		// A seriously malformed url, or only a query or a fragment
+		// (?page=2, #top), is left as it is
+		if ($parsed === false || !array_key_exists('host', $parsed) && !array_key_exists('path', $parsed))
+			return $url;
+
 		if (array_key_exists('scheme', $parsed) && $parsed['scheme'] != 'http' && $parsed['scheme'] != 'https')
 			return $url;
 
-		if (array_key_exists('host', $parsed) && $parsed['host'] != $O_O->getRequest()->getHost())
-			return $url;
+		// getHost() is the Host header, which includes a port other
+		// than the default one; host names are case-insensitive
+		if (array_key_exists('host', $parsed)) {
+			$host = $parsed['host'] . (array_key_exists('port', $parsed) ? ':' . $parsed['port'] : '');
+			if (strcasecmp($host, $O_O->getRequest()->getHost()) != 0)
+				return $url;
+		}
 
 		$path = $parsed['path'] ?? '/';
 		$remove = $O_O->getRequest()->getRootUrlPath();
@@ -749,6 +761,12 @@
 		// returns "".
 		if (str_starts_with($path . '/', $remove))
 			$path = substr($path, strlen($remove));
+
+		// Keep the query and the fragment, e.g. en/pagename#anchor
+		if (array_key_exists('query', $parsed))
+			$path .= '?' . $parsed['query'];
+		if (array_key_exists('fragment', $parsed))
+			$path .= '#' . $parsed['fragment'];
 
 		return $path;
 	}
