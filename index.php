@@ -35,6 +35,13 @@
 		- *dataypes* Include modules for available datatypes: textpage, mailinglist, blog et cetera
 	*/
 
+	// Answer /robots.txt and /sitemap.xml from their cache before any
+	// site data is read, or fall through, see system/core/sitemap.php
+	require_once 'system/core/language.php';
+	require_once 'system/core/HyphaRequest.php';
+	require_once 'system/core/sitemap.php';
+	hypha_serveSitemapFast();
+
 	foreach (scandir("system/core/") as $_file) if (substr($_file, -4) == '.php') require_once("system/core/" . $_file);
 
 	// Build request
@@ -66,8 +73,8 @@
 
 	// Answer search engines before any page is looked up, see system/core/sitemap.php
 	$_path = $hyphaRequest->getRelativeUrlPath(false);
-	if ($_path === 'robots.txt') serveRobotsTxt($hyphaUrl);
-	if (preg_match('/^sitemap(?:-([1-9][0-9]*))?\.xml$/', $_path, $_matches)) serveSitemap($hyphaUrl, isset($_matches[1]) ? (int)$_matches[1] : null);
+	if ($_path === 'robots.txt') serveRobotsTxt($hyphaUrl, hypha_getSitemapCache()['allowed']);
+	if (preg_match('/^sitemap(?:-([1-9][0-9]*))?\.xml$/', $_path, $_matches)) serveSitemap($hyphaUrl, isset($_matches[1]) ? (int)$_matches[1] : null, hypha_getSitemapCache());
 
 	/*
 		Group: Stage 4 - Load website data
