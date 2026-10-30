@@ -301,6 +301,7 @@
 						$cell->insertBefore($imgtag, $cell->firstChild);
 						$image = new HyphaImage($contribution->getAttribute(self::ATTR_CONTRIBUTION_IMAGE));
 						$imgtag->setAttribute('src', $image->getUrl(50, 50));
+						$imgtag->setAttribute('alt', $contribution->getAttribute(self::ATTR_CONTRIBUTION_TITLE));
 					}
 				}
 				$notes = $contribution->getOrCreate(self::TAG_CONTRIBUTION_NOTES)->getText();
@@ -696,7 +697,7 @@ EOF;
 							<tr><th><label for="[[field-name-image]]">[[image]]</label></th>
 							<td>
 								<input type="hidden" name="[[field-name-image]]"/>
-								<img data-preview-for="[[field-name-image]]"/><br/>
+								<img data-preview-for="[[field-name-image]]" alt="[[image-preview]]"/><br/>
 								<input type="file" name="[[field-name-image-upload]]"/>
 							</td>
 							<td/>
@@ -740,6 +741,7 @@ EOF;
 					'field-name-description' => self::FIELD_NAME_DESCRIPTION,
 					'image' => __('festival-field-contribution-image'),
 					'field-name-image' => self::FIELD_NAME_IMAGE,
+					'image-preview' => __('image-preview'),
 					'field-name-image-upload' => self::FIELD_NAME_IMAGE_UPLOAD,
 					'website' => __('festival-field-contribution-website'),
 					'field-name-website' => self::FIELD_NAME_WEBSITE,
@@ -1008,7 +1010,7 @@ EOF;
 				$img_width = 150;
 				$img_height = 150;
 				$image = new HyphaImage($image_filename);
-				$html.= '<a href="'.htmlspecialchars($image->getUrl()).'"><img src="'.htmlspecialchars($image->getUrl($img_width, $img_height)).'"/></a>';
+				$html.= '<a href="'.htmlspecialchars($image->getUrl()).'"><img src="'.htmlspecialchars($image->getUrl($img_width, $img_height)).'" alt="'.htmlspecialchars($contribution->getAttribute(self::ATTR_CONTRIBUTION_TITLE)).'"/></a>';
 			}
 			$description = $contribution->findOneXPath(self::TAG_CONTRIBUTION_DESCRIPTION);
 			if ($description) $html.= nl2br(htmlspecialchars($description->getText()));
