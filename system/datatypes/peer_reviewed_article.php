@@ -866,7 +866,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	 * @param null|HyphaDomElement $discussion
 	 * @return null
 	 */
-	protected function discussionRender(HyphaRequest $request, HTMLForm $form, $type, HyphaDomElement $discussion = null) {
+	protected function discussionRender(HyphaRequest $request, HTMLForm $form, $type, ?HyphaDomElement $discussion = null) {
 		// update the form dom so that error can be displayed, if there are any
 		$form->updateDom();
 
@@ -881,7 +881,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		return null;
 	}
 
-	protected function makeDiscussionActionButton($type, HTMLForm $form, HyphaDomElement $discussion = null) {
+	protected function makeDiscussionActionButton($type, HTMLForm $form, ?HyphaDomElement $discussion = null) {
 		$new = $discussion === null;
 		$review = self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER === $type;
 
@@ -1736,7 +1736,7 @@ EOF;
 	 * @param null|HyphaDomElement $discussion
 	 * @return HTMLForm
 	 */
-	protected function createCommentForm($type, array $values = [], HyphaDomElement $discussion = null) {
+	protected function createCommentForm($type, array $values = [], ?HyphaDomElement $discussion = null) {
 		$new = $discussion === null;
 
 		$review = self::FIELD_NAME_DISCUSSION_REVIEW_CONTAINER === $type;
@@ -1803,7 +1803,7 @@ EOF;
 	 * @param null|HyphaDomElement $discussion
 	 * @return string
 	 */
-	protected function constructDiscussionFieldSuffix($type, HyphaDomElement $discussion = null) {
+	protected function constructDiscussionFieldSuffix($type, ?HyphaDomElement $discussion = null) {
 		return $discussion === null ? '/new_' . $type : '/' . $discussion->getId();
 	}
 
@@ -2121,7 +2121,7 @@ EOF;
 	 *
 	 * @return HyphaDomElement
 	 */
-	protected function makeActionButton($label, $path = null, $command = null, $argument = null, HTMLForm $form = null) {
+	protected function makeActionButton($label, $path = null, $command = null, $argument = null, ?HTMLForm $form = null) {
 		$path = $this->language . '/' . $this->pagename . ($path ? '/' . $path : '');
 		$_action = makeAction($path, ($command ? $command : ''), ($argument ? $argument : ''), $form);
 

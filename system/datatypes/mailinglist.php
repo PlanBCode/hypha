@@ -1412,7 +1412,7 @@ EOF;
 	 *
 	 * @return HyphaDomElement
 	 */
-	protected function makeActionButton($label, $path = null, $command = null, $argument = null, HTMLForm $form = null) {
+	protected function makeActionButton($label, $path = null, $command = null, $argument = null, ?HTMLForm $form = null) {
 		$path = $this->language . '/' . $this->pagename . ($path ? '/' . $path : '');
 		$_action = makeAction($path, ($command ? $command : ''), ($argument ? $argument : ''), $form);
 
