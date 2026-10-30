@@ -317,14 +317,14 @@
 					$this->html->writeToElement('pagename', __('view-html-of-theme', ['theme' => $this->O_O->getThemeName()]));
 					$this->html->writeToElement('main', __('cannot-edit-default-theme-explanation', ['link' => $hyphaUrl.'settings/theme']));
 ?>
-<blockquote><pre><code><?=htmlspecialchars(hypha_getHtml());?></code></pre></blockquote>
+<blockquote><pre class="hypha-code"><code><?=htmlspecialchars(hypha_getHtml());?></code></pre></blockquote>
 <?php
 				} else {
 					$this->html->writeToElement('pagename', __('edit-html-of-theme', ['theme' => $this->O_O->getThemeName()]));
 ?>
-<table class="section">
+<table class="section hypha-fit">
 	<tr>
-		<td colspan="2"><textarea name="editHtml" id="editHtml" cols="100" rows="24" wrap="off"><?=htmlspecialchars(hypha_getHtml())?></textarea></td>
+		<td colspan="2"><textarea class="hypha-code" name="editHtml" id="editHtml" cols="100" rows="24" wrap="off"><?=htmlspecialchars(hypha_getHtml())?></textarea></td>
 	</tr>
 </table>
 <?php
@@ -520,12 +520,12 @@
 					$this->html->writeToElement('pagename', __('view-css-of-theme', ['theme' => $this->O_O->getThemeName()]));
 					$this->html->writeToElement('main', __('cannot-edit-default-theme-explanation', ['link' => $hyphaUrl.'settings/theme']));
 ?>
-<blockquote><pre><code><?=hypha_getCss();?></code></pre></blockquote>
+<blockquote><pre class="hypha-code"><code><?=hypha_getCss();?></code></pre></blockquote>
 <?php
 				} else {
 					$this->html->writeToElement('pagename', __('edit-css-of-theme', ['theme' => $this->O_O->getThemeName()]));
 ?>
-<textarea class="section" name="editCss" id="editCss" cols="100%" rows="18" wrap="off"><?=hypha_getCss();?></textarea>
+<textarea class="section hypha-code" name="editCss" id="editCss" cols="100" rows="18" wrap="off"><?=hypha_getCss();?></textarea>
 <?php
 				}
 				$form = $this->html->createForm(ob_get_clean());

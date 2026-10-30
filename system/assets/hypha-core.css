@@ -9,3 +9,29 @@
     display: inline-block;
     margin-right: 15px;
 }
+
+/*
+    Text areas and code fit the column of the theme (#660): a fixed number of
+    columns made them wider than the page.
+*/
+textarea {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+textarea.hypha-code {
+    width: 100%;
+}
+pre.hypha-code {
+    max-width: 100%;
+    overflow: auto;
+}
+table.hypha-fit {
+    width: 100%;
+    table-layout: fixed;
+}
+table.hypha-fit th, table.hypha-fit td {
+    overflow-wrap: anywhere;
+}
+table.hypha-fit label {
+    white-space: normal;
+}
