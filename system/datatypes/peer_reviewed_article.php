@@ -337,7 +337,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		/** @var HyphaDomElement $discussions */
 		$discussions = $this->xml->findOneXPath(self::FIELD_NAME_DISCUSSION_CONTAINER . '/' . self::FIELD_NAME_DISCUSSION_PUBLIC_CONTAINER);
 
-		$xpath = './/' . self::FIELD_NAME_DISCUSSION_COMMENT . '[@' . self::FIELD_NAME_DISCUSSION_COMMENT_PENDING . '!="1"]';
+		$xpath = './/' . self::FIELD_NAME_DISCUSSION_COMMENT . '[not(@' . self::FIELD_NAME_DISCUSSION_COMMENT_PENDING . '="1")]';
 		$commentCollection = $discussions->findXPath($xpath);
 
 		$commentCount = $commentCollection->length;
@@ -348,7 +348,11 @@ class peer_reviewed_article extends HyphaDatatypePage {
 				$commentCountText = __('art-public-comment-count-plural', ['count' => $commentCount]);
 			}
 
-			$this->html->getElementById('pagename')->before('<div class="number_of_comments">'.$commentCountText.'</div>');
+			// DOM before() inserts a string as text, so build the element.
+			$countDiv = $this->html->createElement('div');
+			$countDiv->setAttribute('class', 'number_of_comments');
+			$countDiv->setText($commentCountText);
+			$this->html->getElementById('pagename')->before($countDiv);
 		}
 
 		// Sharing links
