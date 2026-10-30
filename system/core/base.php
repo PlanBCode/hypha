@@ -508,17 +508,65 @@
 	}
 
 	/*
+		Constants: validity of registration keys
+		Seconds a key mailed for an invitation or an account
+		recovery can be used. A recovery link is valid for a short
+		time, since it gives access to an existing account. Keys
+		stored before these limits existed carry no expiry date and
+		no longer work from the moment of the upgrade (see
+		hypha_getUserByRegistrationKey()).
+	*/
+	const HYPHA_INVITATION_KEY_VALIDITY = 432000; // 5 days
+	const HYPHA_RECOVERY_KEY_VALIDITY = 86400; // 1 day
+
+	/*
+		Function: hypha_generateRegistrationKey
+		returns a new, unguessable key for registration or
+		recovering an account (128 bits from a CSPRNG).
+	*/
+	function hypha_generateRegistrationKey() {
+		return bin2hex(random_bytes(16));
+	}
+
+	/*
 		Function: hypha_addUserRegistrationKey
 		sets extra key attribute for registration or recovering account.
 
 		Parameters:
 		$user - DOMElement containing user settings
 		$key
+		$validity - number of seconds the key can be used
 	*/
-	function hypha_addUserRegistrationKey($user, $key) {
+	function hypha_addUserRegistrationKey($user, $key, $validity) {
 		global $hyphaXml;
 		$hyphaXml->requireLock();
 		$user->setAttribute('key', $key);
+		$user->setAttribute('keyExpires', time() + $validity);
+	}
+
+	/*
+		Function: hypha_getUserByRegistrationKey
+		returns the user with the given registration key, or false
+		when no user has it or the key has expired. Keys from
+		before expiry was introduced have no expiry date and are
+		refused; an administrator can send a new invitation with
+		"remind", and users can request a new recovery mail.
+
+		Parameters:
+		$key - the key from the registration link
+	*/
+	function hypha_getUserByRegistrationKey($key) {
+		if (!is_string($key) || $key === '')
+			return false;
+		foreach(hypha_getUserList() as $user) {
+			if (!$user->hasAttribute('key') || !hash_equals($user->getAttribute('key'), $key))
+				continue;
+			$expires = $user->getAttribute('keyExpires');
+			if (!ctype_digit($expires) || (int)$expires < time())
+				return false;
+			return $user;
+		}
+		return false;
 	}
 
 	/*
@@ -533,6 +581,7 @@
 		global $hyphaXml;
 		$hyphaXml->requireLock();
 		$user->removeAttribute('key');
+		$user->removeAttribute('keyExpires');
 	}
 	/*
 		Function: hypha_getPageList
