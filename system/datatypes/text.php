@@ -346,7 +346,18 @@ EOF;
 				$message.= '<hr />';
 				$message.= '<div style="font-size: 14pt; font-weight:bold;">'.$pagename.' ('.$language.') - '.($lastVersion ? 'update (last version '.date('j-m-y, H:i', ltrim($lastVersion, 't')).')' : 'new '.(count($langList) > 1 ? 'translation' : 'page')).'</div>';
 				$node = $this->xml->documentElement;
-				$message.= $lastVersion ? htmlDiff(getWikiContent($node, $language, $lastVersion), getWikiContent($node, $language, '')) : getWikiContent($node, $language, '');
+				$diff = $lastVersion ? htmlDiff(getWikiContent($node, $language, $lastVersion), getWikiContent($node, $language, '')) : getWikiContent($node, $language, '');
+				try {
+					// Doing a textual diff on HTML is
+					// likely to produce invalid HTML, so try to validate it before writing
+					// to the digest.
+					$parsed_diff = $this->html->createFromHtml('<dummy>' . $diff . '</dummy>');
+					$diff = $parsed_diff[0]->getInnerHtml();
+				} catch (Exception $e) {
+					// Oh well.
+					$diff = "Failed to generate diff";
+				}
+				$message .= $diff;
 			}
 
 			return $message;
