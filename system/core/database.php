@@ -440,14 +440,6 @@
 			return $this->hasTextContent() || $this->findXPath($xpath)->length > 0;
 		}
 
-		/**
-		 * Converts the given string to a DOM text node and
-		 * appends the result to the current node.
-		 */
-		function appendText(string $text) {
-			$this->appendChild(new DOMText($text));
-		}
-
 		/* Parse the given string as HTML and append the result
 		 * to the current node.
 		 */
@@ -551,6 +543,15 @@
 			}
 			return $text;
 		}
+
+		/**
+		 * Converts the given string to a DOM text node and
+		 * appends the result to the current node.
+		 */
+		function appendText(string $text) {
+			$this->appendChild(new DOMText($text));
+		}
+
 
 		/**
 		 * Replace the contents of this element with the given text (as
