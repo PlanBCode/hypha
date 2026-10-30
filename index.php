@@ -39,6 +39,10 @@
 
 	// Build request
 	$hyphaRequest = new HyphaRequest();
+	// Absolute urls (also in mails) use the base url configured in
+	// hypha.xml when present, instead of the client-supplied Host
+	// header.
+	$hyphaRequest->setConfiguredRootUrl(hypha_getBaseUrl());
 
 	// Build request context
 	$O_O = new RequestContext($hyphaRequest);
@@ -71,6 +75,14 @@
 
 	$hyphaHtml = new HTMLDocument($O_O->data->themeHtml);
 	$hyphaHtml->initForBrowser($hyphaUrl);
+	// With a configured site address, tell search engines which
+	// address is the real one (e.g. not a test copy or another host
+	// name of the same site).
+	if (hypha_getBaseUrl()) {
+		$canonical = $hyphaHtml->findOneXPath('head')->createChild('link');
+		$canonical->setAttribute('rel', 'canonical');
+		$canonical->setAttribute('href', hypha_getBaseUrl() . $hyphaRequest->getRelativeUrlPath(false));
+	}
 	$hyphaHtml->linkStyle('system/assets/hypha-core.css');
 	$hyphaHtml->linkStyle($O_O->data->themeCss->getFilename());
 	$hyphaHtml->linkScript('system/assets/jquery-1.7.1.min.js');
