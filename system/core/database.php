@@ -119,18 +119,17 @@
 		public function createFromHtml(string $html, string|callable $action = "") {
 			$class = get_class($this);
 			$newdoc = new $class();
-			if (!$newdoc->loadStringHandleErrors($html, $action))
+			if (!$newdoc->loadStringHandleErrors("<dummy>$html</dummy>", $action, LIBXML_HTML_NOIMPLIED))
 				throw new InvalidArgumentException("Failed to parse HTML while {$action()}: $html");
-			$body = $newdoc->documentElement->childNodes->item(0);
-			if ($body->tagName != 'body')
-				throw new InvalidArgumentException("First child of parsed HTML is not body, but {$body->tagName}");
-			// Detach the children from the imported body before
+			if ($newdoc->documentElement->tagName != 'dummy')
+				throw new InvalidArgumentException("First child of parsed HTML is not dummy, but {$newdoc->documentElement->tagName}");
+			// Detach the children from the imported root before
 			// returning them. On PHP 8.2 the libxml nodes of a
 			// detached subtree are freed together with the PHP
 			// object of its root, so returning the childNodes of
-			// the temporary body leaves dangling node objects
+			// the temporary root leaves dangling node objects
 			// ("Couldn't fetch HyphaDomElement").
-			$imported = $this->importNode($body, true);
+			$imported = $this->importNode($newdoc->documentElement, true);
 			$nodes = [];
 			while ($imported->firstChild)
 				$nodes[] = $imported->removeChild($imported->firstChild);
@@ -150,7 +149,7 @@
 			Returns true when the load was (somewhat) successful,
 			false when nothing was loaded.
 		*/
-		protected function loadStringHandleErrors(string $source, string|callable $action) : bool {
+		protected function loadStringHandleErrors(string $source, string|callable $action, int $options = 0) : bool {
 			$previousSetting = libxml_use_internal_errors(true);
 			libxml_clear_errors();
 
@@ -163,7 +162,7 @@
 			// snippets.
 			if (!str_starts_with($source, "<?xml"))
 				$source = '<?xml version="1.0" encoding="utf-8"?' . '>' . "\n". $source;
-			$this->loadString($this->sanitizeString($source), LIBXML_NONET);
+			$this->loadString($this->sanitizeString($source), $options | LIBXML_NONET);
 			$errors = libxml_get_errors();
 			if (count($errors) > 0) {
 				$lines = explode("\n", $source);
