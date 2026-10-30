@@ -71,7 +71,7 @@
 				unlink($file);
 			}
 
-			writeToDigest($hyphaUser->getAttribute('fullname').__('deleted-page').$this->language.'/'.$this->pagename, 'page delete');
+			writeToDigest(htmlspecialchars($hyphaUser->getAttribute('fullname')).__('deleted-page').htmlspecialchars($this->language.'/'.$this->pagename), 'page delete');
 		}
 
 		protected function replacePageListNode(HyphaDomElement $node) {
