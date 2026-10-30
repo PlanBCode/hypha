@@ -43,5 +43,7 @@ Your url should look like this `http://<address-of-your-apache>/index.php`
    and extracting it in your web-folder of choice, or by
    issuing a `git clone https://github.com/PlanBCode/hypha.git .` from the commandline in that folder.
 2. Set write permissions to the folder `data/`, e.g. by issuing a `chmod -R 777 .`
-3. Navigate to your web-folder in a browser to open `index.php` provided by hypha, and follow instructions from there.
+3. Edit `hypha.php` and fill in `$username` and `$password` at the top. The installer and the maintenance tools
+   refuse to log in while these are empty.
+4. Navigate to your web-folder in a browser to open `index.php` provided by hypha, and follow instructions from there.
    Your url should look like this `http://<address-of-your-apache>/index.php`.
