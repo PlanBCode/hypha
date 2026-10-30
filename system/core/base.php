@@ -37,7 +37,9 @@
 	include_once ('database.php');
 	include_once ('language.php');
 	include_once ('crypto.php');
+	include_once ('pagecache.php');
 
+	HyphaCacheGeneration::read();
 	$hyphaXml = new Xml('project', Xml::multiLingualOff, Xml::versionsOff);
 	$hyphaXml->loadFromFile('data/hypha.xml');
 
@@ -544,12 +546,19 @@
 	}
 
 	function hypha_getPage($language, $name) {
-		foreach(hypha_getPageList() as $page) {
-			foreach($page->findXPath('language') as $lang) {
-				if(($lang->getAttribute('id')==$language) && (strtolower($lang->getAttribute('name'))==strtolower($name))) return $page;
+		global $hyphaXml;
+		// One XPath query for all page names instead of one
+		// DOMXPath object per page; rebuilt after a reload.
+		static $map = null, $doc = null;
+		if ($map === null || $doc !== $hyphaXml->documentElement) {
+			$map = [];
+			$doc = $hyphaXml->documentElement;
+			foreach ($hyphaXml->findXPath('pageList/page/language') as $lang) {
+				$key = $lang->getAttribute('id') . '/' . strtolower($lang->getAttribute('name'));
+				if (!isset($map[$key])) $map[$key] = $lang->parentNode;
 			}
 		}
-		return false;
+		return $map[$language . '/' . strtolower($name)] ?? false;
 	}
 
 	function hypha_getPageById($id) {
@@ -805,6 +814,8 @@
 			$stats[$timestamp] = 0;
 
 		$stats[$timestamp]++;
+		// Add the views of cached pages counted in memory.
+		$stats = HyphaPageCache::addPendingViews($stats);
 		$O_O->data->stats->writeAndUnlock(json_encode($stats));
 	}
 
