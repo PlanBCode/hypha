@@ -59,23 +59,28 @@
 			// setup language and tag list for the selected page
 			$this->html->writeToElement('langList', hypha_indexLanguages($this->pageListNode, $this->language));
 
-			// show content, and only allow access to previous revisions for logged in clients
-			$version = isUser() ? $request->getPostValue(self::FIELD_NAME_VERSION) : '';
-			$this->html->writeToElement('main', $this->getContent($version));
+			$version = false;
 
 			// setup addition widgets when client is logged in
 			if (isUser()) {
 				// show a drop down list of revisions
-				$this->html->writeToElement('versionList', versionSelector($this, $this->xml));
-
-				// if a revision is selected, show a 'revert' command button
-				if ($version) {
-					$commands = $this->html->getElementById('pageCommands');
-					$commands->appendChild($this->makeActionButton(__('revert'), self::PATH_REVERT, self::CMD_REVERT));
+				$form = versionSelector($this, $this->xml);
+				$version_list = $this->html->getElementById('versionList');
+				if (is_string($form)) {
+					// Versioning not supported
+					$version_list->append($form);
+				} else {
+					$form->appendTo($version_list);
+					if ($form->isValid())
+						$version = $form->dataFor(self::FIELD_NAME_VERSION);
 				}
-				// if the latest revision is selected, show 'edit' and 'translate' command buttons
-				else {
-					$commands = $this->html->getElementById('pageCommands');
+
+				$commands = $this->html->getElementById('pageCommands');
+				if ($version) {
+					// if a revision is selected, show a 'revert' command button
+					$commands->appendChild($this->makeActionButton(__('revert'), self::PATH_REVERT, self::CMD_REVERT, '', $form));
+				} else {
+					// if the latest revision is selected, show 'edit' and 'translate' command buttons
 					$commands->appendChild($this->makeActionButton(__('edit'), self::PATH_EDIT));
 					$commands->appendChild($this->makeActionButton(__('translate'), self::PATH_TRANSLATE));
 
@@ -85,6 +90,7 @@
 					}
 				}
 			}
+			$this->html->writeToElement('main', $this->getContent($version));
 		}
 
 		/**
@@ -340,7 +346,18 @@ EOF;
 				$message.= '<hr />';
 				$message.= '<div style="font-size: 14pt; font-weight:bold;">'.$pagename.' ('.$language.') - '.($lastVersion ? 'update (last version '.date('j-m-y, H:i', ltrim($lastVersion, 't')).')' : 'new '.(count($langList) > 1 ? 'translation' : 'page')).'</div>';
 				$node = $this->xml->documentElement;
-				$message.= $lastVersion ? htmlDiff(getWikiContent($node, $language, $lastVersion), getWikiContent($node, $language, '')) : getWikiContent($node, $language, '');
+				$diff = $lastVersion ? htmlDiff(getWikiContent($node, $language, $lastVersion), getWikiContent($node, $language, '')) : getWikiContent($node, $language, '');
+				try {
+					// Doing a textual diff on HTML is
+					// likely to produce invalid HTML, so try to validate it before writing
+					// to the digest.
+					$parsed_diff = $this->html->createFromHtml('<dummy>' . $diff . '</dummy>');
+					$diff = $parsed_diff[0]->getInnerHtml();
+				} catch (Exception $e) {
+					// Oh well.
+					$diff = "Failed to generate diff";
+				}
+				$message .= $diff;
 			}
 
 			return $message;

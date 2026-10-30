@@ -69,7 +69,7 @@
 		$condition - when true HTML code for an asterisk is returned, false returns an empty string.
 	*/
 	function asterisk($condition) {
-		return $condition ? '<span style="color:#b90;">&#8727</span>' : '';
+		return $condition ? '<span style="color:#b90;">&#8727;</span>' : '';
 	}
 
 	/*
