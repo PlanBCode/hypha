@@ -101,7 +101,10 @@
 	function buildzip() {
 		// make list of files to include
 		$files = array_keys(index());
-		foreach($_POST as $p => $v) if (substr($p, 0, 6) == 'build_') $files[] = substr($p, 6).'.php';
+		// Only accept a selected module when it is one of the shareable system files of index().
+		// The field name comes from the client and this command needs no login, so without this
+		// check any *.php file the web server can read could be embedded, hypha.php itself included.
+		foreach($_POST as $p => $v) if (substr($p, 0, 6) == 'build_' && in_array(substr($p, 6).'.php', $files, true)) $files[] = substr($p, 6).'.php';
 
 		// get the base script to modify
 		$hypha = file_get_contents('hypha.php');
