@@ -153,6 +153,21 @@
 		}
 
 		/*
+			Function: linkAlternate
+			adds a line to the head section of the document to link a translation of the page
+
+			Parameters:
+			$href - absolute url of the translation
+			$hreflang - language code of the translation, or x-default
+		*/
+		public function linkAlternate($href, $hreflang) {
+			$link = $this->findOneXPath('head')->createChild('link');
+			$link->setAttribute('rel', 'alternate');
+			$link->setAttribute('hreflang', $hreflang);
+			$link->setAttribute('href', $href);
+		}
+
+		/*
 			Function: writeScript
 			adds content to the script element in the head section of the document, creates script element when needed
 
