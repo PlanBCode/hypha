@@ -718,10 +718,7 @@ EOF;
 
 		$html = hypha_substitute($html, $vars);
 
-		$form = $this->html->createForm($html, null);
-
-		// update the form dom so that values and errors can be displayed
-		$form->updateDom();
+		$form = $this->html->createForm($html);
 
 		/** @var HyphaDomElement $main */
 		$main = $this->html->getElementById('main');
