@@ -516,6 +516,27 @@ EOF;
 		$node->setAttribute('href', $url);
 	}
 
+	/*
+		Function: addPageTitle
+		Puts the heading of the page before the site title in <title>:
+		"<heading> | <site title>". The default page keeps the site
+		title alone. Before, every page had the site title only, so tabs,
+		bookmarks and search results could not tell pages apart (#521).
+
+		Parameters:
+		doc - the HTML document of the page
+	*/
+	function addPageTitle($doc) {
+		global $hyphaPage;
+		$site = hypha_getTitle();
+		$heading = $doc->findXPath('//*[@id="pagename"]')->item(0);
+		// The heading, without the asterisk of a private page.
+		$text = $heading ? trim(preg_replace('/\s+/u', ' ', $heading->textContent), " *") : '';
+		if ($text === '' || $text === $site) return;
+		if ($hyphaPage && $hyphaPage->pagename === hypha_getDefaultPage()) return;
+		$doc->setTitle($text . ' | ' . $site);
+	}
+
 	/* Like wikify, but accepts a HTML string instead of a document */
 	function wikify_html($html) {
 		global $hyphaHtml;
