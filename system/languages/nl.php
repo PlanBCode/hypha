@@ -506,8 +506,20 @@
 		"art-start-review" => "start beoordeling",
 		"art-approve(s)" => "beoordeling(en)",
 		"art-unresolved-block(s)" => "onopgeloste breekpunt(en)",
-		"art-date-format-date" => "%e %B %Y", // see for format: https://www.php.net/manual/en/function.date.php
-		"art-date-format-time" => "om %k:%Mu", // see for format: https://www.php.net/manual/en/function.date.php
+		"art-date-format-date" => "%e %B %Y", // strftime format, see peer_reviewed_article::formatTimestamp()
+		"art-date-format-time" => "om %k:%Mu", // strftime format, see peer_reviewed_article::formatTimestamp()
+		"art-month-1" => "januari",
+		"art-month-2" => "februari",
+		"art-month-3" => "maart",
+		"art-month-4" => "april",
+		"art-month-5" => "mei",
+		"art-month-6" => "juni",
+		"art-month-7" => "juli",
+		"art-month-8" => "augustus",
+		"art-month-9" => "september",
+		"art-month-10" => "oktober",
+		"art-month-11" => "november",
+		"art-month-12" => "december",
 		"art-read-more" => "Lees meer",
 
 		// sharing links

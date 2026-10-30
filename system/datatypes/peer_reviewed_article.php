@@ -613,12 +613,49 @@ class peer_reviewed_article extends HyphaDatatypePage {
 			/** @var HyphaDomElement $publishDate */
 			$publishDate = $publish_div->createChild('span');
 			$publishDate->setAttribute('class', 'date');
-			$publishDate->setText(strftime(__('art-date-format-date'), $publishedTimestamp));
+			$publishDate->setText($this->formatTimestamp(__('art-date-format-date'), $publishedTimestamp));
 			/** @var HyphaDomElement $publishTime */
 			$publishTime = $publish_div->createChild('span');
 			$publishTime->setAttribute('class', 'time');
-			$publishTime->setText(strftime(__('art-date-format-time'), $publishedTimestamp));
+			$publishTime->setText($this->formatTimestamp(__('art-date-format-time'), $publishedTimestamp));
 		}
+	}
+
+	/**
+	 * Formats a timestamp with a strftime format, without the
+	 * strftime function (deprecated since PHP 8.1) and without
+	 * depending on the locale: month names come from the
+	 * dictionary.
+	 * Supports %B, %d, %e, %m, %Y, %y, %H, %k, %I, %l, %M, %S,
+	 * %p, %P and %%; other conversions are left as they are.
+	 *
+	 * @param string $format
+	 * @param int|string $timestamp
+	 * @return string
+	 */
+	protected function formatTimestamp($format, $timestamp) {
+		$date = new DateTime();
+		$date->setTimestamp((int)$timestamp);
+		return preg_replace_callback('/%(.)/', function($match) use ($date) {
+			switch ($match[1]) {
+				case 'B': return __('art-month-' . $date->format('n'));
+				case 'd': return $date->format('d');
+				case 'e': return sprintf('%2d', $date->format('j'));
+				case 'm': return $date->format('m');
+				case 'Y': return $date->format('Y');
+				case 'y': return $date->format('y');
+				case 'H': return $date->format('H');
+				case 'k': return sprintf('%2d', $date->format('G'));
+				case 'I': return $date->format('h');
+				case 'l': return sprintf('%2d', $date->format('g'));
+				case 'M': return $date->format('i');
+				case 'S': return $date->format('s');
+				case 'p': return $date->format('A');
+				case 'P': return $date->format('a');
+				case '%': return '%';
+				default: return $match[0];
+			}
+		}, $format);
 	}
 
 
