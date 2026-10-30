@@ -163,7 +163,7 @@
 			// snippets.
 			if (!str_starts_with($source, "<?xml"))
 				$source = '<?xml encoding="utf-8"?' . '>' . $source;
-			$this->loadString($source, LIBXML_NONET);
+			$this->loadString($this->sanitizeString($source), LIBXML_NONET);
 			$errors = libxml_get_errors();
 			if (count($errors) > 0) {
 				$lines = explode("\n", $source);
@@ -191,6 +191,25 @@
 			*/
 			return $this->documentElement !== null;
 		}
+
+		/**
+			Function: sanitizeString
+
+			Sanitize a string according to the XML 1.0 allowed
+			characters. This replaces anything that is invalid with ?.
+
+			Can be applied to strings to be embedded in XML (or
+			HTML), but also to strings containing serialized XML or
+			HTML.
+		*/
+		public function sanitizeString(string $str) {
+			// This ensures that the string is valid utf-8, replacing anything invalid with ?
+			$str = mb_scrub($str, 'UTF-8');   // PHP >= 7.2; replaces invalid byte sequences with '?'
+			// This replaces everything not in the XML 1.0 allowed unicoded point list with a question mark
+			// The u flag is needed to make this work on utf-8 characters instead of raw bytes.
+			return preg_replace('/[^\x{9}\x{A}\x{D}\x{20}-\x{D7FF}\x{E000}-\x{FFFD}\x{10000}-\x{10FFFF}]/u', '?', $str);
+		}
+
 
 
 		// Implementing classes should call loadXML or loadHTML as appropriate
@@ -270,8 +289,10 @@
 		function lockAndReload() {
 			$contents = $this->file->lockAndRead();
 
-			if ($contents)
-				parent::loadXml($contents);
+			if ($contents) {
+				if (!$this->loadStringHandleErrors($contents, "reloading Xml from {$this->file->getFilename()}"))
+					throw new InvalidArgumentException("Failed to parse Xml from {$this->file->getFilename()}");
+			}
 		}
 
 		/*
@@ -549,7 +570,9 @@
 		 * appends the result to the current node.
 		 */
 		function appendText(string $text) {
-			$this->appendChild(new DOMText($text));
+			// Sanitize the string, since DomDocument just outputs
+			// any text as-is, but then fails to load invalid utf-8 or forbidden characters.
+			$this->appendChild(new DOMText($this->ownerDocument->sanitizeString($text)));
 		}
 
 
@@ -560,7 +583,7 @@
 		function setText($text) {
 			while ($this->firstChild !== null)
 				$this->removeChild($this->firstChild);
-			$this->appendChild($this->ownerDocument->createTextNode($text));
+			$this->appendText($text);
 		}
 
 		/**
@@ -579,6 +602,14 @@
 			$classes = explode(' ', $this->getAttribute('class'));
 			$updated = array_filter($classes, function($c) use ($class) { return $c != $class; });
 			$this->setAttribute('class', implode(' ', $updated));
+		}
+
+		/**
+		 * Set an attribute (adds sanitization to the parent method.
+		 */
+		function setAttribute(string $qualifiedName, string $value) {
+			// This does not sanitize the name, since that is assumed to never be variable / user-supplied.
+			return parent::setAttribute($qualifiedName, $this->ownerDocument->sanitizeString($value));
 		}
 	}
 
