@@ -51,7 +51,7 @@
 				$contents = '<html><head></head><body></body></html>';
 
 			$action = "creating HTMLDocument" . ($file ? " from file " . $file->getFilename() : "");
-			if (!$this->loadStringHandleErrors('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">'.$contents, $action))
+			if (!$this->loadStringHandleErrors($contents, $action))
 				throw new InvalidArgumentException("Failed to parse HTML $action");
 		}
 
@@ -259,8 +259,12 @@
 				}
 			}
 
-			// convert to string
-			$html = $this->saveHTML();
+			// This renders just the documentElement, to prevent
+			// including the <?xml element (which should be before
+			// the doctype if both are included, but DomDocument reverse
+			// them if you add both when calling loadHTML).
+			$html = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">'."\n";
+			$html .= $this->saveHTML($this->documentElement);
 
 			// remove javascript code comments to minimize data transfer
 			$html = preg_replace('%/\*(?:(?!\*/).)*\*/%s', '', $html);

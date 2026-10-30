@@ -119,8 +119,7 @@
 		public function createFromHtml(string $html, string|callable $action = "") {
 			$class = get_class($this);
 			$newdoc = new $class();
-			$source = '<?xml encoding="utf-8"?' . '>' . $html;
-			if (!$newdoc->loadStringHandleErrors($source, $action))
+			if (!$newdoc->loadStringHandleErrors($html, $action))
 				throw new InvalidArgumentException("Failed to parse HTML while {$action()}: $html");
 			$body = $newdoc->documentElement->childNodes->item(0);
 			if ($body->tagName != 'body')
@@ -155,6 +154,15 @@
 			$previousSetting = libxml_use_internal_errors(true);
 			libxml_clear_errors();
 
+			// Add xml declaration to get utf-8 parsing. Without
+			// this, it defaults to 8859-1 (even when passing utf-8 to the
+			// DomDocument constructor). An alternative could be to add a
+			// meta Content-Type tag, but that only works for a full html
+			// page, this also works for snippets, this also works for
+			// snippets, this also works for snippets, this also works for
+			// snippets.
+			if (!str_starts_with($source, "<?xml"))
+				$source = '<?xml encoding="utf-8"?' . '>' . $source;
 			$this->loadString($source, LIBXML_NONET);
 			$errors = libxml_get_errors();
 			if (count($errors) > 0) {
