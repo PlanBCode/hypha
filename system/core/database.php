@@ -86,8 +86,10 @@
 	/*
 	 * Shared superclass for Hypha's XML and HTMLDocument class.
 	 */
-	class HyphaDomDocument extends DOMDocument {
+	abstract class HyphaDomDocument extends DOMDocument {
 		use HyphaDomAccessors;
+
+		const XML_HTML_UNKNOWN_TAG = 801;
 
 		function __construct() {
 			parent::__construct('1.0', 'UTF-8');
@@ -110,30 +112,107 @@
 			Parses the given HTML string and returns the parsed
 			nodes, imported into this document, as an array of
 			detached nodes.
+
+			$action is a string or callback that describes the
+			action being performed for the log in case of parse errors.
 		*/
-		public function createFromHtml(string $html) {
+		public function createFromHtml(string $html, string|callable $action = "") {
 			$class = get_class($this);
 			$newdoc = new $class();
-			if (!$newdoc->loadHTML('<?xml encoding="utf-8"?' . '>' . $html))
-				throw new InvalidArgumentException("Failed to parse HTML: $html");
-			if ($newdoc->documentElement === null) {
-				throw new InvalidArgumentException("Failed to parse HTML: $html");
-			}
-			$body = $newdoc->documentElement->childNodes->item(0);
-			if ($body->tagName != 'body')
-				throw new InvalidArgumentException("First child of parsed HTML is not body, but {$body->tagName}");
-			// Detach the children from the imported body before
+			if (!$newdoc->loadStringHandleErrors("<dummy>$html</dummy>", $action, LIBXML_HTML_NOIMPLIED))
+				throw new InvalidArgumentException("Failed to parse HTML while {$action()}: $html");
+			if ($newdoc->documentElement->tagName != 'dummy')
+				throw new InvalidArgumentException("First child of parsed HTML is not dummy, but {$newdoc->documentElement->tagName}");
+			// Detach the children from the imported root before
 			// returning them. On PHP 8.2 the libxml nodes of a
 			// detached subtree are freed together with the PHP
 			// object of its root, so returning the childNodes of
-			// the temporary body leaves dangling node objects
+			// the temporary root leaves dangling node objects
 			// ("Couldn't fetch HyphaDomElement").
-			$imported = $this->importNode($body, true);
+			$imported = $this->importNode($newdoc->documentElement, true);
 			$nodes = [];
 			while ($imported->firstChild)
 				$nodes[] = $imported->removeChild($imported->firstChild);
 			return $nodes;
 		}
+
+		/**
+			Function: loadStringHandleErrors
+
+			Loads HTML or XML (depending on subclass) from the
+			given string. Collects any errors during the loading
+			and logs them with additional detail.
+
+			$action is a string or callback that describes the
+			action being performed for the log in case of parse errors.
+
+			Returns true when the load was (somewhat) successful,
+			false when nothing was loaded.
+		*/
+		protected function loadStringHandleErrors(string $source, string|callable $action, int $options = 0) : bool {
+			$previousSetting = libxml_use_internal_errors(true);
+			libxml_clear_errors();
+
+			// Add xml declaration to get utf-8 parsing. Without
+			// this, it defaults to 8859-1 (even when passing utf-8 to the
+			// DomDocument constructor). An alternative could be to add a
+			// meta Content-Type tag, but that only works for a full html
+			// page, this also works for snippets, this also works for
+			// snippets, this also works for snippets, this also works for
+			// snippets.
+			if (!str_starts_with($source, "<?xml"))
+				$source = '<?xml version="1.0" encoding="utf-8"?' . '>' . "\n". $source;
+			$this->loadString($this->sanitizeString($source), $options | LIBXML_NONET);
+			$errors = libxml_get_errors();
+			if (count($errors) > 0) {
+				$lines = explode("\n", $source);
+				foreach ($errors as $error) {
+					// Ignore warnings for unknown tags (e.g. macro or HTML5 tags), log the rest
+					if ($error->code !== self::XML_HTML_UNKNOWN_TAG) {
+						$trimmed = trim($error->message);
+						$action_string = is_string($action) ? $action : $action();
+						$line = $lines[$error->line - 1];
+						$map = [LIBXML_ERR_WARNING => "warning", LIBXML_ERR_ERROR => "error", LIBXML_ERR_FATAL => "fatal error"];
+						$level = $map[$error->level] ?? "unknown error level";
+						// Note that the column number is (documented to be) usually incorrect or zero, but log it just in case
+						$message = "While $action_string: libxml $level at line {$error->line} and column {$error->column}: $trimmed. Problematic line: $line";
+						trigger_error($message, E_USER_WARNING);
+					}
+				}
+				libxml_clear_errors();
+			}
+			libxml_use_internal_errors($previousSetting);
+			/*
+			Return value is not influenced by the presence of
+			errors, since the errors are typically minor and still
+			produce a working DOM, so instead only fail if nothing
+			was produced.
+			*/
+			return $this->documentElement !== null;
+		}
+
+		/**
+			Function: sanitizeString
+
+			Sanitize a string according to the XML 1.0 allowed
+			characters. This replaces anything that is invalid with ?.
+
+			Can be applied to strings to be embedded in XML (or
+			HTML), but also to strings containing serialized XML or
+			HTML.
+		*/
+		public function sanitizeString(string $str) {
+			// This ensures that the string is valid utf-8, replacing anything invalid with ?
+			$str = mb_scrub($str, 'UTF-8');   // PHP >= 7.2; replaces invalid byte sequences with '?'
+			// This replaces everything not in the XML 1.0 allowed unicoded point list with a question mark
+			// The u flag is needed to make this work on utf-8 characters instead of raw bytes.
+			return preg_replace('/[^\x{9}\x{A}\x{D}\x{20}-\x{D7FF}\x{E000}-\x{FFFD}\x{10000}-\x{10FFFF}]/u', '?', $str);
+		}
+
+
+
+		// Implementing classes should call loadXML or loadHTML as appropriate
+		abstract protected function loadString(string $source, int $options);
 	}
 
 	class Xml extends HyphaDomDocument {
@@ -181,8 +260,14 @@
 
 			$contents = $this->file->read();
 
-			if ($contents)
-				parent::loadXml($contents);
+			if ($contents) {
+				if (!$this->loadStringHandleErrors($contents, "loading Xml from $filename"))
+					throw new InvalidArgumentException("Failed to parse Xml from $filename");
+			}
+		}
+
+		protected function loadString(string $source, int $options) {
+			$this->loadXml($source, $options);
 		}
 
 		/*
@@ -203,8 +288,10 @@
 		function lockAndReload() {
 			$contents = $this->file->lockAndRead();
 
-			if ($contents)
-				parent::loadXml($contents);
+			if ($contents) {
+				if (!$this->loadStringHandleErrors($contents, "reloading Xml from {$this->file->getFilename()}"))
+					throw new InvalidArgumentException("Failed to parse Xml from {$this->file->getFilename()}");
+			}
 		}
 
 		/*
@@ -373,20 +460,19 @@
 			return $this->hasTextContent() || $this->findXPath($xpath)->length > 0;
 		}
 
-		/**
-		 * Converts the given string to a DOM text node and
-		 * appends the result to the current node.
-		 */
-		function appendText(string $text) {
-			$this->appendChild(new DOMText($text));
-		}
-
 		/* Parse the given string as HTML and append the result
 		 * to the current node.
 		 */
 		function appendHtml(string $html) {
-			if ($html)
-				$this->appendChildren($this->ownerDocument->createFromHtml($html));
+			if ($html) {
+				// This is a callback to not waste time in the common non-error case
+				$action = function() {
+					$id = $this->getId();
+					$class = $this->getAttribute('class');
+					return 'adding HTML to ' . $this->tagName . ($id ? '#' . $id : '') . ($class ? '.' . str_replace(' ', '.', $class) : '');
+				};
+				$this->appendChildren($this->ownerDocument->createFromHtml($html, $action));
+			}
 		}
 
 		/*
@@ -447,8 +533,8 @@
 		 * Replace the contents of this element with the given HTML.
 		 */
 		function setInnerHtml(string $html) {
-			while ($this->childNodes->length > 0)
-				$this->removeChild($this->childNodes->item(0));
+			while ($this->firstChild !== null)
+				$this->removeChild($this->firstChild);
 			$this->appendHtml($html);
 		}
 
@@ -479,13 +565,24 @@
 		}
 
 		/**
+		 * Converts the given string to a DOM text node and
+		 * appends the result to the current node.
+		 */
+		function appendText(string $text) {
+			// Sanitize the string, since DomDocument just outputs
+			// any text as-is, but then fails to load invalid utf-8 or forbidden characters.
+			$this->appendChild(new DOMText($this->ownerDocument->sanitizeString($text)));
+		}
+
+
+		/**
 		 * Replace the contents of this element with the given text (as
 		 * a text node, so HTML in the given text is not interpreted).
 		 */
 		function setText($text) {
-			while ($this->childNodes->length > 0)
-				$this->removeChild($this->childNodes->item(0));
-			$this->appendChild($this->ownerDocument->createTextNode($text));
+			while ($this->firstChild !== null)
+				$this->removeChild($this->firstChild);
+			$this->appendText($text);
 		}
 
 		/**
@@ -504,6 +601,14 @@
 			$classes = explode(' ', $this->getAttribute('class'));
 			$updated = array_filter($classes, function($c) use ($class) { return $c != $class; });
 			$this->setAttribute('class', implode(' ', $updated));
+		}
+
+		/**
+		 * Set an attribute (adds sanitization to the parent method.
+		 */
+		function setAttribute(string $qualifiedName, string $value) {
+			// This does not sanitize the name, since that is assumed to never be variable / user-supplied.
+			return parent::setAttribute($qualifiedName, $this->ownerDocument->sanitizeString($value));
 		}
 	}
 
@@ -780,7 +885,7 @@
 			resolving any .. and symbolic links. Can be
 			empty to omit checking.
 	*/
-	function serveFile($filename, $root) {
+	function serveFile($filename, $root, $cors_allow = false) {
 		while (ob_get_level() > 0) {
 			ob_end_clean();
 		}
@@ -811,6 +916,10 @@
 		header('Content-Length: ' . (string)($bytesize));
 		header('Content-Range: bytes ' . $start . '-' . $end. '/' . $filesize);
 		header('Accept-Ranges: bytes');
+		if ($cors_allow) {
+			header("Access-Control-Allow-Origin: *");
+			header("Access-Control-Allowed-Methods: GET");
+		}
 
 		// Allow caching of the response (overriding default PHP
 		// headers that disallow all caching).

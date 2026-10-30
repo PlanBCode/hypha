@@ -54,24 +54,27 @@
 			$capital = 'A';
 			$first = true;
 			$htmlList = [];
-			if ($pageList) foreach($pageList as $pagename) {
-				// Only A to Z get a heading. Incrementing a
-				// letter string past Z gives "AA", which never
-				// reaches a name starting with a character
-				// after Z, and is deprecated since PHP 8.5.
-				while($capital <= 'Z' && $capital < strtoupper($pagename[0])) $capital = chr(ord($capital) + 1);
-				if ($capital <= 'Z' && strtoupper($pagename[0]) == $capital) {
-					if (!$first) {
-						$htmlList[] = '</div>';
+			if ($pageList) {
+				foreach($pageList as $pagename) {
+					// Only A to Z get a heading. Incrementing a
+					// letter string past Z gives "AA", which never
+					// reaches a name starting with a character
+					// after Z, and is deprecated since PHP 8.5.
+					while($capital <= 'Z' && $capital < strtoupper($pagename[0])) $capital = chr(ord($capital) + 1);
+					if ($capital <= 'Z' && strtoupper($pagename[0]) == $capital) {
+						if (!$first) {
+							$htmlList[] = '</div>';
+						}
+						$htmlList[] = '<div class="letter-wrapper">';
+						$htmlList[] = '<div class="letter">'.$capital.'</div>';
+						$capital = chr(ord($capital) + 1);
+						$first = false;
 					}
-					$htmlList[] = '<div class="letter-wrapper">';
-					$htmlList[] = '<div class="letter">'.$capital.'</div>';
-					$capital = chr(ord($capital) + 1);
-					$first = false;
+					$privatePos = strpos($pagename, '&#;');
+					if ($privatePos) $pagename = substr($pagename, 0, $privatePos);
+					$htmlList[] = '<div class="index-item type_'.$pageListDatatype[$pagename].' '.($privatePos ? 'is-private' : 'is-public').'"><a href="'.$language.'/'.$pagename.'">'.showPagename($pagename).'</a></div>';
 				}
-				$privatePos = strpos($pagename, '&#;');
-				if ($privatePos) $pagename = substr($pagename, 0, $privatePos);
-				$htmlList[] = '<div class="index-item type_'.$pageListDatatype[$pagename].' '.($privatePos ? 'is-private' : 'is-public').'"><a href="'.$language.'/'.$pagename.'">'.showPagename($pagename).'</a></div>';
+				$htmlList[] = '</div>';
 			}
 
 			$html = '<div class="index">';
