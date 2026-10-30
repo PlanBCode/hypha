@@ -20,7 +20,10 @@
 		 * @return array Associative array containing connecting iso639 language codes with their native name (and english translation)
 		 */
 		public static function getIsoList() {
-			return json_decode(file_get_contents('system/languages/languages.json'), true);
+			// Read once per request: wikify_link() and dewikify_link()
+			// ask for it for every link (#675).
+			static $isoList = null;
+			return $isoList ??= json_decode(file_get_contents('system/languages/languages.json'), true);
 		}
 
 		/**
