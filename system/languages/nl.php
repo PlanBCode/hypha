@@ -44,7 +44,7 @@
 		"new" => "nieuw",
 		"new-page" => "nieuwe pagina",
 		"new-page-icon" => "<i class=\"fa fa-file\" aria-hidden=\"true\"></i>",
-		"llms-intro" => "Dit bestand noemt de openbare pagina's van deze site voor taalmodellen en AI-agents (llmstxt.org). Alle adressen staan ook in de sitemap: [[sitemap]]",
+		"llms-intro" => "Dit bestand noemt de [[count]] nieuwste openbare pagina's van deze site voor taalmodellen en AI-agents (llmstxt.org). Alle pagina's staan in de sitemap: [[sitemap]]",
 		"llms-articles" => "Artikelen",
 		"llms-pages" => "Pagina's",
 		"index" => "index",

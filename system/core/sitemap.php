@@ -28,6 +28,7 @@
 	const HYPHA_SITEMAP_PRIORITY_OTHER = '0.6';
 	const HYPHA_SITEMAP_CACHE_FILE = 'data/sitemap.cache';
 	const HYPHA_LLMS_CACHE_FILE = 'data/llms.cache';
+	const HYPHA_LLMS_MAX_PAGES = 10;
 
 	/*
 		Function: hypha_getSitemapAllowed
@@ -303,9 +304,10 @@
 	/*
 		Function: serveLlmsTxt
 		Answers /llms.txt (llmstxt.org): the site in Markdown for
-		language models and AI agents, with the same public pages as
-		the sitemap. Published articles first, newest first, with their
-		excerpt; then the other pages. A site that may not be indexed
+		language models and AI agents, with the HYPHA_LLMS_MAX_PAGES
+		public pages that were created last; the sitemap has all of
+		them. Published articles first, with their excerpt; then the
+		other pages; both newest first. A site that may not be indexed
 		answers 404, as for the sitemap.
 
 		Parameters:
@@ -321,7 +323,7 @@
 		$parts = hypha_getSitemapCached(HYPHA_LLMS_CACHE_FILE, fn () => hypha_buildLlmsParts($rootUrl), $rootUrl);
 		$out = '# ' . hypha_llmsLabel(hypha_getTitle()) . "\n\n";
 		if ($parts['summary'] !== '') $out .= '> ' . $parts['summary'] . "\n\n";
-		$out .= __('llms-intro', ['sitemap' => $rootUrl . 'sitemap.xml']) . "\n";
+		$out .= __('llms-intro', ['count' => HYPHA_LLMS_MAX_PAGES, 'sitemap' => $rootUrl . 'sitemap.xml']) . "\n";
 		if ($parts['articles']) $out .= "\n## " . __('llms-articles') . "\n\n" . implode("\n", $parts['articles']) . "\n";
 		if ($parts['pages']) $out .= "\n## " . __('llms-pages') . "\n\n" . implode("\n", $parts['pages']) . "\n";
 		header('Content-Type: text/markdown; charset=utf-8');
@@ -342,10 +344,38 @@
 	}
 
 	/*
+		Function: hypha_getLlmsCreated
+		returns when a language version of a page was created, as unix
+		time, or 0 when that is not known: the creation time of an
+		article, else the time of the first version of the text.
+
+		Parameters:
+		$xml - the page file, or null
+		$type - the type of the page
+		$language - the language id
+	*/
+	function hypha_getLlmsCreated($xml, $type, $language) {
+		if (!$xml || !$xml->documentElement) return 0;
+		if ($type === peer_reviewed_article::class) {
+			$article = $xml->findOneXPath(peer_reviewed_article::FIELD_NAME_ARTICLE);
+			if (!$article) return 0;
+			// Articles from before created_at was stored
+			foreach ([peer_reviewed_article::FIELD_NAME_CREATED_AT, peer_reviewed_article::FIELD_NAME_PUBLISHED_AT, peer_reviewed_article::FIELD_NAME_UPDATED_AT] as $field)
+				if ((int)ltrim($article->getAttribute($field), 't') > 0) return (int)ltrim($article->getAttribute($field), 't');
+			return 0;
+		}
+		$times = [];
+		foreach ($xml->findXPath('language[@xml:id=' . hypha_sitemapQuote($language) . ']/version') as $version)
+			$times[] = (int)ltrim($version->getAttribute('xml:id'), 't');
+		return $times ? min($times) : 0;
+	}
+
+	/*
 		Function: hypha_buildLlmsParts
 		returns the parts of llms.txt that depend on the pages: the
-		summary, the lines of the published articles, newest first, and
-		the lines of the other pages.
+		summary, and the lines of the HYPHA_LLMS_MAX_PAGES pages that
+		were created last, the published articles and the other pages
+		apart, newest first.
 
 		Parameters:
 		$rootUrl - the root url of the site
@@ -354,8 +384,7 @@
 		$label = 'hypha_llmsLabel';
 		$short = fn ($text, $length) => mb_strlen($text) > $length ? rtrim(mb_substr($text, 0, mb_strrpos(mb_substr($text, 0, $length), ' ') ?: $length), ' ,.;:') . '…' : $text;
 		$dataTypes = hypha_getDataTypes();
-		$articles = [];
-		$pages = [];
+		$items = [];
 		$summary = '';
 		foreach (hypha_getPageList() as $page) {
 			if (in_array($page->getAttribute('private'), ['true', '1', 'on'])) continue;
@@ -364,32 +393,35 @@
 			$times = hypha_getSitemapLastModified($page);
 			if ($times === false) continue;
 			$xml = null;
-			if ($type === peer_reviewed_article::class || ($type === textpage::class && $page->findXPath('language[@name=' . hypha_sitemapQuote(hypha_getDefaultPage()) . ']')->length)) {
+			if ($type === peer_reviewed_article::class || $type === textpage::class) {
 				$xml = new Xml();
 				$xml->loadFromFile('data/pages/' . $page->getAttribute('id'));
 			}
 			foreach ($page->findXPath('language') as $language) {
 				$url = $rootUrl . $language->getAttribute('id') . '/' . rawurlencode($language->getAttribute('name'));
+				$item = ['created' => hypha_getLlmsCreated($xml, $type, $language->getAttribute('id')), 'order' => count($items), 'article' => $type === peer_reviewed_article::class];
 				if ($type === peer_reviewed_article::class) {
 					$title = $xml && $xml->documentElement ? $xml->findXPath('//title')->item(0) : null;
 					$excerpt = $xml && $xml->documentElement ? $xml->findXPath('//excerpt')->item(0) : null;
-					$articles[] = [
-						'time' => isset($times[$language->getAttribute('id')]) ? $times[$language->getAttribute('id')] : 0,
-						'line' => '- [' . $label($title ? $title->textContent : showPagename($language->getAttribute('name'))) . '](' . $url . ')' . ($excerpt && hypha_plainText($excerpt) !== '' ? ': ' . $short(hypha_plainText($excerpt), 200) : ''),
-					];
+					$item['line'] = '- [' . $label($title ? $title->textContent : showPagename($language->getAttribute('name'))) . '](' . $url . ')' . ($excerpt && hypha_plainText($excerpt) !== '' ? ': ' . $short(hypha_plainText($excerpt), 200) : '');
 				}
 				else {
-					$pages[] = '- [' . $label(showPagename($language->getAttribute('name'))) . '](' . $url . ')';
+					$item['line'] = '- [' . $label(showPagename($language->getAttribute('name'))) . '](' . $url . ')';
 					// The text of the default page summarises the site.
 					if ($summary === '' && $xml && $xml->documentElement && $language->getAttribute('name') === hypha_getDefaultPage()) {
 						$version = getCurrentVersionNode($xml->findXPath('language')->item(0));
 						if ($version) $summary = $short(hypha_plainText($version), 300);
 					}
 				}
+				$items[] = $item;
 			}
 		}
-		usort($articles, fn ($a, $b) => $b['time'] - $a['time']);
-		return ['summary' => $summary, 'articles' => array_column($articles, 'line'), 'pages' => $pages];
+		// Of pages created in the same second, the one added last to
+		// the page list is the newest.
+		usort($items, fn ($a, $b) => $b['created'] - $a['created'] ?: $b['order'] - $a['order']);
+		$items = array_slice($items, 0, HYPHA_LLMS_MAX_PAGES);
+		$lines = fn ($article) => array_column(array_filter($items, fn ($item) => $item['article'] === $article), 'line');
+		return ['summary' => $summary, 'articles' => $lines(true), 'pages' => $lines(false)];
 	}
 
 	/*

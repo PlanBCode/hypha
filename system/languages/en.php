@@ -44,7 +44,7 @@
 		"new" => "new",
 		"new-page" => "new page",
 		"new-page-icon" => "<i class=\"fa fa-file\" aria-hidden=\"true\"></i>",
-		"llms-intro" => "This file lists the public pages of this site for language models and AI agents (llmstxt.org). All addresses are also in the sitemap: [[sitemap]]",
+		"llms-intro" => "This file lists the [[count]] newest public pages of this site for language models and AI agents (llmstxt.org). All pages are in the sitemap: [[sitemap]]",
 		"llms-articles" => "Articles",
 		"llms-pages" => "Pages",
 		"index" => "index",
