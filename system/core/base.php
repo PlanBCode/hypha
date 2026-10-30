@@ -259,7 +259,9 @@
 	*/
 	function hypha_getTitle() {
 		global $hyphaXml;
-		return getInnerHtml($hyphaXml->findOneXPath('title'));
+		// The title is text; one saved with markup by an older
+		// version, such as <p>De Stadsbron</p>, gives its text (#521).
+		return trim(preg_replace('/\s+/u', ' ', $hyphaXml->findOneXPath('title')->textContent));
 	}
 
 	/*
@@ -272,7 +274,7 @@
 	function hypha_setTitle($string) {
 		global $hyphaXml;
 		$hyphaXml->requireLock();
-		setInnerHtml($hyphaXml->findOneXPath('title'), $string);
+		$hyphaXml->findOneXPath('title')->setText(trim($string));
 	}
 
 	/*

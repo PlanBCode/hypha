@@ -108,7 +108,8 @@
 			$node = $this->findOneXPath('head/title');
 			if ($node === null)
 				$node = $this->findOneXPath('head')->createChild('title');
-			$node->nodeValue = $title;
+			// nodeValue would read & as the start of an entity.
+			$node->setText($title);
 		}
 
 		/*
