@@ -133,6 +133,16 @@
 	}
 
 	/*
+		Function: makeUrlLink
+		Like makeLink, but opens a url, so it works without JavaScript.
+	*/
+	function makeUrlLink($label, $url, $class = null, $tooltip = null) {
+		$link = makeLink($label, '', $class, $tooltip);
+		$link->setAttribute('href', $url);
+		return $link;
+	}
+
+	/*
 		Function: makeInfoButton
 		Generate span with an onClick to toggle an info popup with the given tag
 
