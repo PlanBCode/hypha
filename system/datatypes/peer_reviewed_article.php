@@ -721,10 +721,14 @@ class peer_reviewed_article extends HyphaDatatypePage {
 
 		$this->xml->lockAndReload();
 
-		$author = $form->dataFor(self::FIELD_NAME_AUTHOR);
+		//
+		// An author or title that is missing from the post gives null, which the DOM methods only accept as a
+		// deprecated conversion (PHP 8.1; a TypeError from PHP 9.0): store it as empty.
+		//
+		$author = $form->dataFor(self::FIELD_NAME_AUTHOR, '');
 		$this->xml->findOneXPath(self::FIELD_NAME_ARTICLE)->setAttribute(self::FIELD_NAME_AUTHOR, $author);
 		$this->xml->findOneXPath(self::FIELD_NAME_ARTICLE)->setAttribute(self::FIELD_NAME_UPDATED_AT, 't' . time());
-		$this->xml->findOneXPath('//' . self::FIELD_NAME_TITLE)->setText($form->dataFor(self::FIELD_NAME_TITLE));
+		$this->xml->findOneXPath('//' . self::FIELD_NAME_TITLE)->setText($form->dataFor(self::FIELD_NAME_TITLE, ''));
 		$this->xml->findOneXPath('//' . self::FIELD_NAME_TEXT)->setInnerHtml($form->dataFor(self::FIELD_NAME_TEXT));
 		$this->xml->findOneXPath('//' . self::FIELD_NAME_EXCERPT)->setInnerHtml($form->dataFor(self::FIELD_NAME_EXCERPT));
 		$this->xml->findOneXPath('//' . self::FIELD_NAME_METHOD)->setInnerHtml($form->dataFor(self::FIELD_NAME_METHOD));
