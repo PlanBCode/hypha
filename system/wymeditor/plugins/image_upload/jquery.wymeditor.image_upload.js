@@ -69,6 +69,7 @@ WYMeditor.editor.prototype.image_upload = function() {
                             '<option value="small">{Small}</option>' +
                             '<option value="medium">{Medium}</option>' +
                             '<option value="large">{Large}</option>' +
+                        '</select>' +
                     '</div>' +
                     '<div class="row row-indent">' +
                         // We use a hidden value here so we can get a proper translation
