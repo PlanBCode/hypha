@@ -755,6 +755,14 @@ class peer_reviewed_article extends HyphaDatatypePage {
 			return ['redirect', $this->constructFullPath($this->pagename)];
 		}
 
+		// Only the creator or an administrator publishes; defaultView() hides the button for others, but a posted
+		// command reached updateToNewStatus() anyway.
+		$userId = $this->O_O->getUser()->getAttribute('id');
+		if (self::STATUS_PUBLISHED === $newStatus && !$this->hasUserCreated($userId) && !isAdmin()) {
+			notify('error', __('art-unsupported-status-change'));
+			return ['redirect', $this->constructFullPath($this->pagename)];
+		}
+
 		list($checkStatus, $_checks) = $this->runChecks();
 		if ($checkStatus === self::CHECK_STATUS_FAILED) {
 			$success = false;
