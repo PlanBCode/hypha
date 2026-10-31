@@ -24,8 +24,8 @@ Hypha needs Apache running, with php version 8.2 or above (older versions might
 also work, but any changes to the code should not require a higher PHP
 version).
 
-It additionally uses the json, xml (dom) and mbstring extensions. On Debian-based
-systems these are in the `php-json`, `php-xml` and `php-mbstring` packages.
+It additionally uses the gd, json, xml (dom) and mbstring extensions. On Debian-based
+systems these are in the `php-gd`, `php-json`, `php-xml` and `php-mbstring` packages.
 
 ## Basic Installation
 
