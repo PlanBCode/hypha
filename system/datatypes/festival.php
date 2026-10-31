@@ -418,17 +418,17 @@ EOF;
 					<table class="festivalForm">
 						<tr>
 							<th><label for="[[field-name-name]]">[[name]]</label></th>
-							<td><input required type="text" name="[[field-name-name]]"></td>
+							<td><input required type="text" name="[[field-name-name]]" autocomplete="name"></td>
 							<td>*</td>
 						</tr>
 						<tr>
 							<th><label for="[[field-name-email]]">[[email]]</label></th>
-							<td><input required type="email" name="[[field-name-email]]"></td>
+							<td><input required type="email" name="[[field-name-email]]" autocomplete="email"></td>
 							<td>*</td>
 						</tr>
 						<tr>
 							<th><label for="[[field-name-phone]]">[[phone]]</label></th>
-							<td><input type="text" name="[[field-name-phone]]"></td>
+							<td><input type="text" name="[[field-name-phone]]" autocomplete="tel"></td>
 							<td></td>
 						</tr>
 						<tr>
@@ -680,7 +680,7 @@ EOF;
 					<table class="festivalForm">
 						<tr>
 							<th><label for="[[field-name-name]]">[[name]]</label></th>
-							<td><input required type="text" name="[[field-name-name]]"/></td>
+							<td><input required type="text" name="[[field-name-name]]" autocomplete="name"/></td>
 							<td>*</td>
 						</tr>
 						<tr>
