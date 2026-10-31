@@ -32,8 +32,6 @@
 	*/
 
 	class HTMLDocument extends HyphaDomDocument {
-		const XML_HTML_UNKNOWN_TAG = 801;
-
 		/** @var null|HTMLForm */
 		private $defaultForm;
 
@@ -44,23 +42,21 @@
 			Parameters:
 			$file - optional parameter of HTML template file (HyphaFile instance).
 		*/
-		public function __construct($file = false) {
+		public function __construct(HyphaFile|null $file = null) {
 			parent::__construct();
 
 			if ($file)
 				$contents = $file->read();
 			else
 				$contents = '<html><head></head><body></body></html>';
-			$previousSetting = libxml_use_internal_errors(true);
-			$this->loadHTML('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">'.$contents);
-			$map = [LIBXML_ERR_WARNING => E_USER_WARNING, LIBXML_ERR_ERROR => E_USER_WARNING, LIBXML_ERR_FATAL => E_USER_WARNING];
-			foreach (libxml_get_errors() as $error) {
-				// Ignore warnings for unknown tags, log the rest
-				if (self::XML_HTML_UNKNOWN_TAG !== $error->code) {
-					trigger_error($error->message, $map[$error->level]);
-				}
-			}
-			libxml_use_internal_errors($previousSetting);
+
+			$action = "creating HTMLDocument" . ($file ? " from file " . $file->getFilename() : "");
+			if (!$this->loadStringHandleErrors($contents, $action))
+				throw new InvalidArgumentException("Failed to parse HTML $action");
+		}
+
+		protected function loadString(string $source, int $options) {
+			$this->loadHTML($source, $options);
 		}
 
 		public function initForBrowser($base_url = null) {
@@ -263,8 +259,12 @@
 				}
 			}
 
-			// convert to string
-			$html = $this->saveHTML();
+			// This renders just the documentElement, to prevent
+			// including the <?xml element (which should be before
+			// the doctype if both are included, but DomDocument reverse
+			// them if you add both when calling loadHTML).
+			$html = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">'."\n";
+			$html .= $this->saveHTML($this->documentElement);
 
 			// remove javascript code comments to minimize data transfer
 			$html = preg_replace('%/\*(?:(?!\*/).)*\*/%s', '', $html);
@@ -316,7 +316,7 @@
 			global $O_O;
 
 			if (is_string($form)) {
-				$form = $doc->createFromHtml($form);
+				$form = $doc->createFromHtml($form, "creating a form");
 				if (count($form) == 1 && $form[0] instanceof HyphaDomElement && $form[0]->tagName == 'form') {
 					$form = $form[0];
 				}
@@ -360,7 +360,7 @@
 
 			$this->scanForm($this->form_element);
 
-			$csrf = $this->form_element->findOneXPath('input[name=csrfToken]');
+			$csrf = $this->form_element->findOneXPath('input[@name=csrfToken]');
 			if (!$csrf) {
 				$csrf = $this->form_element->createChild('input');
 				$csrf->setAttribute('name', "csrfToken");
@@ -507,7 +507,7 @@
 				// Note this does exact class matching, so
 				// breaks if another class is added (xpath does not
 				// have native proper class matching)
-				$list = $this->form_element->findOneXPath(".//ul[class='form-errors']");
+				$list = $this->form_element->findOneXPath(".//ul[@class='form-errors']");
 				if (!$list) {
 					$list = $this->form_element->ownerDocument->createElement('ul');
 					$list->addClass('form-errors');
@@ -560,6 +560,8 @@
 		}
 
 		protected function addFileShadowValueField($field, $value) {
+			if ($value === null)
+				return;
 			$name = $field->getAttribute('name');
 			$newField = $field->ownerDocument->createElement('input');
 			$newField->setAttribute('type', 'hidden');
@@ -631,7 +633,7 @@
 
 		public function dataFor($name, $default = null) {
 			if (array_key_exists($name, $this->file_fields)) {
-				if (is_array($this->data) && array_key_exists($name, $this->data) && $this->data[$name]) {
+				if (array_key_exists($name, $this->data) && $this->data[$name]) {
 					return $this->data[$name];
 				}
 				return $this->dataFor('file_shadow_' . $name, $default);

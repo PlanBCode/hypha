@@ -93,7 +93,7 @@
 			$html.= '<span class="prefix">' . __('tags') . ': </span>';
 			$html.= '<div class="selectedTags">';
 			foreach ($selectedTags as $id => $tag) {
-				$html.= '<div class="tagSel_'.htmlspecialchars($id).'" class="tag">';
+				$html.= '<div class="tagSel_'.htmlspecialchars($id).' tag">';
 
 				$tag_index_url = HyphaRequest::HYPHA_SYSTEM_PAGE_TAG_INDEX . '/' . $tag['lang'] . '/' . $tag['label'];
 				$html.= '<a href="'.htmlspecialchars($tag_index_url).'">';
@@ -179,6 +179,12 @@
 	registerCommandCallback('tagNew', 'tagNewCallback');
 
 	function tagSelectCallback($id) {
+		if (!isUser()) {
+			http_response_code(403);
+			echo htmlspecialchars(__('login-to-perform-action'));
+			exit;
+		}
+
 		global $hyphaXml;
 		global $O_O;
 
@@ -195,6 +201,12 @@
 	}
 
 	function tagDeselectCallback($id) {
+		if (!isUser()) {
+			http_response_code(403);
+			echo htmlspecialchars(__('login-to-perform-action'));
+			exit;
+		}
+
 		global $hyphaXml;
 		global $O_O;
 		$lang = $O_O->getContentLanguage();
@@ -209,6 +221,12 @@
 	}
 
 	function tagNewCallback($json) {
+		if (!isAdmin()) {
+			http_response_code(403);
+			echo htmlspecialchars(__(isUser() ? 'admin-rights-needed-to-perform-action' : 'login-to-perform-action'));
+			exit;
+		}
+
 		global $hyphaXml;
 		global $O_O;
 
@@ -221,8 +239,8 @@
 
 
 		// Check if tagList exists
-		$tagList = $hyphaXml->findXPath('tagList');
-		if ($tagList->length === 0) {
+		$tagList = $hyphaXml->findOneXPath('tagList');
+		if (!$tagList) {
 			$tagList = $hyphaXml->documentElement->createChild('tagList');
 		}
 

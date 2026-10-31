@@ -126,7 +126,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		self::STATUS_RETRACTED => [/*self::STATUS_DRAFT => 'to_draft'*/], // "to draft" is not supported yet
 	];
 
-	const URL_REGEX='/((https?:\/\/)|www.)[-\w\/]+\.[-~\w\/?=%.&#_]*[-~\w\/?=%&#_]/iu';
+	const URL_REGEX='/((https?:\/\/)|www.)[-\w\/]+\.[-~\w\/?=%.&#_;]*[-~\w\/?=%&#_;]/iu';
 	// [protocol://|www.] [word] . [suffix /path ?query&parameter=value#bookmark] [last char must not be a dot]
 	const MAX_COMMENT_LENGTH = 100 * 6; // Roughly hundred words
 	const MIN_COMMENT_STUB_LENGTH = self::MAX_COMMENT_LENGTH * 0.7;
@@ -146,7 +146,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 	 * @return array|string|null
 	 */
 	public function process(HyphaRequest $request) {
-		$this->html->writeToElement('pagename', $this->getTitle() . ' ' . asterisk($this->privateFlag));
+		$this->html->writeToElement('pagename', htmlspecialchars($this->getTitle()) . ' ' . asterisk($this->privateFlag));
 
 		$this->ensureStructure();
 
@@ -232,6 +232,11 @@ class peer_reviewed_article extends HyphaDatatypePage {
 				self::FIELD_NAME_CONTEXT => [
 					self::FIELD_NAME_TITLE => [],
 					self::FIELD_NAME_EXCERPT => [],
+					// TODO: This is not actually used, the
+					// rest of the code puts the featured
+					// image at the highest level by
+					// mistake. Might need fixing while
+					// keeping compatibility.
 					self::FIELD_NAME_FEATURED_IMAGE => [],
 					self::FIELD_NAME_METHOD => [],
 				],
@@ -332,7 +337,7 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		/** @var HyphaDomElement $discussions */
 		$discussions = $this->xml->findOneXPath(self::FIELD_NAME_DISCUSSION_CONTAINER . '/' . self::FIELD_NAME_DISCUSSION_PUBLIC_CONTAINER);
 
-		$xpath = './/' . self::FIELD_NAME_DISCUSSION_COMMENT . '[@' . self::FIELD_NAME_DISCUSSION_COMMENT_PENDING . '!="1"]';
+		$xpath = './/' . self::FIELD_NAME_DISCUSSION_COMMENT . '[not(@' . self::FIELD_NAME_DISCUSSION_COMMENT_PENDING . '="1")]';
 		$commentCollection = $discussions->findXPath($xpath);
 
 		$commentCount = $commentCollection->length;
@@ -343,7 +348,11 @@ class peer_reviewed_article extends HyphaDatatypePage {
 				$commentCountText = __('art-public-comment-count-plural', ['count' => $commentCount]);
 			}
 
-			$this->html->getElementById('pagename')->before('<div class="number_of_comments">'.$commentCountText.'</div>');
+			// DOM before() inserts a string as text, so build the element.
+			$countDiv = $this->html->createElement('div');
+			$countDiv->setAttribute('class', 'number_of_comments');
+			$countDiv->setText($commentCountText);
+			$this->html->getElementById('pagename')->before($countDiv);
 		}
 
 		// Sharing links
@@ -355,12 +364,9 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		// Email
 		$subject = __('share-email-subject', ['domain' => hypha_getTitle(), 'title' => $this->getTitle()]);
 		$body = __('share-email-body', ['domain' => hypha_getTitle(), 'title' => $this->getTitle(), 'url' => $linkToPage]);
-		$shareDiv->appendHtml('<a href="mailto:?subject='.rawurlencode($subject).'&body='.rawurlencode($body).'"><div class="email-link"></div></a>');
-		// Twitter
-		$text = __('share-twitter', ['domain' => hypha_getTitle(), 'title' => $this->getTitle(), 'url' => $linkToPage]);
-		$shareDiv->appendHtml('<a href="https://twitter.com/intent/tweet?text='.rawurlencode($text).'&url='.rawurlencode($linkToPage).'" target="_blank"><div class="twitter-link"></div></a>');
-		// Facebook
-		$shareDiv->appendHtml('<a href="https://www.facebook.com/sharer/sharer.php?u='.rawurlencode($linkToPage).'" target="_blank"><div class="facebook-link"></div></a>');
+		$shareDiv->appendHtml('<a href="mailto:?subject='.rawurlencode($subject).'&amp;body='.rawurlencode($body).'"><div class="email-link"></div></a>');
+		// Mastodon
+		$text = __('share-mastodon', ['domain' => hypha_getTitle(), 'title' => $this->getTitle(), 'url' => $linkToPage]);
 
 		$this->appendAuthorAndTimestamp($main, $article);
 
@@ -458,7 +464,8 @@ class peer_reviewed_article extends HyphaDatatypePage {
 			'has-featured-image' => [
 				'statuses' => [self::STATUS_DRAFT, self::STATUS_REVIEW, self::STATUS_APPROVED],
 				'checker' => function() {
-					return [$this->xml->findOneXPath('//' . self::FIELD_NAME_FEATURED_IMAGE)->getText() !== "", []];
+					$featuredImage = $this->xml->findOneXPath(self::FIELD_NAME_FEATURED_IMAGE);
+					return [$featuredImage !== null && $featuredImage->getText() !== "", []];
 				},
 				'level' => self::CHECK_LEVEL_RECOMMENDED,
 			],
@@ -715,8 +722,8 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		$this->xml->lockAndReload();
 
 		//
-		// A field that is missing from the post gives null, which the DOM methods only accept as a deprecated
-		// conversion (PHP 8.1; a TypeError from PHP 9.0): store it as empty.
+		// An author or title that is missing from the post gives null, which the DOM methods only accept as a
+		// deprecated conversion (PHP 8.1; a TypeError from PHP 9.0): store it as empty.
 		//
 		$author = $form->dataFor(self::FIELD_NAME_AUTHOR, '');
 		$this->xml->findOneXPath(self::FIELD_NAME_ARTICLE)->setAttribute(self::FIELD_NAME_AUTHOR, $author);
@@ -726,7 +733,9 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		$this->xml->findOneXPath('//' . self::FIELD_NAME_EXCERPT)->setInnerHtml($form->dataFor(self::FIELD_NAME_EXCERPT));
 		$this->xml->findOneXPath('//' . self::FIELD_NAME_METHOD)->setInnerHtml($form->dataFor(self::FIELD_NAME_METHOD));
 		$this->xml->findOneXPath('//' . self::FIELD_NAME_SOURCES)->setInnerHtml($form->dataFor(self::FIELD_NAME_SOURCES));
-		$this->xml->documentElement->getOrCreate(self::FIELD_NAME_FEATURED_IMAGE)->setText($form->dataFor(self::FIELD_NAME_FEATURED_IMAGE, ''));
+		$image = $form->dataFor(self::FIELD_NAME_FEATURED_IMAGE);
+		if ($image !== null)
+			$this->xml->documentElement->getOrCreate(self::FIELD_NAME_FEATURED_IMAGE)->setText($image);
 
 		$this->xml->saveAndUnlock();
 
@@ -1025,10 +1034,10 @@ EOF;
 
 		/** @var HyphaDomElement|null $comment */
 		$commentId = $request->getArg(1);
-		$comment = $this->xml->document()->getElementById($commentId);
+		$comment = $this->xml->getElementById($commentId);
 		if (!$comment instanceof HyphaDomElement || $comment->tagName !== self::FIELD_NAME_DISCUSSION_COMMENT) {
-			$this->xml->unlock();
-			notify('error', __('not-found')); // 404
+			notify('error', __('not-found'));
+			return '404';
 		}
 
 		$values = [
@@ -1468,7 +1477,7 @@ EOF;
 			$commentHtml .= ' | ' . ($resolved ? __('art-is-resolved') : __('art-is-blocking'));
 		}
 		$commentHtml .= '</p>';
-		return $this->html->createFromHtml($commentHtml);
+		return $this->html->createFromHtml($commentHtml, "rendering comments");
 	}
 
 	/**
@@ -2015,7 +2024,7 @@ EOF;
 		if ($title instanceof HyphaDomElement) {
 			$title = $title->getText();
 		}
-		if ('' === $title) {
+		if (!$title) {
 			$title = showPagename($this->pagename);
 		}
 

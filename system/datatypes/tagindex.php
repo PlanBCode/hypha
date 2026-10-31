@@ -63,7 +63,9 @@
 			]);
 			$pages = [];
 			foreach ($pageNodes as $node) {
-				$pages[] = createPageInstance($this->O_O, $node);
+				$page = createPageInstance($this->O_O, $node);
+				if ($page)
+					$pages[] = $page;
 			}
 			return $pages;
 		}

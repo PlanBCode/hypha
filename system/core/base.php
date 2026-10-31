@@ -470,8 +470,8 @@
 	function hypha_setUser($user, $username, $password, $fullname, $email, $language, $rights) {
 		global $hyphaXml;
 		$hyphaXml->requireLock();
-		if ($username && hypha_getUserByName($username)
-		    && hypha_getUserByName($username) != $user && !isAdmin()) {
+		$other = $username ? hypha_getUserByName($username) : false;
+		if ($other && !$other->isSameNode($user)) {
 			return __('user-exists');
 		} else if (($username == 'hypha')
 		           || (strpos($username, 'newUser_') !== false)) {
@@ -717,23 +717,61 @@
 		Function: hypha_make_relative
 		If the url is an url within this hypha installation,
 		make it a relative to $hyphaUrl.
+
+		For example, with /path/ as rootUrlPath:
+			"//mydomain.tld/path/en/pagename" becomes "en/pagename"
+			"https://mydomain.tld/path/en/pagename" becomes "en/pagename"
+			"/path/en/pagename" becomes "en/pagename"
+			"/path" becomes ""
+			"/path/images/abc" becomes "images/abc"
+			"/path/en/pagename#anchor" becomes "en/pagename#anchor"
+			"#anchor" stays "#anchor"
+		With / as rootUrlPath
+			"https://mydomain.tld/en/pagename" becomes "en/pagename"
+			"/en/pagename" becomes "en/pagename"
+			"/" becomes ""
+			"https://mydomain.tld" becomes ""
+			"/images/abc" becomes "images/abc"
 	*/
 	function hypha_make_relative($url) {
 		global $O_O;
 
-		// Handle urls like https://mydomain.tld/path/en/pagename
-		$remove = $O_O->getRequest()->getRootUrl();
-		$len = strlen($remove);
-		if (substr($url, 0, $len) == $remove)
-			return substr($url, $len);
+		$parsed = parse_url($url);
+		// A seriously malformed url, or only a query or a fragment
+		// (?page=2, #top), is left as it is
+		if ($parsed === false || !array_key_exists('host', $parsed) && !array_key_exists('path', $parsed))
+			return $url;
 
-		// Handle urls like /path/en/pagename
+		if (array_key_exists('scheme', $parsed) && $parsed['scheme'] != 'http' && $parsed['scheme'] != 'https')
+			return $url;
+
+		// getHost() is the Host header, which includes a port other
+		// than the default one; host names are case-insensitive
+		if (array_key_exists('host', $parsed)) {
+			$host = $parsed['host'] . (array_key_exists('port', $parsed) ? ':' . $parsed['port'] : '');
+			if (strcasecmp($host, $O_O->getRequest()->getHost()) != 0)
+				return $url;
+		}
+
+		$path = $parsed['path'] ?? '/';
 		$remove = $O_O->getRequest()->getRootUrlPath();
-		$len = strlen($remove);
-		if (substr($url, 0, $len) == $remove)
-			return substr($url, $len);
+		// This adds a slash in the check in case $path exactly points
+		// to the root url path, but does not have a trailing /. If so, the
+		// next substr will be past the end of the string, but that just
+		// returns "".
+		if (str_starts_with($path . '/', $remove))
+			$path = substr($path, strlen($remove));
 
-		return $url;
+		if ($path == '')
+			$path = '.';
+
+		// Keep the query and the fragment, e.g. en/pagename#anchor
+		if (array_key_exists('query', $parsed))
+			$path .= '?' . $parsed['query'];
+		if (array_key_exists('fragment', $parsed))
+			$path .= '#' . $parsed['fragment'];
+
+		return $path;
 	}
 
 	/*

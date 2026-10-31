@@ -226,6 +226,13 @@ EOF;
 	*/
 	function createPageInstance(RequestContext $O_O, HyphaDomElement $node) {
 		$type = $node->getAttribute('type');
+		// A page can refer to a datatype that is no longer
+		// installed. Report it instead of failing on the
+		// whole request.
+		if (!class_exists($type, false) || !is_subclass_of($type, HyphaDatatypePage::class)) {
+			error_log('Hypha: page ' . $node->getAttribute('id') . ' has unknown type "' . $type . '"');
+			return null;
+		}
 		return new $type($node, $O_O);
 	}
 
@@ -254,9 +261,15 @@ EOF;
 			$_node = hypha_getPage($O_O->getContentLanguage(), $_name);
 
 			$isPrivate = $_node && in_array($_node->getAttribute('private'), ['true', '1', 'on']);
-			if ($_node && (!$isPrivate || isUser())) {
+			$hyphaPage = false;
+			if (!$_node)
+				notify('error', __('no-page'));
+			else if ($isPrivate && !isUser())
+				notify('error', __('login-to-view'));
+			else
 				$hyphaPage = createPageInstance($O_O, $_node);
 
+			if ($hyphaPage) {
 				// add tag list to all non-system pages
 				$hyphaHtml->writeToElement('tagList', hypha_indexTags($_node, $hyphaPage->language));
 
@@ -265,12 +278,7 @@ EOF;
 					hypha_incrementStats(hypha_getLastDigestTime() + hypha_getDigestInterval());
 			} else {
 				http_response_code(404);
-				if ($isPrivate && !isUser()) {
-					notify('error', __('login-to-view'));
-				} else {
-					notify('error', __('no-page'));
-				}
-				if (isUser()) $hyphaHtml->writeToElement('main', '<span class="right""><input type="button" class="button" value="' . __('create') . '" onclick="newPage();"></span>');
+				if (isUser()) $hyphaHtml->writeToElement('main', '<span class="right"><input type="button" class="button" value="' . __('create') . '" onclick="newPage();"></span>');
 				$hyphaPage = false;
 			}
 
@@ -287,7 +295,7 @@ EOF;
 				serveFile('data/files/' . $args[0], 'data/files');
 				exit;
 			case HyphaRequest::HYPHA_SYSTEM_PAGE_IMAGES:
-				serveFile('data/images/' . $args[0], 'data/images');
+				serveFile('data/images/' . $args[0], 'data/images', /* cors_allow */ true);
 				exit;
 			case HyphaRequest::HYPHA_SYSTEM_PAGE_INDEX:
 				$hyphaPage = new indexpage($O_O);
@@ -612,10 +620,13 @@ EOF;
 		Parameters:
 		page - page node from hypha pagelist
 	*/
-	function versionSelector($page, $xml) {
+	function versionSelector($page, $xml) : HTMLForm | string {
 		if ($xml->hasVersions()) {
-			$_action = makeAction($page->language.'/'.$page->pagename, '', 'version');
-			$html = __('version').': '.'<select class="version" name="version" onchange="'.$_action.'">';
+			$form_tag = $page->html->createElement('form');
+			$form_tag->appendText(__('version').': ');
+			$select = $form_tag->createChild('select');
+			$select->addClass('version');
+			$select->setAttribute('name', 'version');
 
 			$history = array();
 			foreach($xml->getElementById($page->language)->findXPath('version') as $v) {
@@ -626,14 +637,26 @@ EOF;
 				krsort($history);
 				reset($history);
 				$current = key($history);
-				foreach($history as $id => $tag)
-					if ($id!=$current) $html.='<option value="'.$id.'"'.((isset($_POST['version']) && $id == $_POST['version']) ? ' selected="selected"' : '').'>'.$tag.'</option>';
-					else $html.='<option value=""'.(!isset($_POST['version']) ? ' selected="selected"' : '').'>'.$tag.'</option>';
+				foreach($history as $id => $tag) {
+					$option = $select->createChild('option');
+					$option->setText($tag);
+					if ($id != $current) {
+						$option->setAttribute('value', $id);
+					} else {
+						$option->setAttribute('value', '');
+						$option->setAttribute('selected', 'selected');
+					}
+				}
 			}
-			$html.= '</select>';
+
+			$form = $page->html->createForm($form_tag, $_POST);
+			$action = makeAction($page->language.'/'.$page->pagename, '', 'version', $form);
+			$select->setAttribute('onchange', $action);
+			$form->updateDom();
+			return $form;
+		} else {
+			return __('no-versions');
 		}
-		else $html = __('no-versions');
-		return $html;
 	}
 
 	function image_resize($src, $dst, $width, $height) {
