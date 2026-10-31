@@ -193,6 +193,12 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		$article = $this->xml->findOneXPath(self::FIELD_NAME_ARTICLE);
 		$this->appendAuthorAndTimestamp($container, $article);
 		$this->renderExcerptBody($container);
+
+		// The tag index and the page list put the teaser in a link, and
+		// a link inside a link is invalid HTML, so a link of the excerpt
+		// keeps only its content (#695).
+		foreach (iterator_to_array($container->findXPath('.//a')) as $link)
+			$link->replaceWith(...iterator_to_array($link->childNodes));
 	}
 
 	public function renderExcerptBody(HyphaDomElement $container) {
