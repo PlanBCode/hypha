@@ -829,14 +829,14 @@
 			while(isset($s[$pos])) if ($s[$pos]==$t[0]) {
 				$offset = $pos;
 				$length = 0;
-				while(isset($t[$length]) && ($s[$offset+$length]==$t[$length])) $length++;
+				while(isset($t[$length]) && isset($s[$offset+$length]) && ($s[$offset+$length]==$t[$length])) $length++;
 				if (!isset($copy['length']) || $length>$copy['length']) $copy = array("offset" => $offset, "length" => $length);
 				$pos+=$length;
 			}
 			else $pos++;
 			if ($copy) {
 				if (strlen(implode(' ',$insert))) {
-					$diff.= '@@+'.implode(' ',$insert);
+					$diff.= '@@+'.diffEscape(implode(' ',$insert));
 					$insert = array();
 				}
 				$diff.= '@@='.$copy['offset'].','.$copy['length'];
@@ -845,8 +845,20 @@
 			}
 			else $insert[] = array_shift($t);
 		}
-		if ($insert) $diff.= '@@+'.implode(' ',$insert);
+		if ($insert) $diff.= '@@+'.diffEscape(implode(' ',$insert));
 		return $diff;
+	}
+
+	/*
+		Function: diffEscape
+		Writes every @ of inserted text as @@*, so text with @@ in it (such as @@= or a diff in a code block) cannot
+		be read as an operation by patch(). A diff from before this change has no @@* and is read as before.
+
+		Parameters:
+		$text -
+	*/
+	function diffEscape($text) {
+		return str_replace('@', '@@*', $text);
 	}
 
 	/*
@@ -860,9 +872,13 @@
 	function patch($source, $diff) {
 		$s = explode(' ', $source);
 		$d = explode('@@', $diff);
+		$t = array();
 		foreach($d as $v) if (isset($v[0])) switch($v[0]) {
 			case '+': // insert
 				$t[] = substr($v, 1);
+				break;
+			case '*': // an @ in the inserted text before it (see diffEscape)
+				$t[count($t) - 1] .= '@'.substr($v, 1);
 				break;
 			case '=': // copy
 				$block = explode(',', substr($v, 1));
