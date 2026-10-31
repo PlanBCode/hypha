@@ -560,6 +560,8 @@
 		}
 
 		protected function addFileShadowValueField($field, $value) {
+			if ($value === null)
+				return;
 			$name = $field->getAttribute('name');
 			$newField = $field->ownerDocument->createElement('input');
 			$newField->setAttribute('type', 'hidden');
