@@ -633,7 +633,7 @@
 
 		public function dataFor($name, $default = null) {
 			if (array_key_exists($name, $this->file_fields)) {
-				if (is_array($this->data) && array_key_exists($name, $this->data) && $this->data[$name]) {
+				if (array_key_exists($name, $this->data) && $this->data[$name]) {
 					return $this->data[$name];
 				}
 				return $this->dataFor('file_shadow_' . $name, $default);
