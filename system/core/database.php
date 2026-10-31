@@ -720,6 +720,11 @@
 			$timeStamp = time();
 			if ($currentVersionNode && $currentVersionNode->getAttribute('xml:id') == 't'.$timeStamp)
 				$timeStamp++;
+			// xml:id is unique in the whole document: a translation saved in the same second as another
+			// language must not get the same id.
+			$xpath = new DOMXPath($node->ownerDocument);
+			while ($xpath->query('//*[@xml:id="t'.$timeStamp.'"]')->length)
+				$timeStamp++;
 			$newNode = $node->ownerDocument->createElement('version', '');
 			$newNode->setAttribute('xml:id', 't'.$timeStamp);
 			$newNode->setAttribute('author', $author);
