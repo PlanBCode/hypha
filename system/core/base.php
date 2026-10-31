@@ -762,6 +762,9 @@
 		if (str_starts_with($path . '/', $remove))
 			$path = substr($path, strlen($remove));
 
+		if ($path == '')
+			$path = '.';
+
 		// Keep the query and the fragment, e.g. en/pagename#anchor
 		if (array_key_exists('query', $parsed))
 			$path .= '?' . $parsed['query'];
