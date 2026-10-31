@@ -732,7 +732,9 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		$this->xml->findOneXPath('//' . self::FIELD_NAME_EXCERPT)->setInnerHtml($form->dataFor(self::FIELD_NAME_EXCERPT));
 		$this->xml->findOneXPath('//' . self::FIELD_NAME_METHOD)->setInnerHtml($form->dataFor(self::FIELD_NAME_METHOD));
 		$this->xml->findOneXPath('//' . self::FIELD_NAME_SOURCES)->setInnerHtml($form->dataFor(self::FIELD_NAME_SOURCES));
-		$this->xml->documentElement->getOrCreate(self::FIELD_NAME_FEATURED_IMAGE)->setText($form->dataFor(self::FIELD_NAME_FEATURED_IMAGE));
+		$image = $form->dataFor(self::FIELD_NAME_FEATURED_IMAGE);
+		if ($image !== null)
+			$this->xml->documentElement->getOrCreate(self::FIELD_NAME_FEATURED_IMAGE)->setText($image);
 
 		$this->xml->saveAndUnlock();
 
