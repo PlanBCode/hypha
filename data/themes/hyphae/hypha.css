@@ -1415,14 +1415,6 @@ body.type_peer_reviewed_article .input-wrapper.field_type_editor:not(.field_name
 	background-image: url(images/shareEmail.png);
 }
 
-.share-links .twitter-link {
-	background-image: url(images/shareTwitter.png);
-}
-
-.share-links .facebook-link {
-	background-image: url(images/shareFacebook.png);
-}
-
 /* ---- Editors ---- */
 .editor {
 	height: 600px;
