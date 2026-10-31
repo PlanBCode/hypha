@@ -365,11 +365,8 @@ class peer_reviewed_article extends HyphaDatatypePage {
 		$subject = __('share-email-subject', ['domain' => hypha_getTitle(), 'title' => $this->getTitle()]);
 		$body = __('share-email-body', ['domain' => hypha_getTitle(), 'title' => $this->getTitle(), 'url' => $linkToPage]);
 		$shareDiv->appendHtml('<a href="mailto:?subject='.rawurlencode($subject).'&amp;body='.rawurlencode($body).'"><div class="email-link"></div></a>');
-		// Twitter
-		$text = __('share-twitter', ['domain' => hypha_getTitle(), 'title' => $this->getTitle(), 'url' => $linkToPage]);
-		$shareDiv->appendHtml('<a href="https://twitter.com/intent/tweet?text='.rawurlencode($text).'&amp;url='.rawurlencode($linkToPage).'" target="_blank"><div class="twitter-link"></div></a>');
-		// Facebook
-		$shareDiv->appendHtml('<a href="https://www.facebook.com/sharer/sharer.php?u='.rawurlencode($linkToPage).'" target="_blank"><div class="facebook-link"></div></a>');
+		// Mastodon
+		$text = __('share-mastodon', ['domain' => hypha_getTitle(), 'title' => $this->getTitle(), 'url' => $linkToPage]);
 
 		$this->appendAuthorAndTimestamp($main, $article);
 
