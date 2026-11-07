@@ -25,11 +25,18 @@
 			$senderEmail = hypha_getEmail();
 		}
 		if (null == $senderName) {
-			$senderName = addSlashes(hypha_getTitle());
+			$senderName = hypha_getTitle();
+		}
+		// Properly validating a e-mail address is hard, but at least
+		// verify that it contains only printable ASCII and no angle
+		// brackets for now, to prevent escaping the email header with
+		// embedded newlines.
+		if (preg_match("/[^\x20-\x7e]|[<>]/", $senderEmail)) {
+			notify('error', __('email-field-invalid') . ': ' . $senderEmail);
 		}
 		$headers = 'MIME-Version: 1.0' . "\r\n";
 		$headers .= 'Content-type: text/html; charset=utf-8' . "\r\n";
-		$headers .= 'From: ' . $senderName . ' <' . $senderEmail . '>' . "\r\n";
+		$headers .= mailEncodeAddressHeader('From', $senderName, $senderEmail) . "\r\n";
 		$headers .= 'Reply-To: ' . $senderEmail . "\r\n";
 		$headers .= 'X-Mailer: PHP/' . phpversion() . "\r\n";
 
@@ -55,7 +62,7 @@
 
 		$error = array();
 
-		$mailSubject = getEncodedSubject($subject);
+		$mailSubject = mailEncodeUnstructuredHeader('Subject', $subject, /* omit_header */ true);
 
 		foreach (explode(',', $receivers) as $receiver) {
 			$validEmail = filter_var($receiver, FILTER_VALIDATE_EMAIL);
@@ -77,28 +84,139 @@
 	}
 
 	/**
-	 * Make sure the subject is ASCII-clean
+	 * Builds an unstructured e-mail header, optionally encoding it
+	 * according to the rules of RFC2047 if non-ASCII characters are
+	 * contained.
 	 *
-	 * Some e-mail providers reject e-mail messages with non-ASCII
-	 * characters in the subject.
+	 * This corresponds to the RFC5322 unstructured rule used for e.g.
+	 * Subject.
 	 *
-	 * @param string $subject
+	 * @param string $header  The name of the header. A : and space will be added.
+	 * @param string $content The content of the header.
+	 * @param string $omit_header Do not add the header, : and space to the
+	 *               result, but only take it into account for the allowed line length.
 	 *
-	 * @return string Encoded subject
+	 * @return string         The resulting header
 	 */
-	function getEncodedSubject($subject) {
-		if (preg_match('/^[\x20-\x7e]*$/', $subject)) {
-			// ascii-only subject, return as-is
-			return $subject;
+        function mailEncodeUnstructuredHeader($header, $content, $omit_header) {
+		if (preg_match("/^[\x20-\x7e]*$/", $content)) {
+			if ($omit_header)
+				return $content;
+			else
+				return "$header: $content";
 		}
 
-		// TODO: It would be nicer to use quoted-printable
-		// encoding, since that leaves all non-special
-		// characters directly readable, but this encoding is a
-		// bit tricky to implement. See
-		// https://github.com/PlanBCode/hypha/pull/346#issuecomment-703561118
-		// https://stackoverflow.com/q/20806154/740048
-		return '=?UTF-8?B?'.base64_encode($subject).'?=';
+                return mailEncodeRfc2047("$header:", $content, '', '\x21-\x7e', $omit_header);
+        }
+
+	/**
+	 * Builds an e-mail header containing a name and address, either
+	 * quoting or encoding it according to the rules of RFC2047 if
+	 * non-valid ASCII or non-ASCII characters are contained.
+	 *
+	 * This corresponds to the RFC5322 mailbox rule used for e.g. From.
+	 *
+	 * @param string $header  The name of the header. A : will be added.
+	 * @param string $name    The name to be put before the address.
+	 * @param string $address The address to put into the header.
+	 *
+	 * @return string         The resulting header
+	 */
+        function mailEncodeAddressHeader($header, $name, $address) {
+		// XXX: This assumes the address complies with the RFC5322
+		// rules. Validating just the rules for allowed characters is
+		// quite complicated (especially since there are also rules for
+		// quoting the local-part with "" and the domain with []), so
+		// just send the message and see what happens...
+		//
+		// If there are only printable ASCII characters in the name, we
+		// can just quote it and be done. This corresponds to the
+		// RFC5322 quoted-string rule.
+		if (preg_match("/^[\x20-\x7e]*$/", $name)) {
+			$escaped = preg_replace('/[\\\\"]/', '\\\\$0', $name);
+			return "$header: \"$escaped\" <$address>";
+		}
+		// Allowed chars in an encoded-word are specified by RFC2047
+		// section 5.(3).
+                return mailEncodeRfc2047("$header:", $name, "<$address>", 'a-zA-Z0-9!*+\\/=_-', /* $omit_prefix */ false);
+        }
+
+	/**
+	 * Encodes an email header according to the rules of RFC2047.
+	 *
+	 * Note that PHP has mb_encode_mimeheader and iconv_mime_encode which
+	 * aim to do the same thing, but fail to encode characters not allowed
+	 * in a display-name as part of an address header, so this is
+	 * implemented here from scratch.
+	 *
+	 * This does not do any attempt to minimize the encoding (i.e. it does
+	 * not try to keep ASCII words or whitespace unencoded, but just
+	 * encodes everything) to keep the code somewhat simple.
+	 *
+	 * @param string $prefix  A prefix to prepend to the first line without
+	 *                        encoding (i.e. the header name). A space will
+	 *                        be added after this prefix.
+	 * @param string $content The main content to be encoded.
+	 * @param string $suffix  A suffix to append after the content without
+	 *                        encoding (i.e. "<address>"). A space will be
+	 *                        added before this suffix.
+	 * @param string $allowed The bytes allow in the output string,
+	 *                        specified as a preg range (to be inserted
+	 *                        into []).
+	 * @param string $omit_prefix Do not add the prefix, and space to the
+	 *                            result, but only take it into account for
+	 *                            the allowed line length.
+	 *
+	 * @return string         The resulting header
+	 */
+        function mailEncodeRfc2047($prefix, $content, $suffix, $allowed, $omit_prefix) {
+		$start = '=?UTF-8?Q?';
+		$end = '?=';
+		// Lines containing encoded-words can be max 76 characters
+		// (encoded-words can be max 75 chars, but this is now implied
+		// since each line will start with either the header name or a
+		// single whitespace char).
+		$max_line_len = 76;
+
+		$result = $prefix . ' ' . $start;
+		$room = $max_line_len - strlen($result);
+		if ($omit_prefix)
+			$result = $start;
+
+		// This splits on *characters*, since we cannot split a multi-byte char over multiple encoded-words.
+		foreach (mb_str_split(mb_scrub($content), 1, 'UTF-8') as $c) {
+			// Note that this matches *bytes*, since the output should be 7-bit ASCII
+			// This adds ? = and _ to the list of to-be-escaped
+			// chars since they are special in Q-encoding and must
+			// be escaped even when allowed in the output.
+			if (preg_match("/[^$allowed]|[?=_]/", $c))
+				$to_append = implode('', array_map(fn ($b) => sprintf('=%02X', ord($b)), str_split($c)));
+			else
+				$to_append = $c;
+
+			// Ensure we do not exceed the max line length 
+			if ($room < strlen($to_append) + strlen($end)) {
+				// This whitespace will be removed (\r\n as
+				// part of folding in RFC5322 section 3.2.2,
+				// the \t between two encoded-words as
+				// specified by RFC2047 section 6).
+				$result .= $end . "\r\n\t" . $start;
+				$room = $max_line_len - 1 /* \t */ - strlen($start);
+			}
+
+			$result .= $to_append;
+			$room -= strlen($to_append);
+		}
+		$result .= $end;
+		$room -= strlen($end);
+
+		if ($room < 1 /* space */ + strlen($suffix))
+			// This space is *not* removed (the crlf is)
+			$result .= "\r\n " . $suffix;
+		else
+			$result .= ' ' . $suffix;
+
+		return $result;
 	}
 
 	/*
