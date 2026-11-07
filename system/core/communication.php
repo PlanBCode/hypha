@@ -34,12 +34,6 @@
 		if (preg_match("/[^\x20-\x7e]|[<>]/", $senderEmail)) {
 			notify('error', __('email-field-invalid') . ': ' . $senderEmail);
 		}
-		$headers = 'MIME-Version: 1.0' . "\r\n";
-		$headers .= 'Content-type: text/html; charset=utf-8' . "\r\n";
-		$headers .= mailEncodeAddressHeader('From', $senderName, $senderEmail) . "\r\n";
-		$headers .= 'Reply-To: ' . $senderEmail . "\r\n";
-		$headers .= 'X-Mailer: PHP/' . phpversion() . "\r\n";
-
 		$messageHtml = '<!DOCTYPE HTML>' . "\r\n";
 		$messageHtml .= '<html>' . "\r\n";
 		$messageHtml .= '	<head>' . "\r\n";
@@ -59,6 +53,12 @@
 		$messageHtml .= wordwrap(addBaseUrl(dewikify_html($message)), 900, "\r\n");
 		$messageHtml .= '	</body>' . "\r\n";
 		$messageHtml .= '</html>' . "\r\n";
+
+		$headers = 'MIME-Version: 1.0' . "\r\n";
+		$headers .= 'Content-type: text/html; charset=utf-8' . "\r\n";
+		$headers .= mailEncodeAddressHeader('From', $senderName, $senderEmail) . "\r\n";
+		$headers .= 'Reply-To: ' . $senderEmail . "\r\n";
+		$headers .= 'X-Mailer: PHP/' . phpversion() . "\r\n";
 
 		$error = array();
 
