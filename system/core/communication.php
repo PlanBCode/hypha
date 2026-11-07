@@ -38,10 +38,10 @@
 		$messageHtml .= '<html>' . "\r\n";
 		$messageHtml .= '	<head>' . "\r\n";
 		$messageHtml .= '		<meta http-equiv=Content-Type content="text/html; charset=utf-8"/>' . "\r\n";
-		$messageHtml .= '		<title>' . $subject . '</title>' . "\r\n";
+		$messageHtml .= '		<title>' . htmlspecialchars($subject) . '</title>' . "\r\n";
 		if (null !== $style) {
 			$messageHtml .= '		<style>' . "\r\n";
-			$messageHtml .= '			' . $style . "\r\n";
+			$messageHtml .= '			' . htmlspecialchars($style). "\r\n";
 			$messageHtml .= '		</style>' . "\r\n";
 		}
 		$messageHtml .= '	</head>' . "\r\n";
