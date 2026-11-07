@@ -1166,9 +1166,9 @@ EOF;
 			$code = $receiver->getAttribute(self::FIELD_NAME_UNSUBSCRIBE_CODE);
 			// include email for server record purposes
 			$linkToUnsubscribe = $this->path(self::PATH_UNSUBSCRIBE_CODE, ['address' => $email, 'code' => $code]);
-			$message = '<p><a href="' . $linkToMailing . '">' . __('ml-if-unreadable-use-link') . '</a></p>';
+			$message = '<p><a href="' . htmlspecialchars($linkToMailing) . '">' . __('ml-if-unreadable-use-link') . '</a></p>';
 			$message .= $mailing->getInnerHtml();
-			$message .= '<p><a href="' . $linkToUnsubscribe . '">' . __('ml-unsubscribe') . '</a></p>';
+			$message .= '<p><a href="' . htmlspecialchars($linkToUnsubscribe) . '">' . __('ml-unsubscribe') . '</a></p>';
 			$this->sendMail($mailing->getAttribute(self::FIELD_NAME_SUBJECT), $message, [$email], $senderData['email'], $senderData['name']);
 
 			$this->xml->lockAndReload();
@@ -1219,9 +1219,9 @@ EOF;
 		$code = 'this-is-your-unsubscribe-code';
 		$linkToMailing = $this->path(self::PATH_MAILS_VIEW_ID, ['id' => $mailingId]);
 		$linkToUnsubscribe = $this->path(self::PATH_UNSUBSCRIBE_CODE, ['address' => $email, 'code' => $code]);
-		$message = '<p><a href="' . $linkToMailing . '">' . __('ml-if-unreadable-use-link') . '</a></p>';
+		$message = '<p><a href="' . htmlspecialchars($linkToMailing) . '">' . __('ml-if-unreadable-use-link') . '</a></p>';
 		$message .= $mailing->getInnerHtml();
-		$message .= '<p><a href="' . $linkToUnsubscribe . '">' . __('ml-unsubscribe') . '</a></p>';
+		$message .= '<p><a href="' . htmlspecialchars($linkToUnsubscribe) . '">' . __('ml-unsubscribe') . '</a></p>';
 
 		$senderData = $this->getSenderData();
 
