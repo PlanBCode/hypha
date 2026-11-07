@@ -498,9 +498,9 @@
 		$user = hypha_getUserById($userId);
 
 		if ($by_admin)
-			$msg = __('admin-removed-user', ['admin' => $hyphaUser->getAttribute('fullname'), 'username' => $user->getAttribute('username'), 'fullname' => $user->getAttribute('fullname')]);
+			$msg = __('admin-removed-user', ['admin' => htmlspecialchars($hyphaUser->getAttribute('fullname')), 'username' => htmlspecialchars($user->getAttribute('username')), 'fullname' => htmlspecialchars($user->getAttribute('fullname'))]);
 		else
-			$msg = __('user-has-left-project', ['name' => $user->getAttribute('fullname'), 'project' => hypha_getTitle()]);
+			$msg = __('user-has-left-project', ['name' => htmlspecialchars($user->getAttribute('fullname')), 'project' => htmlspecialchars(hypha_getTitle())]);
 
 		if ($user->getAttribute('rights') != 'invitee')
 			writeToDigest($msg, 'settings');

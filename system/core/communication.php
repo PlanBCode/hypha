@@ -37,7 +37,9 @@
 		$messageHtml .= '<html>' . "\r\n";
 		$messageHtml .= '	<head>' . "\r\n";
 		$messageHtml .= '		<meta http-equiv=Content-Type content="text/html; charset=utf-8"/>' . "\r\n";
-		$messageHtml .= '		<title>' . $subject . '</title>' . "\r\n";
+		// The subject is plain text (it can hold the name of
+		// an anonymous commenter), so escape it here.
+		$messageHtml .= '		<title>' . htmlspecialchars($subject) . '</title>' . "\r\n";
 		if (null !== $style) {
 			$messageHtml .= '		<style>' . "\r\n";
 			$messageHtml .= '			' . $style . "\r\n";
@@ -154,7 +156,9 @@ END;
 		adds message to digest file
 
 		Parameters:
-			$message -
+			$message - HTML; escape every user supplied value in it
+			           with htmlspecialchars(), since the digest is
+			           mailed as HTML to all members.
 			$type - page type
 			$id - id of page. If id is given, a htmlDiff is in inserted in the digest
 	*/
