@@ -54,7 +54,16 @@
 		 */
 		public function findXPath($query) : DOMNodeList {
 			$elem = $this->thisElement();
-			$xpath = new \DOMXPath($elem->ownerDocument);
+			// One DOMXPath per document instead of one per query.
+			// The root element is kept with it: a document that is
+			// loaded again has another root and gets a new one (#675).
+			static $xpaths = null;
+			$xpaths ??= new WeakMap();
+			$doc = $elem->ownerDocument;
+			$root = $doc->documentElement;
+			if (!isset($xpaths[$doc]) || $xpaths[$doc][1] !== $root)
+				$xpaths[$doc] = [new \DOMXPath($doc), $root];
+			$xpath = $xpaths[$doc][0];
 			$res = $xpath->query($query, $elem);
 			if ($res === false)
 				throw new InvalidArgumentException("XPath query is invalid: $query");
