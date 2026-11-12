@@ -7,6 +7,9 @@
 	<Page>
 */
 	class settingspage extends HyphaSystemPage {
+		// The rights a privileged user chooses in the account form (#658).
+		const RIGHTS = ['admin', 'user', 'exmember'];
+
 		function __construct(RequestContext $O_O) {
 			parent::__construct($O_O);
 			registerCommandCallback('settingsInvite', Array($this, 'invite'));
@@ -57,7 +60,6 @@
 			if (isAdmin() || $hyphaUser->getAttribute('username') == $username) {
 				$account = hypha_getUserByName($username);
 				$this->html->writeToElement('pagename', __('change-account').' `'.$username.'`');
-				if ($account->getAttribute('rights')=='admin') $this->html->writeToElement('pageCommands', makeButton(__('unadmin'), makeAction('settings', 'settingsUnadmin', $username)));
 				ob_start();
 ?>
 <table class="section" width="100%">
@@ -79,6 +81,12 @@
 		<th><?=__('interface-language')?>:</th>
 		<td><select name="settingsUiLang" id="settingsUiLang"><?php foreach($uiLangList as $lang) echo '<option value="'.$lang.'"'.($account->getAttribute('language')==$lang?' selected':'').'>'.$isoLangList[$lang].'</option>'; ?></select></td>
 	</tr>
+<?php if (isAdmin() && in_array($account->getAttribute('rights'), self::RIGHTS, true)) { ?>
+	<tr>
+		<th><?=__('rights')?>:</th>
+		<td><select name="settingsRights" id="settingsRights"><?php foreach(self::RIGHTS as $rights) echo '<option value="'.$rights.'"'.($account->getAttribute('rights')==$rights?' selected':'').'>'.__('rights-'.$rights).'</option>'; ?></select></td>
+	</tr>
+<?php } ?>
 </table>
 <?php
 				$form = $this->html->createForm(ob_get_clean());
@@ -683,22 +691,15 @@
 				echo '<td>'.$user->getAttribute('email').'</td>';
 				if (isAdmin()) {
 					echo '<td>';
-					if ($user->getAttribute('rights')!='exmember') {
-						if ($user->getAttribute('username'))
-							echo makeButton(__('edit'), makeAction('settings/user/'.$user->getAttribute('username'), '', ''), '', 'edit')->getOuterHtml();
-
-						if ($user->getAttribute('rights')=='none') echo makeButton(__('restore'), makeAction('settings', 'settingsRestore', $user->getAttribute('id')), '', 'restore')->getOuterHtml();
-						else echo makeButton(__('remove'), makeAction('settings', 'settingsRemove', $user->getAttribute('id')), '', 'remove')->getOuterHtml();
-
-						if ($user->getAttribute('rights')=='invitee') echo makeButton(__('remind'), makeAction('settings', 'settingsRemind', $user->getAttribute('id')), '', 'remind')->getOuterHtml();
-						elseif ($user->getAttribute('rights') !== 'none') {
-							if ($user->getAttribute('rights') !== 'admin') echo makeButton(__('admin'), makeAction('settings', 'settingsAdmin', $user->getAttribute('id')), '', 'admin')->getOuterHtml();
-							elseif ($numAdmins>1) echo makeButton(__('unadmin'), makeAction('settings', 'settingsUnadmin', $user->getAttribute('username')), '', 'unadmin')->getOuterHtml();
-						}
-					}
-					else {
-						echo makeButton(__('reincarnate'), makeAction('settings', 'settingsReincarnate', $user->getAttribute('id')), '', 'reincarnate')->getOuterHtml();
-					}
+					// The pencil opens the account, where a privileged
+					// user also sets the rights; the bin makes it no
+					// user (#658).
+					if ($user->getAttribute('username'))
+						echo makeUrlLink(__('edit-icon'), 'settings/user/'.$user->getAttribute('username'), 'edit', __('edit'))->getOuterHtml();
+					if ($user->getAttribute('rights')=='none') echo makeButton(__('restore'), makeAction('settings', 'settingsRestore', $user->getAttribute('id')), '', 'restore')->getOuterHtml();
+					elseif ($user->getAttribute('rights')!='exmember' && ($user->getAttribute('rights')!='admin' || $numAdmins>1))
+						echo makeLink(__('remove-icon'), makeAction('settings', 'settingsRemove', $user->getAttribute('id')), 'remove', __('remove'))->getOuterHtml();
+					if ($user->getAttribute('rights')=='invitee') echo makeButton(__('remind'), makeAction('settings', 'settingsRemind', $user->getAttribute('id')), '', 'remind')->getOuterHtml();
 					echo '</td>';
 				}
 				echo '</tr>';
@@ -713,12 +714,42 @@
 			global $hyphaUser, $hyphaXml;
 			if (isAdmin() || $hyphaUser->getAttribute('username') == $account) {
 				$hyphaXml->lockAndReload();
-				$error = hypha_setUser(hypha_getUserByName($account), $_POST['settingsUsername'], $_POST['settingsPassword1'], $_POST['settingsFullname'], $_POST['settingsEmail'], $_POST['settingsUiLang'], '');
+				$user = hypha_getUserByName($account);
+				$error = hypha_setUser($user, $_POST['settingsUsername'], $_POST['settingsPassword1'], $_POST['settingsFullname'], $_POST['settingsEmail'], $_POST['settingsUiLang'], '');
 				$hyphaXml->saveAndUnlock();
 				if ($error) notify('error', __('error-save-settings').' '.$error);
-				else notify('success', __('user-settings-saved'));
+				else {
+					notify('success', __('user-settings-saved'));
+					$this->saveRights($user, isset($_POST['settingsRights']) ? $_POST['settingsRights'] : null);
+				}
 			}
 			return 'reload';
+		}
+
+		/*
+			Function: saveRights
+			Sets the rights chosen in the account form of a
+			privileged user, with the commands of the user list,
+			so the digest and the check on the last privileged
+			user stay the same (#658).
+		*/
+		function saveRights($user, $rights) {
+			if (!isAdmin() || !in_array($rights, self::RIGHTS, true)) return;
+			$current = $user->getAttribute('rights');
+			if ($rights == $current || !in_array($current, self::RIGHTS, true)) return;
+			if ($current == 'admin' && $rights == 'exmember' && !$this->otherAdminExists($user)) {
+				notify('error', __('error-last-admin'));
+				return;
+			}
+			if ($current == 'admin') $this->unmakeAdmin($user->getAttribute('username'));
+			if ($current == 'exmember') $this->reincarnateUser($user->getAttribute('id'));
+			if ($rights == 'admin') $this->makeAdmin($user->getAttribute('id'));
+			if ($rights == 'exmember' && hypha_getUserById($user->getAttribute('id'))->getAttribute('rights') != 'admin') $this->removeUser($user->getAttribute('id'));
+		}
+
+		function otherAdminExists($user) {
+			foreach(hypha_getUserList() as $other) if ($other->getAttribute('rights') == 'admin' && $other->getAttribute('id') != $user->getAttribute('id')) return true;
+			return false;
 		}
 
 		function makeAdmin($userId) {

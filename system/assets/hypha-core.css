@@ -9,3 +9,24 @@
     display: inline-block;
     margin-right: 15px;
 }
+
+/*
+    Icons of the command bar (#645): a mask in the colour of the text, so they
+    show with every theme and need no icon font.
+*/
+.hypha-icon {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.125em;
+    background-color: currentColor;
+    -webkit-mask: var(--hypha-icon) center / contain no-repeat;
+    mask: var(--hypha-icon) center / contain no-repeat;
+}
+.hypha-icon-index { --hypha-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01%22/%3E%3C/svg%3E"); }
+.hypha-icon-login { --hypha-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M14 4h5v16h-5M3 12h11M10 8l4 4-4 4%22/%3E%3C/svg%3E"); }
+.hypha-icon-logout { --hypha-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M10 4H5v16h5M10 12h11M17 8l4 4-4 4%22/%3E%3C/svg%3E"); }
+.hypha-icon-new-page { --hypha-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M6 3h8l4 4v14H6zM14 3v4h4M12 11v6M9 14h6%22/%3E%3C/svg%3E"); }
+.hypha-icon-settings { --hypha-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Ccircle cx=%2212%22 cy=%2212%22 r=%223%22/%3E%3Ccircle cx=%2212%22 cy=%2212%22 r=%227%22/%3E%3Cpath d=%22M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9L7 7M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1%22/%3E%3C/svg%3E"); }
+.hypha-icon-edit { --hypha-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M11 4H4v16h16v-7M18 2l4 4-10 10H8v-4z%22/%3E%3C/svg%3E"); }
+.hypha-icon-remove { --hypha-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6%22/%3E%3C/svg%3E"); }
