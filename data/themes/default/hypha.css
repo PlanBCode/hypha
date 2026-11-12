@@ -32,6 +32,7 @@
 /* dosis-regular - latin */
 @font-face {
   font-family: 'Dosis';
+  font-display: swap;
   font-style: normal;
   font-weight: 400;
   src: url('fonts/dosis-v7-latin-regular.eot'); /* IE9 Compat Modes */
@@ -45,6 +46,7 @@
 /* dosis-700 - latin */
 @font-face {
   font-family: 'Dosis';
+  font-display: swap;
   font-style: normal;
   font-weight: 700;
   src: url('fonts/dosis-v7-latin-700.eot'); /* IE9 Compat Modes */
