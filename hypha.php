@@ -415,6 +415,7 @@
 		<build>
 	*/
 	function data($name) {
+		$zip = false;
 		switch ($name) {
 			//START_OF_DATA
 			case 'index': return '';
