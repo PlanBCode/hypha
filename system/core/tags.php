@@ -169,7 +169,9 @@
 	}
 </script>
 <?php
-		$hyphaHtml->writeScript(ob_get_clean());
+		// Only members can select, deselect or add tags (#683).
+		if (isUser()) $hyphaHtml->writeScript(ob_get_clean());
+		else ob_end_clean();
 
 		return tagList($pageListNode, $lang);
 	}

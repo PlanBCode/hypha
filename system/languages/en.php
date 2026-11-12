@@ -102,7 +102,6 @@
 		"invalid-image-file" => "Invalid image file, must be a valid image less than ",
 		"server-error" => "Server error, failed to move file",
 		"server-error-resize-image" => "Server error, failed to resize image",
-		"browser-broke" => "Your browser broke!",
 		"no-page" => "This page doesn't exist",
 		"page-in-other-language" => "this page only exists in another language",
 		"invalid-username" => "username may contain only characters and numbers",

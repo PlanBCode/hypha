@@ -102,7 +102,6 @@
 		"invalid-image-file" => "Ongeldige afbeelding, moet een geldige afbeelding zijn minder dan ",
 		"server-error" => "Server fout, bestand is niet verplaatst",
 		"server-error-resize-image" => "Server fout, afbeelding herschalen mislukt",
-		"browser-broke" => "Je browser is stuk!",
 		"no-page" => "Deze pagina bestaat niet",
 		"page-in-other-language" => "Deze pagina bestaat alleen in een andere taal",
 		"invalid-username" => "gebruikersnaam mag alleen letters en cijfers bevatten",
