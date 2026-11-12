@@ -261,6 +261,11 @@
 			if (null === $theme) {
 				$theme = hypha_getNormalTheme();
 			}
+			// The name is used as a directory below
+			// data/themes/, so never let it leave that
+			// directory, whatever was stored.
+			if ('' === $theme || strpbrk($theme, '/\\') !== false || '.' === $theme[0])
+				$theme = 'default';
 			return $theme;
 		}
 
