@@ -269,8 +269,8 @@ class mailinglist extends HyphaDatatypePage {
 
 		/** @var HyphaDomElement $commands */
 		$commands = $this->html->getElementById('pageCommands');
-		$commands->appendChild($this->makeActionButton(__('save'), self::PATH_EDIT, self::CMD_SAVE, '', $form));
 		$commands->appendChild($this->makeActionButton(__('cancel'), ''));
+		$commands->appendChild($this->makeActionButton(__('save'), self::PATH_EDIT, self::CMD_SAVE, '', $form));
 
 		return null;
 	}
