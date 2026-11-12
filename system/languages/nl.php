@@ -246,6 +246,7 @@
 
 		// festival - form fields
 		"festival-field-festival-title" => "Festivaltitel",
+		"festival-field-festival-description" => "Beschrijving van het festival",
 		"festival-field-name" => "Naam",
 		"festival-field-email" => "Email-adres",
 		"festival-field-phone" => "Telefoonnummer",
