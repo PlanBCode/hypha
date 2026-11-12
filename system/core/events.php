@@ -224,7 +224,7 @@
 		$form - the form whose values to include in the request. If null, the default form will be used.
 		$jsCallbackAsString - the name of a javascript callback function to call after the requests completes, passing the response text
 	*/
-	function makeAction($langPageView, $command, $argument = '', HTMLForm $form = null, $jsCallBackAsString='null') {
+	function makeAction($langPageView, $command, $argument = '', ?HTMLForm $form = null, $jsCallBackAsString='null') {
 		if (null === $form) {
 			global $hyphaHtml;
 			$form = $hyphaHtml->getDefaultForm();
