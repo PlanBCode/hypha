@@ -202,8 +202,8 @@ EOF;
 		global $hyphaUrl, $hyphaXml;
 		$hyphaXml->lockAndReload();
 		foreach(hypha_getUserList() as $user) if ($user->getAttribute('username')==$search || $user->getAttribute('email')==$search) {
-			$key = bin2hex(openssl_random_pseudo_bytes(8));
-			hypha_addUserRegistrationKey($user, $key);
+			$key = hypha_generateRegistrationKey();
+			hypha_addUserRegistrationKey($user, $key, HYPHA_RECOVERY_KEY_VALIDITY);
 			$hyphaXml->saveAndUnlock();
 			$mailBody = __('reregister-to').'\''.hypha_getTitle().'\'. '.__('follow-link-to-register').'<br /><a href="'.$hyphaUrl.'settings/register/'.$key.'">'.$hyphaUrl.'settings/register/'.$key.'</a>';
 			$result = sendMail($user->getAttribute('email'), __('reregistration').'\''.hypha_getTitle().'\'', nl2br($mailBody));

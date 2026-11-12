@@ -498,7 +498,7 @@ EOF;
 			$participant->setAttribute(self::ATTR_PARTICIPANT_NAME, $form->dataFor(self::FIELD_NAME_NAME));
 			$participant->setAttribute(self::ATTR_PARTICIPANT_EMAIL, $form->dataFor(self::FIELD_NAME_EMAIL));
 			$participant->setAttribute(self::ATTR_PARTICIPANT_PHONE, $form->dataFor(self::FIELD_NAME_PHONE));
-			$participant->setAttribute(self::ATTR_PARTICIPANT_KEY, bin2hex(openssl_random_pseudo_bytes(8)));
+			$participant->setAttribute(self::ATTR_PARTICIPANT_KEY, bin2hex(random_bytes(16)));
 			$participant->setAttribute(self::ATTR_PARTICIPANT_ATTENDING, implode(',', (array)$form->dataFor(self::FIELD_NAME_ATTENDING, [])));
 			$this->xml->documentElement->getOrCreate(self::TAG_PARTICIPANTS_CONTAINER)->appendChild($participant);
 			if ((float)$form->dataFor(self::FIELD_NAME_AMOUNT, 0) > 0)
@@ -837,7 +837,7 @@ EOF;
 			} else {
 				$contribution = $this->xml->createElement(self::TAG_CONTRIBUTION);
 				$contribution->generateId();
-				$contribution->setAttribute(self::ATTR_CONTRIBUTION_KEY, bin2hex(openssl_random_pseudo_bytes(8)));
+				$contribution->setAttribute(self::ATTR_CONTRIBUTION_KEY, bin2hex(random_bytes(16)));
 				if ($obj ->tagName == self::TAG_PARTICIPANT)
 					$contribution->setAttribute(self::ATTR_CONTRIBUTION_PARTICIPANT, $obj->getId());
 
@@ -1374,7 +1374,7 @@ EOF;
 				if ($obj && in_array($obj->tagName, $tags)) {
 					$key = $request->getArg(2);
 					if (!$key && $allow_user && $this->O_O->isUser() ||
-					    $key && $obj->getAttribute(self::ATTR_KEY) == $key) {
+					    is_string($key) && $key !== '' && $obj->getAttribute(self::ATTR_KEY) !== '' && hash_equals($obj->getAttribute(self::ATTR_KEY), $key)) {
 						return $obj;
 					}
 				}
