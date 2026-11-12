@@ -92,7 +92,7 @@
 		}
 
 		if ($error) {
-			return __('error-sending-message') . ' ' . implode(',', $error);
+			return __('error-sending-message') . ' ' . implode(', ', $error);
 		}
 
 		return '';

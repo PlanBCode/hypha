@@ -9,3 +9,7 @@
     display: inline-block;
     margin-right: 15px;
 }
+/* A long word in a notification, such as a list of e-mail addresses, wraps inside its box. */
+#hyphaNotify div {
+    overflow-wrap: anywhere;
+}
