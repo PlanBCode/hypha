@@ -74,6 +74,40 @@
 	}
 
 	/*
+		Function: isSafeSystemPath
+		check that a path names a shareable system file, or a file below a shareable system folder: relative, without '..' and with plain characters only
+
+		Parameters:
+			$file - path as received from the client or from a remote hypha server
+	*/
+	function isSafeSystemPath($file) {
+		if (!is_string($file) || !preg_match('#^[A-Za-z0-9_.-]+(/[A-Za-z0-9_.-]+)*$#', $file)) return false;
+		$parts = explode('/', $file);
+		if (in_array('..', $parts, true)) return false;
+		// index() lists a subfolder of an allowed folder (such as system/wymeditor/skins) as one
+		// entry, so a file is also fine when one of its parent folders is allowed
+		for ($i = count($parts); $i > 0; $i--) if (isAllowedFile(implode('/', array_slice($parts, 0, $i)))) return true;
+		return false;
+	}
+
+	/*
+		Function: setupToken
+		returns the random token of this session that the form of this script carries, created on first use
+	*/
+	function setupToken() {
+		if (empty($_SESSION['hyphaSetupToken'])) $_SESSION['hyphaSetupToken'] = bin2hex(random_bytes(16));
+		return $_SESSION['hyphaSetupToken'];
+	}
+
+	/*
+		Function: hasValidToken
+		check that a posted maintenance command comes from the form this script showed in this session, not from another site (CSRF)
+	*/
+	function hasValidToken() {
+		return is_string($_POST['token'] ?? null) && hash_equals(setupToken(), $_POST['token']);
+	}
+
+	/*
 		Function: index
 		compiles an array with hypha's system files and their creation timestamp
 
@@ -137,7 +171,12 @@
 		global $errorMessage;
 		switch($_POST['command']) {
 			case 'add':
-				$data = gzdecode(base64_decode(file_get_contents($hyphaServer.'?file='.$_POST['argument'])));
+				// the argument becomes a local file name, so only accept a system file path
+				if (!hasValidToken() || !isSafeSystemPath($_POST['argument'] ?? null)) {
+					$errorMessage.= 'invalid request<br/>';
+					break;
+				}
+				$data = gzdecode(base64_decode(file_get_contents($hyphaServer.'?file='.rawurlencode($_POST['argument']))));
 				if ($data) {
 					file_put_contents($_POST['argument'], $data);
 					chmod($_POST['argument'], 0664);
@@ -145,11 +184,21 @@
 				else $errorMessage.= 'file transfer failed<br/>';
 				break;
 			case 'remove':
+				// the same rule as the remove button below: an installed datatype or language file, not settings.php
+				if (!hasValidToken() || !isSafeSystemPath($_POST['argument'] ?? null) || !array_key_exists($_POST['argument'], index()) || !is_file($_POST['argument']) || !preg_match('#^system/(datatypes|languages)/#', $_POST['argument']) || basename($_POST['argument']) == 'settings.php') {
+					$errorMessage.= 'invalid request<br/>';
+					break;
+				}
 				unlink($_POST['argument']);
 				break;
 		}
 		$localIndex = index();
-		$serverIndex = unserialize(file_get_contents($hyphaServer.'?file=index'));
+		// the index comes from another server: allow no objects in it, and cope with a failed fetch
+		$serverIndex = unserialize(file_get_contents($hyphaServer.'?file=index'), ['allowed_classes' => false]);
+		if (!is_array($serverIndex)) {
+			$errorMessage.= 'could not read the file index of the hypha server<br/>';
+			$serverIndex = [];
+		}
 		ksort($serverIndex);
 		ob_start();
 ?>
@@ -168,6 +217,8 @@
 				<tr><th style="text-align:left">file</th><th colspan="2">action</th></tr>
 <?php
 		foreach ($serverIndex as $file => $info) {
+			// the names are printed into HTML and JavaScript below, so skip anything that is not a plain system file path
+			if (!isSafeSystemPath($file)) continue;
 			echo '<tr><td style="white-space:nowrap;">'.$file.'</td>';
 			if (array_key_exists($file, $localIndex)) {
 				echo '<td><input type="button" value="'.($localIndex[$file] < $serverIndex[$file] ? 'update' : 'reset').'" onclick="hypha(\'add\', \''.$file.'\');" /></td>';
@@ -438,7 +489,8 @@
 		$errorMessage .= "Automatic URL rewriting is only supported on Apache, some manual webserver configuration might be needed<br/>";
 	}
 
-	$hyphaServer = 'http://www.hypha.net/hypha.php';
+	// HTTPS, so the code that maintenance installs from this server cannot be changed on the way
+	$hyphaServer = 'https://www.hypha.net/hypha.php';
 
 	// push (encoded) file if we get a file request
 	$file = isset($_GET['file']) ? $_GET['file'] : false;
@@ -514,6 +566,7 @@
 			<form id="hypha" method="post" accept-charset="utf-8">
 				<input id="command" name="command" type="hidden" />
 				<input id="argument" name="argument" type="hidden" />
+				<input name="token" type="hidden" value="<?=setupToken()?>" />
 <?=$html?>
 			</form>
 		</div>
