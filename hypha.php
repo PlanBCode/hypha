@@ -5,7 +5,7 @@
 	// the project homepage is www.hypha.net
 	//
 	// INSTALL
-	// 1. add your superuser login name and password here:
+	// 1. add the login name and password of the system user here:
 	$username = '';
 	$password = '';
 	//
@@ -106,7 +106,7 @@
 		// get the base script to modify
 		$hypha = file_get_contents('hypha.php');
 
-		// insert superuser name and password
+		// insert the name and password of the system user
 		$hypha = preg_replace('/\$username = \'.*?\';/', '\$username = \''.$_POST['username'].'\';', $hypha);
 		$hypha = preg_replace('/\$password = \'.*?\';/', '\$password = \''.$_POST['password'].'\';', $hypha);
 
@@ -155,13 +155,13 @@
 ?>
 			<div style="width:600px;">
 				<input type="submit" name="command" value="back" style="float:right;" />
-				<h1>hypha system tools</h1>
-				Here you can manage the files of your hypha configuration.
+				<h1>Hypha System Tools</h1>
+				Here you can manage the files of your Hypha configuration.
 				<ul>
-					<li><b>install</b> install a (datatype) module that available on the hypha server but is currently not installed on your system.</li>
+					<li><b>install</b> install a (datatype) module that available on the Hypha server but is currently not installed on your system.</li>
 					<li><b>remove</b> remove a (datatype) module that is currently installed on your system.</li>
-					<li><b>update</b> update a file on your system with a newer version available from the hypha server.</li>
-					<li><b>reset</b> your file is newer than the version on the hypha server. You can use this option to revert to the older version. This can be useful when a file got broken or some css code was messed up.</li>
+					<li><b>update</b> update a file on your system with a newer version available from the Hypha server.</li>
+					<li><b>reset</b> your file is newer than the version on the Hypha server. You can use this option to revert to the older version. This can be useful when a file got broken or some css code was messed up.</li>
 				</ul>
 			</div>
 			<table class="section">
@@ -231,10 +231,10 @@
 			$hypha->setAttribute('schemaVersion', 1);
 			$language = $xml->createElement('language', '');
 			$language->setAttribute('xml:id', $_POST['setupDefaultLanguage']);
-			$version = $xml->createElement('version', '<p>welcome to your brand new hypha website.</p>');
+			$version = $xml->createElement('version', '<p>Welcome to your brand new Hypha website.</p>');
 			$version->setAttribute('xml:id', 't'.time());
 			$version->setAttribute('author', '');
-			setNodeHtml($version, '<p>welcome to your brand new hypha website.</p>');
+			setNodeHtml($version, '<p>Welcome to your brand new Hypha website.</p>');
 			$language->appendChild($version);
 			$hypha->appendChild($language);
 			$xml->appendChild($hypha);
@@ -290,7 +290,7 @@
 			exit;
 		}
 		else {
-			if (!is_writable('.')) $errorMessage.= 'php has no write access to the hypa installation directory on the server<br/>';
+			if (!is_writable('.')) $errorMessage.= 'php has no write access to the Hypha installation directory on the server<br/>';
 
 			// extract list of languages
 			$iso639 = json_decode(data('system/languages/languages.json'), true);
@@ -301,18 +301,18 @@
 			ob_start();
 ?>
 		<div style="width:800px;">
-			<h1>hypha installer</h1>
-			In order to set up this new hypha site you need to fill out a few things. This is a once only procedure. The entered data will be used to create some folders, include scripts and config files in the folder where the hypha script resides.
-			<h2>system configuration</h2>
+			<h1>Hypha Installer</h1>
+			In order to set up this new Hypha site you need to fill out a few things. This is a once only procedure. The entered data will be used to create some folders, include scripts and config files in the folder where the Hypha script resides.
+			<h2>System Configuration</h2>
 			The following settings are used to set up your project website. All settings can be changed after the initial installation.<br/>
 			<table style="width:800px;" class="section">
 				<tr><td width="240"></td><td></td><td width="400"></td></tr>
 				<tr><th>title</th><td><input name="setupTitle" size="40" value="<?=$_POST['setupTitle'];?>" /></td><td class="help">The name of your site as it will appear in the browers title bar.</td></tr>
-				<tr><th>base url</th><td><input name="setupBaseUrl" size="40" value="http://<?=$_SERVER["SERVER_NAME"].str_replace('/hypha.php', '', $_SERVER["REQUEST_URI"])?>" /></td><td class="help">This is the address where the hypha site can be found.</td></tr>
+				<tr><th>base url</th><td><input name="setupBaseUrl" size="40" value="http://<?=$_SERVER["SERVER_NAME"].str_replace('/hypha.php', '', $_SERVER["REQUEST_URI"])?>" /></td><td class="help">This is the address where the Hypha site can be found.</td></tr>
 				<tr><th>default page</th><td><input name="setupDefaultPage" size="40" value="home" value="<?=$_POST['setupDefaultPage'];?>" /></td><td class="help">Hypha lets you create wiki style pages which can link to each other. If no particular page is selected the site will default to this page.</td></tr>
 				<tr><th>default language</th><td><select name="setupDefaultLanguage"><?=$languageOptionList?></select></td><td class="help">All pages can be multilingual. If a user does not choose a language the site will default to this language.</td></tr>
-				<tr><th>login</th><td><input name="setupUsername" size="40" value="<?=$_POST['setupUsername'];?>" /></td><td class="help">This first user account will automatically have admin rights for site maintenance.</td></tr>
-				<tr><th>password</th><td><input name="setupPassword" size="40" value="<?=$_POST['setupPassword'];?>" /></td><td class="help">The superuser password.</td></tr>
+				<tr><th>login</th><td><input name="setupUsername" size="40" value="<?=$_POST['setupUsername'];?>" /></td><td class="help">This first user of the site is a privileged user: it can change the settings and manage the other users. It is not the system user of this page.</td></tr>
+				<tr><th>password</th><td><input name="setupPassword" size="40" value="<?=$_POST['setupPassword'];?>" /></td><td class="help">The password of this first user. It is not the password of the system user.</td></tr>
 				<tr><th>full name</th><td><input name="setupFullname" size="40" value="<?=$_POST['setupFullname'];?>" /></td><td class="help">This name will be used for email messages generated by  the system.</td></tr>
 				<tr><th>email</th><td><input name="setupEmail" size="40" value="<?=$_POST['setupEmail'];?>" /></td><td class="help">This email adress will be the reply-to address of system sent messages. You may want to use an email alias that forwards messages to all collaborators in the group.</td></tr>
 				<tr><td colspan="3" style="text-align:right;"><input type="submit" name="command" value="install" /></td></tr>
@@ -331,14 +331,83 @@
 		ob_start();
 ?>
 			<div style="width:600px;">
-				<h1>hypha superuser login</h1>
-				Please log in with the superuser account. In case you forgot the password you'll have to look it up in the file 'hypha.php' on your server.
+				<h1>Hypha System User Login</h1>
+				Please log in as the system user. In case you forgot the password you'll have to look it up in the file 'hypha.php' on your server.
 			</div>
 			<table class="section">
 				<tr><th style="text-align:right; white-space:nowrap;">username:</th><td><input id="username" name="username" type="text" /></td></tr>
 				<tr><th style="text-align:right; white-space:nowrap;">password:</th><td><input name="password" type="password" /></td></tr>
 				<tr><td colspan="2" style="text-align:right;"><input type="submit" name="command" value="login" /></td></tr>
 			</table>
+<?php
+		return ob_get_clean();
+	}
+
+	/*
+		Function: installationNotice
+		Tells that the site is in installation mode because data/hypha.xml is missing, and what to check when an
+		existing site was expected: a data folder with pages but without a readable hypha.xml is a wrong mount or
+		wrong file permissions, and installing then starts a new, empty site. A list shows what Hypha found: the full path
+		of data/, whether the user PHP runs as may read and write it, what it holds, and whether hypha.xml is there.
+	*/
+	function installationNotice() {
+		$existingData = is_dir('data/pages') || is_dir('data/images');
+		$dataDir = getcwd() . '/data';
+		// The user PHP runs as, which needs to read and write data/.
+		$user = function_exists('posix_geteuid') ? (posix_getpwuid(posix_geteuid())['name'] ?? 'uid ' . posix_geteuid()) : 'the web server';
+		// Docker makes /.dockerenv, Podman /run/.containerenv.
+		$container = file_exists('/.dockerenv') || file_exists('/run/.containerenv');
+		$contents = is_dir('data') && is_readable('data') ? array_values(array_diff(scandir('data'), ['.', '..'])) : [];
+		$checks = [];
+		$checks[] = [is_dir('data'), 'The folder <code>' . htmlspecialchars($dataDir) . '</code> exists.', $container ? 'Mount the volume with the data of the site on exactly this path.' : 'Create it, or copy the data/ folder of an existing site here.'];
+		if (is_dir('data')) {
+			$checks[] = [is_readable('data'), 'User ' . htmlspecialchars($user) . ' may read it.', 'Give this user read access, for example with chown or chmod.'];
+			$checks[] = [is_writable('data'), 'User ' . htmlspecialchars($user) . ' may write in it.', 'Hypha stores pages, images and statistics here; give this user write access.'];
+			// The image or package brings data/themes, so only themes/ is as good as empty.
+			$listed = array_slice($contents, 0, 10);
+			if (is_readable('data')) $checks[] = [array_diff($contents, ['themes']) !== [], 'It holds: ' . ($contents ? '<code>' . implode('</code>, <code>', array_map('htmlspecialchars', $listed)) . '</code>' . (count($contents) > count($listed) ? ', ...' : '') : 'nothing') . '.', $container ? 'Nothing or only themes/ in a container usually means the volume with the data is not mounted on this path.' : 'Nothing or only themes/ means a new site.'];
+		}
+		if (is_dir('data/hypha.xml')) $checks[] = [false, '<code>' . htmlspecialchars($dataDir) . '/hypha.xml</code> is a folder, not a file.', 'Docker and Podman make a folder when a file that does not exist on the host is mounted. Remove this folder and mount the data folder as a whole, or the right file.'];
+		else $checks[] = [is_file('data/hypha.xml'), 'The file <code>' . htmlspecialchars($dataDir) . '/hypha.xml</code> exists.', $existingData ? 'Restore hypha.xml from a backup, or check that this is the right data folder.' : 'It is made by the installation below.'];
+		ob_start();
+?>
+			<div class="notice<?=$existingData ? ' warning' : ''?>">
+				<h1>Installation Mode</h1>
+				<p>Hypha is not installed in this folder yet: the file <code>data/hypha.xml</code>, which holds the settings, users and pages of a site, is missing. Every page of this site therefore leads here.</p>
+<?php if ($existingData) { ?>
+				<p><strong>The folder <code>data/</code> does hold pages or images, so this looks like an existing site whose <code>data/hypha.xml</code> cannot be found or read.</strong> Do not install in that case, because it starts a new, empty site. Check instead that the data folder is in the right place (for a container: the volume) and that the web server may read and write it.</p>
+<?php } else { ?>
+				<p>To set up a new site, log in below as the system user from the top of <code>hypha.php</code> and fill out the settings. To move an existing site here, copy its <code>data/</code> folder into this folder instead<?=$container ? ', or mount it as a volume on that path' : ''?>.</p>
+<?php } ?>
+				<p>What Hypha found<?=$container ? ' (in a container)' : ''?>:</p>
+				<ul class="checks">
+<?php foreach ($checks as list($ok, $text, $advice)) { ?>
+					<li class="<?=$ok ? 'ok' : 'nok'?>"><span><?=$ok ? '&#10003;' : '&#10007;'?></span> <?=$text?><?=$ok ? '' : '<br/><em>' . htmlspecialchars($advice) . '</em>'?></li>
+<?php } ?>
+				</ul>
+				<p>Documentation and help: <a href="https://github.com/PlanBCode/hypha">github.com/PlanBCode/hypha</a>.</p>
+			</div>
+<?php
+		return ob_get_clean();
+	}
+
+	/*
+		Function: installedNotice
+		Tells that the site is installed, so nothing needs to be done on this page for normal use, and what the
+		maintenance mode and the builder below are for.
+	*/
+	function installedNotice() {
+		ob_start();
+?>
+			<div class="notice">
+				<h1>Hypha Is Installed</h1>
+				<p>This site is installed and running: <a href="./">open the site</a>. This page belongs to <code>hypha.php</code>, the installation and maintenance script of Hypha; for normal use nothing needs to be done here.</p>
+				<ul>
+					<li><strong>Maintenance:</strong> <a href="hypha.php?maintenance">hypha.php?maintenance</a> updates the files of Hypha and installs or removes modules, after logging in as the system user from the top of <code>hypha.php</code>.</li>
+					<li><strong>Builder</strong> (below): packs the files of this site into a new installer <code>hypha.php</code>, to set up Hypha on another server. It does not change this site.</li>
+				</ul>
+				<p>Documentation and help: <a href="https://github.com/PlanBCode/hypha">github.com/PlanBCode/hypha</a>.</p>
+			</div>
 <?php
 		return ob_get_clean();
 	}
@@ -353,18 +422,18 @@
 		ob_start();
 ?>
 			<div style="width:600px;">
-				<h1>hypha builder</h1>
-				Here you can compose your own hypha system.
+				<h1>Hypha Builder</h1>
+				Here you can compose your own Hypha system.
 				<ol>
-					<li>First you have to enter a name and password for the so called 'superuser' account.</li>
-					<li>Then you can select a number of modules for different data types you want to incorporate in your hypha system.</li>
-					<li>When you click 'build' your superuser account and selection of modules will be packed into one php file ('hypha.php') which is offered for download.</li>
-					<li>Upload the downloaded file into a webdirectory on your server and make shure php has write access to the folder. Open the file in a browser. You will be asked to login as superuser and after setting up some variables hypha will be installed.</li>
+					<li>First you have to enter a name and password for the so called 'system user'.</li>
+					<li>Then you can select a number of modules for different data types you want to incorporate in your Hypha system.</li>
+					<li>When you click 'build' the system user and selection of modules will be packed into one php file ('hypha.php') which is offered for download.</li>
+					<li>Upload the downloaded file into a webdirectory on your server and make shure php has write access to the folder. Open the file in a browser. You will be asked to log in as the system user and after setting up some variables Hypha will be installed.</li>
 				</ol>
 			</div>
 			<table class="section">
-				<tr><th style="text-align:right; white-space:nowrap;">superuser name:</th><td><input id="username" name="username" type="text" /></td></tr>
-				<tr><th style="text-align:right; white-space:nowrap;">superuser password:</th><td><input name="password" type="password" /></td></tr>
+				<tr><th style="text-align:right; white-space:nowrap;">system user name:</th><td><input id="username" name="username" type="text" /></td></tr>
+				<tr><th style="text-align:right; white-space:nowrap;">system user password:</th><td><input name="password" type="password" /></td></tr>
 				<tr name="datatype">
 					<th style="text-align:right; white-space:nowrap;">modules to include:</th><td>
 <?php
@@ -462,12 +531,13 @@
 
 	$login = (isset($_SESSION['hyphaSetupLoggedIn']) && ($_SESSION['hyphaSetupLoggedIn'] == true)) ? true : false;
 
-	// if hypha.xml is absent present superuser login and present hypha installer
-	// else if maintenance request present superuser login and present hypha system tools
+	// if hypha.xml is absent present the system user login and present hypha installer
+	// else if maintenance request present the system user login and present hypha system tools
 	// else present hypha builder
-	if (!file_exists('data/hypha.xml')) $html = $login ? install($hyphaServer) : login();
+	// is_file as in index.php: a folder named hypha.xml (a mount of a missing file) is no installation either.
+	if (!is_file('data/hypha.xml')) $html = installationNotice() . ($login ? install($hyphaServer) : login());
 	else if (key($_GET)=='maintenance') $html = $login ? tools($hyphaServer) : login();
-	else $html = build();
+	else $html = installedNotice() . build();
 
 	// output html
 ?>
@@ -475,15 +545,78 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-		<title id="hypha setup"></title>
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="robots" content="noindex" />
+		<title>Installation | Hypha</title>
 		<style type="text/css">
 			html body {
-				font-family: sans-serif;
+				font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
 				font-size: 11pt;
-				letter-spacing: 0.07em;
-				text-align: justify;
 				color: #222;
-				line-height: 1.35;
+				line-height: 1.45;
+				background-color: #f4f5f2;
+				margin: 0;
+				padding: 2em 1em;
+			}
+			body > div {
+				max-width: 800px;
+				margin: 0 auto;
+				background-color: #fff;
+				border-radius: 8px;
+				box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+				padding: 1.5em 2em;
+			}
+			h1 {
+				font-size: 1.5em;
+				margin: 0 0 0.5em 0;
+			}
+			code {
+				background-color: #eee;
+				padding: 0 0.25em;
+				border-radius: 3px;
+			}
+			a {
+				color: #2a6a3a;
+			}
+			.notice {
+				border-left: 6px solid #2a6a3a;
+				background-color: #eef5ef;
+				padding: 1em 1.25em;
+				margin-bottom: 1.5em;
+				border-radius: 4px;
+			}
+			.notice.warning {
+				border-left-color: #b35c00;
+				background-color: #fdf1e3;
+			}
+			.notice p {
+				margin: 0.5em 0;
+			}
+			.checks {
+				list-style: none;
+				padding: 0;
+				margin: 0.5em 0;
+			}
+			.checks li {
+				margin: 0.35em 0;
+				padding-left: 1.6em;
+				text-indent: -1.6em;
+				overflow-wrap: anywhere;
+			}
+			.checks span {
+				display: inline-block;
+				width: 1.6em;
+				text-indent: 0;
+				font-weight: bold;
+			}
+			.checks .ok span {
+				color: #2a6a3a;
+			}
+			.checks .nok span, .checks em {
+				color: #a33;
+			}
+			form div, form table {
+				max-width: 100%;
 			}
 			tr {
 				vertical-align: top;
@@ -492,8 +625,9 @@
 				padding: 5px 5px 20px 5px;
 			}
 			.section {
-				border:1px solid #000;
-				background-color:#eee;
+				border: 1px solid #ccc;
+				border-radius: 4px;
+				background-color: #f7f7f7;
 			}
 			.help {
 				font-size: 10pt;
