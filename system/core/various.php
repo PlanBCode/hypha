@@ -96,8 +96,45 @@
 		$action - javascript action
 		$id - optional element id
 	*/
+	/*
+		Function: parseAction
+		Returns the url, command, argument and form id of an action
+		made by makeAction(), or null for any other script.
+	*/
+	function parseAction($action) {
+		if (!preg_match("/^hypha\\('([^']*)', '([^']*)', '([^']*)', document\\.getElementById\\('([^']*)'\\),null\\);$/", $action, $m)) return null;
+		return ['url' => $m[1], 'command' => $m[2], 'argument' => $m[3], 'form' => $m[4]];
+	}
+
 	function makeButton($label, $action, $id = '', $class = '') {
 		global $hyphaHtml;
+		// A button made by makeAction() also works without
+		// JavaScript: a link when it only opens a page, else a
+		// submit button that posts the form with its command and
+		// argument; with JavaScript hypha() still runs (#667).
+		$parsed = parseAction($action);
+		if ($parsed) {
+			if ($parsed['command'] === '' && $parsed['argument'] === '') {
+				$button = $hyphaHtml->createElement('a');
+				$button->setAttribute('href', $parsed['url']);
+				$button->setText($label);
+			} else {
+				$button = $hyphaHtml->createElement('button');
+				$button->setAttribute('type', 'submit');
+				$button->setAttribute('form', $parsed['form']);
+				$button->setAttribute('formaction', $parsed['url']);
+				$button->setAttribute('name', 'hyphaCommand[' . $parsed['command'] . ']');
+				$button->setAttribute('value', $parsed['argument']);
+				$button->setAttribute('onclick', $action . ' return false;');
+				$button->setText($label);
+			}
+			if ($id)
+				$button->setAttribute("id", $id);
+			if ($class)
+				$button->addClass($class);
+			$button->addClass('button');
+			return $button;
+		}
 		$button = $hyphaHtml->createElement('input');
 		if ($id)
 			$button->setAttribute("id", $id);
@@ -125,7 +162,12 @@
 		if ($class)
 			$link->addClass($class);
 		$link->addClass('button');
-		$link->setAttribute('href', "javascript:$action");
+		// A link that only opens a page needs no JavaScript (#667).
+		$parsed = parseAction($action);
+		if ($parsed && $parsed['command'] === '' && $parsed['argument'] === '')
+			$link->setAttribute('href', $parsed['url']);
+		else
+			$link->setAttribute('href', "javascript:$action");
 		if ($tooltip !== null)
 			$link->setAttribute('title', $tooltip);
 		$link->appendHtml($label);

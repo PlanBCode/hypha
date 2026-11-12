@@ -278,7 +278,15 @@
 		 * @return array
 		 */
 		public function getPostData() {
-			return $_POST;
+			// A button that works without JavaScript posts its
+			// command and argument as hyphaCommand[<command>] =
+			// <argument> (see makeButton(), issue #667).
+			$post = $_POST;
+			if (!isset($post['command']) && isset($post['hyphaCommand']) && is_array($post['hyphaCommand']) && count($post['hyphaCommand']) == 1) {
+				$post['command'] = (string)key($post['hyphaCommand']);
+				$post['argument'] = (string)reset($post['hyphaCommand']);
+			}
+			return $post;
 		}
 
 		/**
