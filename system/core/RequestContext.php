@@ -1,6 +1,14 @@
 <?php
 
 	class RequestContext {
+		/**
+		 * A login ends after this many seconds without a
+		 * request, or this many seconds after logging in,
+		 * whichever comes first.
+		 */
+		const LOGIN_IDLE_TIMEOUT = 14400; // 4 hours
+		const LOGIN_MAX_DURATION = 86400; // 24 hours
+
 		/** @var HyphaRequest */
 		private $hyphaRequest;
 
@@ -35,7 +43,7 @@
 		public function __construct(HyphaRequest $hyphaRequest) {
 			$this->hyphaRequest = $hyphaRequest;
 			$this->session = new HyphaSession($hyphaRequest);
-			$userid = $this->session->get('hyphaLogin');
+			$userid = $this->checkLoginTimeout($this->session->get('hyphaLogin'));
 			if ($userid)
 				$this->hyphaUser = hypha_getUserById($userid);
 			else
@@ -49,6 +57,40 @@
 			$this->data->themeCss = new HyphaFile('data/themes/' . $theme . '/hypha.css');
 			$this->data->digest = new HyphaFile('data/digest');
 			$this->data->stats = new HyphaFile('data/hypha.stats');
+		}
+
+		/**
+		 * Returns the given user id when the login is still
+		 * valid. Otherwise removes the login from the session
+		 * and returns null. Logins from before these timestamps
+		 * were recorded are ended as well.
+		 * @param null|string $userid
+		 * @return null|string
+		 */
+		private function checkLoginTimeout($userid) {
+			if (!$userid)
+				return null;
+			$now = time();
+			$loginTime = (int)$this->session->get('hyphaLoginTime', 0);
+			$lastSeen = (int)$this->session->get('hyphaLastSeen', 0);
+			$expired = $now - $loginTime > self::LOGIN_MAX_DURATION
+				|| $now - $lastSeen > self::LOGIN_IDLE_TIMEOUT;
+			// Updating the last-seen time needs a session
+			// write, so do that at most once a minute.
+			if (!$expired && $now - $lastSeen < 60)
+				return $userid;
+
+			$this->session->lockAndReload();
+			if ($expired) {
+				$this->session->remove('hyphaLogin');
+				$this->session->remove('hyphaLoginTime');
+				$this->session->remove('hyphaLastSeen');
+				$userid = null;
+			} else {
+				$this->session->set('hyphaLastSeen', $now);
+			}
+			$this->session->writeAndUnlock();
+			return $userid;
 		}
 
 		/**
