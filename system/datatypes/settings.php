@@ -272,6 +272,10 @@
 		<td><input name="settingsDefaultPage" id="settingsDefaultPage" type="text" size="20" value="<?=showPagename(hypha_getDefaultPage())?>" onblur="validatePagename(this);" onkeyup="validatePagename(this);"/></td>
 	</tr>
 	<tr>
+		<th><?=__('base-url')?>:</th>
+		<td><input name="settingsBaseUrl" id="settingsBaseUrl" type="text" size="40" value="<?=htmlspecialchars(hypha_getBaseUrl())?>" placeholder="https://www.example.org/" /> <?=__('base-url-explain')?></td>
+	</tr>
+	<tr>
 		<th><?=__('system-email')?>:</th>
 		<td><input name="settingsSystemEmail" id="settingsSystemEmail" type="text" size="40" value="<?=hypha_getEmail()?>" /></td>
 	</tr>
@@ -301,6 +305,11 @@
 				hypha_setDefaultInterfaceLanguage($_POST['settingsDefaultInterfaceLanguage']);
 				hypha_setDefaultPage($_POST['settingsDefaultPage']);
 				hypha_setEmail($_POST['settingsSystemEmail']);
+				$baseUrl = HyphaRequest::normaliseRootUrl(isset($_POST['settingsBaseUrl']) ? $_POST['settingsBaseUrl'] : '');
+				if ($baseUrl === false)
+					notify('error', __('invalid-base-url'));
+				else
+					hypha_setBaseUrl($baseUrl);
 				$digestInterval = 86400 * $_POST['settingsIntervalDays'] + 3600 * $_POST['settingsIntervalHours'] + 60 * $_POST['settingsIntervalMinutes'];
 				hypha_setDigestInterval($digestInterval);
 				$hyphaXml->saveAndUnlock();

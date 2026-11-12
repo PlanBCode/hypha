@@ -249,6 +249,12 @@
 			$hypha->setAttribute('defaultLanguage', $_POST['setupDefaultLanguage']);
 			$hypha->setAttribute('defaultPage', $_POST['setupDefaultPage']);
 			$hypha->setAttribute('email', $_POST['setupEmail']);
+			// Keep the site address that was entered, so links in
+			// mails do not depend on the Host header of a request.
+			require_once('system/core/HyphaRequest.php');
+			$setupBaseUrl = HyphaRequest::normaliseRootUrl(isset($_POST['setupBaseUrl']) ? $_POST['setupBaseUrl'] : '');
+			if ($setupBaseUrl)
+				$hypha->setAttribute('baseUrl', $setupBaseUrl);
 			$hypha->setAttribute('digestInterval', '21600');
 			$hypha->setAttribute('schemaVersion', 1);
 			$hypha->appendChild($xml->createElement('title', $_POST['setupTitle']));
@@ -308,7 +314,7 @@
 			<table style="width:800px;" class="section">
 				<tr><td width="240"></td><td></td><td width="400"></td></tr>
 				<tr><th>title</th><td><input name="setupTitle" size="40" value="<?=$_POST['setupTitle'];?>" /></td><td class="help">The name of your site as it will appear in the browers title bar.</td></tr>
-				<tr><th>base url</th><td><input name="setupBaseUrl" size="40" value="http://<?=$_SERVER["SERVER_NAME"].str_replace('/hypha.php', '', $_SERVER["REQUEST_URI"])?>" /></td><td class="help">This is the address where the hypha site can be found.</td></tr>
+				<tr><th>base url</th><td><input name="setupBaseUrl" size="40" value="<?=(isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http'?>://<?=htmlspecialchars($_SERVER["SERVER_NAME"].str_replace('/hypha.php', '', $_SERVER["REQUEST_URI"]))?>" /></td><td class="help">This is the address where the hypha site can be found.</td></tr>
 				<tr><th>default page</th><td><input name="setupDefaultPage" size="40" value="home" value="<?=$_POST['setupDefaultPage'];?>" /></td><td class="help">Hypha lets you create wiki style pages which can link to each other. If no particular page is selected the site will default to this page.</td></tr>
 				<tr><th>default language</th><td><select name="setupDefaultLanguage"><?=$languageOptionList?></select></td><td class="help">All pages can be multilingual. If a user does not choose a language the site will default to this language.</td></tr>
 				<tr><th>login</th><td><input name="setupUsername" size="40" value="<?=$_POST['setupUsername'];?>" /></td><td class="help">This first user account will automatically have admin rights for site maintenance.</td></tr>
