@@ -650,7 +650,9 @@
 		$classes = explode(' ', $bodyElement->getAttribute('class'));
 		if (isset($hyphaPage->pagename)) {
 			$classes[] = $hyphaPage->pagename;
-			if ($hyphaPage->pagename === hypha_getDefaultPage()) {
+			// The default page in any of its languages
+			$home = hypha_getPage(hypha_getDefaultLanguage(), hypha_getDefaultPage());
+			if ($home && isset($hyphaPage->pageListNode) && $hyphaPage->pageListNode->getAttribute('id') === $home->getAttribute('id')) {
 				$classes[] = 'is_home';
 			}
 		}

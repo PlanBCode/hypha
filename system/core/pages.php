@@ -257,6 +257,12 @@ EOF;
 			$_name = $request->getPageName();
 			if ($_name === null) {
 				$_name = hypha_getDefaultPage();
+				// The default page is named in the default
+				// language; in another language (/en) show
+				// its translation, which has its own name.
+				$_home = hypha_getPage(hypha_getDefaultLanguage(), $_name);
+				$_lang = $_home ? hypha_pageGetLanguage($_home, $O_O->getContentLanguage()) : false;
+				if ($_lang) $_name = $_lang->getAttribute('name');
 			}
 			$_node = hypha_getPage($O_O->getContentLanguage(), $_name);
 
