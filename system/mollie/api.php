@@ -87,7 +87,6 @@
 			$result = curl_exec($ch);
 			$code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 			$type = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
-			curl_close($ch);
 
 			//error_log("$method $full_url\n");
 			//error_log("$method $full_url\n" . json_encode($payload, JSON_PRETTY_PRINT) . "\n");
