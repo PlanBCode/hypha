@@ -257,6 +257,8 @@
 		"festival-field-contribution-website" => "Link naar website",
 		"festival-field-contribution-category" => "Categorie",
 		"festival-field-contribution-notes" => "Opmerkingen voor de organisatie",
+		"festival-field-contribution-motivation" => "Waarom past de bijdrage bij het evenement",
+		"motivation" => "Motivatie",
 
 		// festival - digest
 		"festival-edited-contribution" => "[[name]] heeft festivalbijdrage aangepast: [[contribution]]",
