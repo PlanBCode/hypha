@@ -19,7 +19,10 @@
 		"logout-icon" => "<i class=\"fa fa-sign-out\" aria-hidden=\"true\"></i>",
 		"quit" => "account deactiveren",
 		"quit-explain-message" => "Let op! Enkel een admin kan een gedeactiveerd account heractiveren.\nHet bericht wat je hieronder achterlaat wordt gestuurd naar de overgebleven gebruikers.",
-		"logged-in-as" => "ingelogd als",
+		"logged-in-as" => "Aangemeld als",
+		"page-index" => "Pagina-index",
+		"reincarnate" => "weer actief maken",
+		"restore" => "terugzetten",
 		"forgot-password" => "Klik hier als je je gebruikersnaam of wachtwoord bent vergeten: ",
 		"login-failed" => "inloggen mislukt. Klik hier als je je wachtwoord bent vergeten: ",
 		"reregister" => "heraanmelden",
@@ -218,7 +221,7 @@
 		"sure-to-delete" => "Weet je zeker dat je deze pagina wilt verwijderen",
 		"enter-tag-label" => "Voer nieuwe tag in (gebruik een kort woord)",
 		"enter-tag-description" => "Geef korte omschrijving (verplicht)",
-		"login-to-perform-action" => "je moet ingelogd zijn om deze actie te kunnen uitvoeren",
+		"login-to-perform-action" => "je moet aangemeld zijn om deze actie te kunnen uitvoeren",
 		"page-successfully-updated" => "Pagina succesvol bijgewerkt",
 		'cannot-edit-default-theme-explanation' => 'Het standaard thema kan niet bewerkt worden. Op de <a href="[[link]]">thema keuzepagina</a>, is het mogelijk het standaard thema the kopiëren en activeren, de kopie kan wel bewerkt worden.',
 
@@ -516,7 +519,7 @@
 		"share-twitter" => "Zie [[title]] op [[domain]]: ", // Twitter appends URL
 
 		// help_icon_texts
-		"help-private-page" => "Een privepagina is alleen zichtbaar voor degenen die zijn ingelogd.",
+		"help-private-page" => "Een privépagina is alleen zichtbaar voor wie is aangemeld.",
 		"help-page-type" => "Kies eerst het juiste paginatype.\nEen festival pagina geeft je de gereedschappen om een festival te organiseren en de line-up te laten zien aan het publiek.\nEen mailinglijst is een lijst voor emailadressen en een gereedschap om nieuwsbrieven te schrijven en versturen.\nEen artikel met review is een pagina die prive blijft totdat hij is goedgekeurd door 3 anderen,\ndan wordt hij publiek en is er een mogelijkheid voor lezers om te reageren.\nEen webpagina is een gewone webpagina.",
 		"help-version-management" => "Hier kun je terug naar een vorige versie van de pagina. \nDie keuze kun je definitief maken door te klikken op Terugdraaien.",
 		"help-version-revert" => "Hier bevestig je de keuze om de nieuwste versie van de pagina te vervangen voor deze. \nWil je dat niet? Kies dan in de versielijst weer de bovenste pagina.",
