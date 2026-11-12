@@ -62,6 +62,7 @@
 		"edit-icon" => "<i class=\"fa fa-pencil-square-o\" aria-hidden=\"true\"></i>",
 		"file" => "file",
 		"image" => "image",
+		"image-preview" => "preview of the chosen image",
 		"url" => "url",
 		"web" => "web",
 		"html" => "html",
