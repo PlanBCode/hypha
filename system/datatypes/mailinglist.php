@@ -34,6 +34,7 @@ class mailinglist extends HyphaDatatypePage {
 	const FIELD_NAME_CONFIRM_CODE = 'confirm-code';
 	const FIELD_NAME_UNSUBSCRIBE_CODE = 'unsubscribe-code';
 	const FIELD_NAME_REMINDED = 'reminded';
+	const FIELD_NAME_CONFIRM_SENT = 'confirm-sent';
 	const FIELD_NAME_RECEIVERS = 'receivers';
 	const FIELD_NAME_NEW_ADDRESSES = 'new-addresses';
 
@@ -74,6 +75,11 @@ class mailinglist extends HyphaDatatypePage {
 	const ADDRESS_STATUS_PENDING = 'pending';
 	const ADDRESS_STATUS_CONFIRMED = 'confirmed';
 	const ADDRESS_STATUS_UNSUBSCRIBED = 'unsubscribed';
+
+	// Minimum number of seconds between two confirmation mails to the same
+	// pending address, so the anonymous subscribe form cannot be used to
+	// flood an address with mail.
+	const CONFIRM_MAIL_INTERVAL = 900;
 
 	const PROGRESS_UPDATE_INTERVAL_MS = 1000;
 	const TIME_LIMIT_PER_MAIL = 30;
@@ -338,11 +344,15 @@ class mailinglist extends HyphaDatatypePage {
 
 		$addAddress = !$address instanceof HyphaDomElement;
 		if ($addAddress) {
+			$pending = true;
 			$sendEmail = true;
 			$code = $this->constructCode();
 		} else {
-			// if the email is there just send another email if it is still pending
-			$sendEmail = $address->getAttribute(self::FIELD_NAME_STATUS) == self::ADDRESS_STATUS_PENDING;
+			// if the email is there just send another email if it is still pending,
+			// unless one was sent recently
+			$pending = $address->getAttribute(self::FIELD_NAME_STATUS) == self::ADDRESS_STATUS_PENDING;
+			$sentAgo = time() - (int)$address->getAttribute(self::FIELD_NAME_CONFIRM_SENT);
+			$sendEmail = $pending && $sentAgo >= self::CONFIRM_MAIL_INTERVAL;
 			$code = $address->getAttribute(self::FIELD_NAME_CONFIRM_CODE);
 		}
 
@@ -353,10 +363,14 @@ class mailinglist extends HyphaDatatypePage {
 			$address->setAttribute(self::FIELD_NAME_EMAIL, $email);
 			$address->setAttribute(self::FIELD_NAME_STATUS, self::ADDRESS_STATUS_PENDING);
 			$address->setAttribute(self::FIELD_NAME_CONFIRM_CODE, $code);
+			$address->setAttribute(self::FIELD_NAME_CONFIRM_SENT, time());
 			$address->setAttribute(self::FIELD_NAME_REMINDED, false);
 			/** @var HyphaDomElement $addressesContainer */
 			$addressesContainer = $this->getDoc()->get(self::FIELD_NAME_ADDRESSES_CONTAINER);
 			$addressesContainer->appendChild($address);
+			$this->xml->saveAndUnlock();
+		} else if ($sendEmail) {
+			$address->setAttribute(self::FIELD_NAME_CONFIRM_SENT, time());
 			$this->xml->saveAndUnlock();
 		} else {
 			$this->xml->unlock();
@@ -364,6 +378,9 @@ class mailinglist extends HyphaDatatypePage {
 
 		if ($sendEmail) {
 			$this->sendConfirmationMail($code, $email);
+		}
+		if ($pending) {
+			// Also when no mail was sent now: one was sent recently.
 			notify('success', ucfirst(__('ml-confirmation-mail-sent')));
 		} else {
 			notify('success', ucfirst(__('ml-successfully-subscribed')));
