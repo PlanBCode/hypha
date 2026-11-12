@@ -963,10 +963,31 @@
 	function getMimeType($path) {
 		// This uses finfo for most files, but that looks at the
 		// content, not the extension, so it won't get the type
-		// right for js and css files.
-		switch(pathinfo($path, PATHINFO_EXTENSION)) {
-			case 'css': return 'text/css';
-			case 'js': return 'application/javascript';
+		// right for text and font formats: it gives text/plain
+		// for a script module, Markdown or an SVG image that
+		// starts with a comment, and font/sfnt or
+		// application/octet-stream for fonts and icons. These
+		// get the type registered with IANA for their extension
+		// (RFC 9239 for JavaScript, RFC 8081 for fonts, RFC 7763
+		// for Markdown). Images keep the type of their content,
+		// since an uploaded image may have any extension.
+		switch(strtolower(pathinfo($path, PATHINFO_EXTENSION))) {
+			case 'css': return 'text/css; charset=utf-8';
+			case 'js':
+			case 'mjs': return 'text/javascript; charset=utf-8';
+			case 'json': return 'application/json';
+			case 'html':
+			case 'htm': return 'text/html; charset=utf-8';
+			case 'md': return 'text/markdown; charset=utf-8';
+			case 'txt': return 'text/plain; charset=utf-8';
+			case 'xml': return 'application/xml';
+			case 'svg': return 'image/svg+xml';
+			case 'ico': return 'image/vnd.microsoft.icon';
+			case 'woff': return 'font/woff';
+			case 'woff2': return 'font/woff2';
+			case 'ttf': return 'font/ttf';
+			case 'otf': return 'font/otf';
+			case 'eot': return 'application/vnd.ms-fontobject';
 			default: return finfo_file(finfo_open(FILEINFO_MIME_TYPE), $path);
 		}
 	}
