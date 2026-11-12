@@ -443,6 +443,8 @@
 	// push (encoded) file if we get a file request
 	$file = isset($_GET['file']) ? $_GET['file'] : false;
 	if ($file) {
+		// Both answers are data for another hypha.php, not HTML.
+		header('Content-Type: text/plain; charset=utf-8');
 		if ($file=='index') echo serialize(index());
 		else if (isAllowedFile($file)) if (file_exists($file)) echo base64_encode(gzencode(file_get_contents($file), 9));
 		exit;
