@@ -17,9 +17,27 @@
 	registerCommandCallback('login', 'login');
 	function login() {
 		global $O_O;
-		$username = $O_O->getRequest()->getPostValue('loginUsername');
-		$password = $O_O->getRequest()->getPostValue('loginPassword');
+		$username = (string)$O_O->getRequest()->getPostValue('loginUsername');
+		$password = (string)$O_O->getRequest()->getPostValue('loginPassword');
+
+		// Limit password guessing. The counters are kept per
+		// username (whether or not it exists, so they reveal
+		// nothing) and per client address, outside the session
+		// so discarding the cookie does not reset them.
+		$userBucket = 'login:' . strtolower($username);
+		$ipBucket = 'login-ip:' . (isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '');
+		if (hypha_throttleCount($userBucket, HYPHA_LOGIN_WINDOW) >= HYPHA_LOGIN_MAX_FAILURES_PER_USER
+		    || hypha_throttleCount($ipBucket, HYPHA_LOGIN_WINDOW) >= HYPHA_LOGIN_MAX_FAILURES_PER_IP) {
+			notify('error', __('login-throttled'));
+			return 'reload';
+		}
+
 		$user = hypha_getUserByName($username);
+		// Spend the same time on an unknown username as on a
+		// wrong password, so response times do not reveal which
+		// usernames exist.
+		if (!$user)
+			password_hash($password, PASSWORD_DEFAULT);
 		$sess = $O_O->getSession();
 		$sess->lockAndReload();
 		if ($user && $user->getAttribute('rights') != 'exmember' && verifyPassword($password, $user->getAttribute('password'))) {
@@ -27,12 +45,20 @@
 			$sess->changeSessionId();
 			$sess->set('hyphaLogin', $user->getAttribute('id'));
 			$O_O->regenerateCsrfToken();
+			$success = true;
 		}
 		else {
 			$sess->remove('hyphaLogin');
 			notify('error', __('login-failed').'. <a href="javascript:reregister();">'.__('reregister').'</a>');
+			$success = false;
 		}
 		$sess->writeAndUnlock();
+		if ($success) {
+			hypha_throttleClear($userBucket);
+		} else {
+			hypha_throttleRegister($userBucket);
+			hypha_throttleRegister($ipBucket);
+		}
 		return 'reload';
 	}
 
@@ -200,17 +226,123 @@ EOF;
 	registerCommandCallback('reregister', 'reregister');
 	function reregister($search) {
 		global $hyphaUrl, $hyphaXml;
+		$search = (string)$search;
+		// Always give the same answer, whether or not an account
+		// matches, so this cannot be used to find out which
+		// usernames and e-mail addresses are registered.
+		notify('success', __('reregistration-sent'));
+
+		// An empty search would match invitees, which have no
+		// username yet.
+		if ($search === '')
+			return 'reload';
+
+		$ipBucket = 'recover-ip:' . (isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '');
+		if (hypha_throttleCount($ipBucket, HYPHA_RECOVERY_WINDOW) >= HYPHA_RECOVERY_MAX_MAILS_PER_IP)
+			return 'reload';
+		hypha_throttleRegister($ipBucket);
+
 		$hyphaXml->lockAndReload();
 		foreach(hypha_getUserList() as $user) if ($user->getAttribute('username')==$search || $user->getAttribute('email')==$search) {
+			// Limit the number of recovery mails per account,
+			// so the address cannot be flooded.
+			$userBucket = 'recover:' . $user->getAttribute('id');
+			if (hypha_throttleCount($userBucket, HYPHA_RECOVERY_WINDOW) >= HYPHA_RECOVERY_MAX_MAILS_PER_USER)
+				break;
+			hypha_throttleRegister($userBucket);
+
 			$key = bin2hex(openssl_random_pseudo_bytes(8));
 			hypha_addUserRegistrationKey($user, $key);
 			$hyphaXml->saveAndUnlock();
 			$mailBody = __('reregister-to').'\''.hypha_getTitle().'\'. '.__('follow-link-to-register').'<br /><a href="'.$hyphaUrl.'settings/register/'.$key.'">'.$hyphaUrl.'settings/register/'.$key.'</a>';
 			$result = sendMail($user->getAttribute('email'), __('reregistration').'\''.hypha_getTitle().'\'', nl2br($mailBody));
-			if ($result) notify('error', $result);
-			else notify('success',  __('reregistration-sent'));
+			// Showing the mail error would reveal that the
+			// account exists, so log it for the operator.
+			if ($result) error_log('Hypha: sending account recovery mail failed: ' . $result);
 			return 'reload';
 		}
 		$hyphaXml->unlock();
-		notify('success', __('reregistration-error'));
+		return 'reload';
+	}
+
+	/*
+		Constants: limits on login attempts and recovery mails
+		Failed logins are counted per username and per client
+		address over HYPHA_LOGIN_WINDOW seconds; recovery mails
+		per account and per client address over
+		HYPHA_RECOVERY_WINDOW seconds. Users behind one proxy or
+		NAT share an address and so share the per-address limit;
+		15 failed logins per address in 15 minutes still leaves
+		room for a few people mistyping their password.
+	*/
+	const HYPHA_LOGIN_WINDOW = 900;
+	const HYPHA_LOGIN_MAX_FAILURES_PER_USER = 10;
+	const HYPHA_LOGIN_MAX_FAILURES_PER_IP = 15;
+	const HYPHA_RECOVERY_WINDOW = 3600;
+	const HYPHA_RECOVERY_MAX_MAILS_PER_USER = 3;
+	const HYPHA_RECOVERY_MAX_MAILS_PER_IP = 20;
+	const HYPHA_THROTTLE_FILE = 'data/hypha.throttle';
+	// Events older than this are dropped from the file
+	const HYPHA_THROTTLE_MAX_AGE = 3600;
+
+	/*
+		Function: hypha_throttleCount
+		Returns the number of events registered for $bucket in the
+		last $window seconds. Buckets are stored hashed, so the
+		file holds no usernames or addresses.
+	*/
+	function hypha_throttleCount($bucket, $window) {
+		if (!file_exists(HYPHA_THROTTLE_FILE))
+			return 0;
+		$file = new HyphaFile(HYPHA_THROTTLE_FILE);
+		$data = json_decode((string)$file->read(), true);
+		$key = hash('sha256', $bucket);
+		if (!is_array($data) || !isset($data[$key]) || !is_array($data[$key]))
+			return 0;
+		$since = time() - $window;
+		return count(array_filter($data[$key], function($time) use ($since) { return $time > $since; }));
+	}
+
+	/*
+		Function: hypha_throttleRegister
+		Registers an event for $bucket, and drops expired events.
+	*/
+	function hypha_throttleRegister($bucket) {
+		hypha_throttleUpdate($bucket, true);
+	}
+
+	/*
+		Function: hypha_throttleClear
+		Removes all events for $bucket, e.g. after a successful
+		login.
+	*/
+	function hypha_throttleClear($bucket) {
+		hypha_throttleUpdate($bucket, false);
+	}
+
+	function hypha_throttleUpdate($bucket, $add) {
+		$file = new HyphaFile(HYPHA_THROTTLE_FILE);
+		$data = json_decode((string)$file->lockAndRead(), true);
+		if (!is_array($data))
+			$data = [];
+		$now = time();
+		$key = hash('sha256', $bucket);
+		if ($add) {
+			if (!isset($data[$key]) || !is_array($data[$key]))
+				$data[$key] = [];
+			$data[$key][] = $now;
+		} else {
+			unset($data[$key]);
+		}
+		foreach ($data as $k => $times) {
+			$times = is_array($times) ? $times : [];
+			$times = array_filter($times, function($time) use ($now) { return $time > $now - HYPHA_THROTTLE_MAX_AGE; });
+			// Bound the size; the limits are far below this.
+			$times = array_slice(array_values($times), -200);
+			if ($times)
+				$data[$k] = $times;
+			else
+				unset($data[$k]);
+		}
+		$file->writeAndUnlock(json_encode($data));
 	}
