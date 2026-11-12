@@ -14,6 +14,10 @@
 WYMeditor.editor.prototype.image_upload = function() {
     var wym = this;
 	var uploadUrl = wym._options.dialogImageUploadUrl;
+
+	wym._options.attributionImgAttribute = 'data-attribution';
+	wym._options.attributionSelector = '.wym_attribution';
+
 	// Check the options
 	if (uploadUrl == undefined) {
 		WYMeditor.console.warn(
@@ -27,7 +31,12 @@ WYMeditor.editor.prototype.image_upload = function() {
 	var orig = d.initialize;
 	d.initialize = function(wDialog) {
 		orig.call(this, wDialog);
-		var doc = wDialog.document;
+		var wym = this,
+			doc = wDialog.document,
+			options = wym._options,
+			selectedImage = wym.getSelectedImage();
+
+		jQuery(options.attributionSelector, doc).val(jQuery(selectedImage).attr(options.attributionImgAttribute));
 
 		var oldSubmitLabel = jQuery("form#image_upload_form .submit", doc).val();
 		// WYMEditor automatically locks onto any form here, so remove the binding.
@@ -43,13 +52,38 @@ WYMeditor.editor.prototype.image_upload = function() {
 				if (response.error){
 					alert(response.error);
 				} else {
-					jQuery(".wym_src", doc).val(response.thumbUrl);
-					jQuery(".wym_alt", doc).val(response.original_filename);
+					jQuery(options.srcSelector, doc).val(response.thumbUrl);
+					jQuery(options.altSelector, doc).val(response.original_filename);
+					jQuery(options.attributionSelector, doc).val(response.attribution);
 				}
 				jQuery("form#image_upload_form .submit", doc).val(oldSubmitLabel);
 			}
 		})
 	};
+
+	d.submitHandler = function (wDialog) {
+		var wym = this,
+			options = wym._options,
+			imgAttrs,
+			selectedImage = wym.getSelectedImage();
+
+		imgAttrs = {
+			src: jQuery(options.srcSelector, wDialog.document).val(),
+			title: jQuery(options.titleSelector, wDialog.document).val(),
+			alt: jQuery(options.altSelector, wDialog.document).val(),
+		};
+		imgAttrs[options.attributionImgAttribute] = jQuery(options.attributionSelector, wDialog.document).val();
+
+		wym.focusOnDocument();
+
+		if (selectedImage) {
+			wym._updateImageAttrs(selectedImage, imgAttrs);
+			wym.registerModification();
+		} else {
+			wym.insertImage(imgAttrs);
+		}
+		wDialog.close();
+	}
 
 	// Put together the whole dialog script
 	wym._options.dialogImageHtml = String() +
@@ -92,6 +126,10 @@ WYMeditor.editor.prototype.image_upload = function() {
                     '<div class="row">' +
                         '<label>{Title}</label>' +
                         '<input type="text" class="wym_title" value="" size="40" />' +
+                    '</div>' +
+                    '<div class="row">' +
+                        '<label>{Attribution}</label>' +
+                        '<input type="text" class="wym_attribution" value="" size="40" placeholder="{Attribution_placeholder}" />' +
                     '</div>' +
                     '<div class="row row-indent">' +
                         '<input class="wym_submit" type="submit" ' + 'value="{Submit}" />' +
