@@ -516,6 +516,32 @@ EOF;
 		$node->setAttribute('href', $url);
 	}
 
+	/*
+		Function: localizeImageUrls
+		Make absolute urls of images that this site holds relative.
+
+		The image upload answers with an absolute url, and text pages
+		and articles store it as it is. Once the site runs at another
+		address, or behind a proxy with another scheme, such an url
+		points to the old address. An url whose path ends in
+		images/<file> (or images/org/<file>) for a file that exists in
+		data/images is made relative, so it is served by this site.
+
+		Parameters:
+		element - A DomWrap\Element to process
+	*/
+	function localizeImageUrls($element) {
+		foreach ($element->findXPath(".//img[@src] | .//a[@href]") as $node) {
+			$attr = $node->tagName == 'img' ? 'src' : 'href';
+			$url = $node->getAttribute($attr);
+			if (!preg_match('#^(?:[a-z][a-z0-9+.-]*:)?//[^/]+(?:/[^?\#]*)?/images/((?:org/)?[0-9a-z]+\.[a-z0-9]+)([?\#].*)?$#i', $url, $matches))
+				continue;
+			if (!is_file('data/images/' . $matches[1]))
+				continue;
+			$node->setAttribute($attr, 'images/' . $matches[1] . (isset($matches[2]) ? $matches[2] : ''));
+		}
+	}
+
 	/* Like wikify, but accepts a HTML string instead of a document */
 	function wikify_html($html) {
 		global $hyphaHtml;
