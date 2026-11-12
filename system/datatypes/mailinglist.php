@@ -1289,9 +1289,6 @@ EOF;
 			if (function_exists('random_bytes')) {
 				return bin2hex(random_bytes($length));
 			}
-			if (function_exists('mcrypt_create_iv')) {
-				return bin2hex(mcrypt_create_iv($length, MCRYPT_DEV_URANDOM));
-			}
 		} catch (Exception $e) {
 		}
 
