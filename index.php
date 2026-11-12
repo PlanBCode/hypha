@@ -40,6 +40,19 @@
 	// Build request
 	$hyphaRequest = new HyphaRequest();
 
+	// Hypha only implements GET, HEAD and POST. Answer any other
+	// method without running the page code (RFC 9110, sections 9.1,
+	// 9.3.7 and 15.5.6): OPTIONS with the methods that are allowed,
+	// a known method with 405 Method Not Allowed and a method that
+	// HTTP does not define with 501 Not Implemented.
+	if (!in_array($_SERVER['REQUEST_METHOD'], ['GET', 'HEAD', 'POST'], true)) {
+		header('Allow: GET, HEAD, POST');
+		if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') http_response_code(204);
+		elseif (in_array($_SERVER['REQUEST_METHOD'], ['PUT', 'DELETE', 'CONNECT', 'TRACE', 'PATCH'], true)) http_response_code(405);
+		else http_response_code(501);
+		exit;
+	}
+
 	// Build request context
 	$O_O = new RequestContext($hyphaRequest);
 
