@@ -181,11 +181,34 @@ EOF;
 		document.getElementById('loginUsername').focus();
 	}
 	function reregister() {
-		html = '<table class="section">';
-		html+= '<tr><th><?=__('name-or-email')?></th><td><input name="searchLogin" id="searchLogin" type="text" size="10" /></td></tr>';
-		html+= '<tr><td></td><td><input type="submit" name="submit" value="<?=__('submit')?>" onclick="hypha(\'<?=$currentUrlPath?>\', \'reregister\', document.getElementById(\'searchLogin\').value, $(this).closest(\'form\'));" /><input type="button" name="cancel" value="<?=__('cancel')?>" onclick="login();" /></td></tr>';
-		html+= '</table>';
-		document.getElementById('popup').innerHTML = html;
+<?php
+		// Without a form around it, hypha() had nothing to submit
+		// and the request had no CSRF token (issue #643).
+		$html = <<<EOF
+		<div class="login-wrapper">
+			<div class="username">
+				<label class="username" for="searchLogin">
+					[[name-or-email]]
+				</label>
+				<input name="searchLogin" id="searchLogin" type="text" />
+			</div>
+			<div class="cancel">
+				<input class="button" type="button" name="cancel" value="[[cancel]]" onclick="login();" />
+			</div>
+			<div class="submit">
+				<input class="button" type="submit" name="submit" value="[[submit]]" onclick="hypha('[[currentUrlPath]]', 'reregister', document.getElementById('searchLogin').value, $(this).closest('form'));" />
+			</div>
+		</div>
+EOF;
+		$vars = [
+			'cancel' => __('cancel'),
+			'name-or-email' => __('name-or-email'),
+			'submit' => __('submit'),
+			'currentUrlPath' => $currentUrlPath,
+		];
+		$form = $hyphaHtml->createForm(hypha_substitute($html, $vars));
+?>
+		document.getElementById('popup').innerHTML = <?= json_encode($form->getOuterHtml()) ?>;
 		document.getElementById('popup').style.display = 'block';
 		document.getElementById('searchLogin').focus();
 	}
@@ -213,4 +236,6 @@ EOF;
 		}
 		$hyphaXml->unlock();
 		notify('success', __('reregistration-error'));
+		// Without a reload the page gets the command and answers 404.
+		return 'reload';
 	}
