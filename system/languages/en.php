@@ -13,6 +13,7 @@
 		"delete" => "delete",
 		"translate" => "translate",
 		"revert" => "revert",
+		"skip-to-content" => "Skip to content",
 		"login" => "login",
 		"login-icon" => "<i class=\"fa fa-sign-in\" aria-hidden=\"true\"></i>",
 		"logout" => "logout",

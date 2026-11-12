@@ -13,6 +13,7 @@
 		"delete" => "verwijderen",
 		"translate" => "vertalen",
 		"revert" => "terugdraaien",
+		"skip-to-content" => "Naar de inhoud",
 		"login" => "inloggen",
 		"login-icon" => "<i class=\"fa fa-sign-in\" aria-hidden=\"true\"></i>",
 		"logout" => "uitloggen",
