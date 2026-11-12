@@ -9,3 +9,7 @@
     display: inline-block;
     margin-right: 15px;
 }
+/* An image with the size of its file keeps its proportions when the theme scales it (#681). */
+img[width][height] {
+    height: auto;
+}
