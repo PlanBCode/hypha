@@ -89,7 +89,9 @@
 		}
 
 		private function processRequest() {
-			$this->relativeUrlPathParts = $relativeUrlPathParts = array_filter(explode('/', $this->relativeUrlPath));
+			// The browser sends the path percent-encoded (Caf%C3%A9 for Café); decode each part, so a page name, tag label or
+			// file name with characters outside ASCII or a space matches the name as stored.
+			$this->relativeUrlPathParts = $relativeUrlPathParts = array_map('rawurldecode', array_filter(explode('/', $this->relativeUrlPath)));
 
 			$firstPart = reset($relativeUrlPathParts);
 			if ($firstPart !== false && array_key_exists($firstPart, $this->isoLangList)) {
