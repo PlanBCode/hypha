@@ -147,7 +147,7 @@
 		$html = <<<EOF
 			<table class="section">
 				<tr>
-					<th colspan="2">[[create-new-page]]<br/>[[instruction-new-page]]</th>
+					<th colspan="2">[[create-new-page]]</th>
 				</tr>
 				<tr>
 					<th>[[type]]</th>
@@ -175,6 +175,8 @@
 			</table>
 EOF;
 		$pagetype_options = $hyphaHtml->createElement('dummy');
+		// The types in alphabetical order of their name (issue #654).
+		asort($types, SORT_NATURAL | SORT_FLAG_CASE);
 		foreach($types as $type => $datatypeName) {
 			$option = $pagetype_options->createChild('option');
 			$option->setAttribute('value', $type);
@@ -184,7 +186,6 @@ EOF;
 		}
 		$vars = [
 			'create-new-page' => __('create-new-page'),
-			'instruction-new-page' => __('instruction-new-page'),
 			'type' => __('type'),
 			'pagename' => __('pagename'),
 			'private-page' => __('private-page'),
