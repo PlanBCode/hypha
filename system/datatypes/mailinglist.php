@@ -1016,7 +1016,7 @@ EOF;
 	protected function createSubscribeForm(array $values = []) {
 		$html = <<<EOF
 			<div class="section" style="padding:5px; margin-bottom:5px; position:relative;">
-				<label for="[[field-name-email]]">[[email]]</label>: <input required type="email" id="[[field-name-email]]" name="[[field-name-email]]" placeholder="[[email]]" />
+				<label for="[[field-name-email]]">[[email]]</label>: <input required type="email" id="[[field-name-email]]" name="[[field-name-email]]" placeholder="[[email]]" autocomplete="email" />
 			</div>
 EOF;
 

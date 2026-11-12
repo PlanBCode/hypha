@@ -141,13 +141,13 @@
 				<label class="username" for="loginUsername">
 					[[login-username]]
 				</label>
-				<input name="loginUsername" id="loginUsername" type="text" />
+				<input name="loginUsername" id="loginUsername" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" />
 			</div>
 			<div class="password">
 				<label class="password" for="loginPassword">
 					[[login-password]]
 				</label>
-				<input name="loginPassword" id="loginPassword" type="password" />
+				<input name="loginPassword" id="loginPassword" type="password" autocomplete="current-password" />
 			</div>
 			<div class="submit">
 				<input class="button" type="submit" name="login" value="[[login]]" onclick="hypha('[[currentUrlPath]]', 'login', '', $(this).closest('form'));" />
