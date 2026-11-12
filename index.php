@@ -126,6 +126,7 @@
 	if ($hyphaPage) processCommandResult($hyphaPage->process($O_O->getRequest()));
 
 	registerPostProcessingFunction('dewikify');
+	registerPostProcessingFunction('addSeoMeta');
 
 	// add hypha commands and navigation
 	$_cmds[] = makeLink(__('index-icon'), makeAction('index/'.$hyphaContentLanguage, '', ''), 'index', __('index'));
