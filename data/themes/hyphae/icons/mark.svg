@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="88 64 336 400">
+	<!-- The Hyphae mark without background, for the header bar: white threads and an orange hub. -->
+	<path d="M256 404C248 350 264 306 256 262M256 262C222 226 192 210 150 204M256 262C292 220 326 196 368 182M206 213C200 176 210 144 232 118" fill="none" stroke="#ffffff" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/>
+	<circle cx="150" cy="204" r="34" fill="#ffffff"/>
+	<circle cx="368" cy="182" r="34" fill="#ffffff"/>
+	<circle cx="232" cy="118" r="30" fill="#ffffff"/>
+	<circle cx="256" cy="404" r="34" fill="#ffffff"/>
+	<circle cx="256" cy="262" r="50" fill="#fe9900" stroke="#ffffff" stroke-width="16"/>
+</svg>

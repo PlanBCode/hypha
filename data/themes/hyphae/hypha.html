@@ -1,0 +1,111 @@
+<html>
+  <head>
+    <title></title>
+    <meta name="color-scheme" content="light dark"/>
+    <meta name="theme-color" content="#226765" media="(prefers-color-scheme: light)"/>
+    <meta name="theme-color" content="#143d3c" media="(prefers-color-scheme: dark)"/>
+    <link rel="icon" type="image/svg+xml" href="data/themes/hyphae/icons/favicon.svg"/>
+    <link rel="icon" type="image/png" sizes="32x32" href="data/themes/hyphae/icons/favicon-32.png"/>
+    <link rel="apple-touch-icon" sizes="180x180" href="data/themes/hyphae/icons/apple-touch-icon.png"/>
+    <link rel="manifest" href="data/themes/hyphae/site.webmanifest"/>
+    <script>
+      // Apply the colour scheme the visitor chose before the page is drawn, so it does not flash.
+      // The choice is kept in localStorage only (no cookie); without a choice the system setting applies.
+      (function () {
+        try {
+          var scheme = window.localStorage.getItem('hyphae-scheme');
+          if (scheme === 'light' || scheme === 'dark') document.documentElement.setAttribute('data-theme', scheme);
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="appbar">
+      <div class="appbar-inner">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <div id="header" class="container headerContainer"/>
+        <button id="themeToggle" class="theme-toggle" type="button" data-mode="auto"><span class="icon" aria-hidden="true"></span></button>
+      </div>
+    </div>
+    <div id="navContainer" class= "container navContainer">
+      <nav class="nav main">
+        <div id="menu" class="nav-left"/>
+      </nav>
+      <nav class="tabs user">
+        <div class="hyphaCommands nav-right" />
+      </nav>
+      <div id="login" />
+      <div id="trail" />
+      <div id="log" />
+    </div>
+    <div class="container pageContainer">
+      <div class="flex between reverse">
+        <!-- Example of a sidebar. There is CSS in place to show this
+             only on the homepage (based on the id).
+        <div id="sidebar">
+        </div>
+        -->
+        <div id="page">
+          <div id="hyphaNotify" />
+          <div id="pageCommands" />
+          <div class="above-page flex between">
+            <div class="pageTitle">
+              <h1 id="pagename"></h1>
+            </div>
+            <div id="langList"/>
+          </div>
+          <div id="main" />
+          <div id="pageEndCommands"></div>
+          <div id="popup"/>
+          <div class="below-page flex between">
+            <div id="tagList"/>
+            <div id="versionList"/>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="container footerContainer">
+      <div id="footer"/>
+    </div>
+    <script>
+      // The colour scheme switch in the header: automatic (system), light, dark, and around again.
+      (function () {
+        var root = document.documentElement;
+        var button = document.getElementById('themeToggle');
+        if (!button) return;
+        var dutch = (' ' + document.body.className + ' ').indexOf(' lang_nl ') !== -1;
+        var labels = dutch
+          ? { auto: 'Kleuren: zoals het systeem', light: 'Kleuren: licht', dark: 'Kleuren: donker', next: 'klik voor' }
+          : { auto: 'Colours: as the system', light: 'Colours: light', dark: 'Colours: dark', next: 'click for' };
+        var order = { auto: 'light', light: 'dark', dark: 'auto' };
+        var bars = { light: '#226765', dark: '#143d3c' };
+        function mode() {
+          return root.getAttribute('data-theme') || 'auto';
+        }
+        function show() {
+          var m = mode();
+          var label = labels[m] + ' (' + labels.next + ' ' + labels[order[m]].replace(/^[^:]*: /, '') + ')';
+          button.setAttribute('data-mode', m);
+          button.setAttribute('aria-label', label);
+          button.setAttribute('title', label);
+          var metas = document.querySelectorAll('meta[name="theme-color"]');
+          for (var i = 0; i !== metas.length; i++) {
+            var own = metas[i].getAttribute('media').indexOf('dark') === -1 ? 'light' : 'dark';
+            metas[i].setAttribute('content', bars[m === 'auto' ? own : m]);
+          }
+        }
+        button.onclick = function () {
+          var next = order[mode()];
+          try {
+            if (next === 'auto') window.localStorage.removeItem('hyphae-scheme');
+            else window.localStorage.setItem('hyphae-scheme', next);
+          } catch (e) {}
+          if (next === 'auto') root.removeAttribute('data-theme');
+          else root.setAttribute('data-theme', next);
+          show();
+        };
+        show();
+      })();
+    </script>
+  </body>
+</html>
