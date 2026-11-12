@@ -56,14 +56,18 @@
 			$htmlList = [];
 			if ($pageList) {
 				foreach($pageList as $pagename) {
-					while($capital < strtoupper($pagename[0])) $capital++;
-					if (strtoupper($pagename[0]) == $capital) {
+					// Only A to Z get a heading. Incrementing a
+					// letter string past Z gives "AA", which never
+					// reaches a name starting with a character
+					// after Z, and is deprecated since PHP 8.5.
+					while($capital <= 'Z' && $capital < strtoupper($pagename[0])) $capital = chr(ord($capital) + 1);
+					if ($capital <= 'Z' && strtoupper($pagename[0]) == $capital) {
 						if (!$first) {
 							$htmlList[] = '</div>';
 						}
 						$htmlList[] = '<div class="letter-wrapper">';
 						$htmlList[] = '<div class="letter">'.$capital.'</div>';
-						$capital++;
+						$capital = chr(ord($capital) + 1);
 						$first = false;
 					}
 					$privatePos = strpos($pagename, '&#;');
