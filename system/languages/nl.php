@@ -307,7 +307,7 @@
 		"festival-participant-status" => "status",
 
 		// mailing list
-		"datatype.name.mailinglist" => "mailinglist",
+		"datatype.name.mailinglist" => "mailinglijst",
 
 		// mailing list
 		"ml-test-send" => "test-verzending",
