@@ -4,6 +4,11 @@ RewriteEngine On
 RewriteRule ^(system/.*)$ index.php [L]
 RewriteRule ^(data/.*)$ index.php [L]
 
+# Pass paths that start with a dot (.git, .env, ...) through index.php too,
+# so existing ones are not served and the honeypot sees them. Keep
+# .well-known (e.g. Let's Encrypt) served directly.
+RewriteRule ^(?!\.well-known/)(.*/)?\. index.php [L]
+
 # Let index.php handle that do not point to a valid file or directory
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
