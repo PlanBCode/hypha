@@ -319,8 +319,11 @@ EOF;
 				$hyphaXml->lockAndReload();
 				// After reloading, our page list node might
 				// have changed, so find it in the newly loaded
-				// XML. This seems a bit dodgy, though...
-				$this->replacePageListNode(hypha_getPage($this->language, $this->pagename));
+				// XML.
+				if (!$this->reloadPageListNode()) {
+					$hyphaXml->unlock();
+					return __('no-page');
+				}
 				$error = hypha_setPage($this->pageListNode, $language, $pagename, $privateFlag);
 				$hyphaXml->saveAndUnlock();
 			}
