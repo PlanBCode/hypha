@@ -106,7 +106,7 @@
 			if ((isUser() && !empty($deselectedTags)) || isAdmin()) {
 				uasort($deselectedTags, function($a, $b) { return strnatcasecmp($a['label'], $b['label']); });
 
-				$html.= '<select class="remainingTags" onchange="selectTag(this, this.value);">';
+				$html.= '<select id="remainingTags" class="remainingTags" aria-label="'.htmlspecialchars(__('tags')).'" onchange="selectTag(this, this.value);">';
 				$html.= '<option value="_add_" selected="selected" disabled="disabled">'.__('add').'...</option>';
 				foreach ($deselectedTags as $id => $tag) {
 					$html.= '<option id="tagRem_'.htmlspecialchars($id).'" value="'.htmlspecialchars($id).'">'.htmlspecialchars($tag['label']).'</option>';
