@@ -103,10 +103,11 @@ WYMeditor.editor.prototype.site_links = function() {
 	d.initialize = function(wDialog) {
 		orig.call(this, wDialog);
 
-		jQuery(function(){
-			jQuery("select.wym_href_site_links").live("change", function(){
-				jQuery(".wym_href").val(jQuery(this).val());
-			});
+		// .live() was removed in jQuery 1.9. The dialog is already in the
+		// document at this point, so bind to the select itself; the handler
+		// is removed together with the dialog when it is closed.
+		jQuery("select.wym_href_site_links").on("change", function(){
+			jQuery(".wym_href").val(jQuery(this).val());
 		});
 		var oldSubmitLabel = jQuery("form#link_upload_form .submit").val();
 		// WYMEditor automatically locks onto any form here, so remove the binding.

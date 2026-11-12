@@ -51,7 +51,8 @@
 				}
 				
 				
-				iframe = $('#' + options.iframeID).load(function ()
+				// The .load(handler) event shorthand was removed in jQuery 3.0.
+				iframe = $('#' + options.iframeID).on('load', function ()
 				{
 					response = iframe.contents().find('body');
 					
