@@ -147,6 +147,8 @@
 				case [self::PATH_PAY,                 self::CMD_PAY]:    return $this->payAction($request);
 				case [self::PATH_SETTINGS,            null]:             return $this->settingsView($request);
 				case [self::PATH_SETTINGS,            self::CMD_SAVE]:   return $this->settingsSaveAction($request);
+				// A new page opens at its edit view; for a festival that is the settings.
+				case ['edit',                         null]:             return ['redirect', $this->constructFullPath($this->pagename . '/' . self::PATH_SETTINGS)];
 				case [self::PATH_SIGNUP,              null]:             return $this->signupView($request);
 				case [self::PATH_SIGNUP,              self::CMD_SIGNUP]: return $this->signupAction($request);
 				case [self::PATH_TIMETABLE,           null]:             return $this->timetableView($request);
