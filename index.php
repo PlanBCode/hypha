@@ -160,6 +160,11 @@
 	if ($hyphaPage) hypha_setBodyClass($O_O, $hyphaPage);
 	if ($hyphaPage) hypha_setPreviewPanel($O_O, $hyphaPage);
 
+	// The language of the content on the html element, for screen
+	// readers and search engines; a theme that sets one keeps it (#521).
+	$hyphaRoot = $hyphaHtml->documentElement;
+	if (!$hyphaRoot->getAttribute('lang')) $hyphaRoot->setAttribute('lang', $hyphaContentLanguage);
+
 	// Add the default form.
 	$hyphaHtml->getDefaultForm()->appendTo($hyphaHtml->findOneXPath('body'));
 	// poor man's cron job
