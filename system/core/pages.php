@@ -674,8 +674,8 @@ EOF;
 
 		// resize
 		$ratio = min($width/$w, $height/$h);
-		$width = $w * $ratio;
-		$height = $h * $ratio;
+		$width = max(1, (int)round($w * $ratio));
+		$height = max(1, (int)round($h * $ratio));
 
 		$new = imagecreatetruecolor($width, $height);
 
