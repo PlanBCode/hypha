@@ -1,5 +1,26 @@
 RewriteEngine On
 
+# Basic security headers, also for the pages and files that index.php serves.
+# Skipped when mod_headers is not loaded. Setting them in the virtual host
+# instead is fine; "set" replaces rather than duplicates.
+<IfModule mod_headers.c>
+	Header always set X-Content-Type-Options "nosniff"
+	Header always set Referrer-Policy "strict-origin-when-cross-origin"
+	Header always set X-Frame-Options "SAMEORIGIN"
+	# A page of Hypha opens no window of another site that needs it back, so
+	# it can keep its own browsing context (#432).
+	Header always set Cross-Origin-Opener-Policy "same-origin"
+	# Hypha uses no camera, microphone, location, payment or USB, so pages and
+	# the frames they embed may not ask for them (#432). Fullscreen stays
+	# allowed for embedded video.
+	Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()"
+	# A first Content-Security-Policy that Hypha does not break: no framing by
+	# other sites, no plugins. A policy for scripts needs the inline scripts and
+	# onclick handlers moved to files first; base-uri and form-action are left
+	# out, because behind a proxy that hides https the <base href> is http (#398).
+	Header always set Content-Security-Policy "frame-ancestors 'self'; object-src 'none'"
+</IfModule>
+
 # Pass system and data urls through index.php, so it can do access control
 RewriteRule ^(system/.*)$ index.php [L]
 RewriteRule ^(data/.*)$ index.php [L]
