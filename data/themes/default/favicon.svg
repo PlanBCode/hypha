@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+	<!-- Hypha mark: a hub with branching threads. Colours of the default theme. -->
+	<rect width="512" height="512" rx="120" fill="#0002aa"/>
+	<path d="M256 404C248 350 264 306 256 262M256 262C222 226 192 210 150 204M256 262C292 220 326 196 368 182M206 213C200 176 210 144 232 118" fill="none" stroke="#ffffff" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/>
+	<circle cx="150" cy="204" r="34" fill="#ffffff"/>
+	<circle cx="368" cy="182" r="34" fill="#ffffff"/>
+	<circle cx="232" cy="118" r="30" fill="#ffffff"/>
+	<circle cx="256" cy="404" r="34" fill="#ffffff"/>
+	<circle cx="256" cy="262" r="50" fill="#ff0000" stroke="#ffffff" stroke-width="16"/>
+</svg>
