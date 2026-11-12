@@ -96,6 +96,7 @@
 		"page-exists" => "pagina bestaat al",
 		"no-page-name" => "geen paginanaam opgegeven",
 		"page-name-conflict" => "pagina met deze naam bestaat al, oude naam wordt gehandhaafd",
+		"translation-exists" => "deze pagina heeft al een vertaling in deze taal; bewerk die vertaling",
 		"error-sending-message" => "het versturen van e-mail naar de volgende adressen is mislukt:",
 		"error-loading-html" => "setNodeHTML: fout bij het laden van de HTML",
 		"too-big-file" => "Error: bestand moet kleiner zijn dan [[upload-max-filesize]]",

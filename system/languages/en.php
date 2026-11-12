@@ -96,6 +96,7 @@
 		"page-exists" => "page already exists",
 		"no-page-name" => "no page name given",
 		"page-name-conflict" => "page with this name already exists, sticking to old name",
+		"translation-exists" => "this page already has a translation in this language; edit that translation instead",
 		"error-sending-message" => "failed to send email to the following address(es):",
 		"error-loading-html" => "setNodeHTML: error when loading HTML",
 		"too-big-file" => "Error: file must be less than [[upload-max-filesize]]",
