@@ -40,11 +40,19 @@
 		"remind" => "herinneren",
 		"invited" => "uitgenodigd",
 		"remove" => "verwijderen",
+		"restore" => "herstellen",
+		"reincarnate" => "weer lid maken",
+		"theme" => "thema",
+		"login-as-admin-to-delete" => "log in als beheerder om deze pagina te verwijderen",
 		"interface-language" => "bedieningstaal",
 		"new" => "nieuw",
 		"new-page" => "nieuwe pagina",
 		"new-page-icon" => "<i class=\"fa fa-file\" aria-hidden=\"true\"></i>",
 		"index" => "index",
+		"page-index" => "pagina-index",
+		"image-index" => "afbeeldingen-index",
+		"file-index" => "bestanden-index",
+		"tag-index-for" => "Index voor tag: ",
 		"index-icon" => "<i class=\"fa fa-list\" aria-hidden=\"true\"></i>",
 		"settings" => "instellingen",
 		"settings-icon" => "<i class=\"fa fa-cog\" aria-hidden=\"true\"></i>",
@@ -119,6 +127,7 @@
 		"translated-page" => " heeft de volgende pagina vertaald: ",
 		"reverted-page" => " heeft de volgende pagina teruggezet naar een oudere versie: ",
 		"granted-admin-rights-to" => " heeft adminrechten toegekend aan ",
+		"took-admin-rights-from" => " heeft adminrechten afgenomen van ",
 		"has-invited" => " heeft de volgende persoon/personen uitgenodigd om toe te treden tot het projectteam: ",
 		"invites-to-join" => " nodigt je uit om aan het project deel te nemen ",
 		"invitation" => "Uitnodiging om aan het project deel te nemen ",
@@ -220,6 +229,7 @@
 		"enter-tag-description" => "Geef korte omschrijving (verplicht)",
 		"login-to-perform-action" => "je moet ingelogd zijn om deze actie te kunnen uitvoeren",
 		"page-successfully-updated" => "Pagina succesvol bijgewerkt",
+		"page-successfully-deleted" => "Pagina succesvol verwijderd",
 		'cannot-edit-default-theme-explanation' => 'Het standaard thema kan niet bewerkt worden. Op de <a href="[[link]]">thema keuzepagina</a>, is het mogelijk het standaard thema the kopiëren en activeren, de kopie kan wel bewerkt worden.',
 
 		// settings copy theme
@@ -237,6 +247,7 @@
 		'preview-theme' => 'preview theme',
 		'apply-preview-theme' => 'activeer preview theme',
 		'cancel-preview-theme' => 'annuleer preview',
+		'preview-theme-set-successful' => 'voorbeeldthema is ingesteld',
 
 		// textpage
 		"datatype.name.textpage" => "webpagina",
@@ -265,6 +276,7 @@
 		"festival-signed-up-for" => " heeft zich ingeschreven voor ",
 		"festival-failed-to-pay-for" => " kon niet betalen voor ",
 		"festival-payed-for" => " heeft betaald voor ",
+		"festival-confirmed-for" => " heeft het e-mailadres bevestigd voor ",
 
 		// festival - notify & messages
 		"festival-successful-signup-for" => "Je bent ingeschreven voor ",
@@ -278,6 +290,10 @@
 		"festival-timetable-for" => "Blokkenschema voor ",
 		"festival-contribute-to" => "Draag bij aan ",
 		"festival-invalid-or-no-key" => "Geen of een ongeldige pagina-id",
+		"festival-complete-by-confirming" => "Voltooi je inschrijving met de link die je per e-mail hebt gekregen.",
+		"festival-confirmation-needed" => "Bevestiging nodig",
+		"festival-email-confirmed-successfully" => "E-mailadres bevestigd.",
+		"festival-email-already-confirmed" => "E-mailadres was al bevestigd.",
 		"festival-settings-saved" => "Instellingen succesvol opgeslagen.",
 
 		// Festival - confirmation e-mails
@@ -305,6 +321,20 @@
 
 		// festival - other
 		"festival-participant-status" => "status",
+		"signup" => "aanmelden",
+		"pay" => "betalen",
+
+		// festival - table headings
+		"amount" => "bedrag",
+		"attending" => "aanwezig",
+		"category" => "categorie",
+		"count" => "aantal",
+		"location" => "locatie",
+		"notes" => "notities",
+		"phone" => "telefoon",
+		"price" => "prijs",
+		"time" => "tijd",
+		"website" => "website",
 
 		// mailing list
 		"datatype.name.mailinglist" => "mailinglist",

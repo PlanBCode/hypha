@@ -28,7 +28,7 @@
 			/** @var HyphaDomElement $pagename */
 			$pagename = $this->html->getElementById('pagename');
 			$tagprefixSpan = $pagename->createChild('span');
-			$tagprefixSpan->setText('Index for tag: ');
+			$tagprefixSpan->setText(__('tag-index-for'));
 			$tagprefixSpan->setAttribute('class', 'tag_prefix');
 			$tagSpan = $pagename->createChild('span');
 			$tagSpan->setAttribute('class', 'selected_tag');
