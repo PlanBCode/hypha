@@ -122,8 +122,12 @@
 			if ($this->hyphaUser instanceof HyphaDomElement) {
 				$languageOptions[] = $this->hyphaUser->getAttribute('language');
 			}
-			if (array_key_exists('HTTP_ACCEPT_LANGUAGE', $_SERVER)) {
-				$languageOptions[] = strtolower(substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2));
+			if (!array_intersect($languageOptions, Language::getInterfaceLanguageList())) {
+				// The answer now depends on Accept-Language, also
+				// when the request has none, so tell caches
+				// (RFC 9110, section 12.5.5).
+				if (!headers_sent()) header('Vary: Accept-Language');
+				$languageOptions = array_merge($languageOptions, $this->getAcceptedLanguages());
 			}
 			$languageOptions[] = $this->getContentLanguage();
 			$languageOptions[] = $this->getFallbackInterfaceLanguage();
@@ -132,6 +136,32 @@
 			}
 
 			throw new \Exception('Cannot determine the interface language');
+		}
+
+		/**
+		 * The primary language subtags of the Accept-Language
+		 * header, most preferred first: ordered by quality value,
+		 * without the ones with q=0 and without the wildcard
+		 * (RFC 9110, section 12.5.4; the lookup scheme of RFC
+		 * 4647, section 3.4, reduced to the primary subtag since
+		 * the dictionaries have no region).
+		 *
+		 * @return string[]
+		 */
+		protected function getAcceptedLanguages(): array {
+			if (!array_key_exists('HTTP_ACCEPT_LANGUAGE', $_SERVER)) return [];
+			$languages = [];
+			foreach (explode(',', $_SERVER['HTTP_ACCEPT_LANGUAGE']) as $position => $range) {
+				$parameters = explode(';', $range);
+				$tag = strtolower(trim(array_shift($parameters)));
+				$quality = 1.0;
+				foreach ($parameters as $parameter) if (preg_match('/^\s*q\s*=\s*([01](\.\d{0,3})?)\s*$/i', $parameter, $matches)) $quality = (float)$matches[1];
+				if ($quality <= 0 || !preg_match('/^([a-z]{1,8})(-[a-z0-9]{1,8})*$/', $tag, $matches)) continue;
+				// Equal quality values keep the order of the header.
+				$languages[] = [$quality, -$position, $matches[1]];
+			}
+			rsort($languages);
+			return array_values(array_unique(array_column($languages, 2)));
 		}
 
 		/**
